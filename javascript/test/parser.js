@@ -130,6 +130,40 @@ describe('Parser', function() {
       
       Heaven.Parser.load(definition).should.be.rejected.with(/two resources share same URI \/a\/b/).and.notify(done);
     });
+    it('should succeed', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:heaven-lang.org,1.0:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  name: A',
+        '  /b:',
+        '    name: B',
+        '/a/c:',
+        '  name: AC',
+      ].join('\n');
+      
+      Heaven.Parser.load(definition).should.become({ 
+        title: 'Test',
+        resources: [
+          {
+            relativeUri: '/a',
+            name: 'A',
+            resources: [
+              {
+                relativeUri: '/b',
+                name: 'B'
+              }
+            ]
+          },
+          {
+            relativeUri: '/a/c',
+            name: 'AC'
+          }
+        ]
+      }).and.notify(done);
+    });    
   });
   describe('Traits', function() {
     it('should succeed when applying using verb question mark', function(done) {
