@@ -19,6 +19,7 @@ module.exports = function(grunt) {
             'build/tokens.js': 'src/tokens.coffee',
             'build/util.js': 'src/util.coffee',
             'build/traits.js': 'src/traits.coffee',
+            'build/joiner.js': 'src/joiner.coffee',            
             'build/yaml.js': 'src/yaml.coffee'
           }
         }      

@@ -24,7 +24,6 @@ class @Validator
   
   constructor: ->
     @validations = [@has_title, @valid_base_uri, @valid_root_properties, @valid_absolute_uris, @validate_traits, @valid_trait_consumption]
-    @absolute_uris = []
   
   validate_document: (node, failFast = true) ->
     @validations.forEach (validation) =>
@@ -84,9 +83,9 @@ class @Validator
     if not node instanceof nodes.MappingNode
       throw new exports.ValidationError 'while validating node', null, 'must be a map', node.start_mark
                 
-  valid_absolute_uris: (node, parent = undefined) ->
+  valid_absolute_uris: (node, parent = undefined, absolute_uris = []) ->
     if node instanceof nodes.IncludeNode
-      return @valid_absolute_uris node.value, parent
+      return @valid_absolute_uris node.value, parent, absolute_uris
     @check_is_map node  
     resources = @child_resources node
     resources.forEach (resource) =>
@@ -94,10 +93,10 @@ class @Validator
         absolute_uri = parent.value + resource[0].value
       else
         absolute_uri = resource[0].value
-      if @absolute_uris.indexOf(absolute_uri) != -1 
+      if absolute_uris.indexOf(absolute_uri) != -1 
         throw new exports.ValidationError 'while validating resources URI', null, 'two resources share same URI ' + absolute_uri, node.start_mark
-      @absolute_uris.push absolute_uri
-      @valid_absolute_uris resource[1], resource[0]    
+      absolute_uris.push absolute_uri
+      @valid_absolute_uris resource[1], resource[0], absolute_uris    
       
   key_or_value: (node) ->
     if node instanceof nodes.IncludeNode

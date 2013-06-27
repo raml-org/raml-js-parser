@@ -21,7 +21,7 @@ describe('Parser', function() {
         '  name: Root'
       ].join('\n');
       
-      promise = Heaven.Parser.load(definition).should.become({ title: 'MyApi', baseUri: 'http://myapi.com', '/': { name: 'Root' } }).and.notify(done);
+      promise = Heaven.Parser.load(definition).should.become({ title: 'MyApi', baseUri: 'http://myapi.com', resources: [ { relativeUri: '/', name: 'Root' } ] }).and.notify(done);
     });
     it('should fail if no title', function(done) {
       var definition = [
@@ -170,19 +170,22 @@ describe('Parser', function() {
             }
           }
         },
-        '/leagues': {
-          use: [ 'rateLimited' ],
-          get: {
-            responses: {
-              '200': {
-                description: 'Retrieve a list of leagues'
-              },
-              '429': {
-                description: 'API Limit Exceeded'
+        resources: [
+          {
+            relativeUri: '/leagues',
+            use: [ 'rateLimited' ],
+            get: {
+              responses: {
+                '200': {
+                  description: 'Retrieve a list of leagues'
+                },
+                '429': {
+                  description: 'API Limit Exceeded'
+                }
               }
             }
           }
-        } 
+        ]
       }).and.notify(done);
     });
     it('should succeed when applying multiple traits', function(done) {
@@ -242,24 +245,27 @@ describe('Parser', function() {
             }
           }
         },
-        '/leagues': {
-          use: [ 'rateLimited', 'queryable' ],
-          get: {
-            queryParameters: {
-              q: {
-                type: 'string'
-              }
-            },
-            responses: {
-              '200': {
-                description: 'Retrieve a list of leagues'
+        resources: [
+          {
+            relativeUri: '/leagues',
+            use: [ 'rateLimited', 'queryable' ],
+            get: {
+              queryParameters: {
+                q: {
+                  type: 'string'
+                }
               },
-              '429': {
-                description: 'API Limit Exceeded'
+              responses: {
+                '200': {
+                  description: 'Retrieve a list of leagues'
+                },
+                '429': {
+                  description: 'API Limit Exceeded'
+                }
               }
             }
           }
-        } 
+        ] 
       }).and.notify(done);
     });
     
@@ -312,19 +318,22 @@ describe('Parser', function() {
             }
           }
         },
-        '/leagues': {
-          use: [ 'rateLimited' ],
-          get: {
-            responses: {
-              '200': {
-                description: 'Retrieve a list of leagues'
-              },
-              '429': {
-                description: 'API Limit Exceeded'
+        resources: [
+          {
+            relativeUri: '/leagues',
+            use: [ 'rateLimited' ],
+            get: {
+              responses: {
+                '200': {
+                  description: 'Retrieve a list of leagues'
+                },
+                '429': {
+                  description: 'API Limit Exceeded'
+                }
               }
             }
           }
-        } 
+        ] 
       }).and.notify(done);
     });
     it('should fail if unknown property is used inside a trait', function(done) {

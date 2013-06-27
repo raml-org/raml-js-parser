@@ -44,8 +44,6 @@ class @BaseConstructor
     return null
 
   construct_document: (node) ->
-    @validate_document node
-    @apply_traits node
     data = @construct_object node
     while not util.is_empty @deferred_constructors
       @deferred_constructors.pop()()

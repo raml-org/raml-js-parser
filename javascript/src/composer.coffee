@@ -39,6 +39,10 @@ class @Composer
     # Drop the STREAM-END event.
     @get_event()
     
+    @validate_document document
+    @apply_traits document
+    @join_resources document
+    
     return document
   
   compose_document: ->
