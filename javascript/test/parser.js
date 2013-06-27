@@ -21,8 +21,7 @@ describe('Parser', function() {
         '  name: Root'
       ].join('\n');
       
-      promise = Heaven.Parser.load(definition);
-      promise.should.eventually.deep.equal({ title: 'MyApi', baseUri: 'http://myapi.com' }).and.notify(done);
+      promise = Heaven.Parser.load(definition).should.become({ title: 'MyApi', baseUri: 'http://myapi.com', '/': { name: 'Root' } }).and.notify(done);
     });
     it('should fail if no title', function(done) {
       var definition = [
@@ -133,7 +132,7 @@ describe('Parser', function() {
     });
   });
   describe('Traits', function() {
-    it('should succeed', function(done) {
+    it('should succeed when applying using verb question mark', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:heaven-lang.org,1.0:',
@@ -143,14 +142,43 @@ describe('Parser', function() {
         '  rateLimited:',
         '    get?:',
         '      responses:',
-        '        503:',
-        '          description: Server Unavailable. Check Your Rate Limits.',
-        '/:',
-        '  use: [ rateLimited: {} ]',
+        '        429:',
+        '          description: API Limit Exceeded',
+        '/leagues:',
+        '  use: [ rateLimited ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues',
       ].join('\n');
       
-      promise = Heaven.Parser.load(definition);
-      promise.should.eventually.deep.equal({ title: 'Test' }).and.notify(done);
+      Heaven.Parser.load(definition).should.become({ 
+        title: 'Test', 
+        traits: {
+          rateLimited: {
+            'get?': {
+              responses: {
+                '429': {
+                  description: 'API Limit Exceeded'
+                }
+              }
+            }
+          }
+        },
+        '/leagues': {
+          use: [ 'rateLimited' ],
+          get: {
+            responses: {
+              '200': {
+                description: 'Retrieve a list of leagues'
+              },
+              '429': {
+                description: 'API Limit Exceeded'
+              }
+            }
+          }
+        } 
+      }).and.notify(done);
     });
     it('should fail if use property is not an array', function(done) {
       var definition = [

@@ -85,7 +85,7 @@ class @Validator
       
   valid_trait_consumption: (node, traits = undefined) ->
     if node instanceof nodes.IncludeNode
-      return @valid_trait_consumption node.value, parent
+      return @valid_trait_consumption node.value
     @check_is_map node
     if not traits? and @has_property node, /traits/i
       traits = @property_value node, /traits/i

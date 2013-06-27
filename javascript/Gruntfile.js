@@ -18,6 +18,7 @@ module.exports = function(grunt) {
             'build/validator.js': 'src/validator.coffee',
             'build/tokens.js': 'src/tokens.coffee',
             'build/util.js': 'src/util.coffee',
+            'build/traits.js': 'src/traits.coffee',
             'build/yaml.js': 'src/yaml.coffee'
           }
         }      

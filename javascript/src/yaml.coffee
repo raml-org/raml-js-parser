@@ -51,8 +51,7 @@ Javascript object.
   deferred = new @q.defer
   try
     result = loader.get_single_data()
-    if not @is_valid
-      deferred.reject @get_validation_errors
+    console.log result
     deferred.resolve result
   catch error
     deferred.reject error
