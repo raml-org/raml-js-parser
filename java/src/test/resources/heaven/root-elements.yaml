@@ -1,0 +1,15 @@
+%TAG ! tag:heaven-lang.org,1.0:
+---
+title: Sample API
+version: v1
+baseUri: https://{host}.sample.com/{path}
+uriParameters:
+    host:
+        name: Host
+        type: string
+    path:
+        name: Path
+        type: string
+/media:
+    name: Media
+    put: !!null

@@ -3,3 +3,9 @@ node_modules
 build
 dist
 .DS_Store
+*.iml
+.classpath
+.project
+.settings
+.idea
+target

@@ -1,0 +1,17 @@
+%TAG ! tag:heaven-lang.org,1.0:
+---
+title: Sample API
+version: v1
+baseUri: https://api.sample.com/
+/media:
+    name: Media
+    get: !!null
+    /search:
+        name: Media Search
+        get: !!null
+    /tags:
+        name: Tags
+        get: !!null
+        /search:
+            name: Tag Search
+            #get: !!null
