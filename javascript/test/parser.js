@@ -208,16 +208,19 @@ describe('Parser', function() {
           {
             relativeUri: '/leagues',
             use: [ 'rateLimited' ],
-            get: {
-              responses: {
-                '200': {
-                  description: 'Retrieve a list of leagues'
-                },
-                '429': {
-                  description: 'API Limit Exceeded'
+            methods: [
+              {
+                method: 'get',
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  },
+                  '429': {
+                    description: 'API Limit Exceeded'
+                  }
                 }
               }
-            }
+            ]
           }
         ]
       }).and.notify(done);
@@ -283,21 +286,24 @@ describe('Parser', function() {
           {
             relativeUri: '/leagues',
             use: [ 'rateLimited', 'queryable' ],
-            get: {
-              queryParameters: {
-                q: {
-                  type: 'string'
-                }
-              },
-              responses: {
-                '200': {
-                  description: 'Retrieve a list of leagues'
+            methods: [
+              {
+                method: 'get',
+                queryParameters: {
+                  q: {
+                    type: 'string'
+                  }
                 },
-                '429': {
-                  description: 'API Limit Exceeded'
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  },
+                  '429': {
+                    description: 'API Limit Exceeded'
+                  }
                 }
               }
-            }
+            ]
           }
         ] 
       }).and.notify(done);
@@ -356,16 +362,19 @@ describe('Parser', function() {
           {
             relativeUri: '/leagues',
             use: [ 'rateLimited' ],
-            get: {
-              responses: {
-                '200': {
-                  description: 'Retrieve a list of leagues'
-                },
-                '429': {
-                  description: 'API Limit Exceeded'
+            methods: [
+              {
+                method: 'get',
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  },
+                  '429': {
+                    description: 'API Limit Exceeded'
+                  }
                 }
               }
-            }
+            ]
           }
         ] 
       }).and.notify(done);
