@@ -1,2 +1,9 @@
 gen
 node_modules
+.DS_Store
+*.iml
+.classpath
+.project
+.settings
+.idea
+target

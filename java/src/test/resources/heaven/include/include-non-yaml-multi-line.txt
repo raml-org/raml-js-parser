@@ -1,0 +1,30 @@
+mule-module-apikit
+==================
+
+A Mule module for implementing REsT and SOAP APIs.
+
+Configuration using Maven Mule Plugin
+-------------------------------------
+
+**Mule plugin configuration:**
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.mule.tools</groupId>
+                <artifactId>maven-mule-plugin</artifactId>
+                <version>1.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <copyToAppsDirectory>true</copyToAppsDirectory>
+                    <excludeMuleDependencies>true</excludeMuleDependencies>
+                    <inclusions>
+                        <inclusion>
+                            <groupId>org.mule.modules</groupId>
+                            <artifactId>mule-module-apikit</artifactId>
+                        </inclusion>
+                    </inclusions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>

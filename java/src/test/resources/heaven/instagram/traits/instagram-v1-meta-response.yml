@@ -1,0 +1,16 @@
+name: MetaResponse
+description: |
+  All response contain the meta key. The meta key is used to communicate extra 
+  information about the response to the developer. If all goes well, you'll only 
+  ever see a code key with value 200.
+requires: 
+  - &method get
+  - &status 200
+provides:
+  *method:
+    responses:
+      *status:
+        body:
+          application/json:
+            example: !include instagram-v1-empty-response-example.json
+  

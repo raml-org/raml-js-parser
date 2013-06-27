@@ -1,0 +1,40 @@
+%TAG ! tag:heaven-lang.org,1.0:
+---
+title: sample API
+version: v1
+baseUri: https://api.sample.com/
+traits:
+  paged:
+    name: Paged
+    requires:
+      #method: [ get, post ]
+      method: get
+      example: '1'
+    provides:
+      !param method:
+        query:
+          count:
+            type: integer
+            #example: !param example
+            required: false
+
+resources:
+  - name: Default
+    relativeUri: default
+    use: [paged]
+    get:
+      query:
+        q:
+          type: string
+          required: true
+  - name: Values
+    relativeUri: values
+    use:
+        - paged:
+            method: get
+            example: '2'
+    get:
+      query:
+        q:
+          type: string
+          required: true

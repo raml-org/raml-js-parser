@@ -1,0 +1,7 @@
+%TAG ! tag:heaven-lang.org,1.0:
+---
+title: Sample API with a really long title too long to be accepted
+version: v1
+baseUri: https://api.sample.com/
+/media:
+    name: Media
