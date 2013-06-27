@@ -28,6 +28,8 @@ class @ScalarNode extends @Node
     if not (node instanceof ScalarNode)
       throw new ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
     @value = node.value
+    
+  remove_question_mark_properties: ->
 
 class @CollectionNode extends @Node
   constructor: (@tag, @value, @start_mark, @end_mark, @flow_style) ->
@@ -50,6 +52,10 @@ class @SequenceNode extends @CollectionNode
     node.value.forEach (property) =>
       value = property.clone()
       @value.push value
+  
+  remove_question_mark_properties: ->
+    @value.forEach (item) ->
+      item.remove_question_mark_properties()
 
 class @MappingNode extends @CollectionNode
   id: 'mapping'
@@ -76,10 +82,16 @@ class @MappingNode extends @CollectionNode
              ((property1[0].value + '?') == name) or
              (property1[0].value == (name + '?'))
             property1[1].combine property2[1]
-          if property1[0].value.indexOf('?', property1[0].value.length - 1) != -1
-            property1[0].value = property1[0].value.substring( 0, property1[0].value.length - 1)
+            if property1[0].value.indexOf('?', property1[0].value.length - 1) != -1
+              property1[0].value = property1[0].value.substring( 0, property1[0].value.length - 1)
       else
         @value.push [ property2[0].clone(), property2[1].clone() ]
+        
+  remove_question_mark_properties: ->
+    @value = @value.filter (property) ->
+      return property[0].value.indexOf('?', property[0].value.length - 1) == -1
+    @value.forEach (property) ->
+      property[1].remove_question_mark_properties()
   
 class @IncludeNode extends @Node
   id: 'include'  

@@ -140,10 +140,12 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  rateLimited:',
-        '    get?:',
-        '      responses:',
-        '        429:',
-        '          description: API Limit Exceeded',
+        '    name: Rate Limited',
+        '    provides:',
+        '      get?:',
+        '        responses:',
+        '          429:',
+        '            description: API Limit Exceeded',
         '/leagues:',
         '  use: [ rateLimited ]',
         '  get:',
@@ -156,10 +158,13 @@ describe('Parser', function() {
         title: 'Test', 
         traits: {
           rateLimited: {
-            'get?': {
-              responses: {
-                '429': {
-                  description: 'API Limit Exceeded'
+            name: 'Rate Limited',
+            provides: {
+              'get?': {
+                responses: {
+                  '429': {
+                    description: 'API Limit Exceeded'
+                  }
                 }
               }
             }
@@ -180,6 +185,200 @@ describe('Parser', function() {
         } 
       }).and.notify(done);
     });
+    it('should succeed when applying multiple traits', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:heaven-lang.org,1.0:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    provides:',
+        '      get?:',
+        '        responses:',
+        '          429:',
+        '            description: API Limit Exceeded',
+        '  queryable:',
+        '    name: Queryable',
+        '    provides:',
+        '      get?:',
+        '        queryParameters:',
+        '          q:',
+        '            type: string',
+        '/leagues:',
+        '  use: [ rateLimited, queryable ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues',
+      ].join('\n');
+      
+      Heaven.Parser.load(definition).should.become({ 
+        title: 'Test', 
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            provides: {
+              'get?': {
+                responses: {
+                  '429': {
+                    description: 'API Limit Exceeded'
+                  }
+                }
+              }
+            }
+          },
+          queryable: {
+            name: 'Queryable',
+            provides: {
+              'get?': {
+                queryParameters: {
+                  q: {
+                    type: 'string'
+                  }
+                }
+              }
+            }
+          }
+        },
+        '/leagues': {
+          use: [ 'rateLimited', 'queryable' ],
+          get: {
+            queryParameters: {
+              q: {
+                type: 'string'
+              }
+            },
+            responses: {
+              '200': {
+                description: 'Retrieve a list of leagues'
+              },
+              '429': {
+                description: 'API Limit Exceeded'
+              }
+            }
+          }
+        } 
+      }).and.notify(done);
+    });
+    
+    it('should remove nodes with question mark that are not used', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:heaven-lang.org,1.0:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    provides:',
+        '      get?:',
+        '        responses:',
+        '          429:',
+        '            description: API Limit Exceeded',
+        '      post?:',
+        '        responses:',
+        '          429:',
+        '            description: API Limit Exceeded',
+        '/leagues:',
+        '  use: [ rateLimited ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues',
+      ].join('\n');
+      
+      Heaven.Parser.load(definition).should.become({ 
+        title: 'Test', 
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            provides: {
+              'get?': {
+                responses: {
+                  '429': {
+                    description: 'API Limit Exceeded'
+                  }
+                }
+              },
+              'post?': {
+                responses: {
+                  '429': {
+                    description: 'API Limit Exceeded'
+                  }
+                }
+              }
+            }
+          }
+        },
+        '/leagues': {
+          use: [ 'rateLimited' ],
+          get: {
+            responses: {
+              '200': {
+                description: 'Retrieve a list of leagues'
+              },
+              '429': {
+                description: 'API Limit Exceeded'
+              }
+            }
+          }
+        } 
+      }).and.notify(done);
+    });
+    it('should fail if unknown property is used inside a trait', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:heaven-lang.org,1.0:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    what:',
+        '      responses:',
+        '        503:',
+        '          description: Server Unavailable. Check Your Rate Limits.',
+        '/:',
+        '  use: [ throttled, rateLimited: { parameter: value } ]',
+      ].join('\n');
+      
+      Heaven.Parser.load(definition).should.be.rejected.with(/unknown property what/).and.notify(done);
+    });    
+    it('should fail if trait is missing provides property', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:heaven-lang.org,1.0:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '/:',
+        '  use: [ rateLimited: { parameter: value } ]',
+      ].join('\n');
+      
+      Heaven.Parser.load(definition).should.be.rejected.with(/every trait must have a provides property/).and.notify(done);
+    });    
+    it('should fail if trait is missing name property', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:heaven-lang.org,1.0:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    provides:',
+        '      get?:',
+        '        responses:',
+        '          503:',
+        '            description: Server Unavailable. Check Your Rate Limits.',
+        '/:',
+        '  use: [ rateLimited: { parameter: value } ]',
+      ].join('\n');
+      
+      Heaven.Parser.load(definition).should.be.rejected.with(/every trait must have a name property/).and.notify(done);
+    });    
     it('should fail if use property is not an array', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -200,10 +399,12 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  rateLimited:',
-        '    get?:',
-        '      responses:',
-        '        503:',
-        '          description: Server Unavailable. Check Your Rate Limits.',
+        '    name: Rate Limited',
+        '    provides:',
+        '      get?:',
+        '        responses:',
+        '          503:',
+        '            description: Server Unavailable. Check Your Rate Limits.',
         '/:',
         '  use: [ throttled, rateLimited: { parameter: value } ]',
       ].join('\n');

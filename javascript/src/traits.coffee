@@ -33,9 +33,11 @@ class @Traits
             temp = trait.clone()
             temp.combine resource[1]
             resource[1] = temp
+        resource[1].remove_question_mark_properties()
         @apply_traits resource[1]
         
   get_trait: (traitName) ->
     trait = @declaredTraits.filter( (declaredTrait) -> return declaredTrait[0].value == traitName );
-    return trait[0][1];
+    provides = trait[0][1].value.filter( (property) -> return property[0].value == 'provides' )
+    return provides[0][1];
     

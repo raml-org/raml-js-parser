@@ -23,13 +23,37 @@ The Validator class deals with validating a YAML file according to the spec
 class @Validator
   
   constructor: ->
-    @validations = [@has_title, @valid_base_uri, @valid_root_properties, @valid_absolute_uris, @valid_trait_consumption]
+    @validations = [@has_title, @valid_base_uri, @valid_root_properties, @valid_absolute_uris, @validate_traits, @valid_trait_consumption]
     @absolute_uris = []
   
   validate_document: (node, failFast = true) ->
     @validations.forEach (validation) =>
       validation.call @, node
     return true
+    
+  validate_traits: (node) ->
+    if node instanceof nodes.IncludeNode
+      return @validate_traits node.value
+    @check_is_map node
+    if @has_property node, /traits/i
+      traits = @property_value node, /traits/i
+      traits.forEach (trait) =>
+        @valid_traits_properties trait[1]
+        if not (@has_property trait[1], /provides/i)
+          throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a provides property', node.start_mark
+        if not (@has_property trait[1], /name/i)
+          throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a name property', node.start_mark
+      
+  valid_traits_properties: (node) ->  
+    if node instanceof nodes.IncludeNode
+      return @valid_traits_properties node.value
+    @check_is_map node
+    invalid = node.value.filter (childNode) -> 
+      return not (childNode[0].value.match(/name/i) or \
+                  childNode[0].value.match(/description/i) or \
+                  childNode[0].value.match(/provides/i) )
+    if invalid.length > 0 
+      throw new exports.ValidationError 'while validating trait properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
   
   valid_root_properties: (node) ->
     if node instanceof nodes.IncludeNode
