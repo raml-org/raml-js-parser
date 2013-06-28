@@ -1,6 +1,7 @@
 {
   "name": "raml-parser",
   "version": "0.0.1",
+  "main": "./lib/raml.js",
   "private": true,
   "scripts": {
     "test": "grunt ci --verbose",
