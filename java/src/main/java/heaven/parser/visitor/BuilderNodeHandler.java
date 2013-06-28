@@ -5,6 +5,7 @@ import java.util.Stack;
 
 import heaven.parser.builder.DefaultTupleBuilder;
 import heaven.parser.builder.TupleBuilder;
+import heaven.parser.resolver.DefaultTupleHandler;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.MappingNode;
@@ -135,11 +136,10 @@ public class BuilderNodeHandler<T> implements NodeHandler
 
     private TupleBuilder<?, ?> buildDocumentBuilder()
     {
-        DefaultTupleBuilder documentBuilder = new DefaultTupleBuilder<Node, MappingNode>();
-       documentBuilder.addBuildersFor(documentClass);
+        DefaultTupleBuilder documentBuilder = new DefaultTupleBuilder<Node, MappingNode>(new DefaultTupleHandler());
+        documentBuilder.addBuildersFor(documentClass);
         return documentBuilder;
     }
-
 
 
     @Override

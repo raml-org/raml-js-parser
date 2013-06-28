@@ -1,9 +1,12 @@
 package heaven.parser.utils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.apache.commons.beanutils.PropertyUtilsBean;
 
 public class ReflectionUtils
 {
@@ -16,5 +19,33 @@ public class ReflectionUtils
             fields.addAll(Arrays.asList(c.getDeclaredFields()));
         }
         return fields;
+    }
+
+
+    public static void setProperty(Object parent, String fieldName, Object value)
+    {
+        if (parent instanceof List && fieldName == null)
+        {
+            ((List) parent).add(value);
+        }
+        else
+        {
+            try
+            {
+                new PropertyUtilsBean().setProperty(parent, fieldName, value);
+            }
+            catch (IllegalAccessException e)
+            {
+                throw new RuntimeException(e);
+            }
+            catch (InvocationTargetException e)
+            {
+                throw new RuntimeException(e);
+            }
+            catch (NoSuchMethodException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

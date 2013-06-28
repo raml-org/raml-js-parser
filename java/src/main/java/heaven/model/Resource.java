@@ -8,22 +8,30 @@ import java.util.Map;
 
 import heaven.model.parameter.UriParameter;
 import heaven.parser.ParseException;
+import heaven.parser.annotation.Mapping;
+import heaven.parser.annotation.Scalar;
 import org.apache.commons.lang.ArrayUtils;
 
 public class Resource
 {
 
+    @Scalar
     private String name;
     private String parentUri;
     private String relativeUri;
     private Map<String, UriParameter> uriParameters = new HashMap<String, UriParameter>();
     private ResourceMap resources = new ResourceMap();
-    private Map<String, Action> actions = new HashMap<String, Action>();
+    @Mapping(implicit = true)
+    private Map<ActionType, Action> actions = new HashMap<ActionType, Action>();
     private List<?> uses = new ArrayList();
 
     //TODO refactor to enum in action class
     public static final String[] ACTION_NAMES = {"get", "post", "put", "delete", "head"};
     private static final List<String> VALID_KEYS;
+
+    public Resource()
+    {
+    }
 
     static
     {
@@ -89,19 +97,17 @@ public class Resource
 
     private void populateAction(Map descriptor)
     {
-        boolean actionDefined = false;
-        for (String name : ACTION_NAMES)
-        {
-            if (descriptor.containsKey(name))
-            {
-                actions.put(name, new Action(name, this, (Map) descriptor.get(name)));
-                actionDefined = true;
-            }
-        }
-        if (!actionDefined)
-        {
-            throw new ParseException("at least one action must be defined");
-        }
+
+    }
+
+    public Map<ActionType, Action> getActions()
+    {
+        return actions;
+    }
+
+    public void setName(String name)
+    {
+        this.name = name;
     }
 
     public String getName()
@@ -128,7 +134,7 @@ public class Resource
         return uses;
     }
 
-    public Action getAction(String name)
+    public Action getAction(ActionType name)
     {
         return actions.get(name);
     }

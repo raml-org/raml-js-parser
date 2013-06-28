@@ -33,25 +33,7 @@ public class Trait
 
     public void apply(Map<String, ?> params, Resource resource)
     {
-        //TODO logic to merge trait into resource
-        System.out.println("merging trait " + key + " into resource " + resource.getName());
-        Map<String, ?> mergedParams = mergeParams(params);
 
-        //TODO handle parameter lists
-        //Iterator paramCombinations = generateParamCombinations(mergedParams);
-        Map<String, ?> paramCombination = mergedParams;
-
-        for (Object methodKey : methodTemplate.keySet())
-        {
-            String key = methodKey.toString();
-            if (methodKey instanceof ScalarNode)
-            {
-                key = (String) mergedParams.get(((ScalarNode) methodKey).getValue());
-            }
-            //TODO apply to non defined methods too
-            Action method = resource.getAction(key);
-            method.applyTrait((Map<?, ?>) methodTemplate.get(methodKey), paramCombination);
-        }
     }
 
     private Iterator generateParamCombinations(Map<String, ?> mergedParams)

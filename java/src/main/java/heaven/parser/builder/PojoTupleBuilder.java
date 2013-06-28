@@ -3,6 +3,7 @@ package heaven.parser.builder;
 import java.lang.reflect.InvocationTargetException;
 
 import heaven.parser.resolver.DefaultScalarTupleHandler;
+import heaven.parser.utils.ReflectionUtils;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.NodeTuple;
@@ -16,8 +17,15 @@ public class PojoTupleBuilder extends DefaultTupleBuilder<ScalarNode, MappingNod
 
     public PojoTupleBuilder(String fieldName, Class<?> pojoClass)
     {
+        super(new DefaultScalarTupleHandler(MappingNode.class, fieldName));
+        this.fieldName = fieldName;
         this.pojoClass = pojoClass;
-        setHandler(new DefaultScalarTupleHandler(MappingNode.class, fieldName));
+
+    }
+
+    public PojoTupleBuilder(Class<?> pojoClass)
+    {
+        this(null, pojoClass);
     }
 
     @Override
@@ -30,11 +38,6 @@ public class PojoTupleBuilder extends DefaultTupleBuilder<ScalarNode, MappingNod
         return super.getBuiderForTuple(tuple);
     }
 
-    public PojoTupleBuilder(Class<?> pojoClass)
-    {
-        this(null, pojoClass);
-    }
-
 
     @Override
     public Object buildValue(Object parent, MappingNode tuple)
@@ -42,8 +45,7 @@ public class PojoTupleBuilder extends DefaultTupleBuilder<ScalarNode, MappingNod
         try
         {
             Object newValue = pojoClass.newInstance();
-            new PropertyUtilsBean().setProperty(parent, fieldName, newValue);
-
+            ReflectionUtils.setProperty(parent, fieldName, newValue);
             return newValue;
         }
         catch (InstantiationException e)
@@ -54,14 +56,7 @@ public class PojoTupleBuilder extends DefaultTupleBuilder<ScalarNode, MappingNod
         {
             throw new RuntimeException(e);
         }
-        catch (InvocationTargetException e)
-        {
-            throw new RuntimeException(e);
-        }
-        catch (NoSuchMethodException e)
-        {
-            throw new RuntimeException(e);
-        }
+
 
     }
 

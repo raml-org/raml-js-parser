@@ -12,6 +12,8 @@ import heaven.model.parameter.UriParameter;
 import heaven.parser.ParseException;
 import heaven.parser.annotation.Mapping;
 import heaven.parser.annotation.Scalar;
+import heaven.parser.annotation.Sequence;
+import heaven.parser.resolver.ResourceHandler;
 
 
 public class Heaven
@@ -26,8 +28,13 @@ public class Heaven
     @Mapping()
     private Map<String, UriParameter> uriParameters = new HashMap<String, UriParameter>();
     private Map<String, Trait> traits = new HashMap<String, Trait>();
+    @Mapping(handler = ResourceHandler.class , implicit = true)
+    private Map<String, Resource> resources = new HashMap<String, Resource>();
 
-    private ResourceMap resources = new ResourceMap();
+    @Sequence
+    private List<DocumentationItem> documentation;
+
+
 
     private static final List<String> VALID_KEYS = Arrays.asList(
             "title", "version", "baseUri", "uriParameters", "documentation", "traits");
@@ -40,50 +47,19 @@ public class Heaven
 
     }
 
-    @Deprecated //old validator
-    public Heaven(Map<String, ?> descriptor)
+    public void setDocumentation(List<DocumentationItem> documentation)
     {
-        validateRequiredFields(descriptor);
-        checkInvalidFields(descriptor);
-
-        title = (String) descriptor.get("title");
-        if (title.length() > TITLE_MAX_LENGTH)
-        {
-            throw new ParseException("Title too long, maximum character length is " + TITLE_MAX_LENGTH);
-        }
-        version = (String) descriptor.get("version");
-        baseUri = (String) descriptor.get("baseUri");
-        URL baseUrl;
-        try
-        {
-            baseUrl = new URL(baseUri);
-        }
-        catch (MalformedURLException e)
-        {
-            throw new ParseException("Malformed baseUri: " + baseUri);
-        }
-        if (descriptor.containsKey("uriParameters"))
-        {
-            populateUriParameters((Map<String, ?>) descriptor.get("uriParameters"));
-        }
-
-        resources.populate(descriptor, baseUrl.getPath());
-        List<Resource> collisions = resources.checkResourceCollision();
-        if (!collisions.isEmpty())
-        {
-            StringBuilder sb = new StringBuilder("\n");
-            for (Resource r : collisions)
-            {
-                sb.append(" -> ").append(r.getUri()).append("\n");
-            }
-            throw new ParseException("Duplicate resource paths: " + sb);
-        }
+        this.documentation = documentation;
     }
-
 
     public void setUriParameters(Map<String, UriParameter> uriParameters)
     {
         this.uriParameters = uriParameters;
+    }
+
+    public void setResources(Map<String, Resource> resources)
+    {
+        this.resources = resources;
     }
 
     private void populateUriParameters(Map<String, ?> descriptor)
@@ -176,7 +152,7 @@ public class Heaven
         traits.put(trait.getKey(), trait);
     }
 
-    public ResourceMap getResources()
+    public Map<String, Resource> getResources()
     {
         return resources;
     }
@@ -207,7 +183,7 @@ public class Heaven
             path = path.substring(baseUriPath.length());
         }
 
-        for (Resource resource : resources)
+        for (Resource resource : resources.values())
         {
             if (path.startsWith(resource.getRelativeUri()))
             {

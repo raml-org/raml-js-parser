@@ -4,7 +4,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
 import heaven.parser.resolver.DefaultScalarTupleHandler;
+import heaven.parser.utils.ReflectionUtils;
 import org.apache.commons.beanutils.PropertyUtilsBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
@@ -12,14 +15,18 @@ import org.yaml.snakeyaml.nodes.ScalarNode;
 public class MapTupleBuilder extends DefaultTupleBuilder<ScalarNode, MappingNode>
 {
 
+    private Class<?> keyClass;
     private Class valueClass;
-    private String fieldName;
+    private String keyValue;
 
-    public MapTupleBuilder(String fieldName, Class valueClass)
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+
+    public MapTupleBuilder(String keyValue, Class<?> keyClass, Class<?> valueClass)
     {
-        this.fieldName = fieldName;
+        super(new DefaultScalarTupleHandler(MappingNode.class, keyValue));
+        this.keyValue = keyValue;
+        this.keyClass = keyClass;
         this.valueClass = valueClass;
-        setHandler(new DefaultScalarTupleHandler(MappingNode.class, fieldName));
     }
 
     @Override
@@ -31,30 +38,15 @@ public class MapTupleBuilder extends DefaultTupleBuilder<ScalarNode, MappingNode
     @Override
     public Object buildValue(Object parent, MappingNode tuple)
     {
-        HashMap<String, Object> map = new HashMap<String, Object>();
-        try
-        {
-            new PropertyUtilsBean().setProperty(parent, fieldName, map);
-        }
-        catch (IllegalAccessException e)
-        {
-            throw new RuntimeException(e);
-        }
-        catch (InvocationTargetException e)
-        {
-            throw new RuntimeException(e);
-        }
-        catch (NoSuchMethodException e)
-        {
-            throw new RuntimeException(e);
-        }
+        final HashMap<String, Object> map = new HashMap<String, Object>();
+        ReflectionUtils.setProperty(parent, keyValue, map);
         return map;
     }
 
     @Override
     public void buildKey(Object parent, ScalarNode tuple)
     {
-        fieldName = tuple.getValue();
+        keyValue = tuple.getValue();
     }
 
 }

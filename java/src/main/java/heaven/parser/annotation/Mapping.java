@@ -13,6 +13,8 @@ public @interface Mapping
 
     boolean required() default false;
 
+    boolean implicit() default false;
+
     Class<? extends ITupleRule> rule() default ITupleRule.class;
 
     Class<? extends TupleBuilder> builder() default TupleBuilder.class;

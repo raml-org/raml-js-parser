@@ -12,4 +12,21 @@ uriParameters:
         type: string
 /media:
     name: Media
-    put: !!null
+    get:
+        name: retrieve
+        body:
+            application/json:
+                schema: |
+                    {
+                         "$schema": "http://json-schema.org/draft-03/schema",
+                         "properties": {
+                             "input": {
+                                 "required": false,
+                                 "type": "string"
+                             }
+                         },
+                         "required": false,
+                         "type": "object"
+                    }
+                example: '{ "input": "hola" }'
+

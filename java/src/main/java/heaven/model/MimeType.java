@@ -4,14 +4,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 import heaven.model.parameter.FormParameter;
+import heaven.parser.annotation.Scalar;
 
 public class MimeType
 {
 
+
     private String type;
+    @Scalar
     private String schema;
+    @Scalar
     private String example;
     private Map<String, FormParameter> formParameters;
+
+    public MimeType()
+    {
+    }
 
     public MimeType(String type, Map<String, ?> mimeDescriptor)
     {
@@ -45,6 +53,21 @@ public class MimeType
     public String getType()
     {
         return type;
+    }
+
+    public void setSchema(String schema)
+    {
+        this.schema = schema;
+    }
+
+    public void setExample(String example)
+    {
+        this.example = example;
+    }
+
+    public void setFormParameters(Map<String, FormParameter> formParameters)
+    {
+        this.formParameters = formParameters;
     }
 
     public String getSchema()

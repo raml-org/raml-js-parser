@@ -9,8 +9,11 @@ import java.util.Map;
 
 import heaven.parser.annotation.Mapping;
 import heaven.parser.annotation.Scalar;
+import heaven.parser.resolver.DefaultTupleHandler;
+import heaven.parser.resolver.EnumHandler;
 import heaven.parser.resolver.TupleHandler;
 import heaven.parser.utils.ReflectionUtils;
+import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 
@@ -21,9 +24,10 @@ public class DefaultTupleBuilder<K extends Node, V extends Node> implements Tupl
     private TupleBuilder parent;
     private TupleHandler handler;
 
-    public DefaultTupleBuilder()
+    public DefaultTupleBuilder(TupleHandler tupleHandler)
     {
         builders = new HashMap<String, TupleBuilder<?, ?>>();
+        this.setHandler(tupleHandler);
     }
 
     @Override
@@ -36,7 +40,7 @@ public class DefaultTupleBuilder<K extends Node, V extends Node> implements Tupl
                 return tupleBuilder;
             }
         }
-        return new DefaultTupleBuilder();
+        return new DefaultTupleBuilder(new DefaultTupleHandler());
     }
 
     @Override
@@ -110,10 +114,16 @@ public class DefaultTupleBuilder<K extends Node, V extends Node> implements Tupl
                         if (type instanceof ParameterizedType)
                         {
                             ParameterizedType pType = (ParameterizedType) type;
+                            Type keyType = pType.getActualTypeArguments()[0];
                             Type valueType = pType.getActualTypeArguments()[1];
-                            if (valueType instanceof Class<?>)
+                            if (keyType instanceof Class<?> && valueType instanceof Class<?>)
                             {
-                                tupleBuilder = new MapTupleBuilder(declaredField.getName(), (Class) valueType);
+                                Class<?> keyClass = (Class<?>) keyType;
+                                tupleBuilder = mapping.implicit() ? new MapEntryBuilder(declaredField.getName(), keyClass, (Class) valueType) : new MapTupleBuilder(declaredField.getName(), keyClass, (Class) valueType);
+                                if (keyClass.isEnum())
+                                {
+                                    tupleBuilder.setHandler(new EnumHandler(MappingNode.class, (Class<? extends Enum>) keyClass));
+                                }
                             }
                         }
                     }
@@ -178,7 +188,7 @@ public class DefaultTupleBuilder<K extends Node, V extends Node> implements Tupl
     }
 
     @Override
-    public boolean handles(NodeTuple tuple)
+    public final boolean handles(NodeTuple tuple)
     {
         return handler != null ? handler.handles(tuple) : false;
     }
