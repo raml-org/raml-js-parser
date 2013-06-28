@@ -1,12 +1,10 @@
 package heaven.parser.visitor;
 
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Stack;
 
+import heaven.parser.builder.DefaultTupleBuilder;
 import heaven.parser.builder.TupleBuilder;
-import heaven.parser.rule.ValidationResult;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.MappingNode;
@@ -15,25 +13,23 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
 
-public class BuilderNodeHandler implements NodeHandler
+public class BuilderNodeHandler<T> implements NodeHandler
 {
 
-
-    private Class documentClass;
+    private Class<T> documentClass;
+    private T documentObject;
 
     private Stack<TupleBuilder<?, ?>> builderContext = new Stack<TupleBuilder<?, ?>>();
     private Stack<Object> objectContext = new Stack<Object>();
 
 
-    private List<ValidationResult> errorMessage = new ArrayList<ValidationResult>();
-
-    public BuilderNodeHandler(Class documentClass)
+    public BuilderNodeHandler(Class<T> documentClass)
     {
         this.documentClass = documentClass;
 
     }
 
-    public List<ValidationResult> validate(String content)
+    public T build(String content)
     {
         Yaml yamlParser = new Yaml();
 
@@ -46,18 +42,15 @@ public class BuilderNodeHandler implements NodeHandler
                 {
                     nodeVisitor.visitDocument((MappingNode) data);
                 }
-                else
-                {
-                    //   errorMessage.add(ValidationResult.createErrorResult(EMPTY_DOCUMENT_MESSAGE));
-                }
+
             }
 
         }
         catch (YAMLException ex)
         {
-            // errorMessage.add(ValidationResult.createErrorResult(ex.getMessage()));
+            throw new RuntimeException(ex);
         }
-        return errorMessage;
+        return documentObject;
     }
 
 
@@ -130,30 +123,29 @@ public class BuilderNodeHandler implements NodeHandler
     {
         try
         {
+
             objectContext.push(documentClass.newInstance());
             builderContext.push(buildDocumentBuilder());
         }
-        catch (InstantiationException e)
+        catch (Exception e)
         {
-
-        }
-        catch (IllegalAccessException e)
-        {
-
+            throw new RuntimeException(e);
         }
     }
 
     private TupleBuilder<?, ?> buildDocumentBuilder()
     {
-        return null;
+        DefaultTupleBuilder documentBuilder = new DefaultTupleBuilder<Node, MappingNode>();
+       documentBuilder.addBuildersFor(documentClass);
+        return documentBuilder;
     }
+
+
 
     @Override
     public void onDocumentEnd(MappingNode node)
     {
-        objectContext.pop();
-
-
+        documentObject = (T) objectContext.pop();
     }
 
     @Override

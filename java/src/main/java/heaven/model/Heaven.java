@@ -26,7 +26,7 @@ public class Heaven
     @Mapping()
     private Map<String, UriParameter> uriParameters = new HashMap<String, UriParameter>();
     private Map<String, Trait> traits = new HashMap<String, Trait>();
-    @Mapping(handler = heaven.parser.resolver.ResourceHandler.class)
+
     private ResourceMap resources = new ResourceMap();
 
     private static final List<String> VALID_KEYS = Arrays.asList(
@@ -35,6 +35,12 @@ public class Heaven
             "title", "baseUri");
     private static final int TITLE_MAX_LENGTH = 48;
 
+    public Heaven()
+    {
+
+    }
+
+    @Deprecated //old validator
     public Heaven(Map<String, ?> descriptor)
     {
         validateRequiredFields(descriptor);
