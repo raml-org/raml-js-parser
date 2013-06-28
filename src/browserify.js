@@ -1,3 +1,3 @@
-window.Heaven = {}
+window.RAML = {}
 
-window.Heaven.Parser = require('../build/yaml');
+window.RAML.Parser = require('../build/raml');

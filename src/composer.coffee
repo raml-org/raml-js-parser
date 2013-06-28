@@ -90,7 +90,7 @@ class @Composer
     tag = event.tag
     if tag is null or tag is '!'
       tag = @resolve nodes.ScalarNode, event.value, event.implicit
-    if tag == 'tag:heaven-lang.org,1.0:include'
+    if tag == 'tag:raml.org,0.1:include'
       node = new nodes.IncludeNode tag, event.value, event.start_mark,
         event.end_mark, event.style
     else

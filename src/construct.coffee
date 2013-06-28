@@ -80,7 +80,7 @@ class @BaseConstructor
         else if node instanceof nodes.ScalarNode
           constructor = @construct_scalar
         else if node instanceof nodes.IncludeNode
-          constructor = @construct_heaven_include
+          constructor = @construct_include
         else if node instanceof nodes.SequenceNode
           constructor = @construct_sequence
         else if node instanceof nodes.MappingNode
@@ -375,7 +375,7 @@ class @Constructor extends @BaseConstructor
       data[key] = value for key, value of @construct_mapping node, true
     return data
     
-  construct_heaven_include: (node) ->
+  construct_include: (node) ->
     if node.value instanceof nodes.Node
       return @construct_document node.value
     else
@@ -422,8 +422,8 @@ class @Constructor extends @BaseConstructor
 @Constructor.add_constructor 'tag:yaml.org,2002:map',
   @Constructor::construct_yaml_map
 
-@Constructor.add_constructor 'tag:heaven-lang.org,1.0:include',
-  @Constructor::construct_heaven_include
+@Constructor.add_constructor 'tag:raml.org,0.1:include',
+  @Constructor::construct_include
 
 @Constructor.add_constructor null,
   @Constructor::construct_undefined

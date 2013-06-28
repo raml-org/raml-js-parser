@@ -20,12 +20,12 @@ module.exports = function(grunt) {
             'build/util.js': 'src/util.coffee',
             'build/traits.js': 'src/traits.coffee',
             'build/joiner.js': 'src/joiner.coffee',            
-            'build/yaml.js': 'src/yaml.coffee'
+            'build/raml.js': 'src/raml.coffee'
           }
         }      
     },
     browserify: {
-      'dist/heaven-parser.js': ['src/browserify.js', 'build/*.js', 'node_modules/q/q.js']
+      'dist/raml-parser.js': ['src/browserify.js', 'build/*.js', 'node_modules/q/q.js']
     },
     watch: {
       coffee: {
@@ -40,12 +40,12 @@ module.exports = function(grunt) {
     uglify: {
       options: {
         mangle: {
-          except: ['Heaven', 'Q']
+          except: ['RAML', 'Q']
         }
       },
       javascript: {
         files: {
-          'dist/heaven-parser.min.js': ['dist/heaven-parser.js']
+          'dist/raml-parser.min.js': ['dist/raml-parser.js']
         }
       }
     },    

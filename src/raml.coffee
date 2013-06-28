@@ -1,4 +1,3 @@
-# Attach all the classes to the yaml-js object.
 @composer    = require './composer'
 @constructor = require './construct'
 @errors      = require './errors'
@@ -13,21 +12,21 @@
 @q           = require 'q'
 
 ###
-Scan a YAML stream and produce scanning tokens.
+Scan a RAML stream and produce scanning tokens.
 ###
 @scan = (stream) ->
   loader = new exports.loader.Loader stream
   loader.get_token() while loader.check_token()
 
 ###
-Parse a YAML stream and produce parsing events.
+Parse a RAML stream and produce parsing events.
 ###
 @parse = (stream) ->
   loader = new exports.loader.Loader stream
   loader.get_event() while loader.check_event()
 
 ###
-Parse the first YAML document in a stream and produce the corresponding
+Parse the first RAML document in a stream and produce the corresponding
 representation tree.
 ###
 @compose = (stream) ->
@@ -35,7 +34,7 @@ representation tree.
   return loader.get_single_node()
 
 ###
-Parse all YAML documents in a stream and produce corresponding representation
+Parse all RAML documents in a stream and produce corresponding representation
 trees.
 ###
 @compose_all = (stream) ->
@@ -43,7 +42,7 @@ trees.
   loader.get_node() while loader.check_node()
 
 ###
-Parse the first YAML document in a stream and produce the corresponding
+Parse the first RAML document in a stream and produce the corresponding
 Javascript object.
 ###
 @load = (stream) ->
@@ -57,7 +56,7 @@ Javascript object.
   return deferred.promise
 
 ###
-Parse all YAML documents in a stream and produce the corresponing Javascript
+Parse all RAML documents in a stream and produce the corresponing Javascript
 object.
 ###
 @load_all = (stream) ->

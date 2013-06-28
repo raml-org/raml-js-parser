@@ -1,5 +1,5 @@
 {MarkedYAMLError} = require './errors'
-yaml              = require './yaml'
+raml              = require './raml'
 
 unique_id = 0
 
@@ -110,7 +110,7 @@ class @IncludeNode extends @Node
          contentType.indexOf('application/x-yaml') != -1 or
          extension == 'yaml' or
          extension == 'yml'
-        @value = yaml.compose(xhr.responseText);
+        @value = raml.compose(xhr.responseText);
       else
         @value = xhr.responseText;
     else
