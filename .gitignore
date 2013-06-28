@@ -1,6 +1,6 @@
 gen
 node_modules
-build
+lib
 dist
 .DS_Store
 *.iml
