@@ -1,8 +1,10 @@
 {
   "name": "raml-parser",
   "version": "0.0.1",
+  "private": true,
   "scripts": {
-    "test": "grunt ci --verbose"
+    "test": "grunt ci --verbose",
+    "install": "./node_modules/grunt/bin/grunt compile"
   },
   "dependencies": {
     "mocha": "1.9.0",

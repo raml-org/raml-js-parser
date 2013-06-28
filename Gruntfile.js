@@ -5,27 +5,27 @@ module.exports = function(grunt) {
     coffee: {
       compile: {
           files: {
-            'build/composer.js': 'src/composer.coffee',
-            'build/construct.js': 'src/construct.coffee',
-            'build/errors.js': 'src/errors.coffee',
-            'build/events.js': 'src/events.coffee',
-            'build/loader.js': 'src/loader.coffee',
-            'build/nodes.js': 'src/nodes.coffee',
-            'build/parser.js': 'src/parser.coffee',
-            'build/reader.js': 'src/reader.coffee',
-            'build/resolver.js': 'src/resolver.coffee',
-            'build/scanner.js': 'src/scanner.coffee',
-            'build/validator.js': 'src/validator.coffee',
-            'build/tokens.js': 'src/tokens.coffee',
-            'build/util.js': 'src/util.coffee',
-            'build/traits.js': 'src/traits.coffee',
-            'build/joiner.js': 'src/joiner.coffee',            
-            'build/raml.js': 'src/raml.coffee'
+            'lib/composer.js': 'src/composer.coffee',
+            'lib/construct.js': 'src/construct.coffee',
+            'lib/errors.js': 'src/errors.coffee',
+            'lib/events.js': 'src/events.coffee',
+            'lib/loader.js': 'src/loader.coffee',
+            'lib/nodes.js': 'src/nodes.coffee',
+            'lib/parser.js': 'src/parser.coffee',
+            'lib/reader.js': 'src/reader.coffee',
+            'lib/resolver.js': 'src/resolver.coffee',
+            'lib/scanner.js': 'src/scanner.coffee',
+            'lib/validator.js': 'src/validator.coffee',
+            'lib/tokens.js': 'src/tokens.coffee',
+            'lib/util.js': 'src/util.coffee',
+            'lib/traits.js': 'src/traits.coffee',
+            'lib/joiner.js': 'src/joiner.coffee',            
+            'lib/raml.js': 'src/raml.coffee'
           }
         }      
     },
     browserify: {
-      'dist/raml-parser.js': ['src/browserify.js', 'build/*.js', 'node_modules/q/q.js']
+      'dist/raml-parser.js': ['src/browserify.js', 'lib/*.js', 'node_modules/q/q.js']
     },
     watch: {
       coffee: {
@@ -33,7 +33,7 @@ module.exports = function(grunt) {
         tasks: ['coffee']
       },
       javascript: {
-        files: ['build/*.js', 'src/browserify.js'],
+        files: ['lib/*.js', 'src/browserify.js'],
         tasks: ['browserify']
       }
     },
@@ -75,6 +75,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
+  grunt.registerTask('compile', ['coffee']);
   grunt.registerTask('default', ['coffee', 'browserify', 'uglify']);
   grunt.registerTask('test', ['connect', 'mocha_phantomjs']);
   grunt.registerTask('server', ['default', 'connect', 'watch']);
