@@ -80,6 +80,12 @@ public class Heaven
         }
     }
 
+
+    public void setUriParameters(Map<String, UriParameter> uriParameters)
+    {
+        this.uriParameters = uriParameters;
+    }
+
     private void populateUriParameters(Map<String, ?> descriptor)
     {
         for (String param : descriptor.keySet())

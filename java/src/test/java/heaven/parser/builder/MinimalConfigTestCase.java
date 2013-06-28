@@ -3,6 +3,7 @@ package heaven.parser.builder;
 import static org.hamcrest.CoreMatchers.is;
 
 import heaven.model.Heaven;
+import heaven.model.ParamType;
 import heaven.parser.visitor.BuilderNodeHandler;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -20,7 +21,12 @@ public class MinimalConfigTestCase
         Assert.assertThat(heaven.getTitle(), is("Sample API"));
         Assert.assertThat(heaven.getVersion(), is("v1"));
         Assert.assertThat(heaven.getBaseUri(), is("https://{host}.sample.com/{path}"));
-        Assert.assertThat(heaven.getUriParameters().isEmpty(),is(false));
+        Assert.assertThat(heaven.getUriParameters().size(), is(2));
+        Assert.assertThat(heaven.getUriParameters().get("host").getName(), is("Host"));
+        Assert.assertThat(heaven.getUriParameters().get("host").getType(), is(ParamType.STRING));
+
+        Assert.assertThat(heaven.getUriParameters().get("path").getName(), is("Path"));
+        Assert.assertThat(heaven.getUriParameters().get("path").getType(), is(ParamType.STRING));
 
     }
 }

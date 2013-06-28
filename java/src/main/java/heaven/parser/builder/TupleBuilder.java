@@ -17,5 +17,7 @@ public interface TupleBuilder<K extends Node, V extends Node> extends TupleHandl
 
     void setParentTupleBuilder(TupleBuilder tupleBuilder);
 
-    void setNestedBuilders(Map<String, TupleBuilder<?,?>> nestedBuilders);
+    void setNestedBuilders(Map<String, TupleBuilder<?, ?>> nestedBuilders);
+
+    void setHandler(TupleHandler handler);
 }

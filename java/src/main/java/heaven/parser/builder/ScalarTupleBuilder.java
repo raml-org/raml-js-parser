@@ -2,8 +2,9 @@ package heaven.parser.builder;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.commons.beanutils.BeanUtils;
-import org.yaml.snakeyaml.nodes.NodeTuple;
+import heaven.parser.resolver.DefaultScalarTupleHandler;
+import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 
 
@@ -11,24 +12,33 @@ public class ScalarTupleBuilder extends DefaultTupleBuilder<ScalarNode, ScalarNo
 {
 
     private String fieldName;
+    private Class<?> type;
 
-    public ScalarTupleBuilder(String field)
+
+    public ScalarTupleBuilder(String field, Class<?> type)
     {
         fieldName = field;
+        this.type = type;
+        setHandler(new DefaultScalarTupleHandler(ScalarNode.class, fieldName));
     }
 
-    @Override
-    public TupleBuilder getBuiderForTuple(NodeTuple tuple)
-    {
-        return null;
-    }
 
     @Override
     public Object buildValue(Object parent, ScalarNode node)
     {
         try
         {
-            BeanUtils.setProperty(parent, fieldName, node.getValue());
+            String value = node.getValue();
+            Object converted;
+            if (type.isEnum())
+            {
+                converted = Enum.valueOf((Class) type, value.toUpperCase());
+            }
+            else
+            {
+                converted = ConvertUtils.convert(value, type);
+            }
+            new PropertyUtilsBean().setProperty(parent, fieldName, converted);
         }
         catch (IllegalAccessException e)
         {
@@ -38,22 +48,12 @@ public class ScalarTupleBuilder extends DefaultTupleBuilder<ScalarNode, ScalarNo
         {
             throw new RuntimeException(e);
         }
+        catch (NoSuchMethodException e)
+        {
+            throw new RuntimeException(e);
+        }
         return parent;
     }
 
-    @Override
-    public void buildKey(Object parent, ScalarNode tuple)
-    {
 
-    }
-
-    @Override
-    public boolean handles(NodeTuple touple)
-    {
-        if (touple.getKeyNode() instanceof ScalarNode && touple.getValueNode() instanceof ScalarNode)
-        {
-            return ((ScalarNode) touple.getKeyNode()).getValue().equals(fieldName);
-        }
-        return false;
-    }
 }

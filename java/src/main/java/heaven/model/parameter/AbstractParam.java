@@ -14,14 +14,18 @@ import heaven.model.validation.MinimumIntegerValidation;
 import heaven.model.validation.MinimumNumberValidation;
 import heaven.model.validation.PatternValidation;
 import heaven.model.validation.Validation;
+import heaven.parser.annotation.Scalar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AbstractParam
 {
 
+    @Scalar
     private String name;
+    @Scalar
     private String description;
+    @Scalar
     private ParamType type;
     private boolean required;
     private List<Validation> validations = new ArrayList<Validation>();
@@ -118,6 +122,27 @@ public class AbstractParam
             }
         }
 
+    }
+
+
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description = description;
+    }
+
+    public void setType(ParamType type)
+    {
+        this.type = type;
+    }
+
+    public void setRequired(boolean required)
+    {
+        this.required = required;
     }
 
     public String getName()
