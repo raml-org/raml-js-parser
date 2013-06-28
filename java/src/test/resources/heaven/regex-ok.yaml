@@ -1,3 +1,0 @@
-%TAG ! tag:heaven-lang.org,1.0:
----
-validation: !regex '^[a-zA-Z0-9][-a-zA-Z0-9]*$'

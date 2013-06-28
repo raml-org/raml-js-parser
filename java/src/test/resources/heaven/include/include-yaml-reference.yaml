@@ -1,8 +1,0 @@
-%TAG ! tag:heaven-lang.org,1.0:
----
-#resources: !include heaven/include/include-single-resource.yaml
-address1:
-    home: &home
-        street: evergreen
-        city: springfield
-address2: !include heaven/include/include-reference-resource.yaml
