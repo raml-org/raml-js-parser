@@ -9,8 +9,7 @@
   },
   "dependencies": {
     "mocha": "1.9.0",
-    "chai": "1.5.0",
-    "sinon-chai": "2.4.0",
+    "chai": "1.7.2",
     "chai-as-promised": "3.3.1",
     "q": "0.9.6",
     "uritemplate": "0.3.3",
@@ -22,8 +21,10 @@
     "grunt-contrib-connect": "0.3.0",
     "grunt-contrib-uglify": "0.2.2",
     "grunt-mocha-phantomjs": "~0.2.8",
+    "grunt-mocha-cli": "1.0.6",
     "grunt-browserify": "1.0.5",
-    "coffeeify": "0.4.1"
+    "coffeeify": "0.4.1",
+    "xmlhttprequest": "1.5.0"
   },
   "devDependencies": {
   }

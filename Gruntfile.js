@@ -65,7 +65,15 @@ module.exports = function(grunt) {
           ]
         }
       }
-    }    
+    },
+    mochacli: {
+        options: {
+            require: ['chai', 'chai-as-promised'],
+            reporter: 'nyan',
+            bail: true
+        },
+        all: ['test/parser.js']
+    }        
   });
   
   grunt.loadNpmTasks('grunt-contrib-coffee');
@@ -74,9 +82,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-mocha-cli');
 
   grunt.registerTask('compile', ['coffee']);
   grunt.registerTask('default', ['coffee', 'browserify', 'uglify']);
-  grunt.registerTask('test', ['connect', 'mocha_phantomjs']);
+  grunt.registerTask('test', ['coffee', 'browserify', 'uglify', 'connect', 'mochacli', 'mocha_phantomjs']);
   grunt.registerTask('server', ['default', 'connect', 'watch']);
 };

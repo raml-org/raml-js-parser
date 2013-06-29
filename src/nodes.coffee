@@ -99,20 +99,18 @@ class @IncludeNode extends @Node
   constructor: (@tag, @value, @start_mark, @end_mark, @flow_style) ->
     super
     extension = @value.split(".").pop()
-    xhr = new XMLHttpRequest()
+    if not window?
+      xhr = new (require("xmlhttprequest").XMLHttpRequest)()
+    else
+      xhr = new XMLHttpRequest()
     xhr.open 'GET', value, false
     xhr.send null
-    if xhr.status == 200
-      contentType = xhr.getResponseHeader 'Content-Type'
-      if contentType.indexOf('text/yaml') != -1 or
-         contentType.indexOf('text/x-yaml') != -1 or
-         contentType.indexOf('application/yaml') != -1 or
-         contentType.indexOf('application/x-yaml') != -1 or
-         extension == 'yaml' or
+    if (typeof xhr.status is 'number' and xhr.status == 200) or
+       (typeof xhr.status is 'string' and xhr.status.match /^200/i)
+      if extension == 'yaml' or
          extension == 'yml'
         @value = raml.compose(xhr.responseText);
       else
         @value = xhr.responseText;
     else
-      throw new exports.IncludeError 'while including #{value}', null, 'error ' + xhr.status, @start_mark
-  
+      throw new exports.IncludeError 'while including ' + value, null, 'error ' + xhr.status, @start_mark

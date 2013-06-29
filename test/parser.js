@@ -1,5 +1,14 @@
-chai.should();
-var expect = chai.expect;
+if (typeof window === 'undefined') {
+  var raml = require('../lib/raml.js')
+  var chai = require('chai')
+    , expect = chai.expect
+    , should = chai.should();
+  var chaiAsPromised = require("chai-as-promised");
+  chai.use(chaiAsPromised);  
+} else {
+  var raml = RAML.Parser;
+  chai.should();
+}
 
 describe('Parser', function() {
   describe('Basic Information', function(done) {
@@ -10,7 +19,7 @@ describe('Parser', function() {
         'title: MyApi'
       ].join('\n');
       
-      RAML.Parser.load(definition).should.be.rejected.with(/incompatible YAML/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/incompatible YAML/).and.notify(done);
     });
     it('should succeed', function(done) {
       var definition = [
@@ -21,7 +30,7 @@ describe('Parser', function() {
         '  name: Root'
       ].join('\n');
       
-      promise = RAML.Parser.load(definition).should.become({ title: 'MyApi', baseUri: 'http://myapi.com', resources: [ { relativeUri: '/', name: 'Root' } ] }).and.notify(done);
+      promise = raml.load(definition).should.become({ title: 'MyApi', baseUri: 'http://myapi.com', resources: [ { relativeUri: '/', name: 'Root' } ] }).and.notify(done);
     });
     it('should fail if no title', function(done) {
       var definition = [
@@ -29,7 +38,7 @@ describe('Parser', function() {
         'baseUri: http://myapi.com',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.be.rejected.with(/missing title/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/missing title/).and.notify(done);
     });
     it('should fail if baseUri value its not really a URI', function(done) {
       var definition = [
@@ -38,7 +47,7 @@ describe('Parser', function() {
         'baseUri: http://{myapi.com',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.be.rejected.with(/unclosed brace/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/unclosed brace/).and.notify(done);
     });
     it('should fail if baseUri uses version but there is no version defined', function(done) {
       var definition = [
@@ -47,7 +56,7 @@ describe('Parser', function() {
         'baseUri: http://myapi.com/{version}',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.be.rejected.with(/missing version/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/missing version/).and.notify(done);
     });
     it('should succeed if baseUri uses version and there is a version defined', function(done) {
       var definition = [
@@ -57,7 +66,7 @@ describe('Parser', function() {
         'baseUri: http://myapi.com/{version}',
       ].join('\n');
       
-      promise = RAML.Parser.load(definition);
+      promise = raml.load(definition);
       promise.should.eventually.deep.equal({ title: 'MyApi', version: 'v1', baseUri: 'http://myapi.com/{version}' }).and.notify(done);
     });
     it('should fail if there is a root property with wrong name', function(done) {
@@ -68,7 +77,7 @@ describe('Parser', function() {
         'wrongPropertyName: http://myapi.com/{version}',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.be.rejected.with(/unknown property/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/unknown property/).and.notify(done);
     });    
   });
   describe('Include', function() {
@@ -80,7 +89,7 @@ describe('Parser', function() {
         'title: !include relative.md'
       ].join('\n');
       
-      RAML.Parser.load(definition).should.be.rejected.with(/error 404/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/error 404|error 503/).and.notify(done);
     });
     it('should succeed on including Markdown', function(done) {
       var definition = [
@@ -92,7 +101,7 @@ describe('Parser', function() {
         '    content: !include http://localhost:9001/test/gettingstarted.md',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
+      raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
     });
     it('should succeed on including another YAML file with .yml extension', function(done) {
       var definition = [
@@ -101,7 +110,7 @@ describe('Parser', function() {
         '!include http://localhost:9001/test/external.yml',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
+      raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
     });
     it('should succeed on including another YAML file with .yaml extension', function(done) {
       var definition = [
@@ -110,7 +119,7 @@ describe('Parser', function() {
         '!include http://localhost:9001/test/external.yaml',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
+      raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
     });
   });  
   describe('Resources', function() {
@@ -128,7 +137,7 @@ describe('Parser', function() {
         '  name: AB',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.be.rejected.with(/two resources share same URI \/a\/b/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/two resources share same URI \/a\/b/).and.notify(done);
     });
     it('should succeed', function(done) {
       var definition = [
@@ -144,7 +153,7 @@ describe('Parser', function() {
         '  name: AC',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.become({ 
+      raml.load(definition).should.become({ 
         title: 'Test',
         resources: [
           {
@@ -188,7 +197,7 @@ describe('Parser', function() {
         '        description: Retrieve a list of leagues',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.become({ 
+      raml.load(definition).should.become({ 
         title: 'Test', 
         traits: {
           rateLimited: {
@@ -254,7 +263,7 @@ describe('Parser', function() {
         '        description: Retrieve a list of leagues',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.become({ 
+      raml.load(definition).should.become({ 
         title: 'Test', 
         traits: {
           rateLimited: {
@@ -335,7 +344,7 @@ describe('Parser', function() {
         '        description: Retrieve a list of leagues',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.become({ 
+      raml.load(definition).should.become({ 
         title: 'Test', 
         traits: {
           rateLimited: {
@@ -395,7 +404,7 @@ describe('Parser', function() {
         '  use: [ throttled, rateLimited: { parameter: value } ]',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.be.rejected.with(/unknown property what/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/unknown property what/).and.notify(done);
     });    
     it('should fail if trait is missing provides property', function(done) {
       var definition = [
@@ -410,7 +419,7 @@ describe('Parser', function() {
         '  use: [ rateLimited: { parameter: value } ]',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.be.rejected.with(/every trait must have a provides property/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/every trait must have a provides property/).and.notify(done);
     });    
     it('should fail if trait is missing name property', function(done) {
       var definition = [
@@ -429,7 +438,7 @@ describe('Parser', function() {
         '  use: [ rateLimited: { parameter: value } ]',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.be.rejected.with(/every trait must have a name property/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/every trait must have a name property/).and.notify(done);
     });    
     it('should fail if use property is not an array', function(done) {
       var definition = [
@@ -441,7 +450,7 @@ describe('Parser', function() {
         '  use: throttled ]',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.be.rejected.with(/use property must be an array/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/use property must be an array/).and.notify(done);
     });
     it('should fail on invalid trait name', function(done) {
       var definition = [
@@ -461,7 +470,7 @@ describe('Parser', function() {
         '  use: [ throttled, rateLimited: { parameter: value } ]',
       ].join('\n');
       
-      RAML.Parser.load(definition).should.be.rejected.with(/there is no trait named throttled/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/there is no trait named throttled/).and.notify(done);
     });
   });
 });
