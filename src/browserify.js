@@ -1,3 +1,3 @@
 window.RAML = {}
 
-window.RAML.Parser = require('../lib/raml');
+window.RAML.Parser = require('../lib/raml')

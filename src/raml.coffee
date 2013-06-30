@@ -11,42 +11,44 @@
 @tokens      = require './tokens'
 @q           = require 'q'
 
+class @FileError extends @errors.MarkedYAMLError
+
 ###
 Scan a RAML stream and produce scanning tokens.
 ###
-@scan = (stream) ->
-  loader = new exports.loader.Loader stream
+@scan = (stream, location) ->
+  loader = new exports.loader.Loader stream, location
   loader.get_token() while loader.check_token()
 
 ###
 Parse a RAML stream and produce parsing events.
 ###
-@parse = (stream) ->
-  loader = new exports.loader.Loader stream
+@parse = (stream, location) ->
+  loader = new exports.loader.Loader stream, location
   loader.get_event() while loader.check_event()
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
 representation tree.
 ###
-@compose = (stream) ->
-  loader = new exports.loader.Loader stream
+@compose = (stream, location) ->
+  loader = new exports.loader.Loader stream, location
   return loader.get_single_node()
 
 ###
 Parse all RAML documents in a stream and produce corresponding representation
 trees.
 ###
-@compose_all = (stream) ->
-  loader = new exports.loader.Loader stream
+@compose_all = (stream, location) ->
+  loader = new exports.loader.Loader stream, location
   loader.get_node() while loader.check_node()
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
 Javascript object.
 ###
-@load = (stream) ->
-  loader = new exports.loader.Loader stream
+@load = (stream, location) ->
+  loader = new exports.loader.Loader stream, location
   deferred = new @q.defer
   try
     result = loader.get_single_data()
@@ -56,9 +58,62 @@ Javascript object.
   return deferred.promise
 
 ###
+Parse the first RAML document in a stream and produce the corresponding
+Javascript object.
+###
+@loadFile = (file) ->
+  stream = @readFile file
+  return @load stream, file
+
+###
 Parse all RAML documents in a stream and produce the corresponing Javascript
 object.
 ###
-@load_all = (stream) ->
-  loader = new exports.loader.Loader stream
+@load_all = (stream, location) ->
+  loader = new exports.loader.Loader stream, location
   loader.get_data() while loader.check_data()
+
+###
+Parse the first RAML document in a file and produce the corresponding
+representation tree.
+###
+@composeFile = (file) ->
+  stream = @readFile file
+  return @compose stream, file
+
+###
+Read file either locally or from the network
+###
+@readFile = (file) ->
+  url = require('url').parse(file)
+
+  if url.protocol?
+    if not url.protocol.match(/^https?/i)
+      throw new exports.FileError 'while reading ' + file, null, 'unknown protocol ' + url.protocol, @start_mark
+    else
+      return @fetchFile file
+  else
+    if (not (window?))
+      fs = require('fs')
+      if fs.existsSync file
+        return fs.readFileSync(file).toString()
+      else
+        throw new exports.FileError 'while reading ' + file, null, 'cannot find ' + file, @start_mark
+    else
+      return @fetchFile file
+
+###
+Read file from the network
+###
+@fetchFile = (file) ->
+  if not window?
+    xhr = new (require("xmlhttprequest").XMLHttpRequest)()
+  else
+    xhr = new XMLHttpRequest()
+  xhr.open 'GET', file, false
+  xhr.send null
+  if (typeof xhr.status is 'number' and xhr.status == 200) or
+     (typeof xhr.status is 'string' and xhr.status.match /^200/i)
+    return xhr.responseText;
+  else
+    throw new exports.FileError 'while reading ' + file, null, 'error ' + xhr.status, @start_mark

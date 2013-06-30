@@ -89,7 +89,7 @@ describe('Parser', function() {
         'title: !include relative.md'
       ].join('\n');
       
-      raml.load(definition).should.be.rejected.with(/error 404|error 503/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/error 404|cannot find relative.md/).and.notify(done);
     });
     it('should succeed on including Markdown', function(done) {
       var definition = [

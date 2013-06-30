@@ -3,8 +3,6 @@ raml              = require './raml'
 
 unique_id = 0
 
-class @IncludeError extends MarkedYAMLError
-  
 class @ApplicationError extends MarkedYAMLError
 
 class @Node
@@ -94,23 +92,19 @@ class @MappingNode extends @CollectionNode
       property[1].remove_question_mark_properties()
   
 class @IncludeNode extends @Node
-  id: 'include'  
-  
-  constructor: (@tag, @value, @start_mark, @end_mark, @flow_style) ->
+  id: 'include'
+
+  constructor: (@tag, @location, @value, @start_mark, @end_mark, @flow_style) ->
     super
-    extension = @value.split(".").pop()
-    if not window?
-      xhr = new (require("xmlhttprequest").XMLHttpRequest)()
+
+    extension = value.split(".").pop()
+
+    if location?
+      resolvedLocation = require('url').resolve(location, value)
     else
-      xhr = new XMLHttpRequest()
-    xhr.open 'GET', value, false
-    xhr.send null
-    if (typeof xhr.status is 'number' and xhr.status == 200) or
-       (typeof xhr.status is 'string' and xhr.status.match /^200/i)
-      if extension == 'yaml' or
-         extension == 'yml'
-        @value = raml.compose(xhr.responseText);
-      else
-        @value = xhr.responseText;
+      resolvedLocation = value
+
+    if extension == 'yaml' or extension == 'yml' or extension == 'raml'
+      @value = raml.composeFile(resolvedLocation);
     else
-      throw new exports.IncludeError 'while including ' + value, null, 'error ' + xhr.status, @start_mark
+      @value = raml.readFile(resolvedLocation)

@@ -18,7 +18,7 @@ Reader:
 class @Reader
   NON_PRINTABLE = /[^\x09\x0A\x0D\x20-\x7E\x85\xA0-\uD7FF\uE000-\uFFFD]/
   
-  constructor: (@string) ->
+  constructor: (@string, @location) ->
     @line = 0
     @column = 0
     @index = 0

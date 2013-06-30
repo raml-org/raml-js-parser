@@ -72,7 +72,7 @@ module.exports = function(grunt) {
             reporter: 'nyan',
             bail: true
         },
-        all: ['test/parser.js']
+        all: ['test/parser.js', 'test/local.js']
     }        
   });
   
