@@ -105,6 +105,6 @@ class @IncludeNode extends @Node
       resolvedLocation = value
 
     if extension == 'yaml' or extension == 'yml' or extension == 'raml'
-      @value = raml.composeFile(resolvedLocation);
+      @value = raml.composeFile(resolvedLocation, false);
     else
       @value = raml.readFile(resolvedLocation)

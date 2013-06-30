@@ -24,10 +24,12 @@ class @Validator
   
   constructor: ->
     @validations = [@has_title, @valid_base_uri, @valid_root_properties, @valid_absolute_uris, @validate_traits, @valid_trait_consumption]
-  
-  validate_document: (node, failFast = true) ->
-    @validations.forEach (validation) =>
-      validation.call @, node
+
+  validate_document: (node) ->
+    if @shoudValidate
+      @validations.forEach (validation) =>
+        validation.call @, node
+
     return true
     
   validate_traits: (node) ->
@@ -70,12 +72,18 @@ class @Validator
       throw new exports.ValidationError 'while validating root properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
         
   child_resources: (node) ->
+    if node instanceof nodes.IncludeNode
+      return @child_resources node.value, property
     return node.value.filter (childNode) -> return childNode[0].value.match(/^\//i);
     
-  has_property: (node, property) ->  
+  has_property: (node, property) ->
+    if node instanceof nodes.IncludeNode
+      return @has_property node.value, property
     return node.value.some( (childNode) -> return childNode[0].value.match(property) )
     
   property_value: (node, property) ->
+    if node instanceof nodes.IncludeNode
+      return @property_value node.value, property
     filteredNodes = node.value.filter (childNode) -> return childNode[0].value.match(property)
     return filteredNodes[0][1].value;
     

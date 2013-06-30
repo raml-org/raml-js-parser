@@ -121,7 +121,35 @@ describe('Parser', function() {
       
       raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
     });
-  });  
+    it('should succeed on including another YAML file mid-document', function(done) {
+      var definition = [
+          '%TAG ! tag:raml.org,0.1:',
+          '---',
+          'title: Test',
+          'traits:',
+          '  customTrait: !include http://localhost:9001/test/customtrait.yml',
+      ].join('\n');
+
+      raml.load(definition).should.eventually.deep.equal({
+          title: 'Test',
+          traits: {
+              customTrait: {
+                  name: 'Custom Trait',
+                  description: 'This is a custom trait',
+                  provides: {
+                      get: {
+                          responses: {
+                              429: {
+                                  description: 'API Limit Exceeded'
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+      }).and.notify(done);
+    });
+  });
   describe('Resources', function() {
     it('should fail on duplicate absolute URIs', function(done) {
       var definition = [

@@ -16,39 +16,39 @@ class @FileError extends @errors.MarkedYAMLError
 ###
 Scan a RAML stream and produce scanning tokens.
 ###
-@scan = (stream, location) ->
-  loader = new exports.loader.Loader stream, location
+@scan = (stream, validate = true, location) ->
+  loader = new exports.loader.Loader stream, validate, location
   loader.get_token() while loader.check_token()
 
 ###
 Parse a RAML stream and produce parsing events.
 ###
-@parse = (stream, location) ->
-  loader = new exports.loader.Loader stream, location
+@parse = (stream, validate = true, location) ->
+  loader = new exports.loader.Loader stream, validate, location
   loader.get_event() while loader.check_event()
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
 representation tree.
 ###
-@compose = (stream, location) ->
-  loader = new exports.loader.Loader stream, location
+@compose = (stream, validate = true, location) ->
+  loader = new exports.loader.Loader stream, validate, location
   return loader.get_single_node()
 
 ###
 Parse all RAML documents in a stream and produce corresponding representation
 trees.
 ###
-@compose_all = (stream, location) ->
-  loader = new exports.loader.Loader stream, location
+@compose_all = (stream, validate = true, location) ->
+  loader = new exports.loader.Loader stream, validate, location
   loader.get_node() while loader.check_node()
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
 Javascript object.
 ###
-@load = (stream, location) ->
-  loader = new exports.loader.Loader stream, location
+@load = (stream, validate = true, location) ->
+  loader = new exports.loader.Loader stream, validate, location
   deferred = new @q.defer
   try
     result = loader.get_single_data()
@@ -61,25 +61,25 @@ Javascript object.
 Parse the first RAML document in a stream and produce the corresponding
 Javascript object.
 ###
-@loadFile = (file) ->
+@loadFile = (file, validate = true) ->
   stream = @readFile file
-  return @load stream, file
+  return @load stream, validate, file
 
 ###
 Parse all RAML documents in a stream and produce the corresponing Javascript
 object.
 ###
-@load_all = (stream, location) ->
-  loader = new exports.loader.Loader stream, location
+@load_all = (stream, validate = true, location) ->
+  loader = new exports.loader.Loader stream, validate, location
   loader.get_data() while loader.check_data()
 
 ###
 Parse the first RAML document in a file and produce the corresponding
 representation tree.
 ###
-@composeFile = (file) ->
+@composeFile = (file, validate = true) ->
   stream = @readFile file
-  return @compose stream, file
+  return @compose stream, validate, file
 
 ###
 Read file either locally or from the network

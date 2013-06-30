@@ -13,8 +13,8 @@ traits      = require './traits'
   components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, Joiner, Constructor]
   util.extend.apply util, [@::].concat (component.prototype for component in components)
    
-  constructor: (stream, location) ->
-    components[0].call @, stream, location
+  constructor: (stream, validate, location) ->
+    components[0].call @, stream, validate, location
     component.call @ for component in components[1..]
 
 @Loader = @make_loader()
