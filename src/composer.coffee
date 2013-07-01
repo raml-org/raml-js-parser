@@ -91,7 +91,7 @@ class @Composer
     if tag is null or tag is '!'
       tag = @resolve nodes.ScalarNode, event.value, event.implicit
     if tag == 'tag:raml.org,0.1:include'
-      node = new nodes.IncludeNode tag, @location, event.value, event.start_mark,
+      node = new nodes.IncludeNode tag, @location, event.value, null, event.start_mark,
         event.end_mark, event.style
     else
       node = new nodes.ScalarNode tag, event.value, event.start_mark,

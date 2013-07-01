@@ -23,8 +23,10 @@ class @ScalarNode extends @Node
     return temp
     
   combine: (node) ->
+    if node instanceof exports.IncludeNode
+      return @combine node.value
     if not (node instanceof ScalarNode)
-      throw new ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
+      throw new exports.ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
     @value = node.value
     
   remove_question_mark_properties: ->
@@ -45,8 +47,10 @@ class @SequenceNode extends @CollectionNode
     return temp
     
   combine: (node) ->
+    if node instanceof exports.IncludeNode
+      return @combine node.value
     if not (node instanceof SequenceNode)
-      throw new ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
+      throw new exports.ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
     node.value.forEach (property) =>
       value = property.clone()
       @value.push value
@@ -68,8 +72,10 @@ class @MappingNode extends @CollectionNode
     return temp
     
   combine: (node) ->
+    if node instanceof exports.IncludeNode
+      return @combine node.value
     if not (node instanceof MappingNode)
-      throw new ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
+      throw new exports.ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
     node.value.forEach (property2) =>
       name = property2[0].value
       has_property = @value.some (property1) -> 
@@ -94,17 +100,29 @@ class @MappingNode extends @CollectionNode
 class @IncludeNode extends @Node
   id: 'include'
 
-  constructor: (@tag, @location, @value, @start_mark, @end_mark, @flow_style) ->
+  constructor: (@tag, @location, @file, @value, @start_mark, @end_mark, @flow_style) ->
     super
 
-    extension = value.split(".").pop()
+    if not (value?)
+      extension = file.split(".").pop()
 
-    if location?
-      resolvedLocation = require('url').resolve(location, value)
-    else
-      resolvedLocation = value
+      if location?
+        resolvedLocation = require('url').resolve(location, file)
+      else
+        resolvedLocation = file
 
-    if extension == 'yaml' or extension == 'yml' or extension == 'raml'
-      @value = raml.composeFile(resolvedLocation, false);
+      if extension == 'yaml' or extension == 'yml' or extension == 'raml'
+        @value = raml.composeFile(resolvedLocation, false);
+      else
+        @value = raml.readFile(resolvedLocation)
+
+  remove_question_mark_properties: ->
+    if @value instanceof exports.Node
+      @value.remove_question_mark_properties()
+
+  clone: ->
+    if @value instanceof exports.Node
+      return new @constructor(@tag, @location, @file, @value.clone(), @start_mark, @end_mark)
     else
-      @value = raml.readFile(resolvedLocation)
+      return new @constructor(@tag, @location, @file, @value, @start_mark, @end_mark)
+

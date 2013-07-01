@@ -22,6 +22,8 @@ class @Traits
     return @declaredTraits.length > 0
   
   apply_traits: (node) ->
+    if node instanceof nodes.IncludeNode
+      @apply_traits node.value
     @check_is_map node
     if @has_traits node
       resources = @child_resources node
@@ -38,6 +40,9 @@ class @Traits
         
   get_trait: (traitName) ->
     trait = @declaredTraits.filter( (declaredTrait) -> return declaredTrait[0].value == traitName );
-    provides = trait[0][1].value.filter( (property) -> return property[0].value == 'provides' )
+    if trait[0][1] instanceof nodes.IncludeNode
+      provides = trait[0][1].value.value.filter( (property) -> return property[0].value == 'provides' )
+    else
+      provides = trait[0][1].value.filter( (property) -> return property[0].value == 'provides' )
     return provides[0][1];
     
