@@ -1,6 +1,7 @@
 events            = require './events'
 {MarkedYAMLError} = require './errors'
 nodes             = require './nodes'
+raml              = require './raml'
 
 class @ComposerError extends MarkedYAMLError
 
@@ -84,18 +85,32 @@ class @Composer
     @ascend_resolver()
     
     return node
-  
+
+  compose_fixed_scalar_node: (anchor, value) ->
+    event = @get_event()
+    node = new nodes.ScalarNode 'tag:yaml.org,2002:str', value, event.start_mark,
+      event.end_mark, event.style
+    @anchors[anchor] = node if anchor isnt null
+    return node
+
   compose_scalar_node: (anchor) ->
     event = @get_event()
     tag = event.tag
     if tag is null or tag is '!'
       tag = @resolve nodes.ScalarNode, event.value, event.implicit
-    if tag == 'tag:raml.org,0.1:include'
-      node = new nodes.IncludeNode tag, @location, event.value, null, event.start_mark,
-        event.end_mark, event.style
+    if event.tag == 'tag:raml.org,0.1:include'
+      # Compose include
+      extension = event.value.split(".").pop()
+
+      if @src?
+        event.value = require('url').resolve(@src, event.value)
+
+      if extension == 'yaml' or extension == 'yml' or extension == 'raml'
+        return raml.composeFile(event.value, false);
+      else
+        node = new nodes.ScalarNode 'tag:yaml.org,2002:str', raml.readFile(event.value), event.start_mark, event.end_mark, event.style
     else
-      node = new nodes.ScalarNode tag, event.value, event.start_mark,
-        event.end_mark, event.style
+      node = new nodes.ScalarNode tag, event.value, event.start_mark, event.end_mark, event.style
     @anchors[anchor] = node if anchor isnt null
     return node
   

@@ -1,5 +1,4 @@
 {MarkedYAMLError} = require './errors'
-raml              = require './raml'
 
 unique_id = 0
 
@@ -23,8 +22,6 @@ class @ScalarNode extends @Node
     return temp
     
   combine: (node) ->
-    if node instanceof exports.IncludeNode
-      return @combine node.value
     if not (node instanceof ScalarNode)
       throw new exports.ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
     @value = node.value
@@ -47,8 +44,6 @@ class @SequenceNode extends @CollectionNode
     return temp
     
   combine: (node) ->
-    if node instanceof exports.IncludeNode
-      return @combine node.value
     if not (node instanceof SequenceNode)
       throw new exports.ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
     node.value.forEach (property) =>
@@ -68,12 +63,10 @@ class @MappingNode extends @CollectionNode
       name = property[0].clone()
       value = property[1].clone()
       properties.push [ name, value ]
-    temp = new @constructor(@tag, properties, @start_mark, @end_mark, @flow_style)
+    temp = new @constructor( @tag, properties, @start_mark, @end_mark, @flow_style)
     return temp
     
   combine: (node) ->
-    if node instanceof exports.IncludeNode
-      return @combine node.value
     if not (node instanceof MappingNode)
       throw new exports.ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
     node.value.forEach (property2) =>
@@ -96,33 +89,4 @@ class @MappingNode extends @CollectionNode
       return property[0].value.indexOf('?', property[0].value.length - 1) == -1
     @value.forEach (property) ->
       property[1].remove_question_mark_properties()
-  
-class @IncludeNode extends @Node
-  id: 'include'
-
-  constructor: (@tag, @location, @file, @value, @start_mark, @end_mark, @flow_style) ->
-    super
-
-    if not (value?)
-      extension = file.split(".").pop()
-
-      if location?
-        resolvedLocation = require('url').resolve(location, file)
-      else
-        resolvedLocation = file
-
-      if extension == 'yaml' or extension == 'yml' or extension == 'raml'
-        @value = raml.composeFile(resolvedLocation, false);
-      else
-        @value = raml.readFile(resolvedLocation)
-
-  remove_question_mark_properties: ->
-    if @value instanceof exports.Node
-      @value.remove_question_mark_properties()
-
-  clone: ->
-    if @value instanceof exports.Node
-      return new @constructor(@tag, @location, @file, @value.clone(), @start_mark, @end_mark)
-    else
-      return new @constructor(@tag, @location, @file, @value, @start_mark, @end_mark)
 

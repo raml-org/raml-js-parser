@@ -33,8 +33,6 @@ class @Validator
     return true
     
   validate_traits: (node) ->
-    if node instanceof nodes.IncludeNode
-      return @validate_traits node.value
     @check_is_map node
     if @has_property node, /traits/i
       traits = @property_value node, /traits/i
@@ -46,8 +44,6 @@ class @Validator
           throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a name property', node.start_mark
       
   valid_traits_properties: (node) ->  
-    if node instanceof nodes.IncludeNode
-      return @valid_traits_properties node.value
     @check_is_map node
     invalid = node.value.filter (childNode) -> 
       return not (childNode[0].value.match(/name/i) or \
@@ -57,8 +53,6 @@ class @Validator
       throw new exports.ValidationError 'while validating trait properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
   
   valid_root_properties: (node) ->
-    if node instanceof nodes.IncludeNode
-      return @valid_root_properties node.value
     @check_is_map node
     invalid = node.value.filter (childNode) -> 
       return not (childNode[0].value.match(/title/i) or \
@@ -72,18 +66,12 @@ class @Validator
       throw new exports.ValidationError 'while validating root properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
         
   child_resources: (node) ->
-    if node instanceof nodes.IncludeNode
-      return @child_resources node.value, property
     return node.value.filter (childNode) -> return childNode[0].value.match(/^\//i);
     
   has_property: (node, property) ->
-    if node instanceof nodes.IncludeNode
-      return @has_property node.value, property
     return node.value.some( (childNode) -> return childNode[0].value.match(property) )
     
   property_value: (node, property) ->
-    if node instanceof nodes.IncludeNode
-      return @property_value node.value, property
     filteredNodes = node.value.filter (childNode) -> return childNode[0].value.match(property)
     return filteredNodes[0][1].value;
     
@@ -92,9 +80,7 @@ class @Validator
       throw new exports.ValidationError 'while validating node', null, 'must be a map', node.start_mark
                 
   valid_absolute_uris: (node, parent = undefined, absolute_uris = []) ->
-    if node instanceof nodes.IncludeNode
-      return @valid_absolute_uris node.value, parent, absolute_uris
-    @check_is_map node  
+    @check_is_map node
     resources = @child_resources node
     resources.forEach (resource) =>
       if parent? 
@@ -107,16 +93,12 @@ class @Validator
       @valid_absolute_uris resource[1], resource[0], absolute_uris    
       
   key_or_value: (node) ->
-    if node instanceof nodes.IncludeNode
-      return @key_or_value node.value
     if node instanceof nodes.ScalarNode
       return node.value
     if node instanceof nodes.MappingNode
       return node.value[0][0].value
       
   valid_trait_consumption: (node, traits = undefined) ->
-    if node instanceof nodes.IncludeNode
-      return @valid_trait_consumption node.value
     @check_is_map node
     if not traits? and @has_property node, /traits/i
       traits = @property_value node, /traits/i
@@ -132,22 +114,16 @@ class @Validator
       @valid_trait_consumption resource[1], traits
     
   has_title: (node) ->
-    if node instanceof nodes.IncludeNode
-      return @has_title node.value
     @check_is_map node
     if not @has_property node, /title/i
       throw new exports.ValidationError 'while validating title', null, 'missing title', node.start_mark
 
   has_version: (node) ->
-    if node instanceof nodes.IncludeNode
-      return @has_version node.value
     @check_is_map node
     if not @has_property node, /version/i
       throw new exports.ValidationError 'while validating version', null, 'missing version', node.start_mark
 
   valid_base_uri: (node) ->
-    if node instanceof nodes.IncludeNode
-      return @valid_base_uri node.value
     if @has_property node, /baseUri/i
       baseUri = @property_value node, /baseUri/i
       try
