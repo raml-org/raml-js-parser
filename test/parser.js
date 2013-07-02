@@ -203,6 +203,69 @@ describe('Parser', function() {
     });    
   });
   describe('Traits', function() {
+    it('should succeed when applying traits across !include boundaries', function(done) {
+      var definition = [
+          '%TAG ! tag:raml.org,0.1:',
+          '---',
+          'title: Test',
+          'traits:',
+          '  customTrait: !include http://localhost:9001/test/customtrait.yml',
+          '/: !include http://localhost:9001/test/root.yml'
+      ].join('\n');
+
+      raml.load(definition).should.eventually.deep.equal({
+          title: 'Test',
+          traits: {
+              customTrait: {
+                  name: 'Custom Trait',
+                  description: 'This is a custom trait',
+                  provides: {
+                      get: {
+                          responses: {
+                              429: {
+                                  description: 'API Limit Exceeded'
+                              }
+                          }
+                      }
+                  }
+              }
+          },
+          resources: [
+              {
+                  relativeUri: "/",
+                  name: "Root",
+                  use: [ "customTrait" ],
+                  methods: [
+                      {
+                          method: "get",
+                          responses: {
+                              429: {
+                                  description: 'API Limit Exceeded'
+                              }
+                          }
+                      }
+                  ],
+                  resources: [
+                      {
+                          relativeUri: "/anotherResource",
+                          name: "Another Resource",
+                          use: [ "customTrait" ],
+                          methods: [
+                              {
+                                  method: "get",
+                                  responses: {
+                                      429: {
+                                          description: 'API Limit Exceeded'
+                                      }
+                                  }
+                              }
+                          ]
+                      }
+                  ]
+              }
+          ]
+      }).and.notify(done);
+    });
     it('should succeed when applying using verb question mark', function(done) {
       var definition = [
         '%YAML 1.2',

@@ -12,6 +12,9 @@ The Joiner class groups resources under resource property and groups methods und
 class @Joiner
   
   join_resources: (node) ->
+    if not @shoudValidate
+      return;
+
     resources = node.value.filter (childNode) -> return childNode[0].value.match(/^\//i)
     resourcesArray = []
     if resources.length > 0

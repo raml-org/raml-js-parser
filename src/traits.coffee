@@ -20,6 +20,9 @@ class @Traits
     return @declaredTraits.length > 0
   
   apply_traits: (node) ->
+    if not @shoudValidate
+      return;
+
     @check_is_map node
     if @has_traits node
       resources = @child_resources node
