@@ -200,7 +200,34 @@ describe('Parser', function() {
           }
         ]
       }).and.notify(done);
-    });    
+    });
+    it('should succeed when a method is null', function(done) {
+      var definition = [
+          '%YAML 1.2',
+          '%TAG ! tag:raml.org,0.1:',
+          '---',
+          'title: Test',
+          '/a:',
+          '  name: A',
+          '  get: ~',
+      ].join('\n');
+
+      raml.load(definition).should.become({
+          title: 'Test',
+          resources: [
+              {
+                  relativeUri: '/a',
+                  name: 'A',
+                  methods: [
+                      {
+                          method: "get"
+                      }
+                  ]
+
+              }
+          ]
+      }).and.notify(done);
+    });
   });
   describe('Traits', function() {
     it('should succeed when applying traits across !include boundaries', function(done) {

@@ -42,6 +42,8 @@ class @Joiner
       methods.forEach (method) =>
         methodName = new nodes.ScalarNode 'tag:yaml.org,2002:str', 'method', method[0].start_mark, method[1].end_mark
         methodValue = new nodes.ScalarNode 'tag:yaml.org,2002:str', method[0].value, method[0].start_mark, method[1].end_mark
+        if method[1].tag == 'tag:yaml.org,2002:null'
+          method[1] = new nodes.MappingNode('tag:yaml.org,2002:map', [], method[1].start_mark, method[1].end_mark);
         method[1].value.push [ methodName, methodValue ]
         methodsArray.push method[1]
       
