@@ -1147,10 +1147,9 @@ class @Scanner
     while true
       # Instead of checking for indentation, we check for document separators.
       prefix = @prefix 3
-      throw new exports.ScannerError 'while scanning a quoted scalar',
-        start_mark, 'found unexpected document separator', @get_mark() \
-        if prefix is '---' or prefix is '...' \
-          and @peek 3 in C_LB + C_WS + '\x00'
+      if prefix is '---' or prefix is '...' and @peek 3 in C_LB + C_WS + '\x00'
+        throw new exports.ScannerError 'while scanning a quoted scalar',
+          start_mark, 'found unexpected document separator', @get_mark()
       @forward() while @peek() in C_WS
       if @peek() in C_LB
         chunks.push @scan_line_break()
