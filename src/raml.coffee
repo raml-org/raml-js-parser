@@ -36,14 +36,6 @@ representation tree.
   return loader.get_single_node()
 
 ###
-Parse all RAML documents in a stream and produce corresponding representation
-trees.
-###
-@compose_all = (stream, validate = true, location) ->
-  loader = new exports.loader.Loader stream, validate, location
-  loader.get_node() while loader.check_node()
-
-###
 Parse the first RAML document in a stream and produce the corresponding
 Javascript object.
 ###
@@ -64,14 +56,6 @@ Javascript object.
 @loadFile = (file, validate = true) ->
   stream = @readFile file
   return @load stream, validate, file
-
-###
-Parse all RAML documents in a stream and produce the corresponing Javascript
-object.
-###
-@load_all = (stream, validate = true, location) ->
-  loader = new exports.loader.Loader stream, validate, location
-  loader.get_data() while loader.check_data()
 
 ###
 Parse the first RAML document in a file and produce the corresponding
