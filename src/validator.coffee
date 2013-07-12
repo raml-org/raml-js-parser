@@ -23,44 +23,43 @@ The Validator class deals with validating a YAML file according to the spec
 class @Validator
   
   constructor: ->
-    @validations = [@has_title, @valid_base_uri, @valid_root_properties, @valid_absolute_uris, @validate_traits, @valid_trait_consumption]
+    @validations = [@has_title, @valid_base_uri, @valid_root_properties, @validate_traits, @valid_absolute_uris, @valid_trait_consumption]
 
   validate_document: (node) ->
-    if @shoudValidate
-      @validations.forEach (validation) =>
-        validation.call @, node
+    @validations.forEach (validation) =>
+      validation.call @, node
 
     return true
     
   validate_traits: (node) ->
     @check_is_map node
-    if @has_property node, /traits/i
-      traits = @property_value node, /traits/i
+    if @has_property node, /^traits$/i
+      traits = @property_value node, /^traits$/i
       traits.forEach (trait) =>
         @valid_traits_properties trait[1]
-        if not (@has_property trait[1], /provides/i)
+        if not (@has_property trait[1], /^provides$/i)
           throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a provides property', node.start_mark
-        if not (@has_property trait[1], /name/i)
+        if not (@has_property trait[1], /^name$/i)
           throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a name property', node.start_mark
       
   valid_traits_properties: (node) ->  
     @check_is_map node
     invalid = node.value.filter (childNode) -> 
-      return not (childNode[0].value.match(/name/i) or \
-                  childNode[0].value.match(/description/i) or \
-                  childNode[0].value.match(/provides/i) )
+      return not (childNode[0].value.match(/^name$/i) or \
+                  childNode[0].value.match(/^description$/i) or \
+                  childNode[0].value.match(/^provides$/i) )
     if invalid.length > 0 
       throw new exports.ValidationError 'while validating trait properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
   
   valid_root_properties: (node) ->
     @check_is_map node
     invalid = node.value.filter (childNode) -> 
-      return not (childNode[0].value.match(/title/i) or \
-                  childNode[0].value.match(/baseUri/i) or \
-                  childNode[0].value.match(/version/i) or \
-                  childNode[0].value.match(/traits/i) or \
-                  childNode[0].value.match(/documentation/i) or \
-                  childNode[0].value.match(/uriParameters/i) or \
+      return not (childNode[0].value.match(/^title$/i) or \
+                  childNode[0].value.match(/^baseUri$/i) or \
+                  childNode[0].value.match(/^version$/i) or \
+                  childNode[0].value.match(/^traits$/i) or \
+                  childNode[0].value.match(/^documentation$/i) or \
+                  childNode[0].value.match(/^uriParameters$/i) or \
                   childNode[0].value.match(/^\//i))
     if invalid.length > 0 
       throw new exports.ValidationError 'while validating root properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
@@ -78,34 +77,82 @@ class @Validator
   check_is_map: (node) ->
     if not node instanceof nodes.MappingNode
       throw new exports.ValidationError 'while validating node', null, 'must be a map', node.start_mark
-                
-  valid_absolute_uris: (node, parent = undefined, absolute_uris = []) ->
+      
+  resources: ( node = @get_single_node(true, true, false), parentPath ) ->
     @check_is_map node
-    resources = @child_resources node
-    resources.forEach (resource) =>
-      if parent? 
-        absolute_uri = parent.value + resource[0].value
+    response = []
+    child_resources = @child_resources node
+    child_resources.forEach (childResource) =>
+      resourceResponse = {}
+      resourceResponse.methods = []
+      
+      if parentPath?
+        resourceResponse.uri = parentPath + childResource[0].value
       else
-        absolute_uri = resource[0].value
-      if absolute_uris.indexOf(absolute_uri) != -1 
-        throw new exports.ValidationError 'while validating resources URI', null, 'two resources share same URI ' + absolute_uri, node.start_mark
-      absolute_uris.push absolute_uri
-      @valid_absolute_uris resource[1], resource[0], absolute_uris    
+        resourceResponse.uri = childResource[0].value
+      
+      if @has_property childResource[1], /^name$/i
+        resourceResponse.name = @property_value childResource[1], /^name$/i
+
+      if @has_property childResource[1], /^get$/i
+        resourceResponse.methods.push 'get'
+      if @has_property childResource[1], /^post$/i
+        resourceResponse.methods.push 'post'
+      if @has_property childResource[1], /^put$/i
+        resourceResponse.methods.push 'put'
+      if @has_property childResource[1], /^patch$/i
+        resourceResponse.methods.push 'patch'
+      if @has_property childResource[1], /^delete$/i
+        resourceResponse.methods.push 'delete'
+      if @has_property childResource[1], /^head$/i
+        resourceResponse.methods.push 'head'
+      if @has_property childResource[1], /^options$/i
+        resourceResponse.methods.push 'options'
+      
+      resourceResponse.line = childResource[0].start_mark.line + 1
+      resourceResponse.column = childResource[0].start_mark.column + 1
+      response.push resourceResponse
+      response = response.concat( @resources(childResource[1], resourceResponse.uri) )
+    return response
+    
+  valid_absolute_uris: (node ) ->
+    uris = @get_absolute_uris node
+    sorted_uris = uris.sort();
+    if sorted_uris.length > 1
+      for i in [0...sorted_uris.length]
+        if sorted_uris[i + 1] == sorted_uris[i]
+          throw new exports.ValidationError 'while validating trait consumption', null, 'two resources share same URI ' + sorted_uris[i], null
+    
+  get_absolute_uris: ( node = @get_single_node(true, true, false), parentPath ) ->
+    @check_is_map node
+    
+    response = []
+    child_resources = @child_resources node
+    child_resources.forEach (childResource) =>
+      if parentPath?
+        uri = parentPath + childResource[0].value
+      else
+        uri = childResource[0].value
+      
+      response.push uri
+      response = response.concat( @get_absolute_uris(childResource[1], uri) )
+    return response 
       
   key_or_value: (node) ->
     if node instanceof nodes.ScalarNode
       return node.value
     if node instanceof nodes.MappingNode
       return node.value[0][0].value
+    console.log(node)
       
   valid_trait_consumption: (node, traits = undefined) ->
     @check_is_map node
-    if not traits? and @has_property node, /traits/i
-      traits = @property_value node, /traits/i
+    if not traits? and @has_property node, /^traits$/i
+      traits = @property_value node, /^traits$/i
     resources = @child_resources node
     resources.forEach (resource) =>
-      if @has_property resource[1], /use/i
-        uses = @property_value resource[1], /use/i
+      if @has_property resource[1], /^use$/i
+        uses = @property_value resource[1], /^use$/i
         if not (uses instanceof Array)
           throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', node.start_mark
         uses.forEach (use) =>
@@ -115,17 +162,17 @@ class @Validator
     
   has_title: (node) ->
     @check_is_map node
-    if not @has_property node, /title/i
+    if not @has_property node, /^title$/i
       throw new exports.ValidationError 'while validating title', null, 'missing title', node.start_mark
 
   has_version: (node) ->
     @check_is_map node
-    if not @has_property node, /version/i
+    if not @has_property node, /^version$/i
       throw new exports.ValidationError 'while validating version', null, 'missing version', node.start_mark
 
   valid_base_uri: (node) ->
-    if @has_property node, /baseUri/i
-      baseUri = @property_value node, /baseUri/i
+    if @has_property node, /^baseUri$/i
+      baseUri = @property_value node, /^baseUri$/i
       try
         template = uritemplate.parse baseUri
       catch err

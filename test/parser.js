@@ -151,6 +151,56 @@ describe('Parser', function() {
     });
   });
   describe('Resources', function() {
+    it('should succeed extracting resource information', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  name: A',
+        '  get:',
+        '  /b:',
+        '    name: AB',
+        '    get:',
+        '    put:',
+        '/a/c:',
+        '  name: AC',
+        '  post:',
+        '',
+      ].join('\n');
+      
+      raml.resources(definition).should.become([
+        {
+          "methods": [
+            "get"
+          ],
+          "uri": "/a",
+          "name": "A",
+          "line": 5,
+          "column": 1
+        },
+        {
+          "methods": [
+            "get",
+            "put"
+          ],
+          "uri": "/a/b",
+          "name": "AB",
+          "line": 8,
+          "column": 3
+        },
+        {
+          "methods": [
+            "post"
+          ],
+          "uri": "/a/c",
+          "name": "AC",
+          "line": 12,
+          "column": 1
+        }
+      ]).and.notify(done);
+    });
     it('should fail on duplicate absolute URIs', function(done) {
       var definition = [
         '%YAML 1.2',

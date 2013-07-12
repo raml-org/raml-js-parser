@@ -16,34 +16,48 @@ class @FileError extends @errors.MarkedYAMLError
 ###
 Scan a RAML stream and produce scanning tokens.
 ###
-@scan = (stream, validate = true, location) ->
-  loader = new exports.loader.Loader stream, validate, location
+@scan = (stream, location) ->
+  loader = new exports.loader.Loader stream, location
   loader.get_token() while loader.check_token()
 
 ###
 Parse a RAML stream and produce parsing events.
 ###
-@parse = (stream, validate = true, location) ->
-  loader = new exports.loader.Loader stream, validate, location
+@parse = (stream, location) ->
+  loader = new exports.loader.Loader stream, location
   loader.get_event() while loader.check_event()
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
 representation tree.
 ###
-@compose = (stream, validate = true, location) ->
-  loader = new exports.loader.Loader stream, validate, location
-  return loader.get_single_node()
+@compose = (stream, validate = true, apply = true, join = true, location) ->
+  loader = new exports.loader.Loader stream, location
+  return loader.get_single_node(validate, apply, join)
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
 Javascript object.
 ###
 @load = (stream, validate = true, location) ->
-  loader = new exports.loader.Loader stream, validate, location
+  loader = new exports.loader.Loader stream, location
   deferred = new @q.defer
   try
     result = loader.get_single_data()
+    deferred.resolve result
+  catch error
+    deferred.reject error
+  return deferred.promise
+
+###
+Parse the first RAML document in a stream and produce a list of
+  all the absolute URIs for all resources
+###
+@resources = (stream, validate = true, location) ->
+  loader = new exports.loader.Loader stream, location
+  deferred = new @q.defer
+  try
+    result = loader.resources()
     deferred.resolve result
   catch error
     deferred.reject error
@@ -61,9 +75,17 @@ Javascript object.
 Parse the first RAML document in a file and produce the corresponding
 representation tree.
 ###
-@composeFile = (file, validate = true) ->
+@composeFile = (file, validate = true, apply = true, join = true) ->
   stream = @readFile file
-  return @compose stream, validate, file
+  return @compose stream, validate, apply, join, file
+  
+###
+Parse the first RAML document in a file and produce a list of
+  all the absolute URIs for all resources
+###
+@resourcesFile = (file, validate = true) ->
+  stream = @readFile file
+  return @resources stream, validate, file  
 
 ###
 Read file either locally or from the network

@@ -23,7 +23,7 @@ class @Composer
   get_node: ->
     return @compose_document() unless @check_event events.StreamEndEvent
   
-  get_single_node: ->
+  get_single_node: (validate = true, apply = true, join = true) ->
     # Drop the STREAM-START event.
     @get_event()
     
@@ -40,9 +40,14 @@ class @Composer
     # Drop the STREAM-END event.
     @get_event()
     
-    @validate_document document
-    @apply_traits document
-    @join_resources document
+    if validate
+      @validate_document document
+      
+    if apply
+      @apply_traits document
+      
+    if join
+      @join_resources document
     
     return document
   
@@ -106,7 +111,7 @@ class @Composer
         event.value = require('url').resolve(@src, event.value)
 
       if extension == 'yaml' or extension == 'yml' or extension == 'raml'
-        return raml.composeFile(event.value, false);
+        return raml.composeFile(event.value, false, false, false);
       else
         node = new nodes.ScalarNode 'tag:yaml.org,2002:str', raml.readFile(event.value), event.start_mark, event.end_mark, event.style
     else

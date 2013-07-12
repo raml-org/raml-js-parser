@@ -15,20 +15,17 @@ class @Traits
     @declaredTraits = []
     
   has_traits: (node) ->
-    if @has_property node, /traits/i
-      @declaredTraits = @property_value node, /traits/i
+    if @has_property node, /^traits$/i
+      @declaredTraits = @property_value node, /^traits$/i
     return @declaredTraits.length > 0
   
   apply_traits: (node) ->
-    if not @shoudValidate
-      return;
-
     @check_is_map node
     if @has_traits node
       resources = @child_resources node
       resources.forEach (resource) =>
-        if @has_property resource[1], /use/i
-          uses = @property_value resource[1], /use/i
+        if @has_property resource[1], /^use$/i
+          uses = @property_value resource[1], /^use$/i
           uses.forEach (use) =>
             trait = @get_trait @key_or_value use
             temp = trait.clone()
