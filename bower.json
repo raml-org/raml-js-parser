@@ -1,0 +1,5 @@
+{
+  "name": "raml-parser",
+  "version": "0.0.1",
+  "main": "dist/*"
+}
