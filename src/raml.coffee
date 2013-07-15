@@ -117,6 +117,7 @@ Read file from the network
   else
     xhr = new XMLHttpRequest()
   xhr.open 'GET', file, false
+  xhr.setRequestHeader 'Accept', 'application/raml+yaml, */*'
   xhr.send null
   if (typeof xhr.status is 'number' and xhr.status == 200) or
      (typeof xhr.status is 'string' and xhr.status.match /^200/i)

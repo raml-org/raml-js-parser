@@ -11179,6 +11179,7 @@ function decode(str) {
       xhr = new XMLHttpRequest();
     }
     xhr.open('GET', file, false);
+    xhr.setRequestHeader('Accept', 'application/raml+yaml, */*');
     xhr.send(null);
     if ((typeof xhr.status === 'number' && xhr.status === 200) || (typeof xhr.status === 'string' && xhr.status.match(/^200/i))) {
       return xhr.responseText;
