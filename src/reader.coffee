@@ -43,7 +43,7 @@ class @Reader
       length--
   
   get_mark: ->
-    new Mark @name, @line, @column, @string, @index
+    new Mark @src, @line, @column, @string, @index
   
   check_printable: ->
     match = NON_PRINTABLE.exec @string

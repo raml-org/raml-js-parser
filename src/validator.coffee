@@ -111,6 +111,8 @@ class @Validator
       
       resourceResponse.line = childResource[0].start_mark.line + 1
       resourceResponse.column = childResource[0].start_mark.column + 1
+      if childResource[0].start_mark.name?
+        resourceResponse.src = childResource[0].start_mark.name
       response.push resourceResponse
       response = response.concat( @resources(childResource[1], resourceResponse.uri) )
     return response

@@ -11,7 +11,7 @@ program
   .version(pack.version)
 
 program
-  .command('validate [file.raml]')
+  .command('validate [api.raml]')
   .description('validate RAML file against 0.1 version of the specification')
   .action(function(file){
 		cconsole.log("Validating #blue[%s]...", file);
@@ -23,20 +23,27 @@ program
   });
 
 program
-  .command('to-json [file.raml]')
+  .command('to-json [api.raml]')
+  .option('-p, --pretty', 'pretty print JSON')
   .description('generate a JSON representation for the specified RAML file')
-  .action(function(file){
+  .action(function(file, args){
     raml.loadFile(file).then(function(data) {
-    	console.log(JSON.stringify(data, null, 2));
+      if( args.pretty ) {
+        console.log(JSON.stringify(data, null, 2));
+      } else {
+        console.log(data);
+      }
     }, function(error) {
     	cconsole.log("#red[" + error + "]");
     });
   });
 
 program
-  .command('resources [file.raml]')
+  .command('resources [api.raml]')
+  .option('-m, --methods', 'list methods for each resource')
+  .option('-l, --location', 'show the name of the source file under which the resource was declared')
   .description('generate a list of resources in the file')
-  .action(function(file){
+  .action(function(file, args) {
     raml.resourcesFile(file).then(function(resources) {
       maxUriLength = 0;
     	resources.forEach( function(resource) {
@@ -50,27 +57,37 @@ program
           // pad
           line += Array(maxUriLength - resource.uri.length + 1).join(' ');
         }
-        line += " at #grey[" + resource.line + "," + resource.column + "]:";
-        if (resource.methods.indexOf("get") != -1) {
-            line += " #blue[GET]";
+        if( args.location ) {
+          line += " at";
+          if( resource.src != null )
+             line += " " + resource.src;
+          line += "(#grey[" + resource.line + "," + resource.column + "])";
+          if( args.methods ) {
+            line += ":";
+          }
         }
-        if (resource.methods.indexOf("post") != -1) {
-            line += " #yellow[POST]";
-        }
-        if (resource.methods.indexOf("put") != -1) {
-            line += " #green[PUT]";
-        }
-        if (resource.methods.indexOf("patch") != -1) {
-            line += " #cyan[PATCH]";
-        }
-        if (resource.methods.indexOf("delete") != -1) {
-            line += " #red[DELETE]";
-        }
-        if (resource.methods.indexOf("options") != -1) {
-            line += " #white[OPTIONS]";
-        }
-        if (resource.methods.indexOf("head") != -1) {
-            line += " #magenta[HEAD]";
+        if( args.methods ) {
+          if (resource.methods.indexOf("get") != -1) {
+              line += " #blue[GET]";
+          }
+          if (resource.methods.indexOf("post") != -1) {
+              line += " #yellow[POST]";
+          }
+          if (resource.methods.indexOf("put") != -1) {
+              line += " #green[PUT]";
+          }
+          if (resource.methods.indexOf("patch") != -1) {
+              line += " #cyan[PATCH]";
+          }
+          if (resource.methods.indexOf("delete") != -1) {
+              line += " #red[DELETE]";
+          }
+          if (resource.methods.indexOf("options") != -1) {
+              line += " #white[OPTIONS]";
+          }
+          if (resource.methods.indexOf("head") != -1) {
+              line += " #magenta[HEAD]";
+          }
         }
         cconsole.log(line);
     	});
