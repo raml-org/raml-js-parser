@@ -4,50 +4,19 @@ This project contains a RAML parser capable (at this moment) to parser v0.1 vers
 of the RAML specification. The parser is written in CoffeeScript and its capable
 of running inside NodeJS as well as in-browser.
 
-## Installation
+## Versioning
 
-To install the package you need to do the following:
-
-```
-npm install -g git+ssh://github.com/restful-api-modelling-lang/javascript-parser
-```
-
-This is only required for use within NodeJS or if you want to install the command line utility.
-
-## Command Line Utility
-
-The RAML parser comes with a custom command line tool that can be used
-in scripts for doing a bunch of repetitive tasks related to RAML.
-
-### Validating RAML Syntax
-
-The command line utility can be used for validating the syntax of a RAML
-file as follows:
+The RAML parser is versioned in the following manner:
 
 ```
-raml validate myAPI.raml
+x.y.z
 ```
 
-if it succeds you see something like the following:
+in which *x.y* denotes the version of the RAML specification
+and *z* is the version of the parser.
 
-```
-Validating myAPI.raml
-OK
-```
-
-otherwise it will fail with a message containing an explanation on the error
-
-### Generate a JSON representation of the RAML file
-
-The command line utility also provides a way to generate a JSON representation
-of the RAML file. This JSON representation has already all traits factored in
-and all the !includes already processed.
-
-You can invoke this sub-command as follows:
-
-```
-raml to-json myAPI.raml
-```
+So *0.1.2* is the 2nd revision of the parser for the *0.1* version
+of the RAML specification.
 
 ## Usage for NodeJS
   
