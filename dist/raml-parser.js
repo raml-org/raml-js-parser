@@ -3060,6 +3060,10 @@ function parseHost(host) {
 // nothing to see here... no file methods for the browser
 
 },{}],10:[function(require,module,exports){
+window.RAML = {}
+
+window.RAML.Parser = require('../lib/raml')
+},{"../lib/raml":11}],12:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, events, nodes, raml, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -3261,7 +3265,7 @@ function parseHost(host) {
 
 }).call(this);
 
-},{"./errors":1,"./events":2,"./nodes":11,"./raml":12,"url":7}],13:[function(require,module,exports){
+},{"./errors":1,"./events":2,"./nodes":13,"./raml":11,"url":7}],14:[function(require,module,exports){
 require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{1:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
@@ -7126,7 +7130,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 },{}]},{},[])
 ;;module.exports=require("buffer-browserify")
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 (function(Buffer){(function() {
   var MarkedYAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -7753,7 +7757,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 }).call(this);
 
 })(require("__browserify_buffer").Buffer)
-},{"./errors":1,"./nodes":11,"./util":4,"__browserify_buffer":13}],15:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4,"__browserify_buffer":14}],16:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -7847,7 +7851,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11}],16:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],17:[function(require,module,exports){
 (function() {
   var composer, construct, joiner, parser, reader, resolver, scanner, traits, util, validator;
 
@@ -7933,7 +7937,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./composer":10,"./construct":14,"./joiner":15,"./parser":19,"./reader":17,"./resolver":20,"./scanner":18,"./traits":22,"./util":4,"./validator":21}],11:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./traits":23,"./util":4,"./validator":22}],13:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -8133,7 +8137,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],19:[function(require,module,exports){
+},{"./errors":1}],20:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, events, tokens, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -8744,7 +8748,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./events":2,"./tokens":3}],17:[function(require,module,exports){
+},{"./errors":1,"./events":2,"./tokens":3}],18:[function(require,module,exports){
 (function() {
   var Mark, YAMLError, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -8848,7 +8852,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],20:[function(require,module,exports){
+},{"./errors":1}],21:[function(require,module,exports){
 (function() {
   var YAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -9057,7 +9061,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11,"./util":4}],18:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9298,7 +9302,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       if (this.check_plain()) {
         return this.fetch_plain();
       }
-      throw new exports.ScannerError('while scanning for the next token', null, "found character " + char + " that cannot start any token", this());
+      throw new exports.ScannerError('while scanning for the next token', null, "found character " + char + " that cannot start any token", this.get_mark());
     };
 
     /*
@@ -9343,7 +9347,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
         if (!key.required) {
           _results.push(delete this.possible_simple_keys[level]);
         } else {
-          throw new exports.ScannerError('while scanning a simple key', key.mark, 'could not find expected \':\'', this());
+          throw new exports.ScannerError('while scanning a simple key', key.mark, 'could not find expected \':\'', this.get_mark());
         }
       }
       return _results;
@@ -9367,7 +9371,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       }
       this.remove_possible_simple_key();
       token_number = this.tokens_taken + this.tokens.length;
-      return this.possible_simple_keys[this.flow_level] = new SimpleKey(token_number, required, this.index, this.line, this.column, this());
+      return this.possible_simple_keys[this.flow_level] = new SimpleKey(token_number, required, this.index, this.line, this.column, this.get_mark());
     };
 
     /*
@@ -9383,7 +9387,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       if (!key.required) {
         return delete this.possible_simple_keys[this.flow_level];
       } else {
-        throw new exports.ScannerError('while scanning a simple key', key.mark, 'could not find expected \':\'', this());
+        throw new exports.ScannerError('while scanning a simple key', key.mark, 'could not find expected \':\'', this.get_mark());
       }
     };
 
@@ -9404,7 +9408,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       }
       _results = [];
       while (this.indent > column) {
-        mark = this();
+        mark = this.get_mark();
         this.indent = this.indents.pop();
         _results.push(this.tokens.push(new tokens.BlockEndToken(mark, mark)));
       }
@@ -9427,7 +9431,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
     Scanner.prototype.fetch_stream_start = function() {
       var mark;
-      mark = this();
+      mark = this.get_mark();
       return this.tokens.push(new tokens.StreamStartToken(mark, mark, this.encoding));
     };
 
@@ -9437,7 +9441,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       this.remove_possible_simple_key();
       this.allow_possible_simple_key = false;
       this.possible_simple_keys = {};
-      mark = this();
+      mark = this.get_mark();
       this.tokens.push(new tokens.StreamEndToken(mark, mark));
       return this.done = true;
     };
@@ -9462,9 +9466,9 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       this.unwind_indent(-1);
       this.remove_possible_simple_key();
       this.allow_simple_key = false;
-      start_mark = this();
+      start_mark = this.get_mark();
       this.forward(3);
-      return this.tokens.push(new TokenClass(start_mark, this()));
+      return this.tokens.push(new TokenClass(start_mark, this.get_mark()));
     };
 
     Scanner.prototype.fetch_flow_sequence_start = function() {
@@ -9480,9 +9484,9 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       this.save_possible_simple_key();
       this.flow_level++;
       this.allow_simple_key = true;
-      start_mark = this();
+      start_mark = this.get_mark();
       this.forward();
-      return this.tokens.push(new TokenClass(start_mark, this()));
+      return this.tokens.push(new TokenClass(start_mark, this.get_mark()));
     };
 
     Scanner.prototype.fetch_flow_sequence_end = function() {
@@ -9498,54 +9502,54 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       this.remove_possible_simple_key();
       this.flow_level--;
       this.allow_simple_key = false;
-      start_mark = this();
+      start_mark = this.get_mark();
       this.forward();
-      return this.tokens.push(new TokenClass(start_mark, this()));
+      return this.tokens.push(new TokenClass(start_mark, this.get_mark()));
     };
 
     Scanner.prototype.fetch_flow_entry = function() {
       var start_mark;
       this.allow_simple_key = true;
       this.remove_possible_simple_key();
-      start_mark = this();
+      start_mark = this.get_mark();
       this.forward();
-      return this.tokens.push(new tokens.FlowEntryToken(start_mark, this()));
+      return this.tokens.push(new tokens.FlowEntryToken(start_mark, this.get_mark()));
     };
 
     Scanner.prototype.fetch_block_entry = function() {
       var mark, start_mark;
       if (this.flow_level === 0) {
         if (!this.allow_simple_key) {
-          throw new exports.ScannerError(null, null, 'sequence entries are not allowed here', this());
+          throw new exports.ScannerError(null, null, 'sequence entries are not allowed here', this.get_mark());
         }
         if (this.add_indent(this.column)) {
-          mark = this();
+          mark = this.get_mark();
           this.tokens.push(new tokens.BlockSequenceStartToken(mark, mark));
         }
       }
       this.allow_simple_key = true;
       this.remove_possible_simple_key();
-      start_mark = this();
+      start_mark = this.get_mark();
       this.forward();
-      return this.tokens.push(new tokens.BlockEntryToken(start_mark, this()));
+      return this.tokens.push(new tokens.BlockEntryToken(start_mark, this.get_mark()));
     };
 
     Scanner.prototype.fetch_key = function() {
       var mark, start_mark;
       if (this.flow_level === 0) {
         if (!this.allow_simple_key) {
-          throw new exports.ScannerError(null, null, 'mapping keys are not allowed here', this());
+          throw new exports.ScannerError(null, null, 'mapping keys are not allowed here', this.et_mark());
         }
         if (this.add_indent(this.column)) {
-          mark = this();
+          mark = this.get_mark();
           this.tokens.push(new tokens.BlockMappingStartToken(mark, mark));
         }
       }
       this.allow_simple_key = !this.flow_level;
       this.remove_possible_simple_key();
-      start_mark = this();
+      start_mark = this.get_mark();
       this.forward();
-      return this.tokens.push(new tokens.KeyToken(start_mark, this()));
+      return this.tokens.push(new tokens.KeyToken(start_mark, this.get_mark()));
     };
 
     Scanner.prototype.fetch_value = function() {
@@ -9562,19 +9566,19 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       } else {
         if (this.flow_level === 0) {
           if (!this.allow_simple_key) {
-            throw new exports.ScannerError(null, null, 'mapping values are not allowed here', this());
+            throw new exports.ScannerError(null, null, 'mapping values are not allowed here', this.get_mark());
           }
           if (this.add_indent(this.column)) {
-            mark = this();
+            mark = this.get_mark();
             this.tokens.push(new tokens.BlockMappingStartToken(mark, mark));
           }
         }
         this.allow_simple_key = !this.flow_level;
         this.remove_possible_simple_key();
       }
-      start_mark = this();
+      start_mark = this.get_mark();
       this.forward();
-      return this.tokens.push(new tokens.ValueToken(start_mark, this()));
+      return this.tokens.push(new tokens.ValueToken(start_mark, this.get_mark()));
     };
 
     Scanner.prototype.fetch_alias = function() {
@@ -9781,18 +9785,18 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
     Scanner.prototype.scan_directive = function() {
       var end_mark, name, start_mark, value, _ref1;
-      start_mark = this();
+      start_mark = this.get_mark();
       this.forward();
       name = this.scan_directive_name(start_mark);
       value = null;
       if (name === 'YAML') {
         value = this.scan_yaml_directive_value(start_mark);
-        end_mark = this();
+        end_mark = this.get_mark();
       } else if (name === 'TAG') {
         value = this.scan_tag_directive_value(start_mark);
-        end_mark = this();
+        end_mark = this.get_mark();
       } else {
-        end_mark = this();
+        end_mark = this.get_mark();
         while (_ref1 = this.peek(), __indexOf.call(C_LB + '\x00', _ref1) < 0) {
           this.forward();
         }
@@ -9815,13 +9819,13 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
         char = this.peek(length);
       }
       if (length === 0) {
-        throw new exports.ScannerError('while scanning a directive', start_mark, "expected alphanumeric or numeric character but found " + char, this());
+        throw new exports.ScannerError('while scanning a directive', start_mark, "expected alphanumeric or numeric character but found " + char, this.get_mark());
       }
       value = this.prefix(length);
       this.forward(length);
       char = this.peek();
       if (__indexOf.call(C_LB + '\x00 ', char) < 0) {
-        throw new exports.ScannerError('while scanning a directive', start_mark, "expected alphanumeric or numeric character but found " + char, this());
+        throw new exports.ScannerError('while scanning a directive', start_mark, "expected alphanumeric or numeric character but found " + char, this.get_mark());
       }
       return value;
     };
@@ -9838,12 +9842,12 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       }
       major = this.scan_yaml_directive_number(start_mark);
       if (this.peek() !== '.') {
-        throw new exports.ScannerError('while scanning a directive', start_mark, "expected a digit or '.' but found " + (this.peek()), this());
+        throw new exports.ScannerError('while scanning a directive', start_mark, "expected a digit or '.' but found " + (this.peek()), this.get_mark());
       }
       this.forward();
       minor = this.scan_yaml_directive_number(start_mark);
       if (_ref1 = this.peek(), __indexOf.call(C_LB + '\x00 ', _ref1) < 0) {
-        throw new exports.ScannerError('while scanning a directive', start_mark, "expected a digit or ' ' but found " + (this.peek()), this());
+        throw new exports.ScannerError('while scanning a directive', start_mark, "expected a digit or ' ' but found " + (this.peek()), this.get_mark());
       }
       return [major, minor];
     };
@@ -9857,7 +9861,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       var char, length, value, _ref1;
       char = this.peek();
       if (!(('0' <= char && char <= '9'))) {
-        throw new exports.ScannerError('while scanning a directive', start_mark, "expected a digit but found " + char, this());
+        throw new exports.ScannerError('while scanning a directive', start_mark, "expected a digit but found " + char, this.get_mark());
       }
       length = 0;
       while (('0' <= (_ref1 = this.peek(length)) && _ref1 <= '9')) {
@@ -9896,7 +9900,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       value = this.scan_tag_handle('directive', start_mark);
       char = this.peek();
       if (char !== ' ') {
-        throw new exports.ScannerError('while scanning a directive', start_mark, "expected ' ' but found " + char, this());
+        throw new exports.ScannerError('while scanning a directive', start_mark, "expected ' ' but found " + char, this.get_mark());
       }
       return value;
     };
@@ -9911,7 +9915,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       value = this.scan_tag_uri('directive', start_mark);
       char = this.peek();
       if (__indexOf.call(C_LB + '\x00 ', char) < 0) {
-        throw new exports.ScannerError('while scanning a directive', start_mark, "expected ' ' but found " + char, this());
+        throw new exports.ScannerError('while scanning a directive', start_mark, "expected ' ' but found " + char, this.get_mark());
       }
       return value;
     };
@@ -9933,7 +9937,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       }
       char = this.peek();
       if (__indexOf.call(C_LB + '\x00', char) < 0) {
-        throw new exports.ScannerError('while scanning a directive', start_mark, "expected a comment or a line break but found " + char, this());
+        throw new exports.ScannerError('while scanning a directive', start_mark, "expected a comment or a line break but found " + char, this.get_mark());
       }
       return this.scan_line_break();
     };
@@ -9952,7 +9956,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
     Scanner.prototype.scan_anchor = function(TokenClass) {
       var char, indicator, length, name, start_mark, value;
-      start_mark = this();
+      start_mark = this.get_mark();
       indicator = this.peek();
       if (indicator === '*') {
         name = 'alias';
@@ -9967,15 +9971,15 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
         char = this.peek(length);
       }
       if (length === 0) {
-        throw new exports.ScannerError("while scanning an " + name, start_mark, "expected alphabetic or numeric character but found '" + char + "'", this());
+        throw new exports.ScannerError("while scanning an " + name, start_mark, "expected alphabetic or numeric character but found '" + char + "'", this.get_mark());
       }
       value = this.prefix(length);
       this.forward(length);
       char = this.peek();
       if (__indexOf.call(C_LB + C_WS + '\x00' + '?:,]}%@`', char) < 0) {
-        throw new exports.ScannerError("while scanning an " + name, start_mark, "expected alphabetic or numeric character but found '" + char + "'", this());
+        throw new exports.ScannerError("while scanning an " + name, start_mark, "expected alphabetic or numeric character but found '" + char + "'", this.get_mark());
       }
-      return new TokenClass(value, start_mark, this());
+      return new TokenClass(value, start_mark, this.get_mark());
     };
 
     /*
@@ -9985,14 +9989,14 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
     Scanner.prototype.scan_tag = function() {
       var char, handle, length, start_mark, suffix, use_handle;
-      start_mark = this();
+      start_mark = this.get_mark();
       char = this.peek(1);
       if (char === '<') {
         handle = null;
         this.forward(2);
         suffix = this.scan_tag_uri('tag', start_mark);
         if (this.peek() !== '>') {
-          throw new exports.ScannerError('while parsing a tag', start_mark, "expected '>' but found " + (this.peek()), this());
+          throw new exports.ScannerError('while parsing a tag', start_mark, "expected '>' but found " + (this.peek()), this.get_mark());
         }
         this.forward();
       } else if (__indexOf.call(C_LB + C_WS + '\x00', char) >= 0) {
@@ -10020,9 +10024,9 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       }
       char = this.peek();
       if (__indexOf.call(C_LB + '\x00 ', char) < 0) {
-        throw new exports.ScannerError('while scanning a tag', start_mark, "expected ' ' but found " + char, this());
+        throw new exports.ScannerError('while scanning a tag', start_mark, "expected ' ' but found " + char, this.get_mark());
       }
-      return new tokens.TagToken([handle, suffix], start_mark, this());
+      return new tokens.TagToken([handle, suffix], start_mark, this.get_mark());
     };
 
     /*
@@ -10034,7 +10038,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       var breaks, chomping, chunks, end_mark, folded, increment, indent, leading_non_space, length, line_break, max_indent, min_indent, start_mark, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
       folded = style === '>';
       chunks = [];
-      start_mark = this();
+      start_mark = this.get_mark();
       this.forward();
       _ref1 = this.scan_block_scalar_indicators(start_mark), chomping = _ref1[0], increment = _ref1[1];
       this.scan_block_scalar_ignored_line(start_mark);
@@ -10099,14 +10103,14 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
         if (__indexOf.call(C_NUMBERS, char) >= 0) {
           increment = parseInt(char);
           if (increment === 0) {
-            throw new exports.ScannerError('while scanning a block scalar', start_mark, 'expected indentation indicator in the range 1-9 but found 0', this());
+            throw new exports.ScannerError('while scanning a block scalar', start_mark, 'expected indentation indicator in the range 1-9 but found 0', this.get_mark());
           }
           this.forward();
         }
       } else if (__indexOf.call(C_NUMBERS, char) >= 0) {
         increment = parseInt(char);
         if (increment === 0) {
-          throw new exports.ScannerError('while scanning a block scalar', start_mark, 'expected indentation indicator in the range 1-9 but found 0', this());
+          throw new exports.ScannerError('while scanning a block scalar', start_mark, 'expected indentation indicator in the range 1-9 but found 0', this.get_mark());
         }
         this.forward();
         char = this.peek();
@@ -10117,7 +10121,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       }
       char = this.peek();
       if (__indexOf.call(C_LB + '\x00 ', char) < 0) {
-        throw new exports.ScannerError('while scanning a block scalar', start_mark, "expected chomping or indentation indicators, but found " + char, this());
+        throw new exports.ScannerError('while scanning a block scalar', start_mark, "expected chomping or indentation indicators, but found " + char, this.get_mark());
       }
       return [chomping, increment];
     };
@@ -10139,7 +10143,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       }
       char = this.peek();
       if (__indexOf.call(C_LB + '\x00', char) < 0) {
-        throw new exports.ScannerError('while scanning a block scalar', start_mark, "expected a comment or a line break but found " + char, this());
+        throw new exports.ScannerError('while scanning a block scalar', start_mark, "expected a comment or a line break but found " + char, this.get_mark());
       }
       return this.scan_line_break();
     };
@@ -10153,11 +10157,11 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       var chunks, end_mark, max_indent, _ref1;
       chunks = [];
       max_indent = 0;
-      end_mark = this();
+      end_mark = this.get_mark();
       while (_ref1 = this.peek(), __indexOf.call(C_LB + ' ', _ref1) >= 0) {
         if (this.peek() !== ' ') {
           chunks.push(this.scan_line_break());
-          end_mark = this();
+          end_mark = this.get_mark();
         } else {
           this.forward();
           if (this.column > max_indent) {
@@ -10176,13 +10180,13 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
     Scanner.prototype.scan_block_scalar_breaks = function(indent) {
       var chunks, end_mark, _ref1;
       chunks = [];
-      end_mark = this();
+      end_mark = this.get_mark();
       while (this.column < indent && this.peek() === ' ') {
         this.forward();
       }
       while (_ref1 = this.peek(), __indexOf.call(C_LB, _ref1) >= 0) {
         chunks.push(this.scan_line_break());
-        end_mark = this();
+        end_mark = this.get_mark();
         while (this.column < indent && this.peek() === ' ') {
           this.forward();
         }
@@ -10204,7 +10208,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       var chunks, double, quote, start_mark;
       double = style === '"';
       chunks = [];
-      start_mark = this();
+      start_mark = this.get_mark();
       quote = this.peek();
       this.forward();
       chunks = chunks.concat(this.scan_flow_scalar_non_spaces(double, start_mark));
@@ -10213,7 +10217,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
         chunks = chunks.concat(this.scan_flow_scalar_non_spaces(double, start_mark));
       }
       this.forward();
-      return new tokens.ScalarToken(chunks.join(''), false, start_mark, this(), style);
+      return new tokens.ScalarToken(chunks.join(''), false, start_mark, this.get_mark(), style);
     };
 
     /*
@@ -10251,7 +10255,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
             this.forward();
             for (k = _i = 0; 0 <= length ? _i < length : _i > length; k = 0 <= length ? ++_i : --_i) {
               if (this.peek(__indexOf.call(C_NUMBERS + 'ABCDEFabcdef', k) < 0)) {
-                throw new exports.ScannerError('while scanning a double-quoted scalar', start_mark, "expected escape sequence of " + length + " hexadecimal numbers, but              found " + (this.peek(k)), this());
+                throw new exports.ScannerError('while scanning a double-quoted scalar', start_mark, "expected escape sequence of " + length + " hexadecimal numbers, but              found " + (this.peek(k)), this.get_mark());
               }
             }
             code = parseInt(this.prefix(length), 16);
@@ -10261,7 +10265,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
             this.scan_line_break();
             chunks = chunks.concat(this.scan_flow_scalar_breaks(double, start_mark));
           } else {
-            throw new exports.ScannerError('while scanning a double-quoted scalar', start_mark, "found unknown escape character " + char, this());
+            throw new exports.ScannerError('while scanning a double-quoted scalar', start_mark, "found unknown escape character " + char, this.get_mark());
           }
         } else {
           return chunks;
@@ -10285,7 +10289,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       this.forward(length);
       char = this.peek();
       if (char === '\x00') {
-        throw new exports.ScannerError('while scanning a quoted scalar', start_mark, 'found unexpected end of stream', this());
+        throw new exports.ScannerError('while scanning a quoted scalar', start_mark, 'found unexpected end of stream', this.get_mark());
       }
       if (__indexOf.call(C_LB, char) >= 0) {
         line_break = this.scan_line_break();
@@ -10313,7 +10317,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       while (true) {
         prefix = this.prefix(3);
         if (prefix === '---' || prefix === '...' && this.peek(__indexOf.call(C_LB + C_WS + '\x00', 3) >= 0)) {
-          throw new exports.ScannerError('while scanning a quoted scalar', start_mark, 'found unexpected document separator', this());
+          throw new exports.ScannerError('while scanning a quoted scalar', start_mark, 'found unexpected document separator', this.get_mark());
         }
         while (_ref1 = this.peek(), __indexOf.call(C_WS, _ref1) >= 0) {
           this.forward();
@@ -10338,7 +10342,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
     Scanner.prototype.scan_plain = function() {
       var char, chunks, end_mark, indent, length, spaces, start_mark, _ref1, _ref2;
       chunks = [];
-      start_mark = end_mark = this();
+      start_mark = end_mark = this.get_mark();
       indent = this.indent + 1;
       spaces = [];
       while (true) {
@@ -10355,7 +10359,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
         }
         if (this.flow_level !== 0 && char === ':' && (_ref2 = this.peek(length + 1), __indexOf.call(C_LB + C_WS + '\x00,[]{}', _ref2) < 0)) {
           this.forward(length);
-          throw new exports.ScannerError('while scanning a plain scalar', start_mark, 'found unexpected \':\'', this(), 'Please check http://pyyaml.org/wiki/YAMLColonInFlowContext');
+          throw new exports.ScannerError('while scanning a plain scalar', start_mark, 'found unexpected \':\'', this.get_mark(), 'Please check http://pyyaml.org/wiki/YAMLColonInFlowContext');
         }
         if (length === 0) {
           break;
@@ -10364,7 +10368,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
         chunks = chunks.concat(spaces);
         chunks.push(this.prefix(length));
         this.forward(length);
-        end_mark = this();
+        end_mark = this.get_mark();
         spaces = this.scan_plain_spaces(indent, start_mark);
         if ((spaces == null) || spaces.length === 0 || this.peek() === '#' || (this.flow_level === 0 && this.column < indent)) {
           break;
@@ -10432,7 +10436,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       var char, length, value;
       char = this.peek();
       if (char !== '!') {
-        throw new exports.ScannerError("while scanning a " + name, start_mark, "expected '!' but found " + char, this());
+        throw new exports.ScannerError("while scanning a " + name, start_mark, "expected '!' but found " + char, this.get_mark());
       }
       length = 1;
       char = this.peek(length);
@@ -10443,7 +10447,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
         }
         if (char !== '!') {
           this.forward(length);
-          throw new exports.ScannerError("while scanning a " + name, start_mark, "expected '!' but found " + char, this());
+          throw new exports.ScannerError("while scanning a " + name, start_mark, "expected '!' but found " + char, this.get_mark());
         }
         length++;
       }
@@ -10480,7 +10484,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
         length = 0;
       }
       if (chunks.length === 0) {
-        throw new exports.ScannerError("while parsing a " + name, start_mark, "expected URI but found " + char, this());
+        throw new exports.ScannerError("while parsing a " + name, start_mark, "expected URI but found " + char, this.get_mark());
       }
       return chunks.join('');
     };
@@ -10493,11 +10497,11 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
     Scanner.prototype.scan_uri_escapes = function(name, start_mark) {
       var bytes, k, mark, _i;
       bytes = [];
-      mark = this();
+      mark = this.get_mark();
       while (this.peek() === '%') {
         this.forward();
         for (k = _i = 0; _i <= 2; k = ++_i) {
-          throw new exports.ScannerError("while scanning a " + name, start_mark, "expected URI escape sequence of 2 hexadecimal numbers but found          " + (this.peek(k)), this());
+          throw new exports.ScannerError("while scanning a " + name, start_mark, "expected URI escape sequence of 2 hexadecimal numbers but found          " + (this.peek(k)), this.get_mark());
         }
         bytes.push(String.fromCharCode(parseInt(this.prefix(2), 16)));
         this.forward(2);
@@ -10540,7 +10544,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./tokens":3,"./util":4}],22:[function(require,module,exports){
+},{"./errors":1,"./tokens":3,"./util":4}],23:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10625,11 +10629,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11}],23:[function(require,module,exports){
-window.RAML = {}
-
-window.RAML.Parser = require('../lib/raml')
-},{"../lib/raml":12}],8:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],8:[function(require,module,exports){
 
 /**
  * Object#toString() ref for stringify().
@@ -10948,7 +10948,7 @@ function decode(str) {
   }
 }
 
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function() {
   var _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11189,7 +11189,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./composer":10,"./construct":14,"./errors":1,"./events":2,"./loader":16,"./nodes":11,"./parser":19,"./reader":17,"./resolver":20,"./scanner":18,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":24}],21:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":24}],22:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, uritemplate, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11508,7 +11508,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11,"uritemplate":25}],24:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"uritemplate":25}],24:[function(require,module,exports){
 (function(process,Buffer){/**
  * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
  *
@@ -12074,7 +12074,7 @@ exports.XMLHttpRequest = function() {
 };
 
 })(require("__browserify_process"),require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":13,"__browserify_process":5,"child_process":26,"fs":9,"http":27,"https":28,"url":7}],25:[function(require,module,exports){
+},{"__browserify_buffer":14,"__browserify_process":5,"child_process":26,"fs":9,"http":27,"https":28,"url":7}],25:[function(require,module,exports){
 (function(global){/*global unescape, module, define, window, global*/
 
 /*
@@ -12962,6 +12962,10 @@ var UriTemplate = (function () {
 ));
 
 })(window)
+},{}],26:[function(require,module,exports){
+exports.spawn = function () {};
+exports.exec = function () {};
+
 },{}],28:[function(require,module,exports){
 var http = require('http');
 
@@ -12976,11 +12980,7 @@ https.request = function (params, cb) {
     params.scheme = 'https';
     return http.request.call(this, params, cb);
 }
-},{"http":27}],26:[function(require,module,exports){
-exports.spawn = function () {};
-exports.exec = function () {};
-
-},{}],29:[function(require,module,exports){
+},{"http":27}],29:[function(require,module,exports){
 (function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
 
 var EventEmitter = exports.EventEmitter = process.EventEmitter;
@@ -13703,127 +13703,6 @@ exports.format = function(f) {
 };
 
 },{"events":29}],33:[function(require,module,exports){
-var Stream = require('stream');
-
-var Response = module.exports = function (res) {
-    this.offset = 0;
-    this.readable = true;
-};
-
-Response.prototype = new Stream;
-
-var capable = {
-    streaming : true,
-    status2 : true
-};
-
-function parseHeaders (res) {
-    var lines = res.getAllResponseHeaders().split(/\r?\n/);
-    var headers = {};
-    for (var i = 0; i < lines.length; i++) {
-        var line = lines[i];
-        if (line === '') continue;
-        
-        var m = line.match(/^([^:]+):\s*(.*)/);
-        if (m) {
-            var key = m[1].toLowerCase(), value = m[2];
-            
-            if (headers[key] !== undefined) {
-            
-                if (isArray(headers[key])) {
-                    headers[key].push(value);
-                }
-                else {
-                    headers[key] = [ headers[key], value ];
-                }
-            }
-            else {
-                headers[key] = value;
-            }
-        }
-        else {
-            headers[line] = true;
-        }
-    }
-    return headers;
-}
-
-Response.prototype.getResponse = function (xhr) {
-    var respType = String(xhr.responseType).toLowerCase();
-    if (respType === 'blob') return xhr.responseBlob || xhr.response;
-    if (respType === 'arraybuffer') return xhr.response;
-    return xhr.responseText;
-}
-
-Response.prototype.getHeader = function (key) {
-    return this.headers[key.toLowerCase()];
-};
-
-Response.prototype.handle = function (res) {
-    if (res.readyState === 2 && capable.status2) {
-        try {
-            this.statusCode = res.status;
-            this.headers = parseHeaders(res);
-        }
-        catch (err) {
-            capable.status2 = false;
-        }
-        
-        if (capable.status2) {
-            this.emit('ready');
-        }
-    }
-    else if (capable.streaming && res.readyState === 3) {
-        try {
-            if (!this.statusCode) {
-                this.statusCode = res.status;
-                this.headers = parseHeaders(res);
-                this.emit('ready');
-            }
-        }
-        catch (err) {}
-        
-        try {
-            this._emitData(res);
-        }
-        catch (err) {
-            capable.streaming = false;
-        }
-    }
-    else if (res.readyState === 4) {
-        if (!this.statusCode) {
-            this.statusCode = res.status;
-            this.emit('ready');
-        }
-        this._emitData(res);
-        
-        if (res.error) {
-            this.emit('error', this.getResponse(res));
-        }
-        else this.emit('end');
-        
-        this.emit('close');
-    }
-};
-
-Response.prototype._emitData = function (res) {
-    var respBody = this.getResponse(res);
-    if (respBody.toString().match(/ArrayBuffer/)) {
-        this.emit('data', new Uint8Array(respBody, this.offset));
-        this.offset = respBody.byteLength;
-        return;
-    }
-    if (respBody.length > this.offset) {
-        this.emit('data', respBody.slice(this.offset));
-        this.offset = respBody.length;
-    }
-};
-
-var isArray = Array.isArray || function (xs) {
-    return Object.prototype.toString.call(xs) === '[object Array]';
-};
-
-},{"stream":31}],34:[function(require,module,exports){
 (function(){// UTILITY
 var util = require('util');
 var Buffer = require("buffer").Buffer;
@@ -14140,7 +14019,128 @@ assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
 assert.ifError = function(err) { if (err) {throw err;}};
 
 })()
-},{"buffer":35,"util":32}],36:[function(require,module,exports){
+},{"buffer":34,"util":32}],35:[function(require,module,exports){
+var Stream = require('stream');
+
+var Response = module.exports = function (res) {
+    this.offset = 0;
+    this.readable = true;
+};
+
+Response.prototype = new Stream;
+
+var capable = {
+    streaming : true,
+    status2 : true
+};
+
+function parseHeaders (res) {
+    var lines = res.getAllResponseHeaders().split(/\r?\n/);
+    var headers = {};
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (line === '') continue;
+        
+        var m = line.match(/^([^:]+):\s*(.*)/);
+        if (m) {
+            var key = m[1].toLowerCase(), value = m[2];
+            
+            if (headers[key] !== undefined) {
+            
+                if (isArray(headers[key])) {
+                    headers[key].push(value);
+                }
+                else {
+                    headers[key] = [ headers[key], value ];
+                }
+            }
+            else {
+                headers[key] = value;
+            }
+        }
+        else {
+            headers[line] = true;
+        }
+    }
+    return headers;
+}
+
+Response.prototype.getResponse = function (xhr) {
+    var respType = String(xhr.responseType).toLowerCase();
+    if (respType === 'blob') return xhr.responseBlob || xhr.response;
+    if (respType === 'arraybuffer') return xhr.response;
+    return xhr.responseText;
+}
+
+Response.prototype.getHeader = function (key) {
+    return this.headers[key.toLowerCase()];
+};
+
+Response.prototype.handle = function (res) {
+    if (res.readyState === 2 && capable.status2) {
+        try {
+            this.statusCode = res.status;
+            this.headers = parseHeaders(res);
+        }
+        catch (err) {
+            capable.status2 = false;
+        }
+        
+        if (capable.status2) {
+            this.emit('ready');
+        }
+    }
+    else if (capable.streaming && res.readyState === 3) {
+        try {
+            if (!this.statusCode) {
+                this.statusCode = res.status;
+                this.headers = parseHeaders(res);
+                this.emit('ready');
+            }
+        }
+        catch (err) {}
+        
+        try {
+            this._emitData(res);
+        }
+        catch (err) {
+            capable.streaming = false;
+        }
+    }
+    else if (res.readyState === 4) {
+        if (!this.statusCode) {
+            this.statusCode = res.status;
+            this.emit('ready');
+        }
+        this._emitData(res);
+        
+        if (res.error) {
+            this.emit('error', this.getResponse(res));
+        }
+        else this.emit('end');
+        
+        this.emit('close');
+    }
+};
+
+Response.prototype._emitData = function (res) {
+    var respBody = this.getResponse(res);
+    if (respBody.toString().match(/ArrayBuffer/)) {
+        this.emit('data', new Uint8Array(respBody, this.offset));
+        this.offset = respBody.byteLength;
+        return;
+    }
+    if (respBody.length > this.offset) {
+        this.emit('data', respBody.slice(this.offset));
+        this.offset = respBody.length;
+    }
+};
+
+var isArray = Array.isArray || function (xs) {
+    return Object.prototype.toString.call(xs) === '[object Array]';
+};
+
+},{"stream":31}],36:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -14226,7 +14226,7 @@ exports.writeIEEE754 = function(buffer, value, offset, isBE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],35:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 (function(){var assert = require('assert');
 exports.Buffer = Buffer;
 exports.SlowBuffer = Buffer;
@@ -15310,7 +15310,7 @@ Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
 };
 
 })()
-},{"./buffer_ieee754":36,"assert":34,"base64-js":37}],30:[function(require,module,exports){
+},{"./buffer_ieee754":36,"assert":33,"base64-js":37}],30:[function(require,module,exports){
 (function(){var Stream = require('stream');
 var Response = require('./response');
 var concatStream = require('concat-stream')
@@ -15444,7 +15444,7 @@ var indexOf = function (xs, x) {
 };
 
 })()
-},{"./response":33,"buffer":35,"concat-stream":38,"stream":31}],37:[function(require,module,exports){
+},{"./response":35,"buffer":34,"concat-stream":38,"stream":31}],37:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 
@@ -15581,5 +15581,5 @@ module.exports = function(cb) {
 module.exports.ConcatStream = ConcatStream
 
 })(require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":13,"stream":31,"util":32}]},{},[23,10,14,1,2,15,16,11,19,12,17,20,18,3,22,4,21,6])
+},{"__browserify_buffer":14,"stream":31,"util":32}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,19,3,23,4,22,6])
 ;

@@ -214,7 +214,7 @@ class @Scanner
 
     # No? It's an error.
     throw new exports.ScannerError 'while scanning for the next token', null,
-      "found character #{char} that cannot start any token", @()
+      "found character #{char} that cannot start any token", @get_mark()
 
   # Simple keys treatment.
 
@@ -243,7 +243,7 @@ class @Scanner
         delete @possible_simple_keys[level]
       else
         throw new exports.ScannerError 'while scanning a simple key',
-          key.mark, 'could not find expected \':\'', @()
+          key.mark, 'could not find expected \':\'', @get_mark()
 
   ###
   The next token may start a simple key.  We check if it's possible and save
@@ -266,7 +266,7 @@ class @Scanner
     @remove_possible_simple_key()
     token_number = @tokens_taken + @tokens.length
     @possible_simple_keys[@flow_level] = new SimpleKey \
-      token_number, required, @index, @line, @column, @()
+      token_number, required, @index, @line, @column, @get_mark()
 
   ###
   Remove the saved possible simple key at the current flow level.
@@ -276,7 +276,7 @@ class @Scanner
     if not key.required then delete @possible_simple_keys[@flow_level]
     else
       throw new exports.ScannerError 'while scanning a simple key', key.mark,
-        'could not find expected \':\'', @()
+        'could not find expected \':\'', @get_mark()
 
   # Indentation functions
 
@@ -295,7 +295,7 @@ class @Scanner
 
     # In block context we may need to issue the BLOCK-END tokens.
     while @indent > column
-      mark = @()
+      mark = @get_mark()
       @indent = @indents.pop()
       @tokens.push new tokens.BlockEndToken mark, mark
 
@@ -311,7 +311,7 @@ class @Scanner
   # Fetchers.
 
   fetch_stream_start: ->
-    mark = @()
+    mark = @get_mark()
     @tokens.push new tokens.StreamStartToken mark, mark, @encoding
 
   fetch_stream_end: ->
@@ -323,7 +323,7 @@ class @Scanner
     @allow_possible_simple_key = no
     @possible_simple_keys = {}
 
-    mark = @()
+    mark = @get_mark()
     @tokens.push new tokens.StreamEndToken mark, mark
 
     # The stream is finished.
@@ -356,9 +356,9 @@ class @Scanner
     @allow_simple_key = no
 
     # Add DOCUMENT-START or DOCUMENT-END.
-    start_mark = @()
+    start_mark = @get_mark()
     @forward 3
-    @tokens.push new TokenClass start_mark, @()
+    @tokens.push new TokenClass start_mark, @get_mark()
 
   fetch_flow_sequence_start: ->
     @fetch_flow_collection_start tokens.FlowSequenceStartToken
@@ -377,9 +377,9 @@ class @Scanner
     @allow_simple_key = yes
 
     # Add FLOW-SEQUENCE-START or FLOW-MAPPING-START.
-    start_mark = @()
+    start_mark = @get_mark()
     @forward()
-    @tokens.push new TokenClass start_mark, @()
+    @tokens.push new TokenClass start_mark, @get_mark()
 
   fetch_flow_sequence_end: ->
     @fetch_flow_collection_end tokens.FlowSequenceEndToken
@@ -398,9 +398,9 @@ class @Scanner
     @allow_simple_key = no
 
     # Add FLOW-SEQUENCE-END or FLOW-MAPPING-END.
-    start_mark = @()
+    start_mark = @get_mark()
     @forward()
-    @tokens.push new TokenClass start_mark, @()
+    @tokens.push new TokenClass start_mark, @get_mark()
 
   fetch_flow_entry: ->
     # Simple keys are allowed after ','.
@@ -410,9 +410,9 @@ class @Scanner
     @remove_possible_simple_key()
 
     # Add FLOW-ENTRY
-    start_mark = @()
+    start_mark = @get_mark()
     @forward()
-    @tokens.push new tokens.FlowEntryToken start_mark, @()
+    @tokens.push new tokens.FlowEntryToken start_mark, @get_mark()
 
   fetch_block_entry: ->
     # Block context needs additional checks
@@ -420,11 +420,11 @@ class @Scanner
       # Are we allowed to start a new entry?
       unless @allow_simple_key
         throw new exports.ScannerError null, null,
-          'sequence entries are not allowed here', @()
+          'sequence entries are not allowed here', @get_mark()
 
       # We may need to add BLOCK-SEQUENCE-START
       if @add_indent @column
-        mark = @()
+        mark = @get_mark()
         @tokens.push new tokens.BlockSequenceStartToken mark, mark
 
     # It's an error for the block entry to occur in the flow context but we
@@ -437,9 +437,9 @@ class @Scanner
     @remove_possible_simple_key()
 
     # Add BLOCK-ENTRY
-    start_mark = @()
+    start_mark = @get_mark()
     @forward()
-    @tokens.push new tokens.BlockEntryToken start_mark, @()
+    @tokens.push new tokens.BlockEntryToken start_mark, @get_mark()
 
   fetch_key: ->
     # Block context needs additional checks.
@@ -447,11 +447,11 @@ class @Scanner
       # Are we allowed to start a key?
       unless @allow_simple_key
         throw new exports.ScannerError null, null,
-          'mapping keys are not allowed here', @()
+          'mapping keys are not allowed here', @et_mark()
 
       # We may need to add BLOCK-MAPPING-START.
       if @add_indent @column
-        mark = @()
+        mark = @get_mark()
         @tokens.push new tokens.BlockMappingStartToken mark, mark
 
     # Simple keys are allowed after '?' in the flow context.
@@ -461,9 +461,9 @@ class @Scanner
     @remove_possible_simple_key()
 
     # Add KEY.
-    start_mark = @()
+    start_mark = @get_mark()
     @forward()
-    @tokens.push new tokens.KeyToken start_mark, @()
+    @tokens.push new tokens.KeyToken start_mark, @get_mark()
 
   fetch_value: ->
     # Do we determine a simple key?
@@ -492,13 +492,13 @@ class @Scanner
         # a simple key.
         unless @allow_simple_key
           throw new exports.ScannerError null, null,
-            'mapping values are not allowed here', @()
+            'mapping values are not allowed here', @get_mark()
 
         # If this value starts a new block mapping we need to add
         # BLOCK-MAPPING-START.  It will be detected as an error later by the
         # parser.
         if @add_indent @column
-          mark = @()
+          mark = @get_mark()
           @tokens.push new tokens.BlockMappingStartToken mark, mark
 
       # Simple keys are allowed after ':' in the block context.
@@ -508,9 +508,9 @@ class @Scanner
       @remove_possible_simple_key()
 
     # Add VALUE.
-    start_mark = @()
+    start_mark = @get_mark()
     @forward()
-    @tokens.push new tokens.ValueToken start_mark, @()
+    @tokens.push new tokens.ValueToken start_mark, @get_mark()
 
   fetch_alias: ->
     # ALIAS could be a simple key.
@@ -695,18 +695,18 @@ class @Scanner
   See the specification for details.
   ###
   scan_directive: ->
-    start_mark = @()
+    start_mark = @get_mark()
     @forward()
     name = @scan_directive_name start_mark
     value = null
     if name is 'YAML'
       value = @scan_yaml_directive_value start_mark
-      end_mark = @()
+      end_mark = @get_mark()
     else if name is 'TAG'
       value = @scan_tag_directive_value start_mark
-      end_mark = @()
+      end_mark = @get_mark()
     else
-      end_mark = @()
+      end_mark = @get_mark()
       @forward() while @peek() not in C_LB + '\x00'
     @scan_directive_ignored_line start_mark
     return new tokens.DirectiveToken name, value, start_mark, end_mark
@@ -723,14 +723,14 @@ class @Scanner
       char = @peek length
     if length is 0
       throw new exports.ScannerError 'while scanning a directive', start_mark,
-        "expected alphanumeric or numeric character but found #{char}", @()
+        "expected alphanumeric or numeric character but found #{char}", @get_mark()
 
     value = @prefix length
     @forward length
     char = @peek()
     if char not in C_LB + '\x00 '
       throw new exports.ScannerError 'while scanning a directive', start_mark,
-        "expected alphanumeric or numeric character but found #{char}", @()
+        "expected alphanumeric or numeric character but found #{char}", @get_mark()
 
     return value
 
@@ -742,13 +742,13 @@ class @Scanner
     major = @scan_yaml_directive_number start_mark
     if @peek() != '.'
       throw new exports.ScannerError 'while scanning a directive', start_mark,
-        "expected a digit or '.' but found #{@peek()}", @()
+        "expected a digit or '.' but found #{@peek()}", @get_mark()
 
     @forward()
     minor = @scan_yaml_directive_number start_mark
     if @peek() not in C_LB + '\x00 '
       throw new exports.ScannerError 'while scanning a directive', start_mark,
-        "expected a digit or ' ' but found #{@peek()}", @()
+        "expected a digit or ' ' but found #{@peek()}", @get_mark()
 
     return [major, minor]
 
@@ -759,7 +759,7 @@ class @Scanner
     char = @peek()
     if not ('0' <= char <= '9')
       throw new exports.ScannerError 'while scanning a directive', start_mark,
-        "expected a digit but found #{char}", @()
+        "expected a digit but found #{char}", @get_mark()
 
     length = 0
     length++ while '0' <= @peek(length) <= '9'
@@ -788,7 +788,7 @@ class @Scanner
     char = @peek()
     if char isnt ' '
       throw new exports.ScannerError 'while scanning a directive', start_mark,
-        "expected ' ' but found #{char}", @()
+        "expected ' ' but found #{char}", @get_mark()
     return value
 
   ###
@@ -799,7 +799,7 @@ class @Scanner
     char = @peek()
     if char not in C_LB + '\x00 '
       throw new exports.ScannerError 'while scanning a directive', start_mark,
-        "expected ' ' but found #{char}", @()
+        "expected ' ' but found #{char}", @get_mark()
     return value
 
   ###
@@ -813,7 +813,7 @@ class @Scanner
     char = @peek()
     if char not in C_LB + '\x00'
       throw new exports.ScannerError 'while scanning a directive', start_mark,
-        "expected a comment or a line break but found #{char}", @()
+        "expected a comment or a line break but found #{char}", @get_mark()
 
     @scan_line_break()
 
@@ -828,7 +828,7 @@ class @Scanner
   Therefore we restrict aliases to numbers and ASCII letters.
   ###
   scan_anchor: (TokenClass) ->
-    start_mark = @()
+    start_mark = @get_mark()
     indicator = @peek()
     if indicator is '*'
       name = 'alias'
@@ -845,7 +845,7 @@ class @Scanner
     if length is 0
       throw new exports.ScannerError "while scanning an #{name}", start_mark, \
         "expected alphabetic or numeric character but found '#{char}'", \
-        @() 
+        @get_mark() 
 
     value = @prefix length
     @forward length
@@ -853,15 +853,15 @@ class @Scanner
     if char not in C_LB + C_WS + '\x00' + '?:,]}%@`'    
       throw new exports.ScannerError "while scanning an #{name}", start_mark, \
         "expected alphabetic or numeric character but found '#{char}'", \
-        @()
+        @get_mark()
 
-    return new TokenClass value, start_mark, @()
+    return new TokenClass value, start_mark, @get_mark()
 
   ###
   See the specification for details.
   ###
   scan_tag: ->
-    start_mark = @()
+    start_mark = @get_mark()
     char = @peek 1
     if char is '<'
       handle = null
@@ -869,7 +869,7 @@ class @Scanner
       suffix = @scan_tag_uri 'tag', start_mark
       if @peek() isnt '>'
         throw new exports.ScannerError 'while parsing a tag', start_mark, \
-          "expected '>' but found #{@peek()}", @()
+          "expected '>' but found #{@peek()}", @get_mark()
       @forward()
     else if char in C_LB + C_WS + '\x00'
       handle = null
@@ -893,8 +893,8 @@ class @Scanner
     char = @peek()
     if char not in C_LB + '\x00 '
       throw new exports.ScannerError 'while scanning a tag', start_mark, \
-        "expected ' ' but found #{char}", @()
-    return new tokens.TagToken [handle, suffix], start_mark, @()
+        "expected ' ' but found #{char}", @get_mark()
+    return new tokens.TagToken [handle, suffix], start_mark, @get_mark()
 
   ###
   See the specification for details.
@@ -903,7 +903,7 @@ class @Scanner
     folded = style is '>'
 
     chunks = []
-    start_mark = @()
+    start_mark = @get_mark()
 
     # Scan the header.
     @forward()
@@ -978,7 +978,7 @@ class @Scanner
           throw new exports.ScannerError 'while scanning a block scalar', \
             start_mark, \
             'expected indentation indicator in the range 1-9 but found 0', \
-            @()
+            @get_mark()
         @forward()
     else if char in C_NUMBERS
       increment = parseInt char
@@ -986,7 +986,7 @@ class @Scanner
         throw new exports.ScannerError 'while scanning a block scalar', \
           start_mark, \
           'expected indentation indicator in the range 1-9 but found 0', \
-          @()
+          @get_mark()
       @forward()
       char = @peek()
       if char in '+-'
@@ -998,7 +998,7 @@ class @Scanner
       throw new exports.ScannerError 'while scanning a block scalar', \
         start_mark,\
         "expected chomping or indentation indicators, but found #{char}", \
-        @() 
+        @get_mark() 
 
     return [chomping, increment]
 
@@ -1013,7 +1013,7 @@ class @Scanner
     if char not in C_LB + '\x00'
       throw new exports.ScannerError 'while scanning a block scalar', \
         start_mark, "expected a comment or a line break but found #{char}", \
-        @()
+        @get_mark()
     @scan_line_break()
 
   ###
@@ -1022,11 +1022,11 @@ class @Scanner
   scan_block_scalar_indentation: ->
     chunks = []
     max_indent = 0
-    end_mark = @()
+    end_mark = @get_mark()
     while @peek() in C_LB + ' '
       if @peek() != ' '
         chunks.push @scan_line_break()
-        end_mark = @()
+        end_mark = @get_mark()
       else
         @forward()
         max_indent = @column if @column > max_indent
@@ -1037,11 +1037,11 @@ class @Scanner
   ###
   scan_block_scalar_breaks: (indent) ->
     chunks = []
-    end_mark = @()
+    end_mark = @get_mark()
     @forward() while @column < indent and @peek() == ' '
     while @peek() in C_LB
       chunks.push @scan_line_break()
-      end_mark = @()
+      end_mark = @get_mark()
       @forward() while @column < indent and @peek() == ' '
     return [chunks, end_mark]
 
@@ -1056,7 +1056,7 @@ class @Scanner
   scan_flow_scalar: (style) ->
     double = style is '"'
     chunks = []
-    start_mark = @()
+    start_mark = @get_mark()
     quote = @peek()
     @forward()
     chunks = chunks.concat @scan_flow_scalar_non_spaces double, start_mark
@@ -1065,7 +1065,7 @@ class @Scanner
       chunks = chunks.concat @scan_flow_scalar_non_spaces double, start_mark
     @forward()
     return new tokens.ScalarToken chunks.join(''), false, start_mark,
-      @(), style
+      @get_mark(), style
 
   ###
   See the specification for details.
@@ -1098,7 +1098,7 @@ class @Scanner
             throw new exports.ScannerError \
               'while scanning a double-quoted scalar', start_mark,
               "expected escape sequence of #{length} hexadecimal numbers, but
-              found #{@peek k}", @() \
+              found #{@peek k}", @get_mark() \
               if @peek k not in C_NUMBERS + 'ABCDEFabcdef'
           code = parseInt @prefix(length), 16
           chunks.push String.fromCharCode code
@@ -1109,7 +1109,7 @@ class @Scanner
         else
           throw new exports.ScannerError \
             'while scanning a double-quoted scalar', start_mark,
-            "found unknown escape character #{char}", @()
+            "found unknown escape character #{char}", @get_mark()
       else
         return chunks
 
@@ -1124,7 +1124,7 @@ class @Scanner
     @forward length
     char = @peek()
     throw new exports.ScannerError 'while scanning a quoted scalar', \
-      start_mark, 'found unexpected end of stream', @() \
+      start_mark, 'found unexpected end of stream', @get_mark() \
       if char is '\x00'
     if char in C_LB
       line_break = @scan_line_break()
@@ -1149,7 +1149,7 @@ class @Scanner
       prefix = @prefix 3
       if prefix is '---' or prefix is '...' and @peek 3 in C_LB + C_WS + '\x00'
         throw new exports.ScannerError 'while scanning a quoted scalar',
-          start_mark, 'found unexpected document separator', @()
+          start_mark, 'found unexpected document separator', @get_mark()
       @forward() while @peek() in C_WS
       if @peek() in C_LB
         chunks.push @scan_line_break()
@@ -1165,7 +1165,7 @@ class @Scanner
   ###
   scan_plain: ->
     chunks = []
-    start_mark = end_mark = @()
+    start_mark = end_mark = @get_mark()
     indent = @indent + 1
 
     # We allow zero indentation for scalars, but then we need to check for
@@ -1189,7 +1189,7 @@ class @Scanner
           and @peek(length + 1) not in C_LB + C_WS + '\x00,[]{}'
         @forward length
         throw new exports.ScannerError 'while scanning a plain scalar',
-          start_mark, 'found unexpected \':\'', @(),
+          start_mark, 'found unexpected \':\'', @get_mark(),
           'Please check http://pyyaml.org/wiki/YAMLColonInFlowContext'
       break if length is 0
 
@@ -1197,7 +1197,7 @@ class @Scanner
       chunks = chunks.concat spaces
       chunks.push @prefix length
       @forward length
-      end_mark = @()
+      end_mark = @get_mark()
       spaces = @scan_plain_spaces indent, start_mark
       break if not spaces? or spaces.length is 0 or @peek() == '#' \
         or (@flow_level is 0 and @column < indent)
@@ -1249,7 +1249,7 @@ class @Scanner
     char = @peek()
     if char isnt '!'
       throw new exports.ScannerError "while scanning a #{name}", start_mark, \
-        "expected '!' but found #{char}", @()
+        "expected '!' but found #{char}", @get_mark()
     length = 1
     char = @peek length
     if char isnt ' '
@@ -1260,7 +1260,7 @@ class @Scanner
       if char isnt '!'
         @forward length
         throw new exports.ScannerError "while scanning a #{name}", start_mark,
-          "expected '!' but found #{char}", @()
+          "expected '!' but found #{char}", @get_mark()
       length++
     value = @prefix length
     @forward length
@@ -1290,7 +1290,7 @@ class @Scanner
       length = 0
     if chunks.length is 0
       throw new exports.ScannerError "while parsing a #{name}", start_mark, \
-        "expected URI but found #{char}", @() 
+        "expected URI but found #{char}", @get_mark() 
     return chunks.join('')
 
   ###
@@ -1298,13 +1298,13 @@ class @Scanner
   ###
   scan_uri_escapes: (name, start_mark) ->
     bytes = []
-    mark = @()
+    mark = @get_mark()
     while @peek() == '%'
       @forward()
       for k in [0..2]
         throw new exports.ScannerError "while scanning a #{name}", start_mark,
           "expected URI escape sequence of 2 hexadecimal numbers but found
-          #{@peek k}", @()
+          #{@peek k}", @get_mark()
       bytes.push String.fromCharCode parseInt @prefix(2), 16
       @forward 2
     return bytes.join('')
