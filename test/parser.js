@@ -164,6 +164,27 @@ describe('Parser', function() {
       
       raml.load(definition).should.be.rejected.with(/uri parameter unused/).and.notify(done);
     });
+
+    it('should fail when declaring a URI parameter not on the resource URI', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '/{hello}:',
+        '  uriParameters:',
+        '    a:',
+        '      name: A',
+        '      description: This is A',
+      ].join('\n');
+      
+      raml.load(definition).should.be.rejected.with(/uri parameter unused/).and.notify(done);
+    });
     
     it('should fail if baseUri value its not really a URI', function(done) {
       var definition = [

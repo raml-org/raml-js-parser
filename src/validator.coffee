@@ -23,7 +23,7 @@ The Validator class deals with validating a YAML file according to the spec
 class @Validator
   
   constructor: ->
-    @validations = [@has_title, @valid_base_uri, @validate_uri_parameters, @valid_root_properties, @validate_traits, @valid_absolute_uris, @valid_trait_consumption]
+    @validations = [@has_title, @valid_base_uri, @validate_base_uri_parameters, @valid_root_properties, @validate_traits, @valid_absolute_uris, @valid_trait_consumption]
 
   validate_document: (node) ->
     @validations.forEach (validation) =>
@@ -31,14 +31,11 @@ class @Validator
 
     return true
     
-  validate_uri_parameters: (node) ->
+  validate_uri_parameters: (uri, node) ->
     @check_is_map node
     if @has_property node, /^uriParameters$/i
-      if not @has_property node, /^baseUri$/i
-        throw new exports.ValidationError 'while validating uri parameters', null, uriParameterName + ' uri parameter unused', uriParameter[0].start_mark
-      baseUri = @property_value node, /^baseUri$/i
       try
-        template = uritemplate.parse baseUri
+        template = uritemplate.parse uri
       catch err
         throw new exports.ValidationError 'while validating uri parameters', null, err.options.message, node.start_mark
       expressions = template.expressions.filter((expr) -> return expr.hasOwnProperty('templateText'))
@@ -49,6 +46,17 @@ class @Validator
           expression.templateText == uriParameterName
         if found.length == 0 
            throw new exports.ValidationError 'while validating baseUri', null, uriParameterName + ' uri parameter unused', uriParameter[0].start_mark
+    child_resources = @child_resources node
+    child_resources.forEach (childResource) =>
+      @validate_uri_parameters childResource[0].value, childResource[1]
+    
+  validate_base_uri_parameters: (node) ->
+    @check_is_map node
+    if @has_property node, /^uriParameters$/i
+      if not @has_property node, /^baseUri$/i
+        throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', node.start_mark
+      baseUri = @property_value node, /^baseUri$/i
+      @validate_uri_parameters baseUri, node
     
   validate_traits: (node) ->
     @check_is_map node
