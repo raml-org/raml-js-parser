@@ -11246,7 +11246,7 @@ function decode(str) {
 
   this.Validator = (function() {
     function Validator() {
-      this.validations = [this.has_title, this.valid_base_uri, this.valid_root_properties, this.validate_traits, this.valid_absolute_uris, this.valid_trait_consumption];
+      this.validations = [this.has_title, this.valid_base_uri, this.validate_uri_parameters, this.valid_root_properties, this.validate_traits, this.valid_absolute_uris, this.valid_trait_consumption];
     }
 
     Validator.prototype.validate_document = function(node) {
@@ -11255,6 +11255,38 @@ function decode(str) {
         return validation.call(_this, node);
       });
       return true;
+    };
+
+    Validator.prototype.validate_uri_parameters = function(node) {
+      var baseUri, err, expressions, template, uriParameters,
+        _this = this;
+      this.check_is_map(node);
+      if (this.has_property(node, /^uriParameters$/i)) {
+        if (!this.has_property(node, /^baseUri$/i)) {
+          throw new exports.ValidationError('while validating uri parameters', null, uriParameterName + ' uri parameter unused', uriParameter[0].start_mark);
+        }
+        baseUri = this.property_value(node, /^baseUri$/i);
+        try {
+          template = uritemplate.parse(baseUri);
+        } catch (_error) {
+          err = _error;
+          throw new exports.ValidationError('while validating uri parameters', null, err.options.message, node.start_mark);
+        }
+        expressions = template.expressions.filter(function(expr) {
+          return expr.hasOwnProperty('templateText');
+        });
+        uriParameters = this.property_value(node, /^uriParameters$/i);
+        return uriParameters.forEach(function(uriParameter) {
+          var found, uriParameterName;
+          uriParameterName = uriParameter[0].value;
+          found = expressions.filter(function(expression) {
+            return expression.templateText === uriParameterName;
+          });
+          if (found.length === 0) {
+            throw new exports.ValidationError('while validating baseUri', null, uriParameterName + ' uri parameter unused', uriParameter[0].start_mark);
+          }
+        });
+      }
     };
 
     Validator.prototype.validate_traits = function(node) {

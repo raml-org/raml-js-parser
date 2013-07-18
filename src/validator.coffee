@@ -23,13 +23,32 @@ The Validator class deals with validating a YAML file according to the spec
 class @Validator
   
   constructor: ->
-    @validations = [@has_title, @valid_base_uri, @valid_root_properties, @validate_traits, @valid_absolute_uris, @valid_trait_consumption]
+    @validations = [@has_title, @valid_base_uri, @validate_uri_parameters, @valid_root_properties, @validate_traits, @valid_absolute_uris, @valid_trait_consumption]
 
   validate_document: (node) ->
     @validations.forEach (validation) =>
       validation.call @, node
 
     return true
+    
+  validate_uri_parameters: (node) ->
+    @check_is_map node
+    if @has_property node, /^uriParameters$/i
+      if not @has_property node, /^baseUri$/i
+        throw new exports.ValidationError 'while validating uri parameters', null, uriParameterName + ' uri parameter unused', uriParameter[0].start_mark
+      baseUri = @property_value node, /^baseUri$/i
+      try
+        template = uritemplate.parse baseUri
+      catch err
+        throw new exports.ValidationError 'while validating uri parameters', null, err.options.message, node.start_mark
+      expressions = template.expressions.filter((expr) -> return expr.hasOwnProperty('templateText'))
+      uriParameters = @property_value node, /^uriParameters$/i
+      uriParameters.forEach (uriParameter) =>
+        uriParameterName = uriParameter[0].value
+        found = expressions.filter (expression) -> 
+          expression.templateText == uriParameterName
+        if found.length == 0 
+           throw new exports.ValidationError 'while validating baseUri', null, uriParameterName + ' uri parameter unused', uriParameter[0].start_mark
     
   validate_traits: (node) ->
     @check_is_map node

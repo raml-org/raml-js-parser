@@ -40,35 +40,6 @@ describe('Parser', function() {
       
       raml.load(definition).should.be.rejected.with(/missing title/).and.notify(done);
     });
-    it('should fail if baseUri value its not really a URI', function(done) {
-      var definition = [
-        '---',
-        'title: MyApi',
-        'baseUri: http://{myapi.com',
-      ].join('\n');
-      
-      raml.load(definition).should.be.rejected.with(/unclosed brace/).and.notify(done);
-    });
-    it('should fail if baseUri uses version but there is no version defined', function(done) {
-      var definition = [
-        '---',
-        'title: MyApi',
-        'baseUri: http://myapi.com/{version}',
-      ].join('\n');
-      
-      raml.load(definition).should.be.rejected.with(/missing version/).and.notify(done);
-    });
-    it('should succeed if baseUri uses version and there is a version defined', function(done) {
-      var definition = [
-        '---',
-        'title: MyApi',
-        'version: v1',
-        'baseUri: http://myapi.com/{version}',
-      ].join('\n');
-      
-      promise = raml.load(definition);
-      promise.should.eventually.deep.equal({ title: 'MyApi', version: 'v1', baseUri: 'http://myapi.com/{version}' }).and.notify(done);
-    });
     it('should fail if there is a root property with wrong name', function(done) {
       var definition = [
         '---',
@@ -148,6 +119,80 @@ describe('Parser', function() {
               }
           }
       }).and.notify(done);
+    });
+  });
+  describe('URI Parameters', function() {
+    it('should succeed when dealing with URI parameters', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '',
+      ].join('\n');
+      
+      raml.load(definition).should.become({ 
+        title: 'Test', 
+        baseUri: 'http://{a}.myapi.org',
+        uriParameters: {
+          'a': {
+            name: 'A',
+            description: 'This is A'
+          }
+        }
+      }).and.notify(done);
+    });
+
+    it('should fail when declaring a URI parameter not on the baseUri', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  b:',
+        '    name: A',
+        '    description: This is A',
+        '',
+      ].join('\n');
+      
+      raml.load(definition).should.be.rejected.with(/uri parameter unused/).and.notify(done);
+    });
+    
+    it('should fail if baseUri value its not really a URI', function(done) {
+      var definition = [
+        '---',
+        'title: MyApi',
+        'baseUri: http://{myapi.com',
+      ].join('\n');
+      
+      raml.load(definition).should.be.rejected.with(/unclosed brace/).and.notify(done);
+    });
+    it('should fail if baseUri uses version but there is no version defined', function(done) {
+      var definition = [
+        '---',
+        'title: MyApi',
+        'baseUri: http://myapi.com/{version}',
+      ].join('\n');
+      
+      raml.load(definition).should.be.rejected.with(/missing version/).and.notify(done);
+    });
+    it('should succeed if baseUri uses version and there is a version defined', function(done) {
+      var definition = [
+        '---',
+        'title: MyApi',
+        'version: v1',
+        'baseUri: http://myapi.com/{version}',
+      ].join('\n');
+      
+      promise = raml.load(definition);
+      promise.should.eventually.deep.equal({ title: 'MyApi', version: 'v1', baseUri: 'http://myapi.com/{version}' }).and.notify(done);
     });
   });
   describe('Resources', function() {
