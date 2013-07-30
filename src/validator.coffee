@@ -41,6 +41,7 @@ class @Validator
       expressions = template.expressions.filter((expr) -> return expr.hasOwnProperty('templateText'))
       uriParameters = @property_value node, /^uriParameters$/i
       uriParameters.forEach (uriParameter) =>
+        @valid_common_parameter_properties uriParameter[1]
         uriParameterName = uriParameter[0].value
         found = expressions.filter (expression) -> 
           expression.templateText == uriParameterName
@@ -77,6 +78,38 @@ class @Validator
                   childNode[0].value.match(/^provides$/i) )
     if invalid.length > 0 
       throw new exports.ValidationError 'while validating trait properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
+
+  valid_common_parameter_properties: (node) ->
+    @check_is_map node
+    invalid = node.value.filter (childNode) -> 
+      return not (childNode[0].value.match(/^name$/i) or \
+                  childNode[0].value.match(/^description$/i) or \
+                  childNode[0].value.match(/^type$/i) or \
+                  childNode[0].value.match(/^enum$/i) or \
+                  childNode[0].value.match(/^pattern$/i) or \
+                  childNode[0].value.match(/^minLength$/i) or \
+                  childNode[0].value.match(/^maxLength$/i) or \
+                  childNode[0].value.match(/^minimum$/i) or \
+                  childNode[0].value.match(/^maximum$/i) or \
+                  childNode[0].value.match(/^default$/i))
+    if invalid.length > 0 
+      throw new exports.ValidationError 'while validating parameter properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
+    if @has_property node, /^minLength$/i
+      if isNaN(@property_value(node, /^minLength$/i))
+        throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minLength must be a number', node.start_mark
+    if @has_property node, /^maxLength$/i
+      if isNaN(@property_value(node, /^maxLength$/i))
+        throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maxLength must be a number', node.start_mark
+    if @has_property node, /^minimum$/i
+      if isNaN(@property_value(node, /^minimum$/i))
+        throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minimum must be a number', node.start_mark
+    if @has_property node, /^maximum$/i
+      if isNaN(@property_value(node, /^maximum$/i))
+        throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maximum must be a number', node.start_mark
+    if @has_property node, /^type$/i
+      type = @property_value node, /^type$/i
+      if type != 'string' and type != 'number' and type != 'integer' and type != 'date'
+        throw new exports.ValidationError 'while validating parameter properties', null, 'type can either be: string, number, integer or date', node.start_mark
   
   valid_root_properties: (node) ->
     @check_is_map node
@@ -216,4 +249,3 @@ class @Validator
         
   is_valid: ->
     return @validation_errors.length == 0
-  

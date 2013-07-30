@@ -186,6 +186,244 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.with(/uri parameter unused/).and.notify(done);
     });
     
+    it('should fail when declaring a property inside a URI parameter that is not valid', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    wrongPropertyName: X',
+      ].join('\n');
+      
+      raml.load(definition).should.be.rejected.with(/unknown property wrongPropertyName/).and.notify(done);
+    });
+    
+    it('should succeed when declaring a minLength validation as a number', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    minLength: 123',
+      ].join('\n');
+      
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+    
+    it('should succeed when declaring a maxLength validation as a number', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    maxLength: 123',
+      ].join('\n');
+      
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+    
+    it('should succeed when declaring a minimum validation as a number', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    minimum: 123',
+      ].join('\n');
+      
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+    
+    it('should succeed when declaring a maximum validation as a number', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    maximum: 123',
+      ].join('\n');
+      
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+    
+    it('should fail when declaring a minLength validation as anything other than a number', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    minLength: X',
+      ].join('\n');
+      
+      raml.load(definition).should.be.rejected.with(/the value of minLength must be a number/).and.notify(done);
+    });
+    
+    it('should fail when declaring a maxLength validation as anything other than a number', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    maxLength: X',
+      ].join('\n');
+      
+      raml.load(definition).should.be.rejected.with(/the value of maxLength must be a number/).and.notify(done);
+    });
+    
+    it('should fail when declaring a minimum validation as anything other than a number', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    minimum: X',
+      ].join('\n');
+      
+      raml.load(definition).should.be.rejected.with(/the value of minimum must be a number/).and.notify(done);
+    });
+    
+    it('should fail when declaring a maximum validation as anything other than a number', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    maximum: X',
+      ].join('\n');
+      
+      raml.load(definition).should.be.rejected.with(/the value of maximum must be a number/).and.notify(done);
+    });
+
+    it('should fail when declaring a URI parameter with an invalid type', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: X',
+      ].join('\n');
+      
+      raml.load(definition).should.be.rejected.with(/type can either be: string, number, integer or date/).and.notify(done);
+    });
+
+    it('should succeed when declaring a URI parameter with a string type', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: string',
+      ].join('\n');
+      
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when declaring a URI parameter with a number type', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: number',
+      ].join('\n');
+      
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+        
+    it('should succeed when declaring a URI parameter with a integer type', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: integer',
+      ].join('\n');
+      
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+     
+    it('should succeed when declaring a URI parameter with a date type', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+      ].join('\n');
+      
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+                
     it('should fail if baseUri value its not really a URI', function(done) {
       var definition = [
         '---',
