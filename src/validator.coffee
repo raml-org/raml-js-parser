@@ -21,9 +21,10 @@ class @ValidationErrors extends MarkedYAMLError
 The Validator class deals with validating a YAML file according to the spec
 ###
 class @Validator
-  
+  MAX_TITLE_LENGTH = 48
+
   constructor: ->
-    @validations = [@has_title, @valid_base_uri, @validate_base_uri_parameters, @valid_root_properties, @validate_traits, @valid_absolute_uris, @valid_trait_consumption]
+    @validations = [@has_title, @title_is_correct_length, @valid_base_uri, @validate_base_uri_parameters, @valid_root_properties, @validate_traits, @valid_absolute_uris, @valid_trait_consumption]
 
   validate_document: (node) ->
     @validations.forEach (validation) =>
@@ -224,8 +225,17 @@ class @Validator
     
   has_title: (node) ->
     @check_is_map node
-    if not @has_property node, /^title$/i
+    unless @has_property node, /^title$/i
       throw new exports.ValidationError 'while validating title', null, 'missing title', node.start_mark
+    title = @property_value node, "title"
+    unless typeof title is 'string' or typeof title is 'number'
+      throw new exports.ValidationError 'while validating title', null, 'not a scalar', node.start_mark
+
+   title_is_correct_length: (node) ->
+    @check_is_map node
+    title = @property_value node, "title"
+    unless title.length <= MAX_TITLE_LENGTH
+      throw new exports.ValidationError 'while validating title', null, 'too long', node.start_mark
 
   has_version: (node) ->
     @check_is_map node
