@@ -23,29 +23,66 @@ describe('Parser', function() {
     });
     it('should succeed', function(done) {
       var definition = [
+        '%YAML 1.2',
         '---',
         'title: MyApi',
         'baseUri: http://myapi.com',
         '/:',
         '  name: Root'
       ].join('\n');
-      
+
       promise = raml.load(definition).should.become({ title: 'MyApi', baseUri: 'http://myapi.com', resources: [ { relativeUri: '/', name: 'Root' } ] }).and.notify(done);
     });
-    it('should fail if no title', function(done) {
+      it('should fail if no title', function(done) {
       var definition = [
         '---',
-        'baseUri: http://myapi.com',
+        'baseUri: http://myapi.com'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/missing title/).and.notify(done);
     });
-    it('should fail if there is a root property with wrong name', function(done) {
+      it('should fail if title is array', function(done) {
+          var definition = [
+              '---',
+              'title: ["title", "title line 2", "title line 3"]',
+              'baseUri: http://myapi.com'
+          ].join('\n');
+
+          raml.load(definition).should.be.rejected.with(/not a scalar/).and.notify(done);
+      });
+      it('should fail if title is mapping', function(done) {
+          var definition = [
+              '---',
+              'title: { line 1: line 1, line 2: line 2 }',
+              'baseUri: http://myapi.com'
+          ].join('\n');
+
+          raml.load(definition).should.be.rejected.with(/not a scalar/).and.notify(done);
+      });
+      it('should fail if title is longer than 48 chars', function(done) {
+          var definition = [
+              '---',
+              'title: this is a very long title, it should fail the length validation for titles with an exception clearly marking it so',
+              'baseUri: http://myapi.com'
+          ].join('\n');
+
+          raml.load(definition).should.be.rejected.with(/too long/).and.notify(done);
+      });
+      it('should allow number title', function(done) {
+          var definition = [
+              '---',
+              'title: 54',
+              'baseUri: http://myapi.com'
+          ].join('\n');
+
+          promise = raml.load(definition).should.become({ title: 54, baseUri: 'http://myapi.com' }).and.notify(done);
+      });
+      it('should fail if there is a root property with wrong name', function(done) {
       var definition = [
         '---',
         'title: MyApi',
         'version: v1',
-        'wrongPropertyName: http://myapi.com/{version}',
+        'wrongPropertyName: http://myapi.com/{version}'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/unknown property/).and.notify(done);
@@ -69,7 +106,7 @@ describe('Parser', function() {
         'title: MyApi',
         'documentation:',
         '  - title: Getting Started',
-        '    content: !include http://localhost:9001/test/gettingstarted.md',
+        '    content: !include http://localhost:9001/test/gettingstarted.md'
       ].join('\n');
       
       raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
@@ -78,7 +115,7 @@ describe('Parser', function() {
       var definition = [
         '%TAG ! tag:raml.org,0.1:',
         '---',
-        '!include http://localhost:9001/test/external.yml',
+        '!include http://localhost:9001/test/external.yml'
       ].join('\n');
       
       raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
@@ -87,7 +124,7 @@ describe('Parser', function() {
       var definition = [
         '%TAG ! tag:raml.org,0.1:',
         '---',
-        '!include http://localhost:9001/test/external.yaml',
+        '!include http://localhost:9001/test/external.yaml'
       ].join('\n');
       
       raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
@@ -98,10 +135,10 @@ describe('Parser', function() {
           '---',
           'title: Test',
           'traits:',
-          '  customTrait: !include http://localhost:9001/test/customtrait.yml',
+          '  customTrait: !include http://localhost:9001/test/customtrait.yml'
       ].join('\n');
 
-      raml.load(definition).should.eventually.deep.equal({
+        raml.load(definition).should.eventually.deep.equal({
           title: 'Test',
           traits: {
               customTrait: {
@@ -133,10 +170,10 @@ describe('Parser', function() {
         '  a:',
         '    name: A',
         '    description: This is A',
-        '',
+        ''
       ].join('\n');
-      
-      raml.load(definition).should.become({ 
+
+        raml.load(definition).should.become({
         title: 'Test', 
         baseUri: 'http://{a}.myapi.org',
         uriParameters: {
@@ -159,7 +196,7 @@ describe('Parser', function() {
         '  b:',
         '    name: A',
         '    description: This is A',
-        '',
+        ''
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/uri parameter unused/).and.notify(done);
@@ -180,7 +217,7 @@ describe('Parser', function() {
         '  uriParameters:',
         '    a:',
         '      name: A',
-        '      description: This is A',
+        '      description: This is A'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/uri parameter unused/).and.notify(done);
@@ -197,7 +234,7 @@ describe('Parser', function() {
         '  a:',
         '    name: A',
         '    description: This is A',
-        '    wrongPropertyName: X',
+        '    wrongPropertyName: X'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/unknown property wrongPropertyName/).and.notify(done);
@@ -214,7 +251,7 @@ describe('Parser', function() {
         '  a:',
         '    name: A',
         '    description: This is A',
-        '    minLength: 123',
+        '    minLength: 123'
       ].join('\n');
       
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -231,7 +268,7 @@ describe('Parser', function() {
         '  a:',
         '    name: A',
         '    description: This is A',
-        '    maxLength: 123',
+        '    maxLength: 123'
       ].join('\n');
       
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -248,7 +285,7 @@ describe('Parser', function() {
         '  a:',
         '    name: A',
         '    description: This is A',
-        '    minimum: 123',
+        '    minimum: 123'
       ].join('\n');
       
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -265,7 +302,7 @@ describe('Parser', function() {
         '  a:',
         '    name: A',
         '    description: This is A',
-        '    maximum: 123',
+        '    maximum: 123'
       ].join('\n');
       
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -282,7 +319,7 @@ describe('Parser', function() {
         '  a:',
         '    name: A',
         '    description: This is A',
-        '    minLength: X',
+        '    minLength: X'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/the value of minLength must be a number/).and.notify(done);
@@ -299,7 +336,7 @@ describe('Parser', function() {
         '  a:',
         '    name: A',
         '    description: This is A',
-        '    maxLength: X',
+        '    maxLength: X'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/the value of maxLength must be a number/).and.notify(done);
@@ -316,7 +353,7 @@ describe('Parser', function() {
         '  a:',
         '    name: A',
         '    description: This is A',
-        '    minimum: X',
+        '    minimum: X'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/the value of minimum must be a number/).and.notify(done);
@@ -333,7 +370,7 @@ describe('Parser', function() {
         '  a:',
         '    name: A',
         '    description: This is A',
-        '    maximum: X',
+        '    maximum: X'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/the value of maximum must be a number/).and.notify(done);
@@ -350,7 +387,7 @@ describe('Parser', function() {
         '  a:',
         '    name: A',
         '    description: This is A',
-        '    type: X',
+        '    type: X'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/type can either be: string, number, integer or date/).and.notify(done);
@@ -367,7 +404,7 @@ describe('Parser', function() {
         '  a:',
         '    name: A',
         '    description: This is A',
-        '    type: string',
+        '    type: string'
       ].join('\n');
       
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -384,7 +421,7 @@ describe('Parser', function() {
         '  a:',
         '    name: A',
         '    description: This is A',
-        '    type: number',
+        '    type: number'
       ].join('\n');
       
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -401,7 +438,7 @@ describe('Parser', function() {
         '  a:',
         '    name: A',
         '    description: This is A',
-        '    type: integer',
+        '    type: integer'
       ].join('\n');
       
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -418,7 +455,7 @@ describe('Parser', function() {
         '  a:',
         '    name: A',
         '    description: This is A',
-        '    type: date',
+        '    type: date'
       ].join('\n');
       
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -428,7 +465,7 @@ describe('Parser', function() {
       var definition = [
         '---',
         'title: MyApi',
-        'baseUri: http://{myapi.com',
+        'baseUri: http://{myapi.com'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/unclosed brace/).and.notify(done);
@@ -437,7 +474,7 @@ describe('Parser', function() {
       var definition = [
         '---',
         'title: MyApi',
-        'baseUri: http://myapi.com/{version}',
+        'baseUri: http://myapi.com/{version}'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/missing version/).and.notify(done);
@@ -447,7 +484,7 @@ describe('Parser', function() {
         '---',
         'title: MyApi',
         'version: v1',
-        'baseUri: http://myapi.com/{version}',
+        'baseUri: http://myapi.com/{version}'
       ].join('\n');
       
       promise = raml.load(definition);
@@ -471,7 +508,7 @@ describe('Parser', function() {
         '/a/c:',
         '  name: AC',
         '  post:',
-        '',
+        ''
       ].join('\n');
       
       raml.resources(definition).should.become([
@@ -516,7 +553,7 @@ describe('Parser', function() {
         '  /b:',
         '    name: B',
         '/a/b:',
-        '  name: AB',
+        '  name: AB'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/two resources share same URI \/a\/b/).and.notify(done);
@@ -532,7 +569,7 @@ describe('Parser', function() {
         '  /b:',
         '    name: B',
         '/a/c:',
-        '  name: AC',
+        '  name: AC'
       ].join('\n');
       
       raml.load(definition).should.become({ 
@@ -563,7 +600,7 @@ describe('Parser', function() {
           'title: Test',
           '/a:',
           '  name: A',
-          '  get: ~',
+          '  get: ~'
       ].join('\n');
 
       raml.load(definition).should.become({
@@ -666,7 +703,7 @@ describe('Parser', function() {
         '  get:',
         '    responses:',
         '      200:',
-        '        description: Retrieve a list of leagues',
+        '        description: Retrieve a list of leagues'
       ].join('\n');
       
       raml.load(definition).should.become({ 
@@ -732,7 +769,7 @@ describe('Parser', function() {
         '  get:',
         '    responses:',
         '      200:',
-        '        description: Retrieve a list of leagues',
+        '        description: Retrieve a list of leagues'
       ].join('\n');
       
       raml.load(definition).should.become({ 
@@ -813,7 +850,7 @@ describe('Parser', function() {
         '  get:',
         '    responses:',
         '      200:',
-        '        description: Retrieve a list of leagues',
+        '        description: Retrieve a list of leagues'
       ].join('\n');
       
       raml.load(definition).should.become({ 
@@ -873,7 +910,7 @@ describe('Parser', function() {
         '        503:',
         '          description: Server Unavailable. Check Your Rate Limits.',
         '/:',
-        '  use: [ throttled, rateLimited: { parameter: value } ]',
+        '  use: [ throttled, rateLimited: { parameter: value } ]'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/unknown property what/).and.notify(done);
@@ -888,7 +925,7 @@ describe('Parser', function() {
         '  rateLimited:',
         '    name: Rate Limited',
         '/:',
-        '  use: [ rateLimited: { parameter: value } ]',
+        '  use: [ rateLimited: { parameter: value } ]'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/every trait must have a provides property/).and.notify(done);
@@ -907,7 +944,7 @@ describe('Parser', function() {
         '          503:',
         '            description: Server Unavailable. Check Your Rate Limits.',
         '/:',
-        '  use: [ rateLimited: { parameter: value } ]',
+        '  use: [ rateLimited: { parameter: value } ]'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/every trait must have a name property/).and.notify(done);
@@ -919,7 +956,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         '/:',
-        '  use: throttled ]',
+        '  use: throttled ]'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/use property must be an array/).and.notify(done);
@@ -939,7 +976,7 @@ describe('Parser', function() {
         '          503:',
         '            description: Server Unavailable. Check Your Rate Limits.',
         '/:',
-        '  use: [ throttled, rateLimited: { parameter: value } ]',
+        '  use: [ throttled, rateLimited: { parameter: value } ]'
       ].join('\n');
       
       raml.load(definition).should.be.rejected.with(/there is no trait named throttled/).and.notify(done);
