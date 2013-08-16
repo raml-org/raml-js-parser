@@ -220,7 +220,7 @@ class @Validator
           throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', node.start_mark
         uses.forEach (use) =>
           if not traits.some( (trait) => trait[0].value == @key_or_value use)
-            throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), node.start_mark
+            throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
       @valid_trait_consumption resource[1], traits
     
   has_title: (node) ->
