@@ -4,7 +4,7 @@ if (typeof window === 'undefined') {
     , expect = chai.expect
     , should = chai.should();
   var chaiAsPromised = require("chai-as-promised");
-  chai.use(chaiAsPromised);  
+  chai.use(chaiAsPromised);
 } else {
   var raml = RAML.Parser;
   chai.should();
@@ -18,7 +18,7 @@ describe('Parser', function() {
         '---',
         'title: MyApi'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/incompatible YAML/).and.notify(done);
     });
     it('should succeed', function(done) {
@@ -38,7 +38,7 @@ describe('Parser', function() {
         '---',
         'baseUri: http://myapi.com'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/missing title/).and.notify(done);
     });
       it('should fail if title is array', function(done) {
@@ -84,9 +84,9 @@ describe('Parser', function() {
         'version: v1',
         'wrongPropertyName: http://myapi.com/{version}'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/unknown property/).and.notify(done);
-    });    
+    });
   });
   describe('Include', function() {
     it('should fail if include not found', function(done) {
@@ -96,7 +96,7 @@ describe('Parser', function() {
         '---',
         'title: !include relative.md'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/error 404|cannot find relative.md/).and.notify(done);
     });
     it('should succeed on including Markdown', function(done) {
@@ -108,7 +108,7 @@ describe('Parser', function() {
         '  - title: Getting Started',
         '    content: !include http://localhost:9001/test/gettingstarted.md'
       ].join('\n');
-      
+
       raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
     });
     it('should succeed on including another YAML file with .yml extension', function(done) {
@@ -117,7 +117,7 @@ describe('Parser', function() {
         '---',
         '!include http://localhost:9001/test/external.yml'
       ].join('\n');
-      
+
       raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
     });
     it('should succeed on including another YAML file with .yaml extension', function(done) {
@@ -126,7 +126,7 @@ describe('Parser', function() {
         '---',
         '!include http://localhost:9001/test/external.yaml'
       ].join('\n');
-      
+
       raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
     });
     it('should succeed on including another YAML file mid-document', function(done) {
@@ -173,8 +173,8 @@ describe('Parser', function() {
         ''
       ].join('\n');
 
-        raml.load(definition).should.become({
-        title: 'Test', 
+      raml.load(definition).should.become({
+        title: 'Test',
         baseUri: 'http://{a}.myapi.org',
         uriParameters: {
           'a': {
@@ -198,7 +198,7 @@ describe('Parser', function() {
         '    description: This is A',
         ''
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/uri parameter unused/).and.notify(done);
     });
 
@@ -219,10 +219,10 @@ describe('Parser', function() {
         '      name: A',
         '      description: This is A'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/uri parameter unused/).and.notify(done);
     });
-    
+
     it('should fail when declaring a property inside a URI parameter that is not valid', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -236,10 +236,10 @@ describe('Parser', function() {
         '    description: This is A',
         '    wrongPropertyName: X'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/unknown property wrongPropertyName/).and.notify(done);
     });
-    
+
     it('should succeed when declaring a minLength validation as a number', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -253,10 +253,10 @@ describe('Parser', function() {
         '    description: This is A',
         '    minLength: 123'
       ].join('\n');
-      
+
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
-    
+
     it('should succeed when declaring a maxLength validation as a number', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -270,10 +270,10 @@ describe('Parser', function() {
         '    description: This is A',
         '    maxLength: 123'
       ].join('\n');
-      
+
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
-    
+
     it('should succeed when declaring a minimum validation as a number', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -287,10 +287,10 @@ describe('Parser', function() {
         '    description: This is A',
         '    minimum: 123'
       ].join('\n');
-      
+
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
-    
+
     it('should succeed when declaring a maximum validation as a number', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -304,10 +304,10 @@ describe('Parser', function() {
         '    description: This is A',
         '    maximum: 123'
       ].join('\n');
-      
+
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
-    
+
     it('should fail when declaring a minLength validation as anything other than a number', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -321,10 +321,10 @@ describe('Parser', function() {
         '    description: This is A',
         '    minLength: X'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/the value of minLength must be a number/).and.notify(done);
     });
-    
+
     it('should fail when declaring a maxLength validation as anything other than a number', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -338,10 +338,10 @@ describe('Parser', function() {
         '    description: This is A',
         '    maxLength: X'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/the value of maxLength must be a number/).and.notify(done);
     });
-    
+
     it('should fail when declaring a minimum validation as anything other than a number', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -355,10 +355,10 @@ describe('Parser', function() {
         '    description: This is A',
         '    minimum: X'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/the value of minimum must be a number/).and.notify(done);
     });
-    
+
     it('should fail when declaring a maximum validation as anything other than a number', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -372,7 +372,7 @@ describe('Parser', function() {
         '    description: This is A',
         '    maximum: X'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/the value of maximum must be a number/).and.notify(done);
     });
 
@@ -389,7 +389,7 @@ describe('Parser', function() {
         '    description: This is A',
         '    type: X'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/type can either be: string, number, integer or date/).and.notify(done);
     });
 
@@ -406,7 +406,7 @@ describe('Parser', function() {
         '    description: This is A',
         '    type: string'
       ].join('\n');
-      
+
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
 
@@ -423,10 +423,10 @@ describe('Parser', function() {
         '    description: This is A',
         '    type: number'
       ].join('\n');
-      
+
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
-        
+
     it('should succeed when declaring a URI parameter with a integer type', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -440,10 +440,10 @@ describe('Parser', function() {
         '    description: This is A',
         '    type: integer'
       ].join('\n');
-      
+
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
-     
+
     it('should succeed when declaring a URI parameter with a date type', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -457,17 +457,17 @@ describe('Parser', function() {
         '    description: This is A',
         '    type: date'
       ].join('\n');
-      
+
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
-                
+
     it('should fail if baseUri value its not really a URI', function(done) {
       var definition = [
         '---',
         'title: MyApi',
         'baseUri: http://{myapi.com'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/unclosed brace/).and.notify(done);
     });
     it('should fail if baseUri uses version but there is no version defined', function(done) {
@@ -476,7 +476,7 @@ describe('Parser', function() {
         'title: MyApi',
         'baseUri: http://myapi.com/{version}'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/missing version/).and.notify(done);
     });
     it('should succeed if baseUri uses version and there is a version defined', function(done) {
@@ -486,7 +486,7 @@ describe('Parser', function() {
         'version: v1',
         'baseUri: http://myapi.com/{version}'
       ].join('\n');
-      
+
       promise = raml.load(definition);
       promise.should.eventually.deep.equal({ title: 'MyApi', version: 'v1', baseUri: 'http://myapi.com/{version}' }).and.notify(done);
     });
@@ -510,7 +510,7 @@ describe('Parser', function() {
         '  post:',
         ''
       ].join('\n');
-      
+
       raml.resources(definition).should.become([
         {
           "methods": [
@@ -555,7 +555,7 @@ describe('Parser', function() {
         '/a/b:',
         '  name: AB'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/two resources share same URI \/a\/b/).and.notify(done);
     });
     it('should succeed', function(done) {
@@ -571,8 +571,8 @@ describe('Parser', function() {
         '/a/c:',
         '  name: AC'
       ].join('\n');
-      
-      raml.load(definition).should.become({ 
+
+      raml.load(definition).should.become({
         title: 'Test',
         resources: [
           {
@@ -705,9 +705,9 @@ describe('Parser', function() {
         '      200:',
         '        description: Retrieve a list of leagues'
       ].join('\n');
-      
-      raml.load(definition).should.become({ 
-        title: 'Test', 
+
+      raml.load(definition).should.become({
+        title: 'Test',
         traits: {
           rateLimited: {
             name: 'Rate Limited',
@@ -771,9 +771,9 @@ describe('Parser', function() {
         '      200:',
         '        description: Retrieve a list of leagues'
       ].join('\n');
-      
-      raml.load(definition).should.become({ 
-        title: 'Test', 
+
+      raml.load(definition).should.become({
+        title: 'Test',
         traits: {
           rateLimited: {
             name: 'Rate Limited',
@@ -823,10 +823,10 @@ describe('Parser', function() {
               }
             ]
           }
-        ] 
+        ]
       }).and.notify(done);
     });
-    
+
     it('should remove nodes with question mark that are not used', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -852,9 +852,9 @@ describe('Parser', function() {
         '      200:',
         '        description: Retrieve a list of leagues'
       ].join('\n');
-      
-      raml.load(definition).should.become({ 
-        title: 'Test', 
+
+      raml.load(definition).should.become({
+        title: 'Test',
         traits: {
           rateLimited: {
             name: 'Rate Limited',
@@ -894,7 +894,7 @@ describe('Parser', function() {
               }
             ]
           }
-        ] 
+        ]
       }).and.notify(done);
     });
     it('should fail if unknown property is used inside a trait', function(done) {
@@ -912,9 +912,9 @@ describe('Parser', function() {
         '/:',
         '  use: [ throttled, rateLimited: { parameter: value } ]'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/unknown property what/).and.notify(done);
-    });    
+    });
     it('should fail if trait is missing provides property', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -927,9 +927,9 @@ describe('Parser', function() {
         '/:',
         '  use: [ rateLimited: { parameter: value } ]'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/every trait must have a provides property/).and.notify(done);
-    });    
+    });
     it('should fail if trait is missing name property', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -946,9 +946,9 @@ describe('Parser', function() {
         '/:',
         '  use: [ rateLimited: { parameter: value } ]'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/every trait must have a name property/).and.notify(done);
-    });    
+    });
     it('should fail if use property is not an array', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -958,7 +958,7 @@ describe('Parser', function() {
         '/:',
         '  use: throttled ]'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/use property must be an array/).and.notify(done);
     });
     it('should fail on invalid trait name', function(done) {
@@ -978,8 +978,40 @@ describe('Parser', function() {
         '/:',
         '  use: [ throttled, rateLimited: { parameter: value } ]'
       ].join('\n');
-      
+
       raml.load(definition).should.be.rejected.with(/there is no trait named throttled/).and.notify(done);
+    });
+  });
+  describe('Error reporting', function () {
+    it('should report correct line/column for invalid trait error', function(done) {
+      var noop = function () {};
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    provides:',
+        '      get?:',
+        '        responses:',
+        '          503:',
+        '            description: Server Unavailable. Check Your Rate Limits.',
+        '/:',
+        '  use: [ throttled, rateLimited: { parameter: value } ]'
+      ].join('\n');
+
+      raml.load(definition).then(noop, function (error) {
+
+        expect(error.problem_mark).to.exist;
+        done();
+
+        // error.problem_mark.column.should.be.equal(10);
+        // error.problem_mark.line.should.be.equal(10);
+
+      });
+      //raml.load(definition).should.be.rejected.with(/there is no trait named throttled/).and.notify(done);
     });
   });
 });
