@@ -1003,13 +1003,14 @@ describe('Parser', function() {
       ].join('\n');
 
       raml.load(definition).then(noop, function (error) {
+        setTimeout(function () {
 
-        expect(error.problem_mark).to.exist;
-        done();
+          expect(error.problem_mark).to.exist;
+          error.problem_mark.column.should.be.equal(9);
+          error.problem_mark.line.should.be.equal(13);
 
-        // error.problem_mark.column.should.be.equal(10);
-        // error.problem_mark.line.should.be.equal(10);
-
+          done();
+        }, 0);
       });
       //raml.load(definition).should.be.rejected.with(/there is no trait named throttled/).and.notify(done);
     });
