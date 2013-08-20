@@ -115,9 +115,9 @@ class @BaseConstructor
       # foo: value
       # bar: value
       if typeof key is 'object' and key_node.tag == 'tag:yaml.org,2002:seq'
-        for key_value in key_node.value
-          key_value_value = @construct_object key_value
-          mapping[key_value_value] = value
+        for key_item in key_node.value
+          key_item_value = @construct_object key_item
+          mapping[key_item_value] = value
       else if typeof key is 'object'
         throw new exports.ConstructorError 'while constructing a mapping', \
           node.start_mark, 'found unhashable key', key_node.start_mark

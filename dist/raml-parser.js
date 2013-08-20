@@ -7300,7 +7300,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
     };
 
     BaseConstructor.prototype.construct_mapping = function(node) {
-      var key, key_node, key_value, key_value_value, mapping, value, value_node, _i, _j, _len, _len1, _ref1, _ref2, _ref3;
+      var key, key_item, key_item_value, key_node, mapping, value, value_node, _i, _j, _len, _len1, _ref1, _ref2, _ref3;
       if (!(node instanceof nodes.MappingNode)) {
         throw new exports.ConstructorError(null, null, "expected a mapping node but found " + node.id, node.start_mark);
       }
@@ -7313,9 +7313,9 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
         if (typeof key === 'object' && key_node.tag === 'tag:yaml.org,2002:seq') {
           _ref3 = key_node.value;
           for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
-            key_value = _ref3[_j];
-            key_value_value = this.construct_object(key_value);
-            mapping[key_value_value] = value;
+            key_item = _ref3[_j];
+            key_item_value = this.construct_object(key_item);
+            mapping[key_item_value] = value;
           }
         } else if (typeof key === 'object') {
           throw new exports.ConstructorError('while constructing a mapping', node.start_mark, 'found unhashable key', key_node.start_mark);
@@ -10956,249 +10956,7 @@ function decode(str) {
   }
 }
 
-},{}],11:[function(require,module,exports){
-(function() {
-  var _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  this.composer = require('./composer');
-
-  this.constructor = require('./construct');
-
-  this.errors = require('./errors');
-
-  this.events = require('./events');
-
-  this.loader = require('./loader');
-
-  this.nodes = require('./nodes');
-
-  this.parser = require('./parser');
-
-  this.reader = require('./reader');
-
-  this.resolver = require('./resolver');
-
-  this.scanner = require('./scanner');
-
-  this.tokens = require('./tokens');
-
-  this.q = require('q');
-
-  this.FileError = (function(_super) {
-    __extends(FileError, _super);
-
-    function FileError() {
-      _ref = FileError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return FileError;
-
-  })(this.errors.MarkedYAMLError);
-
-  /*
-  Scan a RAML stream and produce scanning tokens.
-  */
-
-
-  this.scan = function(stream, location) {
-    var loader, _results;
-    loader = new exports.loader.Loader(stream, location);
-    _results = [];
-    while (loader.check_token()) {
-      _results.push(loader.get_token());
-    }
-    return _results;
-  };
-
-  /*
-  Parse a RAML stream and produce parsing events.
-  */
-
-
-  this.parse = function(stream, location) {
-    var loader, _results;
-    loader = new exports.loader.Loader(stream, location);
-    _results = [];
-    while (loader.check_event()) {
-      _results.push(loader.get_event());
-    }
-    return _results;
-  };
-
-  /*
-  Parse the first RAML document in a stream and produce the corresponding
-  representation tree.
-  */
-
-
-  this.compose = function(stream, validate, apply, join, location) {
-    var loader;
-    if (validate == null) {
-      validate = true;
-    }
-    if (apply == null) {
-      apply = true;
-    }
-    if (join == null) {
-      join = true;
-    }
-    loader = new exports.loader.Loader(stream, location);
-    return loader.get_single_node(validate, apply, join);
-  };
-
-  /*
-  Parse the first RAML document in a stream and produce the corresponding
-  Javascript object.
-  */
-
-
-  this.load = function(stream, validate, location) {
-    var deferred, error, loader, result;
-    if (validate == null) {
-      validate = true;
-    }
-    loader = new exports.loader.Loader(stream, location);
-    deferred = new this.q.defer;
-    try {
-      result = loader.get_single_data();
-      deferred.resolve(result);
-    } catch (_error) {
-      error = _error;
-      deferred.reject(error);
-    }
-    return deferred.promise;
-  };
-
-  /*
-  Parse the first RAML document in a stream and produce a list of
-    all the absolute URIs for all resources
-  */
-
-
-  this.resources = function(stream, validate, location) {
-    var deferred, error, loader, result;
-    if (validate == null) {
-      validate = true;
-    }
-    loader = new exports.loader.Loader(stream, location);
-    deferred = new this.q.defer;
-    try {
-      result = loader.resources();
-      deferred.resolve(result);
-    } catch (_error) {
-      error = _error;
-      deferred.reject(error);
-    }
-    return deferred.promise;
-  };
-
-  /*
-  Parse the first RAML document in a stream and produce the corresponding
-  Javascript object.
-  */
-
-
-  this.loadFile = function(file, validate) {
-    var stream;
-    if (validate == null) {
-      validate = true;
-    }
-    stream = this.readFile(file);
-    return this.load(stream, validate, file);
-  };
-
-  /*
-  Parse the first RAML document in a file and produce the corresponding
-  representation tree.
-  */
-
-
-  this.composeFile = function(file, validate, apply, join) {
-    var stream;
-    if (validate == null) {
-      validate = true;
-    }
-    if (apply == null) {
-      apply = true;
-    }
-    if (join == null) {
-      join = true;
-    }
-    stream = this.readFile(file);
-    return this.compose(stream, validate, apply, join, file);
-  };
-
-  /*
-  Parse the first RAML document in a file and produce a list of
-    all the absolute URIs for all resources
-  */
-
-
-  this.resourcesFile = function(file, validate) {
-    var stream;
-    if (validate == null) {
-      validate = true;
-    }
-    stream = this.readFile(file);
-    return this.resources(stream, validate, file);
-  };
-
-  /*
-  Read file either locally or from the network
-  */
-
-
-  this.readFile = function(file) {
-    var fs, url;
-    url = require('url').parse(file);
-    if (url.protocol != null) {
-      if (!url.protocol.match(/^https?/i)) {
-        throw new exports.FileError('while reading ' + file, null, 'unknown protocol ' + url.protocol, this.start_mark);
-      } else {
-        return this.fetchFile(file);
-      }
-    } else {
-      if (!(typeof window !== "undefined" && window !== null)) {
-        fs = require('fs');
-        if (fs.existsSync(file)) {
-          return fs.readFileSync(file).toString();
-        } else {
-          throw new exports.FileError('while reading ' + file, null, 'cannot find ' + file, this.start_mark);
-        }
-      } else {
-        return this.fetchFile(file);
-      }
-    }
-  };
-
-  /*
-  Read file from the network
-  */
-
-
-  this.fetchFile = function(file) {
-    var xhr;
-    if (typeof window === "undefined" || window === null) {
-      xhr = new (require("xmlhttprequest").XMLHttpRequest)();
-    } else {
-      xhr = new XMLHttpRequest();
-    }
-    xhr.open('GET', file, false);
-    xhr.setRequestHeader('Accept', 'application/raml+yaml, */*');
-    xhr.send(null);
-    if ((typeof xhr.status === 'number' && xhr.status === 200) || (typeof xhr.status === 'string' && xhr.status.match(/^200/i))) {
-      return xhr.responseText;
-    } else {
-      throw new exports.FileError('while reading ' + file, null, 'error ' + xhr.status, this.start_mark);
-    }
-  };
-
-}).call(this);
-
-},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":24}],22:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, uritemplate, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11616,573 +11374,249 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"uritemplate":25}],24:[function(require,module,exports){
-(function(process,Buffer){/**
- * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
- *
- * This can be used with JS designed for browsers to improve reuse of code and
- * allow the use of existing libraries.
- *
- * Usage: include("XMLHttpRequest.js") and use XMLHttpRequest per W3C specs.
- *
- * @author Dan DeFelippi <dan@driverdan.com>
- * @contributor David Ellis <d.f.ellis@ieee.org>
- * @license MIT
- */
+},{"./errors":1,"./nodes":13,"uritemplate":24}],11:[function(require,module,exports){
+(function() {
+  var _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-var Url = require("url")
-  , spawn = require("child_process").spawn
-  , fs = require('fs');
+  this.composer = require('./composer');
 
-exports.XMLHttpRequest = function() {
-  /**
-   * Private variables
-   */
-  var self = this;
-  var http = require('http');
-  var https = require('https');
+  this.constructor = require('./construct');
 
-  // Holds http.js objects
-  var client;
-  var request;
-  var response;
+  this.errors = require('./errors');
 
-  // Request settings
-  var settings = {};
+  this.events = require('./events');
 
-  // Disable header blacklist.
-  // Not part of XHR specs.
-  var disableHeaderCheck = false;
+  this.loader = require('./loader');
 
-  // Set some default headers
-  var defaultHeaders = {
-    "User-Agent": "node-XMLHttpRequest",
-    "Accept": "*/*",
+  this.nodes = require('./nodes');
+
+  this.parser = require('./parser');
+
+  this.reader = require('./reader');
+
+  this.resolver = require('./resolver');
+
+  this.scanner = require('./scanner');
+
+  this.tokens = require('./tokens');
+
+  this.q = require('q');
+
+  this.FileError = (function(_super) {
+    __extends(FileError, _super);
+
+    function FileError() {
+      _ref = FileError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return FileError;
+
+  })(this.errors.MarkedYAMLError);
+
+  /*
+  Scan a RAML stream and produce scanning tokens.
+  */
+
+
+  this.scan = function(stream, location) {
+    var loader, _results;
+    loader = new exports.loader.Loader(stream, location);
+    _results = [];
+    while (loader.check_token()) {
+      _results.push(loader.get_token());
+    }
+    return _results;
   };
 
-  var headers = defaultHeaders;
+  /*
+  Parse a RAML stream and produce parsing events.
+  */
 
-  // These headers are not user setable.
-  // The following are allowed but banned in the spec:
-  // * user-agent
-  var forbiddenRequestHeaders = [
-    "accept-charset",
-    "accept-encoding",
-    "access-control-request-headers",
-    "access-control-request-method",
-    "connection",
-    "content-length",
-    "content-transfer-encoding",
-    "cookie",
-    "cookie2",
-    "date",
-    "expect",
-    "host",
-    "keep-alive",
-    "origin",
-    "referer",
-    "te",
-    "trailer",
-    "transfer-encoding",
-    "upgrade",
-    "via"
-  ];
 
-  // These request methods are not allowed
-  var forbiddenRequestMethods = [
-    "TRACE",
-    "TRACK",
-    "CONNECT"
-  ];
-
-  // Send flag
-  var sendFlag = false;
-  // Error flag, used when errors occur or abort is called
-  var errorFlag = false;
-
-  // Event listeners
-  var listeners = {};
-
-  /**
-   * Constants
-   */
-
-  this.UNSENT = 0;
-  this.OPENED = 1;
-  this.HEADERS_RECEIVED = 2;
-  this.LOADING = 3;
-  this.DONE = 4;
-
-  /**
-   * Public vars
-   */
-
-  // Current state
-  this.readyState = this.UNSENT;
-
-  // default ready state change handler in case one is not set or is set late
-  this.onreadystatechange = null;
-
-  // Result & response
-  this.responseText = "";
-  this.responseXML = "";
-  this.status = null;
-  this.statusText = null;
-
-  /**
-   * Private methods
-   */
-
-  /**
-   * Check if the specified header is allowed.
-   *
-   * @param string header Header to validate
-   * @return boolean False if not allowed, otherwise true
-   */
-  var isAllowedHttpHeader = function(header) {
-    return disableHeaderCheck || (header && forbiddenRequestHeaders.indexOf(header.toLowerCase()) === -1);
+  this.parse = function(stream, location) {
+    var loader, _results;
+    loader = new exports.loader.Loader(stream, location);
+    _results = [];
+    while (loader.check_event()) {
+      _results.push(loader.get_event());
+    }
+    return _results;
   };
 
-  /**
-   * Check if the specified method is allowed.
-   *
-   * @param string method Request method to validate
-   * @return boolean False if not allowed, otherwise true
-   */
-  var isAllowedHttpMethod = function(method) {
-    return (method && forbiddenRequestMethods.indexOf(method) === -1);
+  /*
+  Parse the first RAML document in a stream and produce the corresponding
+  representation tree.
+  */
+
+
+  this.compose = function(stream, validate, apply, join, location) {
+    var loader;
+    if (validate == null) {
+      validate = true;
+    }
+    if (apply == null) {
+      apply = true;
+    }
+    if (join == null) {
+      join = true;
+    }
+    loader = new exports.loader.Loader(stream, location);
+    return loader.get_single_node(validate, apply, join);
   };
 
-  /**
-   * Public methods
-   */
+  /*
+  Parse the first RAML document in a stream and produce the corresponding
+  Javascript object.
+  */
 
-  /**
-   * Open the connection. Currently supports local server requests.
-   *
-   * @param string method Connection method (eg GET, POST)
-   * @param string url URL for the connection.
-   * @param boolean async Asynchronous connection. Default is true.
-   * @param string user Username for basic authentication (optional)
-   * @param string password Password for basic authentication (optional)
-   */
-  this.open = function(method, url, async, user, password) {
-    this.abort();
-    errorFlag = false;
 
-    // Check for valid request method
-    if (!isAllowedHttpMethod(method)) {
-      throw "SecurityError: Request method not allowed";
-      return;
+  this.load = function(stream, validate, location) {
+    var deferred, error, loader, result;
+    if (validate == null) {
+      validate = true;
     }
-
-    settings = {
-      "method": method,
-      "url": url.toString(),
-      "async": (typeof async !== "boolean" ? true : async),
-      "user": user || null,
-      "password": password || null
-    };
-
-    setState(this.OPENED);
+    loader = new exports.loader.Loader(stream, location);
+    deferred = new this.q.defer;
+    try {
+      result = loader.get_single_data();
+      deferred.resolve(result);
+    } catch (_error) {
+      error = _error;
+      deferred.reject(error);
+    }
+    return deferred.promise;
   };
 
-  /**
-   * Disables or enables isAllowedHttpHeader() check the request. Enabled by default.
-   * This does not conform to the W3C spec.
-   *
-   * @param boolean state Enable or disable header checking.
-   */
-  this.setDisableHeaderCheck = function(state) {
-    disableHeaderCheck = state;
-  }
+  /*
+  Parse the first RAML document in a stream and produce a list of
+    all the absolute URIs for all resources
+  */
 
-  /**
-   * Sets a header for the request.
-   *
-   * @param string header Header name
-   * @param string value Header value
-   */
-  this.setRequestHeader = function(header, value) {
-    if (this.readyState != this.OPENED) {
-      throw "INVALID_STATE_ERR: setRequestHeader can only be called when state is OPEN";
+
+  this.resources = function(stream, validate, location) {
+    var deferred, error, loader, result;
+    if (validate == null) {
+      validate = true;
     }
-    if (!isAllowedHttpHeader(header)) {
-      console.warn('Refused to set unsafe header "' + header + '"');
-      return;
+    loader = new exports.loader.Loader(stream, location);
+    deferred = new this.q.defer;
+    try {
+      result = loader.resources();
+      deferred.resolve(result);
+    } catch (_error) {
+      error = _error;
+      deferred.reject(error);
     }
-    if (sendFlag) {
-      throw "INVALID_STATE_ERR: send flag is true";
-    }
-    headers[header] = value;
+    return deferred.promise;
   };
 
-  /**
-   * Gets a header from the server response.
-   *
-   * @param string header Name of header to get.
-   * @return string Text of the header or null if it doesn't exist.
-   */
-  this.getResponseHeader = function(header) {
-    if (typeof header === "string"
-      && this.readyState > this.OPENED
-      && response.headers[header.toLowerCase()]
-      && !errorFlag
-    ) {
-      return response.headers[header.toLowerCase()];
-    }
+  /*
+  Parse the first RAML document in a stream and produce the corresponding
+  Javascript object.
+  */
 
-    return null;
+
+  this.loadFile = function(file, validate) {
+    var stream;
+    if (validate == null) {
+      validate = true;
+    }
+    stream = this.readFile(file);
+    return this.load(stream, validate, file);
   };
 
-  /**
-   * Gets all the response headers.
-   *
-   * @return string A string with all response headers separated by CR+LF
-   */
-  this.getAllResponseHeaders = function() {
-    if (this.readyState < this.HEADERS_RECEIVED || errorFlag) {
-      return "";
-    }
-    var result = "";
+  /*
+  Parse the first RAML document in a file and produce the corresponding
+  representation tree.
+  */
 
-    for (var i in response.headers) {
-      // Cookie headers are excluded
-      if (i !== "set-cookie" && i !== "set-cookie2") {
-        result += i + ": " + response.headers[i] + "\r\n";
-      }
+
+  this.composeFile = function(file, validate, apply, join) {
+    var stream;
+    if (validate == null) {
+      validate = true;
     }
-    return result.substr(0, result.length - 2);
+    if (apply == null) {
+      apply = true;
+    }
+    if (join == null) {
+      join = true;
+    }
+    stream = this.readFile(file);
+    return this.compose(stream, validate, apply, join, file);
   };
 
-  /**
-   * Gets a request header
-   *
-   * @param string name Name of header to get
-   * @return string Returns the request header or empty string if not set
-   */
-  this.getRequestHeader = function(name) {
-    // @TODO Make this case insensitive
-    if (typeof name === "string" && headers[name]) {
-      return headers[name];
+  /*
+  Parse the first RAML document in a file and produce a list of
+    all the absolute URIs for all resources
+  */
+
+
+  this.resourcesFile = function(file, validate) {
+    var stream;
+    if (validate == null) {
+      validate = true;
     }
+    stream = this.readFile(file);
+    return this.resources(stream, validate, file);
+  };
 
-    return "";
-  }
+  /*
+  Read file either locally or from the network
+  */
 
-  /**
-   * Sends the request to the server.
-   *
-   * @param string data Optional data to send as request body.
-   */
-  this.send = function(data) {
-    if (this.readyState != this.OPENED) {
-      throw "INVALID_STATE_ERR: connection must be opened before send() is called";
-    }
 
-    if (sendFlag) {
-      throw "INVALID_STATE_ERR: send has already been called";
-    }
-
-    var ssl = false, local = false;
-    var url = Url.parse(settings.url);
-
-    // Determine the server
-    switch (url.protocol) {
-      case 'https:':
-        ssl = true;
-        // SSL & non-SSL both need host, no break here.
-      case 'http:':
-        var host = url.hostname;
-        break;
-
-      case 'file:':
-        local = true;
-        break;
-
-      case undefined:
-      case '':
-        var host = "localhost";
-        break;
-
-      default:
-        throw "Protocol not supported.";
-    }
-
-    // Load files off the local filesystem (file://)
-    if (local) {
-      if (settings.method !== "GET") {
-        throw "XMLHttpRequest: Only GET method is supported";
-      }
-
-      if (settings.async) {
-        fs.readFile(url.pathname, 'utf8', function(error, data) {
-          if (error) {
-            self.handleError(error);
-          } else {
-            self.status = 200;
-            self.responseText = data;
-            setState(self.DONE);
-          }
-        });
+  this.readFile = function(file) {
+    var fs, url;
+    url = require('url').parse(file);
+    if (url.protocol != null) {
+      if (!url.protocol.match(/^https?/i)) {
+        throw new exports.FileError('while reading ' + file, null, 'unknown protocol ' + url.protocol, this.start_mark);
       } else {
-        try {
-          this.responseText = fs.readFileSync(url.pathname, 'utf8');
-          this.status = 200;
-          setState(self.DONE);
-        } catch(e) {
-          this.handleError(e);
+        return this.fetchFile(file);
+      }
+    } else {
+      if (!(typeof window !== "undefined" && window !== null)) {
+        fs = require('fs');
+        if (fs.existsSync(file)) {
+          return fs.readFileSync(file).toString();
+        } else {
+          throw new exports.FileError('while reading ' + file, null, 'cannot find ' + file, this.start_mark);
         }
-      }
-
-      return;
-    }
-
-    // Default to port 80. If accessing localhost on another port be sure
-    // to use http://localhost:port/path
-    var port = url.port || (ssl ? 443 : 80);
-    // Add query string if one is used
-    var uri = url.pathname + (url.search ? url.search : '');
-
-    // Set the Host header or the server may reject the request
-    headers["Host"] = host;
-    if (!((ssl && port === 443) || port === 80)) {
-      headers["Host"] += ':' + url.port;
-    }
-
-    // Set Basic Auth if necessary
-    if (settings.user) {
-      if (typeof settings.password == "undefined") {
-        settings.password = "";
-      }
-      var authBuf = new Buffer(settings.user + ":" + settings.password);
-      headers["Authorization"] = "Basic " + authBuf.toString("base64");
-    }
-
-    // Set content length header
-    if (settings.method === "GET" || settings.method === "HEAD") {
-      data = null;
-    } else if (data) {
-      headers["Content-Length"] = Buffer.byteLength(data);
-
-      if (!headers["Content-Type"]) {
-        headers["Content-Type"] = "text/plain;charset=UTF-8";
-      }
-    } else if (settings.method === "POST") {
-      // For a post with no data set Content-Length: 0.
-      // This is required by buggy servers that don't meet the specs.
-      headers["Content-Length"] = 0;
-    }
-
-    var options = {
-      host: host,
-      port: port,
-      path: uri,
-      method: settings.method,
-      headers: headers,
-      agent: false
-    };
-
-    // Reset error flag
-    errorFlag = false;
-
-    // Handle async requests
-    if (settings.async) {
-      // Use the proper protocol
-      var doRequest = ssl ? https.request : http.request;
-
-      // Request is being sent, set send flag
-      sendFlag = true;
-
-      // As per spec, this is called here for historical reasons.
-      self.dispatchEvent("readystatechange");
-
-      // Create the request
-      request = doRequest(options, function(resp) {
-        response = resp;
-        response.setEncoding("utf8");
-
-        setState(self.HEADERS_RECEIVED);
-        self.status = response.statusCode;
-
-        response.on('data', function(chunk) {
-          // Make sure there's some data
-          if (chunk) {
-            self.responseText += chunk;
-          }
-          // Don't emit state changes if the connection has been aborted.
-          if (sendFlag) {
-            setState(self.LOADING);
-          }
-        });
-
-        response.on('end', function() {
-          if (sendFlag) {
-            // Discard the 'end' event if the connection has been aborted
-            setState(self.DONE);
-            sendFlag = false;
-          }
-        });
-
-        response.on('error', function(error) {
-          self.handleError(error);
-        });
-      }).on('error', function(error) {
-        self.handleError(error);
-      });
-
-      // Node 0.4 and later won't accept empty data. Make sure it's needed.
-      if (data) {
-        request.write(data);
-      }
-
-      request.end();
-
-      self.dispatchEvent("loadstart");
-    } else { // Synchronous
-      // Create a temporary file for communication with the other Node process
-      var syncFile = ".node-xmlhttprequest-sync-" + process.pid;
-      fs.writeFileSync(syncFile, "", "utf8");
-      // The async request the other Node process executes
-      var execString = "var http = require('http'), https = require('https'), fs = require('fs');"
-        + "var doRequest = http" + (ssl ? "s" : "") + ".request;"
-        + "var options = " + JSON.stringify(options) + ";"
-        + "var responseText = '';"
-        + "var req = doRequest(options, function(response) {"
-        + "response.setEncoding('utf8');"
-        + "response.on('data', function(chunk) {"
-        + "responseText += chunk;"
-        + "});"
-        + "response.on('end', function() {"
-        + "fs.writeFileSync('" + syncFile + "', 'NODE-XMLHTTPREQUEST-STATUS:' + response.statusCode + ',' + responseText, 'utf8');"
-        + "});"
-        + "response.on('error', function(error) {"
-        + "fs.writeFileSync('" + syncFile + "', 'NODE-XMLHTTPREQUEST-ERROR:' + JSON.stringify(error), 'utf8');"
-        + "});"
-        + "}).on('error', function(error) {"
-        + "fs.writeFileSync('" + syncFile + "', 'NODE-XMLHTTPREQUEST-ERROR:' + JSON.stringify(error), 'utf8');"
-        + "});"
-        + (data ? "req.write('" + data.replace(/'/g, "\\'") + "');":"")
-        + "req.end();";
-      // Start the other Node Process, executing this string
-      syncProc = spawn(process.argv[0], ["-e", execString]);
-      while((self.responseText = fs.readFileSync(syncFile, 'utf8')) == "") {
-        // Wait while the file is empty
-      }
-      // Kill the child process once the file has data
-      syncProc.stdin.end();
-      // Remove the temporary file
-      fs.unlinkSync(syncFile);
-      if (self.responseText.match(/^NODE-XMLHTTPREQUEST-ERROR:/)) {
-        // If the file returned an error, handle it
-        var errorObj = self.responseText.replace(/^NODE-XMLHTTPREQUEST-ERROR:/, "");
-        self.handleError(errorObj);
       } else {
-        // If the file returned okay, parse its data and move to the DONE state
-        self.status = self.responseText.replace(/^NODE-XMLHTTPREQUEST-STATUS:([0-9]*),.*/, "$1");
-        self.responseText = self.responseText.replace(/^NODE-XMLHTTPREQUEST-STATUS:[0-9]*,(.*)/, "$1");
-        setState(self.DONE);
+        return this.fetchFile(file);
       }
     }
   };
 
-  /**
-   * Called when an error is encountered to deal with it.
-   */
-  this.handleError = function(error) {
-    this.status = 503;
-    this.statusText = error;
-    this.responseText = error.stack;
-    errorFlag = true;
-    setState(this.DONE);
-  };
+  /*
+  Read file from the network
+  */
 
-  /**
-   * Aborts a request.
-   */
-  this.abort = function() {
-    if (request) {
-      request.abort();
-      request = null;
+
+  this.fetchFile = function(file) {
+    var xhr;
+    if (typeof window === "undefined" || window === null) {
+      xhr = new (require("xmlhttprequest").XMLHttpRequest)();
+    } else {
+      xhr = new XMLHttpRequest();
     }
-
-    headers = defaultHeaders;
-    this.responseText = "";
-    this.responseXML = "";
-
-    errorFlag = true;
-
-    if (this.readyState !== this.UNSENT
-        && (this.readyState !== this.OPENED || sendFlag)
-        && this.readyState !== this.DONE) {
-      sendFlag = false;
-      setState(this.DONE);
-    }
-    this.readyState = this.UNSENT;
-  };
-
-  /**
-   * Adds an event listener. Preferred method of binding to events.
-   */
-  this.addEventListener = function(event, callback) {
-    if (!(event in listeners)) {
-      listeners[event] = [];
-    }
-    // Currently allows duplicate callbacks. Should it?
-    listeners[event].push(callback);
-  };
-
-  /**
-   * Remove an event callback that has already been bound.
-   * Only works on the matching funciton, cannot be a copy.
-   */
-  this.removeEventListener = function(event, callback) {
-    if (event in listeners) {
-      // Filter will return a new array with the callback removed
-      listeners[event] = listeners[event].filter(function(ev) {
-        return ev !== callback;
-      });
+    xhr.open('GET', file, false);
+    xhr.setRequestHeader('Accept', 'application/raml+yaml, */*');
+    xhr.send(null);
+    if ((typeof xhr.status === 'number' && xhr.status === 200) || (typeof xhr.status === 'string' && xhr.status.match(/^200/i))) {
+      return xhr.responseText;
+    } else {
+      throw new exports.FileError('while reading ' + file, null, 'error ' + xhr.status, this.start_mark);
     }
   };
 
-  /**
-   * Dispatch any events, including both "on" methods and events attached using addEventListener.
-   */
-  this.dispatchEvent = function(event) {
-    if (typeof self["on" + event] === "function") {
-      self["on" + event]();
-    }
-    if (event in listeners) {
-      for (var i = 0, len = listeners[event].length; i < len; i++) {
-        listeners[event][i].call(self);
-      }
-    }
-  };
+}).call(this);
 
-  /**
-   * Changes readyState and calls onreadystatechange.
-   *
-   * @param int state New state
-   */
-  var setState = function(state) {
-    if (self.readyState !== state) {
-      self.readyState = state;
-
-      if (settings.async || self.readyState < self.OPENED || self.readyState === self.DONE) {
-        self.dispatchEvent("readystatechange");
-      }
-
-      if (self.readyState === self.DONE && !errorFlag) {
-        self.dispatchEvent("load");
-        // @TODO figure out InspectorInstrumentation::didLoadXHR(cookie)
-        self.dispatchEvent("loadend");
-      }
-    }
-  };
-};
-
-})(require("__browserify_process"),require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":14,"__browserify_process":5,"child_process":26,"fs":9,"http":27,"https":28,"url":7}],25:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":25}],24:[function(require,module,exports){
 (function(global){/*global unescape, module, define, window, global*/
 
 /*
@@ -13070,7 +12504,573 @@ var UriTemplate = (function () {
 ));
 
 })(window)
-},{}],26:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
+(function(process,Buffer){/**
+ * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
+ *
+ * This can be used with JS designed for browsers to improve reuse of code and
+ * allow the use of existing libraries.
+ *
+ * Usage: include("XMLHttpRequest.js") and use XMLHttpRequest per W3C specs.
+ *
+ * @author Dan DeFelippi <dan@driverdan.com>
+ * @contributor David Ellis <d.f.ellis@ieee.org>
+ * @license MIT
+ */
+
+var Url = require("url")
+  , spawn = require("child_process").spawn
+  , fs = require('fs');
+
+exports.XMLHttpRequest = function() {
+  /**
+   * Private variables
+   */
+  var self = this;
+  var http = require('http');
+  var https = require('https');
+
+  // Holds http.js objects
+  var client;
+  var request;
+  var response;
+
+  // Request settings
+  var settings = {};
+
+  // Disable header blacklist.
+  // Not part of XHR specs.
+  var disableHeaderCheck = false;
+
+  // Set some default headers
+  var defaultHeaders = {
+    "User-Agent": "node-XMLHttpRequest",
+    "Accept": "*/*",
+  };
+
+  var headers = defaultHeaders;
+
+  // These headers are not user setable.
+  // The following are allowed but banned in the spec:
+  // * user-agent
+  var forbiddenRequestHeaders = [
+    "accept-charset",
+    "accept-encoding",
+    "access-control-request-headers",
+    "access-control-request-method",
+    "connection",
+    "content-length",
+    "content-transfer-encoding",
+    "cookie",
+    "cookie2",
+    "date",
+    "expect",
+    "host",
+    "keep-alive",
+    "origin",
+    "referer",
+    "te",
+    "trailer",
+    "transfer-encoding",
+    "upgrade",
+    "via"
+  ];
+
+  // These request methods are not allowed
+  var forbiddenRequestMethods = [
+    "TRACE",
+    "TRACK",
+    "CONNECT"
+  ];
+
+  // Send flag
+  var sendFlag = false;
+  // Error flag, used when errors occur or abort is called
+  var errorFlag = false;
+
+  // Event listeners
+  var listeners = {};
+
+  /**
+   * Constants
+   */
+
+  this.UNSENT = 0;
+  this.OPENED = 1;
+  this.HEADERS_RECEIVED = 2;
+  this.LOADING = 3;
+  this.DONE = 4;
+
+  /**
+   * Public vars
+   */
+
+  // Current state
+  this.readyState = this.UNSENT;
+
+  // default ready state change handler in case one is not set or is set late
+  this.onreadystatechange = null;
+
+  // Result & response
+  this.responseText = "";
+  this.responseXML = "";
+  this.status = null;
+  this.statusText = null;
+
+  /**
+   * Private methods
+   */
+
+  /**
+   * Check if the specified header is allowed.
+   *
+   * @param string header Header to validate
+   * @return boolean False if not allowed, otherwise true
+   */
+  var isAllowedHttpHeader = function(header) {
+    return disableHeaderCheck || (header && forbiddenRequestHeaders.indexOf(header.toLowerCase()) === -1);
+  };
+
+  /**
+   * Check if the specified method is allowed.
+   *
+   * @param string method Request method to validate
+   * @return boolean False if not allowed, otherwise true
+   */
+  var isAllowedHttpMethod = function(method) {
+    return (method && forbiddenRequestMethods.indexOf(method) === -1);
+  };
+
+  /**
+   * Public methods
+   */
+
+  /**
+   * Open the connection. Currently supports local server requests.
+   *
+   * @param string method Connection method (eg GET, POST)
+   * @param string url URL for the connection.
+   * @param boolean async Asynchronous connection. Default is true.
+   * @param string user Username for basic authentication (optional)
+   * @param string password Password for basic authentication (optional)
+   */
+  this.open = function(method, url, async, user, password) {
+    this.abort();
+    errorFlag = false;
+
+    // Check for valid request method
+    if (!isAllowedHttpMethod(method)) {
+      throw "SecurityError: Request method not allowed";
+      return;
+    }
+
+    settings = {
+      "method": method,
+      "url": url.toString(),
+      "async": (typeof async !== "boolean" ? true : async),
+      "user": user || null,
+      "password": password || null
+    };
+
+    setState(this.OPENED);
+  };
+
+  /**
+   * Disables or enables isAllowedHttpHeader() check the request. Enabled by default.
+   * This does not conform to the W3C spec.
+   *
+   * @param boolean state Enable or disable header checking.
+   */
+  this.setDisableHeaderCheck = function(state) {
+    disableHeaderCheck = state;
+  }
+
+  /**
+   * Sets a header for the request.
+   *
+   * @param string header Header name
+   * @param string value Header value
+   */
+  this.setRequestHeader = function(header, value) {
+    if (this.readyState != this.OPENED) {
+      throw "INVALID_STATE_ERR: setRequestHeader can only be called when state is OPEN";
+    }
+    if (!isAllowedHttpHeader(header)) {
+      console.warn('Refused to set unsafe header "' + header + '"');
+      return;
+    }
+    if (sendFlag) {
+      throw "INVALID_STATE_ERR: send flag is true";
+    }
+    headers[header] = value;
+  };
+
+  /**
+   * Gets a header from the server response.
+   *
+   * @param string header Name of header to get.
+   * @return string Text of the header or null if it doesn't exist.
+   */
+  this.getResponseHeader = function(header) {
+    if (typeof header === "string"
+      && this.readyState > this.OPENED
+      && response.headers[header.toLowerCase()]
+      && !errorFlag
+    ) {
+      return response.headers[header.toLowerCase()];
+    }
+
+    return null;
+  };
+
+  /**
+   * Gets all the response headers.
+   *
+   * @return string A string with all response headers separated by CR+LF
+   */
+  this.getAllResponseHeaders = function() {
+    if (this.readyState < this.HEADERS_RECEIVED || errorFlag) {
+      return "";
+    }
+    var result = "";
+
+    for (var i in response.headers) {
+      // Cookie headers are excluded
+      if (i !== "set-cookie" && i !== "set-cookie2") {
+        result += i + ": " + response.headers[i] + "\r\n";
+      }
+    }
+    return result.substr(0, result.length - 2);
+  };
+
+  /**
+   * Gets a request header
+   *
+   * @param string name Name of header to get
+   * @return string Returns the request header or empty string if not set
+   */
+  this.getRequestHeader = function(name) {
+    // @TODO Make this case insensitive
+    if (typeof name === "string" && headers[name]) {
+      return headers[name];
+    }
+
+    return "";
+  }
+
+  /**
+   * Sends the request to the server.
+   *
+   * @param string data Optional data to send as request body.
+   */
+  this.send = function(data) {
+    if (this.readyState != this.OPENED) {
+      throw "INVALID_STATE_ERR: connection must be opened before send() is called";
+    }
+
+    if (sendFlag) {
+      throw "INVALID_STATE_ERR: send has already been called";
+    }
+
+    var ssl = false, local = false;
+    var url = Url.parse(settings.url);
+
+    // Determine the server
+    switch (url.protocol) {
+      case 'https:':
+        ssl = true;
+        // SSL & non-SSL both need host, no break here.
+      case 'http:':
+        var host = url.hostname;
+        break;
+
+      case 'file:':
+        local = true;
+        break;
+
+      case undefined:
+      case '':
+        var host = "localhost";
+        break;
+
+      default:
+        throw "Protocol not supported.";
+    }
+
+    // Load files off the local filesystem (file://)
+    if (local) {
+      if (settings.method !== "GET") {
+        throw "XMLHttpRequest: Only GET method is supported";
+      }
+
+      if (settings.async) {
+        fs.readFile(url.pathname, 'utf8', function(error, data) {
+          if (error) {
+            self.handleError(error);
+          } else {
+            self.status = 200;
+            self.responseText = data;
+            setState(self.DONE);
+          }
+        });
+      } else {
+        try {
+          this.responseText = fs.readFileSync(url.pathname, 'utf8');
+          this.status = 200;
+          setState(self.DONE);
+        } catch(e) {
+          this.handleError(e);
+        }
+      }
+
+      return;
+    }
+
+    // Default to port 80. If accessing localhost on another port be sure
+    // to use http://localhost:port/path
+    var port = url.port || (ssl ? 443 : 80);
+    // Add query string if one is used
+    var uri = url.pathname + (url.search ? url.search : '');
+
+    // Set the Host header or the server may reject the request
+    headers["Host"] = host;
+    if (!((ssl && port === 443) || port === 80)) {
+      headers["Host"] += ':' + url.port;
+    }
+
+    // Set Basic Auth if necessary
+    if (settings.user) {
+      if (typeof settings.password == "undefined") {
+        settings.password = "";
+      }
+      var authBuf = new Buffer(settings.user + ":" + settings.password);
+      headers["Authorization"] = "Basic " + authBuf.toString("base64");
+    }
+
+    // Set content length header
+    if (settings.method === "GET" || settings.method === "HEAD") {
+      data = null;
+    } else if (data) {
+      headers["Content-Length"] = Buffer.byteLength(data);
+
+      if (!headers["Content-Type"]) {
+        headers["Content-Type"] = "text/plain;charset=UTF-8";
+      }
+    } else if (settings.method === "POST") {
+      // For a post with no data set Content-Length: 0.
+      // This is required by buggy servers that don't meet the specs.
+      headers["Content-Length"] = 0;
+    }
+
+    var options = {
+      host: host,
+      port: port,
+      path: uri,
+      method: settings.method,
+      headers: headers,
+      agent: false
+    };
+
+    // Reset error flag
+    errorFlag = false;
+
+    // Handle async requests
+    if (settings.async) {
+      // Use the proper protocol
+      var doRequest = ssl ? https.request : http.request;
+
+      // Request is being sent, set send flag
+      sendFlag = true;
+
+      // As per spec, this is called here for historical reasons.
+      self.dispatchEvent("readystatechange");
+
+      // Create the request
+      request = doRequest(options, function(resp) {
+        response = resp;
+        response.setEncoding("utf8");
+
+        setState(self.HEADERS_RECEIVED);
+        self.status = response.statusCode;
+
+        response.on('data', function(chunk) {
+          // Make sure there's some data
+          if (chunk) {
+            self.responseText += chunk;
+          }
+          // Don't emit state changes if the connection has been aborted.
+          if (sendFlag) {
+            setState(self.LOADING);
+          }
+        });
+
+        response.on('end', function() {
+          if (sendFlag) {
+            // Discard the 'end' event if the connection has been aborted
+            setState(self.DONE);
+            sendFlag = false;
+          }
+        });
+
+        response.on('error', function(error) {
+          self.handleError(error);
+        });
+      }).on('error', function(error) {
+        self.handleError(error);
+      });
+
+      // Node 0.4 and later won't accept empty data. Make sure it's needed.
+      if (data) {
+        request.write(data);
+      }
+
+      request.end();
+
+      self.dispatchEvent("loadstart");
+    } else { // Synchronous
+      // Create a temporary file for communication with the other Node process
+      var syncFile = ".node-xmlhttprequest-sync-" + process.pid;
+      fs.writeFileSync(syncFile, "", "utf8");
+      // The async request the other Node process executes
+      var execString = "var http = require('http'), https = require('https'), fs = require('fs');"
+        + "var doRequest = http" + (ssl ? "s" : "") + ".request;"
+        + "var options = " + JSON.stringify(options) + ";"
+        + "var responseText = '';"
+        + "var req = doRequest(options, function(response) {"
+        + "response.setEncoding('utf8');"
+        + "response.on('data', function(chunk) {"
+        + "responseText += chunk;"
+        + "});"
+        + "response.on('end', function() {"
+        + "fs.writeFileSync('" + syncFile + "', 'NODE-XMLHTTPREQUEST-STATUS:' + response.statusCode + ',' + responseText, 'utf8');"
+        + "});"
+        + "response.on('error', function(error) {"
+        + "fs.writeFileSync('" + syncFile + "', 'NODE-XMLHTTPREQUEST-ERROR:' + JSON.stringify(error), 'utf8');"
+        + "});"
+        + "}).on('error', function(error) {"
+        + "fs.writeFileSync('" + syncFile + "', 'NODE-XMLHTTPREQUEST-ERROR:' + JSON.stringify(error), 'utf8');"
+        + "});"
+        + (data ? "req.write('" + data.replace(/'/g, "\\'") + "');":"")
+        + "req.end();";
+      // Start the other Node Process, executing this string
+      syncProc = spawn(process.argv[0], ["-e", execString]);
+      while((self.responseText = fs.readFileSync(syncFile, 'utf8')) == "") {
+        // Wait while the file is empty
+      }
+      // Kill the child process once the file has data
+      syncProc.stdin.end();
+      // Remove the temporary file
+      fs.unlinkSync(syncFile);
+      if (self.responseText.match(/^NODE-XMLHTTPREQUEST-ERROR:/)) {
+        // If the file returned an error, handle it
+        var errorObj = self.responseText.replace(/^NODE-XMLHTTPREQUEST-ERROR:/, "");
+        self.handleError(errorObj);
+      } else {
+        // If the file returned okay, parse its data and move to the DONE state
+        self.status = self.responseText.replace(/^NODE-XMLHTTPREQUEST-STATUS:([0-9]*),.*/, "$1");
+        self.responseText = self.responseText.replace(/^NODE-XMLHTTPREQUEST-STATUS:[0-9]*,(.*)/, "$1");
+        setState(self.DONE);
+      }
+    }
+  };
+
+  /**
+   * Called when an error is encountered to deal with it.
+   */
+  this.handleError = function(error) {
+    this.status = 503;
+    this.statusText = error;
+    this.responseText = error.stack;
+    errorFlag = true;
+    setState(this.DONE);
+  };
+
+  /**
+   * Aborts a request.
+   */
+  this.abort = function() {
+    if (request) {
+      request.abort();
+      request = null;
+    }
+
+    headers = defaultHeaders;
+    this.responseText = "";
+    this.responseXML = "";
+
+    errorFlag = true;
+
+    if (this.readyState !== this.UNSENT
+        && (this.readyState !== this.OPENED || sendFlag)
+        && this.readyState !== this.DONE) {
+      sendFlag = false;
+      setState(this.DONE);
+    }
+    this.readyState = this.UNSENT;
+  };
+
+  /**
+   * Adds an event listener. Preferred method of binding to events.
+   */
+  this.addEventListener = function(event, callback) {
+    if (!(event in listeners)) {
+      listeners[event] = [];
+    }
+    // Currently allows duplicate callbacks. Should it?
+    listeners[event].push(callback);
+  };
+
+  /**
+   * Remove an event callback that has already been bound.
+   * Only works on the matching funciton, cannot be a copy.
+   */
+  this.removeEventListener = function(event, callback) {
+    if (event in listeners) {
+      // Filter will return a new array with the callback removed
+      listeners[event] = listeners[event].filter(function(ev) {
+        return ev !== callback;
+      });
+    }
+  };
+
+  /**
+   * Dispatch any events, including both "on" methods and events attached using addEventListener.
+   */
+  this.dispatchEvent = function(event) {
+    if (typeof self["on" + event] === "function") {
+      self["on" + event]();
+    }
+    if (event in listeners) {
+      for (var i = 0, len = listeners[event].length; i < len; i++) {
+        listeners[event][i].call(self);
+      }
+    }
+  };
+
+  /**
+   * Changes readyState and calls onreadystatechange.
+   *
+   * @param int state New state
+   */
+  var setState = function(state) {
+    if (self.readyState !== state) {
+      self.readyState = state;
+
+      if (settings.async || self.readyState < self.OPENED || self.readyState === self.DONE) {
+        self.dispatchEvent("readystatechange");
+      }
+
+      if (self.readyState === self.DONE && !errorFlag) {
+        self.dispatchEvent("load");
+        // @TODO figure out InspectorInstrumentation::didLoadXHR(cookie)
+        self.dispatchEvent("loadend");
+      }
+    }
+  };
+};
+
+})(require("__browserify_process"),require("__browserify_buffer").Buffer)
+},{"__browserify_buffer":14,"__browserify_process":5,"child_process":26,"fs":9,"http":27,"https":28,"url":7}],26:[function(require,module,exports){
 exports.spawn = function () {};
 exports.exec = function () {};
 
