@@ -1,3 +1,5 @@
+"use strict";
+
 if (typeof window === 'undefined') {
   var raml = require('../lib/raml.js')
   var chai = require('chai')
@@ -31,7 +33,7 @@ describe('Parser', function() {
         '  name: Root'
       ].join('\n');
 
-      promise = raml.load(definition).should.become({ title: 'MyApi', baseUri: 'http://myapi.com', resources: [ { relativeUri: '/', name: 'Root' } ] }).and.notify(done);
+      raml.load(definition).should.become({ title: 'MyApi', baseUri: 'http://myapi.com', resources: [ { relativeUri: '/', name: 'Root' } ] }).and.notify(done);
     });
       it('should fail if no title', function(done) {
       var definition = [
@@ -69,13 +71,13 @@ describe('Parser', function() {
           raml.load(definition).should.be.rejected.with(/too long/).and.notify(done);
       });
       it('should allow number title', function(done) {
-          var definition = [
-              '---',
-              'title: 54',
-              'baseUri: http://myapi.com'
-          ].join('\n');
+        var definition = [
+            '---',
+            'title: 54',
+            'baseUri: http://myapi.com'
+        ].join('\n');
 
-          promise = raml.load(definition).should.become({ title: 54, baseUri: 'http://myapi.com' }).and.notify(done);
+        raml.load(definition).should.become({ title: 54, baseUri: 'http://myapi.com' }).and.notify(done);
       });
       it('should fail if there is a root property with wrong name', function(done) {
       var definition = [
@@ -487,7 +489,7 @@ describe('Parser', function() {
         'baseUri: http://myapi.com/{version}'
       ].join('\n');
 
-      promise = raml.load(definition);
+      var promise = raml.load(definition);
       promise.should.eventually.deep.equal({ title: 'MyApi', version: 'v1', baseUri: 'http://myapi.com/{version}' }).and.notify(done);
     });
   });
