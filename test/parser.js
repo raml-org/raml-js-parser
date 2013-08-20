@@ -19,7 +19,7 @@ describe('Parser', function() {
         'title: MyApi'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/incompatible YAML/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/found incompatible YAML document \(version 1.2 is required\)/).and.notify(done);
     });
     it('should succeed', function(done) {
       var definition = [
@@ -620,6 +620,135 @@ describe('Parser', function() {
       }).and.notify(done);
     });
   });
+  describe('Resource Responses', function() {
+    it('should succeed with arrays as keys', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.2:',
+        '---',
+        'title: Test',
+        '/foo:',
+        '  name: A',
+        '  get:' ,
+        '    description: Blah',
+        '    responses:',
+        '      [200, 210]:',
+        '        description: Blah Blah',
+        ''
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        resources: [{
+          name: 'A',
+          relativeUri: '/foo',
+          methods:[{
+            description: 'Blah',
+            responses: {
+              200: { description: 'Blah Blah'},
+              210: { description: 'Blah Blah'}
+            },
+            method: 'get'
+          }]
+        }]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+
+    it('should overwrite existing node with arrays as keys', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.2:',
+        '---',
+        'title: Test',
+        '/foo:',
+        '  name: A',
+        '  get:' ,
+        '    description: Blah',
+        '    responses:',
+        '      200:',
+        '        description: Foo Foo',
+        '      [200, 210]:',
+        '        description: Blah Blah',
+        ''
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        resources: [{
+          name: 'A',
+          relativeUri: '/foo',
+          methods:[{
+            description: 'Blah',
+            responses: {
+              200: { description: 'Blah Blah'},
+              210: { description: 'Blah Blah'}
+            },
+            method: 'get'
+          }]
+        }]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+
+    it('should overwrite arrays as keys with new single node', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.2:',
+        '---',
+        'title: Test',
+        '/foo:',
+        '  name: A',
+        '  get:' ,
+        '    description: Blah',
+        '    responses:',
+        '      [200, 210]:',
+        '        description: Blah Blah',
+        '      200:',
+        '        description: Foo Foo',
+        ''
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        resources: [{
+          name: 'A',
+          relativeUri: '/foo',
+          methods:[{
+            description: 'Blah',
+            responses: {
+              200: { description: 'Foo Foo'},
+              210: { description: 'Blah Blah'}
+            },
+            method: 'get'
+          }]
+        }]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+
+    it('should fail to load a yaml with hash as key', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.2:',
+        '---',
+        'title: Test',
+        '/foo:',
+        '  name: A',
+        '  get:' ,
+        '    description: Blah',
+        '    responses:',
+        '      {200: Blah}:',
+        '        description: Blah Blah',
+        ''
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/found unhashable key/).and.notify(done);
+    });
+  });
   describe('Traits', function() {
     it('should succeed when applying traits across !include boundaries', function(done) {
       var definition = [
@@ -1004,11 +1133,9 @@ describe('Parser', function() {
 
       raml.load(definition).then(noop, function (error) {
         setTimeout(function () {
-
           expect(error.problem_mark).to.exist;
           error.problem_mark.column.should.be.equal(9);
           error.problem_mark.line.should.be.equal(13);
-
           done();
         }, 0);
       });

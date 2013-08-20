@@ -107,11 +107,22 @@ class @BaseConstructor
     mapping = {}
     for [key_node, value_node] in node.value
       key = @construct_object key_node
-      if typeof key is 'object'
+      value = @construct_object value_node
+
+      # With this we allow keys to be arrays, since JS does not support arrays as keys, we duplicate the values this YAML:
+      # [foo, bar]: value
+      # becomes
+      # foo: value
+      # bar: value
+      if typeof key is 'object' and key_node.tag == 'tag:yaml.org,2002:seq'
+        for key_item in key_node.value
+          key_item_value = @construct_object key_item
+          mapping[key_item_value] = value
+      else if typeof key is 'object'
         throw new exports.ConstructorError 'while constructing a mapping', \
           node.start_mark, 'found unhashable key', key_node.start_mark
-      value = @construct_object value_node
-      mapping[key] = value
+      else
+        mapping[key] = value
     return mapping
 
   construct_pairs: (node) ->

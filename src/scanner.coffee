@@ -1178,8 +1178,7 @@ class @Scanner
 
       while true
         char = @peek length
-        break \
-          if char in C_LB + C_WS + '\x00' or (@flow_level is 0 \
+        break if char in C_LB + C_WS + '\x00' or (@flow_level is 0 \
             and char is ':' and @peek(length + 1) in C_LB + C_WS + '\x00') \
             or (@flow_level isnt 0 and char in ',:?[]{}')
         length++
