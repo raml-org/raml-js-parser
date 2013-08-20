@@ -206,8 +206,7 @@ class @Validator
       return node.value
     if node instanceof nodes.MappingNode
       return node.value[0][0].value
-    console.log(node)
-      
+
   valid_trait_consumption: (node, traits = undefined) ->
     @check_is_map node
     if not traits? and @has_property node, /^traits$/i
