@@ -10,7 +10,6 @@ class @TraitError extends MarkedYAMLError
 The Traits class deals with applying traits to resources according to the spec
 ###
 class @Traits
-  
   constructor: ->
     @declaredTraits = []
     

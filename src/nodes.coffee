@@ -23,8 +23,6 @@ class @ScalarNode extends @Node
     
   combine: (node) ->
     if not (node instanceof ScalarNode)
-      console.log(@value)
-      console.log(node)
       throw new exports.ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
     @value = node.value
     
