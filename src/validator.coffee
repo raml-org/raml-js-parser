@@ -66,17 +66,21 @@ class @Validator
       traits = @property_value node, /^traits$/i
       traits.forEach (trait) =>
         @valid_traits_properties trait[1]
-        if not (@has_property trait[1], /^provides$/i)
-          throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a provides property', node.start_mark
+#        if not (@has_property trait[1], /^provides$/i)
+#          throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a provides property', node.start_mark
         if not (@has_property trait[1], /^name$/i)
           throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a name property', node.start_mark
       
   valid_traits_properties: (node) ->  
     @check_is_map node
     invalid = node.value.filter (childNode) -> 
-      return not (childNode[0].value.match(/^name$/i) or \
-                  childNode[0].value.match(/^description$/i) or \
-                  childNode[0].value.match(/^provides$/i) )
+      return (
+        childNode[0].value.match(/^use$/i) or
+        childNode[0].value.match(/^is$/i)) or
+        !( ( childNode[0].value.match(/^(get|post|put|delete|head|patch|options)\??$/i) or
+           childNode[0].value.match(/^name$/i) or
+           childNode[0].value.match(/^description$/i) or
+           childNode[0].value.match(/^headers$/i)))
     if invalid.length > 0 
       throw new exports.ValidationError 'while validating trait properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
 
@@ -206,6 +210,11 @@ class @Validator
       return node.value
     if node instanceof nodes.MappingNode
       return node.value[0][0].value
+
+  value_or_undefined: (node) ->
+    if node instanceof nodes.MappingNode
+      return node.value
+    return undefined
 
   valid_trait_consumption: (node, traits = undefined) ->
     @check_is_map node

@@ -27,15 +27,25 @@ class @Traits
         if @has_property resource[1], /^use$/i
           uses = @property_value resource[1], /^use$/i
           uses.forEach (use) =>
-            trait = @get_trait @key_or_value use
-            temp = trait.clone()
-            temp.combine resource[1]
-            resource[1] = temp
+            @apply_trait resource, use
         resource[1].remove_question_mark_properties()
         @apply_traits resource[1]
-        
+
+  apply_trait: (resource, useKey) ->
+    trait = @get_trait @key_or_value useKey
+
+    parameters = @value_or_undefined useKey
+    if parameters
+      parameters[0][1].value.forEach (parameter) =>
+        console.log parameter[1].start_mark
+        unless parameter[1].tag == 'tag:yaml.org,2002:str'
+          throw new exports.ValidationError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
+
+    temp = trait.cloneTrait()
+    temp.combine resource[1]
+    resource[1] = temp
+
   get_trait: (traitName) ->
     trait = @declaredTraits.filter( (declaredTrait) -> return declaredTrait[0].value == traitName );
-    provides = trait[0][1].value.filter( (property) -> return property[0].value == 'provides' )
-    return provides[0][1];
+    return trait[0][1];
     
