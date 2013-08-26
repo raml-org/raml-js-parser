@@ -470,6 +470,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/unclosed brace/).and.notify(done);
     });
+
     it('should fail if baseUri uses version but there is no version defined', function(done) {
       var definition = [
         '---',
@@ -479,6 +480,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/missing version/).and.notify(done);
     });
+
     it('should succeed if baseUri uses version and there is a version defined', function(done) {
       var definition = [
         '---',
@@ -490,6 +492,224 @@ describe('Parser', function() {
       var promise = raml.load(definition);
       promise.should.eventually.deep.equal({ title: 'MyApi', version: 'v1', baseUri: 'http://myapi.com/{version}' }).and.notify(done);
     });
+
+    it('should succeed when a URI parameter has required "y"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: y',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "yes"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: yes',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "YES"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: YES',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "t"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: t',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "true"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: true',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "TRUE"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: TRUE',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "n"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: n',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "no"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: no',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "NO"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: NO',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "f"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: f',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "false"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: false',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "FALSE"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: FALSE',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+
   });
   describe('Resources', function() {
     it('should succeed extracting resource information', function(done) {
@@ -1430,19 +1650,6 @@ describe('Parser', function() {
         'traits:',
         '  rateLimited:',
         '    name: Rate Limited',
-        '    get?:',
-        '      headers?:',
-        '        If-None-Match?:',
-        '          description: |',
-        '            If-None-Match headers ensure that you don’t retrieve unnecessary data',
-        '            if you already have the most current version on-hand.',
-        '          type: string',
-        '        On-Behalf-Of?:',
-        '          description: |',
-        '            Used for enterprise administrators to make API calls on behalf of their',
-        '            managed users. To enable this functionality, please contact us with your',
-        '            API key.',
-        '          type: string',
         '/leagues:',
         '  use: [ rateLimited: { param1: {key: "value"}, param2: value} ]',
         '  get:',
@@ -1455,19 +1662,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: {
           rateLimited: {
-            name: 'Rate Limited',
-            'get?': {
-              'headers?': {
-                'If-None-Match?': {
-                  description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
-                  type: 'string'
-                },
-                'On-Behalf-Of?' : {
-                  description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
-                  type: 'string'
-                }
-              }
-            }
+            name: 'Rate Limited'
           }
         },
         resources: [
@@ -1497,7 +1692,28 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
     });
+    it('should reject trait with missing provided parameters', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    get:',
+        '      Authorization:',
+        '        description: <<lalalalala>> <<pepepepepepep>>',
+        '/leagues:',
+        '  use: [ rateLimited: { param1: value1, param2: value2} ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
 
+      raml.load(definition).should.be.rejected.with(/value was not provided for parameter: lalalalala/).and.notify(done);
+    });
   });
   describe('Error reporting', function () {
     it('should report correct line/column for invalid trait error', function(done) {

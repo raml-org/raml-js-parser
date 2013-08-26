@@ -55,3 +55,8 @@ class @MarkedYAMLError extends @YAMLError
     lines.push @problem_mark.toString() if @problem_mark?
     lines.push @note                    if @note?
     return lines.join '\n'
+
+###
+The Validator throws these.
+###
+class @ValidationError extends @MarkedYAMLError

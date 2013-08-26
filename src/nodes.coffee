@@ -23,6 +23,8 @@ class @ScalarNode extends @Node
     
   combine: (node) ->
     if not (node instanceof ScalarNode)
+      console.log(@value)
+      console.log(node)
       throw new exports.ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
     @value = node.value
     
@@ -80,7 +82,6 @@ class @MappingNode extends @CollectionNode
 
   combine: (resourceNode) ->
     if not (resourceNode instanceof MappingNode)
-      console.log(resourceNode)
       throw new exports.ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
 
     resourceNode.value.forEach (resourceProperty) =>

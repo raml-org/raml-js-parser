@@ -6,7 +6,7 @@ uritemplate       = require 'uritemplate'
 The Validator throws these.
 ###
 class @ValidationError extends MarkedYAMLError
-  
+
 ###
 A collection of multiple validation errors
 ###
@@ -66,8 +66,6 @@ class @Validator
       traits = @property_value node, /^traits$/i
       traits.forEach (trait) =>
         @valid_traits_properties trait[1]
-#        if not (@has_property trait[1], /^provides$/i)
-#          throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a provides property', node.start_mark
         if not (@has_property trait[1], /^name$/i)
           throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a name property', node.start_mark
       
@@ -95,7 +93,8 @@ class @Validator
                   childNode[0].value.match(/^minLength$/i) or \
                   childNode[0].value.match(/^maxLength$/i) or \
                   childNode[0].value.match(/^minimum$/i) or \
-                  childNode[0].value.match(/^maximum$/i) or \
+                  childNode[0].value.match(/^maximum$/i) or
+                  childNode[0].value.match(/^required$/i) or
                   childNode[0].value.match(/^default$/i))
     if invalid.length > 0 
       throw new exports.ValidationError 'while validating parameter properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
@@ -115,7 +114,12 @@ class @Validator
       type = @property_value node, /^type$/i
       if type != 'string' and type != 'number' and type != 'integer' and type != 'date'
         throw new exports.ValidationError 'while validating parameter properties', null, 'type can either be: string, number, integer or date', node.start_mark
-  
+    if @has_property node, /^required$/i
+      required = @property_value node, /^required$/i
+      unless required.match(/^(y|yes|YES|t|true|TRUE|n|no|NO|f|false|FALSE)$/)
+        console.log(required)
+        throw new exports.ValidationError 'while validating parameter properties', null, '"'+required+'"' + 'required can be any of: y, yes, YES, t, true, n, no, NO, f, false, FALSE', node.start_mark
+
   valid_root_properties: (node) ->
     @check_is_map node
     invalid = node.value.filter (childNode) -> 
