@@ -47,16 +47,15 @@ class @Traits
       if parameterUse = resource.value.match(/<<([^>]+)>>/g)
         parameterUse.forEach (parameter) =>
           parameter = parameter.replace(/[<>]+/g, '')
-          unless parameters[parameter]
-            throw new @TraitError 'while aplying parameters', null, 'value was not provided for parameter: ' + parameter , useKey.start_mark
-          console.log(parameter)
+          unless parameter in parameters
+            throw new exports.TraitError 'while aplying parameters', null, 'value was not provided for parameter: ' + parameter , useKey.start_mark
+          resource.value.replace "<<" + parameter + ">>", parameters[parameter]
     if resource.tag == 'tag:yaml.org,2002:seq'
       resource.forEach (node) =>
         @apply_parameters node, parameters, useKey
     if resource.tag == 'tag:yaml.org,2002:map'
       @apply_parameters resource.value[0][0], parameters, useKey
       @apply_parameters resource.value[0][1], parameters, useKey
-
 
   apply_trait: (method, useKey) ->
     trait = @get_trait @key_or_value useKey
@@ -65,7 +64,7 @@ class @Traits
     if parameters
       parameters[0][1].value.forEach (parameter) =>
         unless parameter[1].tag == 'tag:yaml.org,2002:str'
-          throw new @TraitError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
+          throw new exports.TraitError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
         plainParameters[parameter[0].value] = parameter[1].value
     temp = trait.cloneTrait()
     # by aplying the parameter mapping first, we allow users to rename things in the trait,

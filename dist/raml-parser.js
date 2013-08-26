@@ -3082,208 +3082,6 @@ window.RAML = {}
 
 window.RAML.Parser = require('../lib/raml')
 },{"../lib/raml":11}],12:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, events, nodes, raml, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  events = require('./events');
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  raml = require('./raml');
-
-  this.ComposerError = (function(_super) {
-    __extends(ComposerError, _super);
-
-    function ComposerError() {
-      _ref = ComposerError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return ComposerError;
-
-  })(MarkedYAMLError);
-
-  this.Composer = (function() {
-    function Composer() {
-      this.anchors = {};
-    }
-
-    Composer.prototype.check_node = function() {
-      if (this.check_event(events.StreamStartEvent)) {
-        this.get_event();
-      }
-      return !this.check_event(events.StreamEndEvent);
-    };
-
-    /*
-    Get the root node of the next document.
-    */
-
-
-    Composer.prototype.get_node = function() {
-      if (!this.check_event(events.StreamEndEvent)) {
-        return this.compose_document();
-      }
-    };
-
-    Composer.prototype.get_single_node = function(validate, apply, join) {
-      var document, event;
-      if (validate == null) {
-        validate = true;
-      }
-      if (apply == null) {
-        apply = true;
-      }
-      if (join == null) {
-        join = true;
-      }
-      this.get_event();
-      document = null;
-      if (!this.check_event(events.StreamEndEvent)) {
-        document = this.compose_document();
-      }
-      if (!this.check_event(events.StreamEndEvent)) {
-        event = this.get_event();
-        throw new exports.ComposerError('expected a single document in the stream', document.start_mark, 'but found another document', event.start_mark);
-      }
-      this.get_event();
-      if (validate) {
-        this.validate_document(document);
-      }
-      if (apply) {
-        this.apply_traits(document);
-      }
-      if (join) {
-        this.join_resources(document);
-      }
-      return document;
-    };
-
-    Composer.prototype.compose_document = function() {
-      var node;
-      this.get_event();
-      node = this.compose_node();
-      this.get_event();
-      this.anchors = {};
-      return node;
-    };
-
-    Composer.prototype.compose_node = function(parent, index) {
-      var anchor, event, node;
-      if (this.check_event(events.AliasEvent)) {
-        event = this.get_event();
-        anchor = event.anchor;
-        if (!(anchor in this.anchors)) {
-          throw new exports.ComposerError(null, null, "found undefined alias " + anchor, event.start_mark);
-        }
-        return this.anchors[anchor];
-      }
-      event = this.peek_event();
-      anchor = event.anchor;
-      if (anchor !== null && anchor in this.anchors) {
-        throw new exports.ComposerError("found duplicate anchor " + anchor + "; first occurence", this.anchors[anchor].start_mark, 'second occurrence', event.start_mark);
-      }
-      this.descend_resolver(parent, index);
-      if (this.check_event(events.ScalarEvent)) {
-        node = this.compose_scalar_node(anchor);
-      } else if (this.check_event(events.SequenceStartEvent)) {
-        node = this.compose_sequence_node(anchor);
-      } else if (this.check_event(events.MappingStartEvent)) {
-        node = this.compose_mapping_node(anchor);
-      }
-      this.ascend_resolver();
-      return node;
-    };
-
-    Composer.prototype.compose_fixed_scalar_node = function(anchor, value) {
-      var event, node;
-      event = this.get_event();
-      node = new nodes.ScalarNode('tag:yaml.org,2002:str', value, event.start_mark, event.end_mark, event.style);
-      if (anchor !== null) {
-        this.anchors[anchor] = node;
-      }
-      return node;
-    };
-
-    Composer.prototype.compose_scalar_node = function(anchor) {
-      var event, extension, node, tag;
-      event = this.get_event();
-      tag = event.tag;
-      if (tag === null || tag === '!') {
-        tag = this.resolve(nodes.ScalarNode, event.value, event.implicit);
-      }
-      if (event.tag === 'tag:raml.org,0.1:include') {
-        extension = event.value.split(".").pop();
-        if (this.src != null) {
-          event.value = require('url').resolve(this.src, event.value);
-        }
-        if (extension === 'yaml' || extension === 'yml' || extension === 'raml') {
-          return raml.composeFile(event.value, false, false, false);
-        } else {
-          node = new nodes.ScalarNode('tag:yaml.org,2002:str', raml.readFile(event.value), event.start_mark, event.end_mark, event.style);
-        }
-      } else {
-        node = new nodes.ScalarNode(tag, event.value, event.start_mark, event.end_mark, event.style);
-      }
-      if (anchor !== null) {
-        this.anchors[anchor] = node;
-      }
-      return node;
-    };
-
-    Composer.prototype.compose_sequence_node = function(anchor) {
-      var end_event, index, node, start_event, tag;
-      start_event = this.get_event();
-      tag = start_event.tag;
-      if (tag === null || tag === '!') {
-        tag = this.resolve(nodes.SequenceNode, null, start_event.implicit);
-      }
-      node = new nodes.SequenceNode(tag, [], start_event.start_mark, null, start_event.flow_style);
-      if (anchor !== null) {
-        this.anchors[anchor] = node;
-      }
-      index = 0;
-      while (!this.check_event(events.SequenceEndEvent)) {
-        node.value.push(this.compose_node(node, index));
-        index++;
-      }
-      end_event = this.get_event();
-      node.end_mark = end_event.end_mark;
-      return node;
-    };
-
-    Composer.prototype.compose_mapping_node = function(anchor) {
-      var end_event, item_key, item_value, node, start_event, tag;
-      start_event = this.get_event();
-      tag = start_event.tag;
-      if (tag === null || tag === '!') {
-        tag = this.resolve(nodes.MappingNode, null, start_event.implicit);
-      }
-      node = new nodes.MappingNode(tag, [], start_event.start_mark, null, start_event.flow_style);
-      if (anchor !== null) {
-        this.anchors[anchor] = node;
-      }
-      while (!this.check_event(events.MappingEndEvent)) {
-        item_key = this.compose_node(node);
-        item_value = this.compose_node(node, item_key);
-        node.value.push([item_key, item_value]);
-      }
-      end_event = this.get_event();
-      node.end_mark = end_event.end_mark;
-      return node;
-    };
-
-    return Composer;
-
-  })();
-
-}).call(this);
-
-},{"./errors":1,"./events":2,"./nodes":13,"./raml":11,"url":7}],14:[function(require,module,exports){
 require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{1:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
@@ -7148,7 +6946,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 },{}]},{},[])
 ;;module.exports=require("buffer-browserify")
 
-},{}],15:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function(Buffer){(function() {
   var MarkedYAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -7783,7 +7581,209 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 }).call(this);
 
 })(require("__browserify_buffer").Buffer)
-},{"./errors":1,"./nodes":13,"./util":4,"__browserify_buffer":14}],16:[function(require,module,exports){
+},{"./errors":1,"./nodes":14,"./util":4,"__browserify_buffer":12}],15:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, events, nodes, raml, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  events = require('./events');
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  raml = require('./raml');
+
+  this.ComposerError = (function(_super) {
+    __extends(ComposerError, _super);
+
+    function ComposerError() {
+      _ref = ComposerError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return ComposerError;
+
+  })(MarkedYAMLError);
+
+  this.Composer = (function() {
+    function Composer() {
+      this.anchors = {};
+    }
+
+    Composer.prototype.check_node = function() {
+      if (this.check_event(events.StreamStartEvent)) {
+        this.get_event();
+      }
+      return !this.check_event(events.StreamEndEvent);
+    };
+
+    /*
+    Get the root node of the next document.
+    */
+
+
+    Composer.prototype.get_node = function() {
+      if (!this.check_event(events.StreamEndEvent)) {
+        return this.compose_document();
+      }
+    };
+
+    Composer.prototype.get_single_node = function(validate, apply, join) {
+      var document, event;
+      if (validate == null) {
+        validate = true;
+      }
+      if (apply == null) {
+        apply = true;
+      }
+      if (join == null) {
+        join = true;
+      }
+      this.get_event();
+      document = null;
+      if (!this.check_event(events.StreamEndEvent)) {
+        document = this.compose_document();
+      }
+      if (!this.check_event(events.StreamEndEvent)) {
+        event = this.get_event();
+        throw new exports.ComposerError('expected a single document in the stream', document.start_mark, 'but found another document', event.start_mark);
+      }
+      this.get_event();
+      if (validate) {
+        this.validate_document(document);
+      }
+      if (apply) {
+        this.apply_traits(document);
+      }
+      if (join) {
+        this.join_resources(document);
+      }
+      return document;
+    };
+
+    Composer.prototype.compose_document = function() {
+      var node;
+      this.get_event();
+      node = this.compose_node();
+      this.get_event();
+      this.anchors = {};
+      return node;
+    };
+
+    Composer.prototype.compose_node = function(parent, index) {
+      var anchor, event, node;
+      if (this.check_event(events.AliasEvent)) {
+        event = this.get_event();
+        anchor = event.anchor;
+        if (!(anchor in this.anchors)) {
+          throw new exports.ComposerError(null, null, "found undefined alias " + anchor, event.start_mark);
+        }
+        return this.anchors[anchor];
+      }
+      event = this.peek_event();
+      anchor = event.anchor;
+      if (anchor !== null && anchor in this.anchors) {
+        throw new exports.ComposerError("found duplicate anchor " + anchor + "; first occurence", this.anchors[anchor].start_mark, 'second occurrence', event.start_mark);
+      }
+      this.descend_resolver(parent, index);
+      if (this.check_event(events.ScalarEvent)) {
+        node = this.compose_scalar_node(anchor);
+      } else if (this.check_event(events.SequenceStartEvent)) {
+        node = this.compose_sequence_node(anchor);
+      } else if (this.check_event(events.MappingStartEvent)) {
+        node = this.compose_mapping_node(anchor);
+      }
+      this.ascend_resolver();
+      return node;
+    };
+
+    Composer.prototype.compose_fixed_scalar_node = function(anchor, value) {
+      var event, node;
+      event = this.get_event();
+      node = new nodes.ScalarNode('tag:yaml.org,2002:str', value, event.start_mark, event.end_mark, event.style);
+      if (anchor !== null) {
+        this.anchors[anchor] = node;
+      }
+      return node;
+    };
+
+    Composer.prototype.compose_scalar_node = function(anchor) {
+      var event, extension, node, tag;
+      event = this.get_event();
+      tag = event.tag;
+      if (tag === null || tag === '!') {
+        tag = this.resolve(nodes.ScalarNode, event.value, event.implicit);
+      }
+      if (event.tag === 'tag:raml.org,0.1:include') {
+        extension = event.value.split(".").pop();
+        if (this.src != null) {
+          event.value = require('url').resolve(this.src, event.value);
+        }
+        if (extension === 'yaml' || extension === 'yml' || extension === 'raml') {
+          return raml.composeFile(event.value, false, false, false);
+        } else {
+          node = new nodes.ScalarNode('tag:yaml.org,2002:str', raml.readFile(event.value), event.start_mark, event.end_mark, event.style);
+        }
+      } else {
+        node = new nodes.ScalarNode(tag, event.value, event.start_mark, event.end_mark, event.style);
+      }
+      if (anchor !== null) {
+        this.anchors[anchor] = node;
+      }
+      return node;
+    };
+
+    Composer.prototype.compose_sequence_node = function(anchor) {
+      var end_event, index, node, start_event, tag;
+      start_event = this.get_event();
+      tag = start_event.tag;
+      if (tag === null || tag === '!') {
+        tag = this.resolve(nodes.SequenceNode, null, start_event.implicit);
+      }
+      node = new nodes.SequenceNode(tag, [], start_event.start_mark, null, start_event.flow_style);
+      if (anchor !== null) {
+        this.anchors[anchor] = node;
+      }
+      index = 0;
+      while (!this.check_event(events.SequenceEndEvent)) {
+        node.value.push(this.compose_node(node, index));
+        index++;
+      }
+      end_event = this.get_event();
+      node.end_mark = end_event.end_mark;
+      return node;
+    };
+
+    Composer.prototype.compose_mapping_node = function(anchor) {
+      var end_event, item_key, item_value, node, start_event, tag;
+      start_event = this.get_event();
+      tag = start_event.tag;
+      if (tag === null || tag === '!') {
+        tag = this.resolve(nodes.MappingNode, null, start_event.implicit);
+      }
+      node = new nodes.MappingNode(tag, [], start_event.start_mark, null, start_event.flow_style);
+      if (anchor !== null) {
+        this.anchors[anchor] = node;
+      }
+      while (!this.check_event(events.MappingEndEvent)) {
+        item_key = this.compose_node(node);
+        item_value = this.compose_node(node, item_key);
+        node.value.push([item_key, item_value]);
+      }
+      end_event = this.get_event();
+      node.end_mark = end_event.end_mark;
+      return node;
+    };
+
+    return Composer;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./events":2,"./nodes":14,"./raml":11,"url":7}],16:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -7877,7 +7877,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],17:[function(require,module,exports){
+},{"./errors":1,"./nodes":14}],17:[function(require,module,exports){
 (function() {
   var composer, construct, joiner, parser, reader, resolver, scanner, traits, util, validator;
 
@@ -7963,7 +7963,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./traits":23,"./util":4,"./validator":22}],13:[function(require,module,exports){
+},{"./composer":15,"./construct":13,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./traits":23,"./util":4,"./validator":22}],14:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -8896,216 +8896,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],21:[function(require,module,exports){
-(function() {
-  var YAMLError, nodes, util, _ref, _ref1,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-  nodes = require('./nodes');
-
-  util = require('./util');
-
-  YAMLError = require('./errors').YAMLError;
-
-  this.ResolverError = (function(_super) {
-    __extends(ResolverError, _super);
-
-    function ResolverError() {
-      _ref = ResolverError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return ResolverError;
-
-  })(YAMLError);
-
-  this.BaseResolver = (function() {
-    var DEFAULT_MAPPING_TAG, DEFAULT_SCALAR_TAG, DEFAULT_SEQUENCE_TAG;
-
-    DEFAULT_SCALAR_TAG = 'tag:yaml.org,2002:str';
-
-    DEFAULT_SEQUENCE_TAG = 'tag:yaml.org,2002:seq';
-
-    DEFAULT_MAPPING_TAG = 'tag:yaml.org,2002:map';
-
-    BaseResolver.prototype.yaml_implicit_resolvers = {};
-
-    BaseResolver.prototype.yaml_path_resolvers = {};
-
-    BaseResolver.add_implicit_resolver = function(tag, regexp, first) {
-      var char, _base, _i, _len, _results;
-      if (first == null) {
-        first = [null];
-      }
-      if (!this.prototype.hasOwnProperty('yaml_implicit_resolvers')) {
-        this.prototype.yaml_implicit_resolvers = util.extend({}, this.prototype.yaml_implicit_resolvers);
-      }
-      _results = [];
-      for (_i = 0, _len = first.length; _i < _len; _i++) {
-        char = first[_i];
-        _results.push(((_base = this.prototype.yaml_implicit_resolvers)[char] != null ? (_base = this.prototype.yaml_implicit_resolvers)[char] : _base[char] = []).push([tag, regexp]));
-      }
-      return _results;
-    };
-
-    function BaseResolver() {
-      this.resolver_exact_paths = [];
-      this.resolver_prefix_paths = [];
-    }
-
-    BaseResolver.prototype.descend_resolver = function(current_node, current_index) {
-      var depth, exact_paths, kind, path, prefix_paths, _i, _j, _len, _len1, _ref1, _ref2, _ref3, _ref4;
-      if (util.is_empty(this.yaml_path_resolvers)) {
-        return;
-      }
-      exact_paths = {};
-      prefix_paths = [];
-      if (current_node) {
-        depth = this.resolver_prefix_paths.length;
-        _ref1 = this.resolver_prefix_paths.slice(-1)[0];
-        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-          _ref2 = _ref1[_i], path = _ref2[0], kind = _ref2[1];
-          if (this.check_resolver_prefix(depth, path, kind, current_node, current_index)) {
-            if (path.length > depth) {
-              prefix_paths.push([path, kind]);
-            } else {
-              exact_paths[kind] = this.yaml_path_resolvers[path][kind];
-            }
-          }
-        }
-      } else {
-        _ref3 = this.yaml_path_resolvers;
-        for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
-          _ref4 = _ref3[_j], path = _ref4[0], kind = _ref4[1];
-          if (!path) {
-            exact_paths[kind] = this.yaml_path_resolvers[path][kind];
-          } else {
-            prefix_paths.push([path, kind]);
-          }
-        }
-      }
-      this.resolver_exact_paths.push(exact_paths);
-      return this.resolver_prefix_paths.push(prefix_paths);
-    };
-
-    BaseResolver.prototype.ascend_resolver = function() {
-      if (util.is_empty(this.yaml_path_resolvers)) {
-        return;
-      }
-      this.resolver_exact_paths.pop();
-      return this.resolver_prefix_paths.pop();
-    };
-
-    BaseResolver.prototype.check_resolver_prefix = function(depth, path, kind, current_node, current_index) {
-      var index_check, node_check, _ref1;
-      _ref1 = path[depth - 1], node_check = _ref1[0], index_check = _ref1[1];
-      if (typeof node_check === 'string') {
-        if (current_node.tag !== node_check) {
-          return;
-        }
-      } else if (node_check !== null) {
-        if (!(current_node instanceof node_check)) {
-          return;
-        }
-      }
-      if (index_check === true && current_index !== null) {
-        return;
-      }
-      if ((index_check === false || index_check === null) && current_index === null) {
-        return;
-      }
-      if (typeof index_check === 'string') {
-        if (!(current_index instanceof nodes.ScalarNode) && index_check === current_index.value) {
-          return;
-        }
-      } else if (typeof index_check === 'number') {
-        if (index_check !== current_index) {
-          return;
-        }
-      }
-      return true;
-    };
-
-    BaseResolver.prototype.resolve = function(kind, value, implicit) {
-      var empty, exact_paths, k, regexp, resolvers, tag, _i, _len, _ref1, _ref2, _ref3, _ref4;
-      if (kind === nodes.ScalarNode && implicit[0]) {
-        if (value === '') {
-          resolvers = (_ref1 = this.yaml_implicit_resolvers['']) != null ? _ref1 : [];
-        } else {
-          resolvers = (_ref2 = this.yaml_implicit_resolvers[value[0]]) != null ? _ref2 : [];
-        }
-        resolvers = resolvers.concat((_ref3 = this.yaml_implicit_resolvers[null]) != null ? _ref3 : []);
-        for (_i = 0, _len = resolvers.length; _i < _len; _i++) {
-          _ref4 = resolvers[_i], tag = _ref4[0], regexp = _ref4[1];
-          if (value.match(regexp)) {
-            return tag;
-          }
-        }
-        implicit = implicit[1];
-      }
-      empty = true;
-      for (k in this.yaml_path_resolvers) {
-        if ({}[k] == null) {
-          empty = false;
-        }
-      }
-      if (!empty) {
-        exact_paths = this.resolver_exact_paths.slice(-1)[0];
-        if (__indexOf.call(exact_paths, kind) >= 0) {
-          return exact_paths[kind];
-        }
-        if (__indexOf.call(exact_paths, null) >= 0) {
-          return exact_paths[null];
-        }
-      }
-      if (kind === nodes.ScalarNode) {
-        return DEFAULT_SCALAR_TAG;
-      }
-      if (kind === nodes.SequenceNode) {
-        return DEFAULT_SEQUENCE_TAG;
-      }
-      if (kind === nodes.MappingNode) {
-        return DEFAULT_MAPPING_TAG;
-      }
-    };
-
-    return BaseResolver;
-
-  })();
-
-  this.Resolver = (function(_super) {
-    __extends(Resolver, _super);
-
-    function Resolver() {
-      _ref1 = Resolver.__super__.constructor.apply(this, arguments);
-      return _ref1;
-    }
-
-    return Resolver;
-
-  })(this.BaseResolver);
-
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:bool', /^(?:yes|Yes|YES|true|True|TRUE|on|On|ON|no|No|NO|false|False|FALSE|off|Off|OFF)$/, 'yYnNtTfFoO');
-
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:float', /^(?:[-+]?(?:[0-9][0-9_]*)\.[0-9_]*(?:[eE][-+][0-9]+)?|\.[0-9_]+(?:[eE][-+][0-9]+)?|[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*|[-+]?\.(?:inf|Inf|INF)|\.(?:nan|NaN|NAN))$/, '-+0123456789.');
-
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:int', /^(?:[-+]?0b[01_]+|[-+]?0[0-7_]+|[-+]?(?:0|[1-9][0-9_]*)|[-+]?0x[0-9a-fA-F_]+|[-+]?0o[0-7_]+|[-+]?[1-9][0-9_]*(?::[0-5]?[0-9])+)$/, '-+0123456789');
-
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:merge', /^(?:<<)$/, '<');
-
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:null', /^(?:~|null|Null|NULL|)$/, ['~', 'n', 'N', '']);
-
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:timestamp', /^(?:[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]|[0-9][0-9][0-9][0-9]-[0-9][0-9]?-[0-9][0-9]?(?:[Tt]|[\x20\t]+)[0-9][0-9]?:[0-9][0-9]:[0-9][0-9](?:\.[0-9]*)?(?:[\x20\t]*(?:Z|[-+][0-9][0-9]?(?::[0-9][0-9])?))?)$/, '0123456789');
-
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:value', /^(?:=)$/, '=');
-
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:yaml', /^(?:!|&|\*)$/, '!&*');
-
-}).call(this);
-
-},{"./errors":1,"./nodes":13,"./util":4}],19:[function(require,module,exports){
+},{"./errors":1}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10588,11 +10379,221 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./tokens":3,"./util":4}],23:[function(require,module,exports){
+},{"./errors":1,"./tokens":3,"./util":4}],21:[function(require,module,exports){
+(function() {
+  var YAMLError, nodes, util, _ref, _ref1,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+  nodes = require('./nodes');
+
+  util = require('./util');
+
+  YAMLError = require('./errors').YAMLError;
+
+  this.ResolverError = (function(_super) {
+    __extends(ResolverError, _super);
+
+    function ResolverError() {
+      _ref = ResolverError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return ResolverError;
+
+  })(YAMLError);
+
+  this.BaseResolver = (function() {
+    var DEFAULT_MAPPING_TAG, DEFAULT_SCALAR_TAG, DEFAULT_SEQUENCE_TAG;
+
+    DEFAULT_SCALAR_TAG = 'tag:yaml.org,2002:str';
+
+    DEFAULT_SEQUENCE_TAG = 'tag:yaml.org,2002:seq';
+
+    DEFAULT_MAPPING_TAG = 'tag:yaml.org,2002:map';
+
+    BaseResolver.prototype.yaml_implicit_resolvers = {};
+
+    BaseResolver.prototype.yaml_path_resolvers = {};
+
+    BaseResolver.add_implicit_resolver = function(tag, regexp, first) {
+      var char, _base, _i, _len, _results;
+      if (first == null) {
+        first = [null];
+      }
+      if (!this.prototype.hasOwnProperty('yaml_implicit_resolvers')) {
+        this.prototype.yaml_implicit_resolvers = util.extend({}, this.prototype.yaml_implicit_resolvers);
+      }
+      _results = [];
+      for (_i = 0, _len = first.length; _i < _len; _i++) {
+        char = first[_i];
+        _results.push(((_base = this.prototype.yaml_implicit_resolvers)[char] != null ? (_base = this.prototype.yaml_implicit_resolvers)[char] : _base[char] = []).push([tag, regexp]));
+      }
+      return _results;
+    };
+
+    function BaseResolver() {
+      this.resolver_exact_paths = [];
+      this.resolver_prefix_paths = [];
+    }
+
+    BaseResolver.prototype.descend_resolver = function(current_node, current_index) {
+      var depth, exact_paths, kind, path, prefix_paths, _i, _j, _len, _len1, _ref1, _ref2, _ref3, _ref4;
+      if (util.is_empty(this.yaml_path_resolvers)) {
+        return;
+      }
+      exact_paths = {};
+      prefix_paths = [];
+      if (current_node) {
+        depth = this.resolver_prefix_paths.length;
+        _ref1 = this.resolver_prefix_paths.slice(-1)[0];
+        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+          _ref2 = _ref1[_i], path = _ref2[0], kind = _ref2[1];
+          if (this.check_resolver_prefix(depth, path, kind, current_node, current_index)) {
+            if (path.length > depth) {
+              prefix_paths.push([path, kind]);
+            } else {
+              exact_paths[kind] = this.yaml_path_resolvers[path][kind];
+            }
+          }
+        }
+      } else {
+        _ref3 = this.yaml_path_resolvers;
+        for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
+          _ref4 = _ref3[_j], path = _ref4[0], kind = _ref4[1];
+          if (!path) {
+            exact_paths[kind] = this.yaml_path_resolvers[path][kind];
+          } else {
+            prefix_paths.push([path, kind]);
+          }
+        }
+      }
+      this.resolver_exact_paths.push(exact_paths);
+      return this.resolver_prefix_paths.push(prefix_paths);
+    };
+
+    BaseResolver.prototype.ascend_resolver = function() {
+      if (util.is_empty(this.yaml_path_resolvers)) {
+        return;
+      }
+      this.resolver_exact_paths.pop();
+      return this.resolver_prefix_paths.pop();
+    };
+
+    BaseResolver.prototype.check_resolver_prefix = function(depth, path, kind, current_node, current_index) {
+      var index_check, node_check, _ref1;
+      _ref1 = path[depth - 1], node_check = _ref1[0], index_check = _ref1[1];
+      if (typeof node_check === 'string') {
+        if (current_node.tag !== node_check) {
+          return;
+        }
+      } else if (node_check !== null) {
+        if (!(current_node instanceof node_check)) {
+          return;
+        }
+      }
+      if (index_check === true && current_index !== null) {
+        return;
+      }
+      if ((index_check === false || index_check === null) && current_index === null) {
+        return;
+      }
+      if (typeof index_check === 'string') {
+        if (!(current_index instanceof nodes.ScalarNode) && index_check === current_index.value) {
+          return;
+        }
+      } else if (typeof index_check === 'number') {
+        if (index_check !== current_index) {
+          return;
+        }
+      }
+      return true;
+    };
+
+    BaseResolver.prototype.resolve = function(kind, value, implicit) {
+      var empty, exact_paths, k, regexp, resolvers, tag, _i, _len, _ref1, _ref2, _ref3, _ref4;
+      if (kind === nodes.ScalarNode && implicit[0]) {
+        if (value === '') {
+          resolvers = (_ref1 = this.yaml_implicit_resolvers['']) != null ? _ref1 : [];
+        } else {
+          resolvers = (_ref2 = this.yaml_implicit_resolvers[value[0]]) != null ? _ref2 : [];
+        }
+        resolvers = resolvers.concat((_ref3 = this.yaml_implicit_resolvers[null]) != null ? _ref3 : []);
+        for (_i = 0, _len = resolvers.length; _i < _len; _i++) {
+          _ref4 = resolvers[_i], tag = _ref4[0], regexp = _ref4[1];
+          if (value.match(regexp)) {
+            return tag;
+          }
+        }
+        implicit = implicit[1];
+      }
+      empty = true;
+      for (k in this.yaml_path_resolvers) {
+        if ({}[k] == null) {
+          empty = false;
+        }
+      }
+      if (!empty) {
+        exact_paths = this.resolver_exact_paths.slice(-1)[0];
+        if (__indexOf.call(exact_paths, kind) >= 0) {
+          return exact_paths[kind];
+        }
+        if (__indexOf.call(exact_paths, null) >= 0) {
+          return exact_paths[null];
+        }
+      }
+      if (kind === nodes.ScalarNode) {
+        return DEFAULT_SCALAR_TAG;
+      }
+      if (kind === nodes.SequenceNode) {
+        return DEFAULT_SEQUENCE_TAG;
+      }
+      if (kind === nodes.MappingNode) {
+        return DEFAULT_MAPPING_TAG;
+      }
+    };
+
+    return BaseResolver;
+
+  })();
+
+  this.Resolver = (function(_super) {
+    __extends(Resolver, _super);
+
+    function Resolver() {
+      _ref1 = Resolver.__super__.constructor.apply(this, arguments);
+      return _ref1;
+    }
+
+    return Resolver;
+
+  })(this.BaseResolver);
+
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:bool', /^(?:yes|Yes|YES|true|True|TRUE|on|On|ON|no|No|NO|false|False|FALSE|off|Off|OFF)$/, 'yYnNtTfFoO');
+
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:float', /^(?:[-+]?(?:[0-9][0-9_]*)\.[0-9_]*(?:[eE][-+][0-9]+)?|\.[0-9_]+(?:[eE][-+][0-9]+)?|[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*|[-+]?\.(?:inf|Inf|INF)|\.(?:nan|NaN|NAN))$/, '-+0123456789.');
+
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:int', /^(?:[-+]?0b[01_]+|[-+]?0[0-7_]+|[-+]?(?:0|[1-9][0-9_]*)|[-+]?0x[0-9a-fA-F_]+|[-+]?0o[0-7_]+|[-+]?[1-9][0-9_]*(?::[0-5]?[0-9])+)$/, '-+0123456789');
+
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:merge', /^(?:<<)$/, '<');
+
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:null', /^(?:~|null|Null|NULL|)$/, ['~', 'n', 'N', '']);
+
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:timestamp', /^(?:[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]|[0-9][0-9][0-9][0-9]-[0-9][0-9]?-[0-9][0-9]?(?:[Tt]|[\x20\t]+)[0-9][0-9]?:[0-9][0-9]:[0-9][0-9](?:\.[0-9]*)?(?:[\x20\t]*(?:Z|[-+][0-9][0-9]?(?::[0-9][0-9])?))?)$/, '0123456789');
+
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:value', /^(?:=)$/, '=');
+
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:yaml', /^(?:!|&|\*)$/, '!&*');
+
+}).call(this);
+
+},{"./errors":1,"./nodes":14,"./util":4}],23:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   MarkedYAMLError = require('./errors').MarkedYAMLError;
 
@@ -10671,10 +10672,10 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
         if (parameterUse = resource.value.match(/<<([^>]+)>>/g)) {
           parameterUse.forEach(function(parameter) {
             parameter = parameter.replace(/[<>]+/g, '');
-            if (!parameters[parameter]) {
-              throw new _this.TraitError('while aplying parameters', null, 'value was not provided for parameter: ' + parameter, useKey.start_mark);
+            if (__indexOf.call(parameters, parameter) < 0) {
+              throw new exports.TraitError('while aplying parameters', null, 'value was not provided for parameter: ' + parameter, useKey.start_mark);
             }
-            return console.log(parameter);
+            return resource.value.replace("<<" + parameter + ">>", parameters[parameter]);
           });
         }
       }
@@ -10698,7 +10699,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       if (parameters) {
         parameters[0][1].value.forEach(function(parameter) {
           if (parameter[1].tag !== 'tag:yaml.org,2002:str') {
-            throw new _this.TraitError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
+            throw new exports.TraitError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
           }
           return plainParameters[parameter[0].value] = parameter[1].value;
         });
@@ -10723,7 +10724,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],8:[function(require,module,exports){
+},{"./errors":1,"./nodes":14}],8:[function(require,module,exports){
 
 /**
  * Object#toString() ref for stringify().
@@ -11284,7 +11285,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":24}],22:[function(require,module,exports){
+},{"./composer":15,"./construct":13,"./errors":1,"./events":2,"./loader":17,"./nodes":14,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":24}],22:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, uritemplate, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11719,7 +11720,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"uritemplate":25}],24:[function(require,module,exports){
+},{"./errors":1,"./nodes":14,"uritemplate":25}],24:[function(require,module,exports){
 (function(process,Buffer){/**
  * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
  *
@@ -12285,7 +12286,7 @@ exports.XMLHttpRequest = function() {
 };
 
 })(require("__browserify_process"),require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":14,"__browserify_process":5,"child_process":26,"fs":9,"http":27,"https":28,"url":7}],25:[function(require,module,exports){
+},{"__browserify_buffer":12,"__browserify_process":5,"child_process":26,"fs":9,"http":27,"https":28,"url":7}],25:[function(require,module,exports){
 (function(global){/*global unescape, module, define, window, global*/
 
 /*
@@ -15795,5 +15796,5 @@ module.exports = function(cb) {
 module.exports.ConcatStream = ConcatStream
 
 })(require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":14,"stream":31,"util":32}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,19,3,23,4,22,6])
+},{"__browserify_buffer":12,"stream":31,"util":32}]},{},[10,13,15,1,2,16,17,14,20,11,18,19,21,3,23,4,22,6])
 ;

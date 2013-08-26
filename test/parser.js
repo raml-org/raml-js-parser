@@ -140,10 +140,6 @@ describe('Parser', function() {
           '  customTrait: !include http://localhost:9001/test/customtrait.yml'
       ].join('\n');
 
-      raml.load(definition).then(function(data){
-        console.log(data);
-      }, function(){});
-
         raml.load(definition).should.eventually.deep.equal({
           title: 'Test',
           traits: {
@@ -971,7 +967,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.with(/found unhashable key/).and.notify(done);
     });
   });
-  describe('Traits', function() {
+  describe('Traits at resource level', function() {
     it('should succeed when applying traits across !include boundaries', function(done) {
       var definition = [
           '%TAG ! tag:raml.org,0.1:',
@@ -1122,8 +1118,6 @@ describe('Parser', function() {
         '      200:',
         '        description: Retrieve a list of leagues'
       ].join('\n');
-
-      raml.load(definition).then(function(data){console.log(data)}, function(){});
 
       raml.load(definition).should.become({
         title: 'Test',
@@ -1508,50 +1502,6 @@ describe('Parser', function() {
         '      200:',
         '        description: Retrieve a list of leagues'
       ].join('\n');
-
-      var expected = {
-        title: 'Test',
-        traits: {
-          rateLimited: {
-            name: 'Rate Limited',
-            'get?': {
-              'headers?': {
-                'If-None-Match?': {
-                  description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
-                  type: 'string'
-                },
-                'On-Behalf-Of?' : {
-                  description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
-                  type: 'string'
-                }
-              }
-            }
-          }
-        },
-        resources: [
-          {
-            use: [
-              {
-                rateLimited: {
-                  param1: 'value',
-                  param2: 'value'
-                }
-              }
-            ],
-            relativeUri: '/leagues',
-            methods: [
-              {
-                method: 'get',
-                responses: {
-                  '200': {
-                    description: 'Retrieve a list of leagues'
-                  }
-                }
-              }
-            ]
-          }
-        ]
-      };
 
       raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
     });
