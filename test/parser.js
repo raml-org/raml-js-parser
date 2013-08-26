@@ -140,19 +140,21 @@ describe('Parser', function() {
           '  customTrait: !include http://localhost:9001/test/customtrait.yml'
       ].join('\n');
 
+      raml.load(definition).then(function(data){
+        console.log(data);
+      }, function(){});
+
         raml.load(definition).should.eventually.deep.equal({
           title: 'Test',
           traits: {
               customTrait: {
-                  name: 'Custom Trait',
-                  description: 'This is a custom trait',
-                  get: {
-                      responses: {
-                          429: {
-                              description: 'API Limit Exceeded'
-                          }
-                      }
-                  }
+                name: 'Custom Trait',
+                description: 'This is a custom trait',
+                responses: {
+                    429: {
+                        description: 'API Limit Exceeded'
+                    }
+                }
               }
           }
       }).and.notify(done);
@@ -986,28 +988,27 @@ describe('Parser', function() {
               customTrait: {
                   name: 'Custom Trait',
                   description: 'This is a custom trait',
-                  get: {
-                      responses: {
-                          429: {
-                              description: 'API Limit Exceeded'
-                          }
+                  responses: {
+                      429: {
+                          description: 'API Limit Exceeded'
                       }
                   }
               }
           },
           resources: [
               {
-                  relativeUri: "/",
-                  name: "Root",
                   use: [ "customTrait" ],
+                  name: "Root",
+                  relativeUri: "/",
                   methods: [
                       {
-                          method: "get",
-                          responses: {
-                              429: {
-                                  description: 'API Limit Exceeded'
-                              }
-                          }
+                        responses: {
+                            429: {
+                                description: 'API Limit Exceeded'
+                            }
+                        },
+                        description: "Root resource",
+                        method: "get"
                       }
                   ],
                   resources: [
@@ -1017,12 +1018,13 @@ describe('Parser', function() {
                           use: [ "customTrait" ],
                           methods: [
                               {
-                                  method: "get",
-                                  responses: {
-                                      429: {
-                                          description: 'API Limit Exceeded'
-                                      }
-                                  }
+                                description: "Another resource",
+                                method: "get",
+                                responses: {
+                                    429: {
+                                        description: 'API Limit Exceeded'
+                                    }
+                                }
                               }
                           ]
                       }
@@ -1030,64 +1032,6 @@ describe('Parser', function() {
               }
           ]
       }).and.notify(done);
-    });
-    it('should succeed when applying using verb question mark', function(done) {
-      var definition = [
-        '%YAML 1.2',
-        '%TAG ! tag:raml.org,0.1:',
-        '---',
-        'title: Test',
-        'traits:',
-        '  rateLimited:',
-        '    name: Rate Limited',
-        '    get?:',
-        '      responses:',
-        '        429:',
-        '          description: API Limit Exceeded',
-        '/leagues:',
-        '  use: [ rateLimited ]',
-        '  get:',
-        '    responses:',
-        '      200:',
-        '        description: Retrieve a list of leagues'
-      ].join('\n');
-
-      var expected =       {
-        title: 'Test',
-        traits: {
-          rateLimited: {
-          name: 'Rate Limited',
-            'get?': {
-              responses: {
-                '429': {
-                  description: 'API Limit Exceeded'
-                }
-              }
-            }
-          }
-        },
-        resources: [
-          {
-            relativeUri: '/leagues',
-            use: [ 'rateLimited' ],
-            methods: [
-              {
-                method: 'get',
-                responses: {
-                  '200': {
-                    description: 'Retrieve a list of leagues'
-                  },
-                  '429': {
-                    description: 'API Limit Exceeded'
-                  }
-                }
-              }
-            ]
-          }
-        ]
-      };
-
-      raml.load(definition).should.become(expected).and.notify(done);
     });
     it('should succeed when applying multiple traits', function(done) {
       var definition = [
@@ -1098,16 +1042,14 @@ describe('Parser', function() {
         'traits:',
         '  rateLimited:',
         '    name: Rate Limited',
-        '    get?:',
-        '      responses:',
-        '        429:',
-        '          description: API Limit Exceeded',
+        '    responses:',
+        '      429:',
+        '        description: API Limit Exceeded',
         '  queryable:',
         '    name: Queryable',
-        '    get?:',
-        '      queryParameters:',
-        '        q:',
-        '          type: string',
+        '    queryParameters:',
+        '      q:',
+        '         type: string',
         '/leagues:',
         '  use: [ rateLimited, queryable ]',
         '  get:',
@@ -1121,21 +1063,17 @@ describe('Parser', function() {
         traits: {
           rateLimited: {
             name: 'Rate Limited',
-            'get?': {
-              responses: {
-                '429': {
-                  description: 'API Limit Exceeded'
-                }
+            responses: {
+              '429': {
+                description: 'API Limit Exceeded'
               }
             }
           },
           queryable: {
             name: 'Queryable',
-            'get?': {
-              queryParameters: {
-                q: {
-                  type: 'string'
-                }
+            queryParameters: {
+              q: {
+                type: 'string'
               }
             }
           }
@@ -1175,14 +1113,8 @@ describe('Parser', function() {
         'traits:',
         '  rateLimited:',
         '    name: Rate Limited',
-        '    get?:',
-        '      responses:',
-        '        429:',
-        '          description: API Limit Exceeded',
-        '    post?:',
-        '      responses:',
-        '        429:',
-        '          description: API Limit Exceeded',
+        '    headers?:',
+        '      x-header-extra: API Limit Exceeded',
         '/leagues:',
         '  use: [ rateLimited ]',
         '  get:',
@@ -1191,24 +1123,15 @@ describe('Parser', function() {
         '        description: Retrieve a list of leagues'
       ].join('\n');
 
+      raml.load(definition).then(function(data){console.log(data)}, function(){});
+
       raml.load(definition).should.become({
         title: 'Test',
         traits: {
           rateLimited: {
             name: 'Rate Limited',
-            'get?': {
-              responses: {
-                '429': {
-                  description: 'API Limit Exceeded'
-                }
-              }
-            },
-            'post?': {
-              responses: {
-                '429': {
-                  description: 'API Limit Exceeded'
-                }
-              }
+            "headers?": {
+              "x-header-extra": "API Limit Exceeded"
             }
           }
         },
@@ -1222,9 +1145,6 @@ describe('Parser', function() {
                 responses: {
                   '200': {
                     description: 'Retrieve a list of leagues'
-                  },
-                  '429': {
-                    description: 'API Limit Exceeded'
                   }
                 }
               }
@@ -1233,25 +1153,24 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
-    it('should fail if unknown property is used inside a trait', function(done) {
-      var definition = [
-        '%YAML 1.2',
-        '%TAG ! tag:raml.org,0.1:',
-        '---',
-        'title: Test',
-        'traits:',
-        '  rateLimited:',
-        '    name: Rate Limited',
-        '    what:',
-        '      responses:',
-        '        503:',
-        '          description: Server Unavailable. Check Your Rate Limits.',
-        '/:',
-        '  use: [ rateLimited: { parameter: value } ]'
-      ].join('\n');
-
-      raml.load(definition).should.be.rejected.with(/unknown property what/).and.notify(done);
-    });
+//    it('should fail if unknown property is used inside a trait', function(done) {
+//      var definition = [
+//        '%YAML 1.2',
+//        '%TAG ! tag:raml.org,0.1:',
+//        '---',
+//        'title: Test',
+//        'traits:',
+//        '  rateLimited:',
+//        '    name: Rate Limited',
+//        '    responses:',
+//        '      503:',
+//        '        description: Server Unavailable. Check Your Rate Limits.',
+//        '/:',
+//        '  use: [ rateLimited: { parameter: value } ]'
+//      ].join('\n');
+//
+//      raml.load(definition).should.be.rejected.with(/unknown property what/).and.notify(done);
+//    });
     it('should fail if trait is missing name property', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -1260,10 +1179,9 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  rateLimited:',
-        '    get?:',
-        '      responses:',
-        '        503:',
-        '          description: Server Unavailable. Check Your Rate Limits.',
+        '    responses:',
+        '      503:',
+        '        description: Server Unavailable. Check Your Rate Limits.',
         '/:',
         '  use: [ rateLimited: { parameter: value } ]'
       ].join('\n');
@@ -1291,10 +1209,9 @@ describe('Parser', function() {
         'traits:',
         '  rateLimited:',
         '    name: Rate Limited',
-        '    get?:',
-        '      responses:',
-        '        503:',
-        '          description: Server Unavailable. Check Your Rate Limits.',
+        '    responses:',
+        '      503:',
+        '        description: Server Unavailable. Check Your Rate Limits.',
         '/:',
         '  use: [ throttled, rateLimited: { parameter: value } ]'
       ].join('\n');
@@ -1357,19 +1274,18 @@ describe('Parser', function() {
         'traits:',
         '  rateLimited:',
         '    name: Rate Limited',
-        '    get?:',
-        '      headers:',
-        '        If-None-Match?:',
-        '          description: |',
-        '            If-None-Match headers ensure that you don’t retrieve unnecessary data',
-        '            if you already have the most current version on-hand.',
-        '          type: string',
-        '        On-Behalf-Of?:',
-        '          description: |',
-        '            Used for enterprise administrators to make API calls on behalf of their',
-        '            managed users. To enable this functionality, please contact us with your',
-        '            API key.',
-        '          type: string',
+        '    headers:',
+        '      If-None-Match?:',
+        '        description: |',
+        '          If-None-Match headers ensure that you don’t retrieve unnecessary data',
+        '          if you already have the most current version on-hand.',
+        '        type: string',
+        '      On-Behalf-Of?:',
+        '        description: |',
+        '          Used for enterprise administrators to make API calls on behalf of their',
+        '          managed users. To enable this functionality, please contact us with your',
+        '          API key.',
+        '        type: string',
         '/leagues:',
         '  use: [ rateLimited ]',
         '  get:',
@@ -1383,16 +1299,14 @@ describe('Parser', function() {
         traits: {
           rateLimited: {
             name: 'Rate Limited',
-            'get?': {
-              'headers': {
-                'If-None-Match?': {
-                  description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
-                  type: 'string'
-                },
-                'On-Behalf-Of?' : {
-                  description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
-                  type: 'string'
-                }
+            'headers': {
+              'If-None-Match?': {
+                description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
+                type: 'string'
+              },
+              'On-Behalf-Of?' : {
+                description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
+                type: 'string'
               }
             }
           }

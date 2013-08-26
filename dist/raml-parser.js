@@ -10639,37 +10639,28 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       if (this.has_traits(node)) {
         resources = this.child_resources(node);
         return resources.forEach(function(resource) {
-          var uses;
+          var methods, uses;
+          methods = _this.child_methods(resource[1]);
           if (_this.has_property(resource[1], /^use$/i)) {
             uses = _this.property_value(resource[1], /^use$/i);
             uses.forEach(function(use) {
-              return _this.apply_trait(resource, use);
+              return methods.forEach(function(method) {
+                return _this.apply_trait(method, use);
+              });
             });
           }
+          methods.forEach(function(method) {
+            if (_this.has_property(method[1], /^use$/i)) {
+              uses = _this.property_value(method[1], /^use$/i);
+              return uses.forEach(function(use) {
+                return _this.apply_trait(method, use);
+              });
+            }
+          });
           resource[1].remove_question_mark_properties();
           return _this.apply_traits(resource[1]);
         });
       }
-    };
-
-    Traits.prototype.apply_trait = function(resource, useKey) {
-      var parameters, plainParameters, temp, trait,
-        _this = this;
-      trait = this.get_trait(this.key_or_value(useKey));
-      parameters = this.value_or_undefined(useKey);
-      plainParameters = {};
-      if (parameters) {
-        parameters[0][1].value.forEach(function(parameter) {
-          if (parameter[1].tag !== 'tag:yaml.org,2002:str') {
-            throw new _this.TraitError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
-          }
-          return plainParameters[parameter[0].value] = parameter[1].value;
-        });
-      }
-      temp = trait.cloneTrait();
-      this.apply_parameters(temp, plainParameters, useKey);
-      temp.combine(resource[1]);
-      return resource[1] = temp;
     };
 
     Traits.prototype.apply_parameters = function(resource, parameters, useKey) {
@@ -10696,6 +10687,26 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
         this.apply_parameters(resource.value[0][0], parameters, useKey);
         return this.apply_parameters(resource.value[0][1], parameters, useKey);
       }
+    };
+
+    Traits.prototype.apply_trait = function(method, useKey) {
+      var parameters, plainParameters, temp, trait,
+        _this = this;
+      trait = this.get_trait(this.key_or_value(useKey));
+      parameters = this.value_or_undefined(useKey);
+      plainParameters = {};
+      if (parameters) {
+        parameters[0][1].value.forEach(function(parameter) {
+          if (parameter[1].tag !== 'tag:yaml.org,2002:str') {
+            throw new _this.TraitError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
+          }
+          return plainParameters[parameter[0].value] = parameter[1].value;
+        });
+      }
+      temp = trait.cloneTrait();
+      this.apply_parameters(temp, plainParameters, useKey);
+      temp.combine(method[1]);
+      return method[1] = temp;
     };
 
     Traits.prototype.get_trait = function(traitName) {
@@ -11408,7 +11419,7 @@ function decode(str) {
       var invalid;
       this.check_is_map(node);
       invalid = node.value.filter(function(childNode) {
-        return (childNode[0].value.match(/^use$/i) || childNode[0].value.match(/^is$/i)) || !(childNode[0].value.match(/^(get|post|put|delete|head|patch|options)\??$/i) || childNode[0].value.match(/^name$/i) || childNode[0].value.match(/^description$/i) || childNode[0].value.match(/^headers$/i));
+        return childNode[0].value.match(/^use$/i) || childNode[0].value.match(/^is$/i);
       });
       if (invalid.length > 0) {
         throw new exports.ValidationError('while validating trait properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark);
@@ -11419,7 +11430,7 @@ function decode(str) {
       var invalid, required, type;
       this.check_is_map(node);
       invalid = node.value.filter(function(childNode) {
-        return !(childNode[0].value.match(/^name$/i) || childNode[0].value.match(/^description$/i) || childNode[0].value.match(/^type$/i) || childNode[0].value.match(/^enum$/i) || childNode[0].value.match(/^pattern$/i) || childNode[0].value.match(/^minLength$/i) || childNode[0].value.match(/^maxLength$/i) || childNode[0].value.match(/^minimum$/i) || childNode[0].value.match(/^maximum$/i) || childNode[0].value.match(/^required$/i) || childNode[0].value.match(/^default$/i));
+        return !(childNode[0].value.match(/^name$/i) || childNode[0].value.match(/^description$/i) || childNode[0].value.match(/^type$/i) || childNode[0].value.match(/^enum$/i) || childNode[0].value.match(/^pattern$/i) || childNode[0].value.match(/^minLength$/i) || childNode[0].value.match(/^maxLength$/i) || childNode[0].value.match(/^minimum$/i) || childNode[0].value.match(/^maximum$/i) || childNode[0].value.match(/^required$/i) || childNode[0].value.match(/^requires$/i) || childNode[0].value.match(/^excludes$/i) || childNode[0].value.match(/^default$/i));
       });
       if (invalid.length > 0) {
         throw new exports.ValidationError('while validating parameter properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark);
@@ -11473,6 +11484,12 @@ function decode(str) {
     Validator.prototype.child_resources = function(node) {
       return node.value.filter(function(childNode) {
         return childNode[0].value.match(/^\//i);
+      });
+    };
+
+    Validator.prototype.child_methods = function(node) {
+      return node.value.filter(function(childNode) {
+        return childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/);
       });
     };
 

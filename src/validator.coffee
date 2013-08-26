@@ -74,29 +74,27 @@ class @Validator
     invalid = node.value.filter (childNode) -> 
       return (
         childNode[0].value.match(/^use$/i) or
-        childNode[0].value.match(/^is$/i)) or
-        !( ( childNode[0].value.match(/^(get|post|put|delete|head|patch|options)\??$/i) or
-           childNode[0].value.match(/^name$/i) or
-           childNode[0].value.match(/^description$/i) or
-           childNode[0].value.match(/^headers$/i)))
+        childNode[0].value.match(/^is$/i))
     if invalid.length > 0 
       throw new exports.ValidationError 'while validating trait properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
 
   valid_common_parameter_properties: (node) ->
     @check_is_map node
     invalid = node.value.filter (childNode) -> 
-      return not (childNode[0].value.match(/^name$/i) or \
-                  childNode[0].value.match(/^description$/i) or \
-                  childNode[0].value.match(/^type$/i) or \
-                  childNode[0].value.match(/^enum$/i) or \
-                  childNode[0].value.match(/^pattern$/i) or \
-                  childNode[0].value.match(/^minLength$/i) or \
-                  childNode[0].value.match(/^maxLength$/i) or \
-                  childNode[0].value.match(/^minimum$/i) or \
+      return not (childNode[0].value.match(/^name$/i) or
+                  childNode[0].value.match(/^description$/i) or
+                  childNode[0].value.match(/^type$/i) or
+                  childNode[0].value.match(/^enum$/i) or
+                  childNode[0].value.match(/^pattern$/i) or
+                  childNode[0].value.match(/^minLength$/i) or
+                  childNode[0].value.match(/^maxLength$/i) or
+                  childNode[0].value.match(/^minimum$/i) or
                   childNode[0].value.match(/^maximum$/i) or
                   childNode[0].value.match(/^required$/i) or
+                  childNode[0].value.match(/^requires$/i) or
+                  childNode[0].value.match(/^excludes$/i) or
                   childNode[0].value.match(/^default$/i))
-    if invalid.length > 0 
+    if invalid.length > 0
       throw new exports.ValidationError 'while validating parameter properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
     if @has_property node, /^minLength$/i
       if isNaN(@property_value(node, /^minLength$/i))
@@ -119,6 +117,8 @@ class @Validator
       unless required.match(/^(y|yes|YES|t|true|TRUE|n|no|NO|f|false|FALSE)$/)
         console.log(required)
         throw new exports.ValidationError 'while validating parameter properties', null, '"'+required+'"' + 'required can be any of: y, yes, YES, t, true, n, no, NO, f, false, FALSE', node.start_mark
+    #TODO: add validations for requires, it should be an array, all keys scalar
+    #TODO: add validations for excludes, it should be an array, all keys scalar
 
   valid_root_properties: (node) ->
     @check_is_map node
@@ -135,6 +135,9 @@ class @Validator
         
   child_resources: (node) ->
     return node.value.filter (childNode) -> return childNode[0].value.match(/^\//i);
+
+  child_methods: (node) ->
+    return node.value.filter (childNode) -> return childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/);
     
   has_property: (node, property) ->
     return node.value.some( (childNode) -> return childNode[0].value.match(property) )

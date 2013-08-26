@@ -1,6 +1,5 @@
 name: Custom Trait
 description: This is a custom trait
-get:
-  responses:
-    429:
-      description: API Limit Exceeded
+responses:
+  429:
+    description: API Limit Exceeded
