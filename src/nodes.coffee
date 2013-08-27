@@ -56,7 +56,7 @@ class @SequenceNode extends @CollectionNode
 
 class @MappingNode extends @CollectionNode
   id: 'mapping'
-  
+
   clone: ->
     properties = []
     @value.forEach (property) =>
@@ -65,28 +65,42 @@ class @MappingNode extends @CollectionNode
       properties.push [ name, value ]
     temp = new @constructor( @tag, properties, @start_mark, @end_mark, @flow_style)
     return temp
-    
-  combine: (node) ->
-    if not (node instanceof MappingNode)
+
+  cloneTrait: ->
+    properties = []
+    @value.forEach (property) =>
+      name = property[0].clone()
+      value = property[1].clone()
+
+      # skip 'name' and 'description' property
+      unless  /^name$/i.test(name.value) or /^description$/i.test(name.value)
+        properties.push [ name, value ]
+    temp = new @constructor( @tag, properties, @start_mark, @end_mark, @flow_style)
+    return temp
+
+  combine: (resourceNode) ->
+    if not (resourceNode instanceof MappingNode)
       throw new exports.ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
-    node.value.forEach (property2) =>
-      name = property2[0].value
-      has_property = @value.some (property1) -> 
-        return (property1[0].value == name) or ((property1[0].value + '?') == name) or (property1[0].value == (name + '?'))
-      if has_property
-        @value.forEach (property1) ->
-          if (property1[0].value == name) or
-             ((property1[0].value + '?') == name) or
-             (property1[0].value == (name + '?'))
-            property1[1].combine property2[1]
-            if property1[0].value.indexOf('?', property1[0].value.length - 1) != -1
-              property1[0].value = property1[0].value.substring( 0, property1[0].value.length - 1)
+
+    resourceNode.value.forEach (resourceProperty) =>
+      name = resourceProperty[0].value
+
+      trait_has_property = @value.some (someProperty) ->
+        return (someProperty[0].value == name) or ((someProperty[0].value + '?') == name) or (someProperty[0].value == (name + '?'))
+
+      if trait_has_property
+        @value.forEach (traitProperty) ->
+          traitPropertyName = traitProperty[0].value
+          if (traitPropertyName == name) or
+             ((traitPropertyName + '?') == name) or (traitPropertyName == (name + '?'))
+            traitProperty[1].combine resourceProperty[1]
+            # remove the '?' at the end of the property name
+            traitProperty[0].value = traitProperty[0].value.replace /\?$/, ''
       else
-        @value.push [ property2[0].clone(), property2[1].clone() ]
-        
+        @value.push [ resourceProperty[0].clone(), resourceProperty[1].clone() ]
+
   remove_question_mark_properties: ->
     @value = @value.filter (property) ->
       return property[0].value.indexOf('?', property[0].value.length - 1) == -1
     @value.forEach (property) ->
       property[1].remove_question_mark_properties()
-

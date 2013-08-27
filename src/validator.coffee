@@ -6,7 +6,7 @@ uritemplate       = require 'uritemplate'
 The Validator throws these.
 ###
 class @ValidationError extends MarkedYAMLError
-  
+
 ###
 A collection of multiple validation errors
 ###
@@ -66,34 +66,35 @@ class @Validator
       traits = @property_value node, /^traits$/i
       traits.forEach (trait) =>
         @valid_traits_properties trait[1]
-        if not (@has_property trait[1], /^provides$/i)
-          throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a provides property', node.start_mark
         if not (@has_property trait[1], /^name$/i)
           throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a name property', node.start_mark
       
   valid_traits_properties: (node) ->  
     @check_is_map node
     invalid = node.value.filter (childNode) -> 
-      return not (childNode[0].value.match(/^name$/i) or \
-                  childNode[0].value.match(/^description$/i) or \
-                  childNode[0].value.match(/^provides$/i) )
+      return (
+        childNode[0].value.match(/^is$/i) or
+        childNode[0].value.match(/^type$/i))
     if invalid.length > 0 
       throw new exports.ValidationError 'while validating trait properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
 
   valid_common_parameter_properties: (node) ->
     @check_is_map node
     invalid = node.value.filter (childNode) -> 
-      return not (childNode[0].value.match(/^name$/i) or \
-                  childNode[0].value.match(/^description$/i) or \
-                  childNode[0].value.match(/^type$/i) or \
-                  childNode[0].value.match(/^enum$/i) or \
-                  childNode[0].value.match(/^pattern$/i) or \
-                  childNode[0].value.match(/^minLength$/i) or \
-                  childNode[0].value.match(/^maxLength$/i) or \
-                  childNode[0].value.match(/^minimum$/i) or \
-                  childNode[0].value.match(/^maximum$/i) or \
+      return not (childNode[0].value.match(/^name$/i) or
+                  childNode[0].value.match(/^description$/i) or
+                  childNode[0].value.match(/^type$/i) or
+                  childNode[0].value.match(/^enum$/i) or
+                  childNode[0].value.match(/^pattern$/i) or
+                  childNode[0].value.match(/^minLength$/i) or
+                  childNode[0].value.match(/^maxLength$/i) or
+                  childNode[0].value.match(/^minimum$/i) or
+                  childNode[0].value.match(/^maximum$/i) or
+                  childNode[0].value.match(/^required$/i) or
+                  childNode[0].value.match(/^requires$/i) or
+                  childNode[0].value.match(/^excludes$/i) or
                   childNode[0].value.match(/^default$/i))
-    if invalid.length > 0 
+    if invalid.length > 0
       throw new exports.ValidationError 'while validating parameter properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
     if @has_property node, /^minLength$/i
       if isNaN(@property_value(node, /^minLength$/i))
@@ -111,7 +112,14 @@ class @Validator
       type = @property_value node, /^type$/i
       if type != 'string' and type != 'number' and type != 'integer' and type != 'date'
         throw new exports.ValidationError 'while validating parameter properties', null, 'type can either be: string, number, integer or date', node.start_mark
-  
+    if @has_property node, /^required$/i
+      required = @property_value node, /^required$/i
+      unless required.match(/^(y|yes|YES|t|true|TRUE|n|no|NO|f|false|FALSE)$/)
+        console.log(required)
+        throw new exports.ValidationError 'while validating parameter properties', null, '"' + required + '"' + 'required can be any of: y, yes, YES, t, true, n, no, NO, f, false, FALSE', node.start_mark
+    #TODO: add validations for requires, it should be an array, all keys scalar
+    #TODO: add validations for excludes, it should be an array, all keys scalar
+
   valid_root_properties: (node) ->
     @check_is_map node
     invalid = node.value.filter (childNode) -> 
@@ -127,10 +135,18 @@ class @Validator
         
   child_resources: (node) ->
     return node.value.filter (childNode) -> return childNode[0].value.match(/^\//i);
+
+  child_methods: (node) ->
+    return node.value.filter (childNode) -> return childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/);
     
   has_property: (node, property) ->
-    return node.value.some( (childNode) -> return childNode[0].value.match(property) )
-    
+    if node.value and typeof node.value is "object"
+      return node.value.some(
+        (childNode) ->
+          return childNode[0].value and childNode[0].value.match(property)
+      )
+    return false
+
   property_value: (node, property) ->
     filteredNodes = node.value.filter (childNode) -> return childNode[0].value.match(property)
     return filteredNodes[0][1].value;
@@ -207,19 +223,36 @@ class @Validator
     if node instanceof nodes.MappingNode
       return node.value[0][0].value
 
+  value_or_undefined: (node) ->
+    if node instanceof nodes.MappingNode
+      return node.value
+    return undefined
+
   valid_trait_consumption: (node, traits = undefined) ->
     @check_is_map node
     if not traits? and @has_property node, /^traits$/i
       traits = @property_value node, /^traits$/i
     resources = @child_resources node
+
     resources.forEach (resource) =>
-      if @has_property resource[1], /^use$/i
-        uses = @property_value resource[1], /^use$/i
+      if @has_property resource[1], /^is$/i
+        uses = @property_value resource[1], /^is$/i
         if not (uses instanceof Array)
           throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', node.start_mark
         uses.forEach (use) =>
           if not traits.some( (trait) => trait[0].value == @key_or_value use)
             throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
+
+      methods = @child_methods resource[1]
+      methods.forEach (method) =>
+        if @has_property method[1], /^is$/i
+          uses = @property_value method[1], /^is$/i
+          if not (uses instanceof Array)
+            throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', node.start_mark
+          uses.forEach (use) =>
+            if not traits.some( (trait) => trait[0].value == @key_or_value use)
+              throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
+
       @valid_trait_consumption resource[1], traits
     
   has_title: (node) ->

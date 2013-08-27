@@ -13,7 +13,7 @@ if (typeof window === 'undefined') {
 }
 
 describe('Parser', function() {
-  describe('Basic Information', function(done) {
+  describe('Basic Information', function() {
     it('should fail unsupported yaml version', function(done) {
       var definition = [
         '%YAML 1.1',
@@ -144,17 +144,13 @@ describe('Parser', function() {
           title: 'Test',
           traits: {
               customTrait: {
-                  name: 'Custom Trait',
-                  description: 'This is a custom trait',
-                  provides: {
-                      get: {
-                          responses: {
-                              429: {
-                                  description: 'API Limit Exceeded'
-                              }
-                          }
-                      }
-                  }
+                name: 'Custom Trait',
+                description: 'This is a custom trait',
+                responses: {
+                    429: {
+                        description: 'API Limit Exceeded'
+                    }
+                }
               }
           }
       }).and.notify(done);
@@ -472,6 +468,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/unclosed brace/).and.notify(done);
     });
+
     it('should fail if baseUri uses version but there is no version defined', function(done) {
       var definition = [
         '---',
@@ -481,6 +478,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/missing version/).and.notify(done);
     });
+
     it('should succeed if baseUri uses version and there is a version defined', function(done) {
       var definition = [
         '---',
@@ -492,6 +490,224 @@ describe('Parser', function() {
       var promise = raml.load(definition);
       promise.should.eventually.deep.equal({ title: 'MyApi', version: 'v1', baseUri: 'http://myapi.com/{version}' }).and.notify(done);
     });
+
+    it('should succeed when a URI parameter has required "y"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: y',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "yes"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: yes',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "YES"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: YES',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "t"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: t',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "true"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: true',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "TRUE"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: TRUE',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "n"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: n',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "no"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: no',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "NO"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: NO',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "f"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: f',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "false"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: false',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has required "FALSE"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    required: FALSE',
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+
   });
   describe('Resources', function() {
     it('should succeed extracting resource information', function(done) {
@@ -751,7 +967,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.with(/found unhashable key/).and.notify(done);
     });
   });
-  describe('Traits', function() {
+  describe('Traits at resource level', function() {
     it('should succeed when applying traits across !include boundaries', function(done) {
       var definition = [
           '%TAG ! tag:raml.org,0.1:',
@@ -768,110 +984,49 @@ describe('Parser', function() {
               customTrait: {
                   name: 'Custom Trait',
                   description: 'This is a custom trait',
-                  provides: {
-                      get: {
-                          responses: {
-                              429: {
-                                  description: 'API Limit Exceeded'
-                              }
-                          }
+                  responses: {
+                      429: {
+                          description: 'API Limit Exceeded'
                       }
                   }
               }
           },
           resources: [
               {
-                  relativeUri: "/",
+                  is: [ "customTrait" ],
                   name: "Root",
-                  use: [ "customTrait" ],
+                  relativeUri: "/",
                   methods: [
                       {
-                          method: "get",
-                          responses: {
-                              429: {
-                                  description: 'API Limit Exceeded'
-                              }
-                          }
+                        responses: {
+                            429: {
+                                description: 'API Limit Exceeded'
+                            }
+                        },
+                        description: "Root resource",
+                        method: "get"
                       }
                   ],
                   resources: [
                       {
                           relativeUri: "/anotherResource",
                           name: "Another Resource",
-                          use: [ "customTrait" ],
+                          is: [ "customTrait" ],
                           methods: [
                               {
-                                  method: "get",
-                                  responses: {
-                                      429: {
-                                          description: 'API Limit Exceeded'
-                                      }
-                                  }
+                                description: "Another resource",
+                                method: "get",
+                                responses: {
+                                    429: {
+                                        description: 'API Limit Exceeded'
+                                    }
+                                }
                               }
                           ]
                       }
                   ]
               }
           ]
-      }).and.notify(done);
-    });
-    it('should succeed when applying using verb question mark', function(done) {
-      var definition = [
-        '%YAML 1.2',
-        '%TAG ! tag:raml.org,0.1:',
-        '---',
-        'title: Test',
-        'traits:',
-        '  rateLimited:',
-        '    name: Rate Limited',
-        '    provides:',
-        '      get?:',
-        '        responses:',
-        '          429:',
-        '            description: API Limit Exceeded',
-        '/leagues:',
-        '  use: [ rateLimited ]',
-        '  get:',
-        '    responses:',
-        '      200:',
-        '        description: Retrieve a list of leagues'
-      ].join('\n');
-
-      raml.load(definition).should.become({
-        title: 'Test',
-        traits: {
-          rateLimited: {
-            name: 'Rate Limited',
-            provides: {
-              'get?': {
-                responses: {
-                  '429': {
-                    description: 'API Limit Exceeded'
-                  }
-                }
-              }
-            }
-          }
-        },
-        resources: [
-          {
-            relativeUri: '/leagues',
-            use: [ 'rateLimited' ],
-            methods: [
-              {
-                method: 'get',
-                responses: {
-                  '200': {
-                    description: 'Retrieve a list of leagues'
-                  },
-                  '429': {
-                    description: 'API Limit Exceeded'
-                  }
-                }
-              }
-            ]
-          }
-        ]
       }).and.notify(done);
     });
     it('should succeed when applying multiple traits', function(done) {
@@ -883,20 +1038,16 @@ describe('Parser', function() {
         'traits:',
         '  rateLimited:',
         '    name: Rate Limited',
-        '    provides:',
-        '      get?:',
-        '        responses:',
-        '          429:',
-        '            description: API Limit Exceeded',
+        '    responses:',
+        '      429:',
+        '        description: API Limit Exceeded',
         '  queryable:',
         '    name: Queryable',
-        '    provides:',
-        '      get?:',
-        '        queryParameters:',
-        '          q:',
-        '            type: string',
+        '    queryParameters:',
+        '      q:',
+        '         type: string',
         '/leagues:',
-        '  use: [ rateLimited, queryable ]',
+        '  is: [ rateLimited, queryable ]',
         '  get:',
         '    responses:',
         '      200:',
@@ -908,25 +1059,17 @@ describe('Parser', function() {
         traits: {
           rateLimited: {
             name: 'Rate Limited',
-            provides: {
-              'get?': {
-                responses: {
-                  '429': {
-                    description: 'API Limit Exceeded'
-                  }
-                }
+            responses: {
+              '429': {
+                description: 'API Limit Exceeded'
               }
             }
           },
           queryable: {
             name: 'Queryable',
-            provides: {
-              'get?': {
-                queryParameters: {
-                  q: {
-                    type: 'string'
-                  }
-                }
+            queryParameters: {
+              q: {
+                type: 'string'
               }
             }
           }
@@ -934,7 +1077,7 @@ describe('Parser', function() {
         resources: [
           {
             relativeUri: '/leagues',
-            use: [ 'rateLimited', 'queryable' ],
+            is: [ 'rateLimited', 'queryable' ],
             methods: [
               {
                 method: 'get',
@@ -957,7 +1100,6 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
-
     it('should remove nodes with question mark that are not used', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -967,17 +1109,10 @@ describe('Parser', function() {
         'traits:',
         '  rateLimited:',
         '    name: Rate Limited',
-        '    provides:',
-        '      get?:',
-        '        responses:',
-        '          429:',
-        '            description: API Limit Exceeded',
-        '      post?:',
-        '        responses:',
-        '          429:',
-        '            description: API Limit Exceeded',
+        '    headers?:',
+        '      x-header-extra: API Limit Exceeded',
         '/leagues:',
-        '  use: [ rateLimited ]',
+        '  is: [ rateLimited ]',
         '  get:',
         '    responses:',
         '      200:',
@@ -989,19 +1124,252 @@ describe('Parser', function() {
         traits: {
           rateLimited: {
             name: 'Rate Limited',
-            provides: {
-              'get?': {
+            "headers?": {
+              "x-header-extra": "API Limit Exceeded"
+            }
+          }
+        },
+        resources: [
+          {
+            relativeUri: '/leagues',
+            is: [ 'rateLimited' ],
+            methods: [
+              {
+                method: 'get',
                 responses: {
-                  '429': {
-                    description: 'API Limit Exceeded'
+                  '200': {
+                    description: 'Retrieve a list of leagues'
                   }
                 }
+              }
+            ]
+          }
+        ]
+      }).and.notify(done);
+    });
+//    it('should fail if unknown property is used inside a trait', function(done) {
+//      var definition = [
+//        '%YAML 1.2',
+//        '%TAG ! tag:raml.org,0.1:',
+//        '---',
+//        'title: Test',
+//        'traits:',
+//        '  rateLimited:',
+//        '    name: Rate Limited',
+//        '    responses:',
+//        '      503:',
+//        '        description: Server Unavailable. Check Your Rate Limits.',
+//        '/:',
+//        '  is: [ rateLimited: { parameter: value } ]'
+//      ].join('\n');
+//
+//      raml.load(definition).should.be.rejected.with(/unknown property what/).and.notify(done);
+//    });
+    it('should fail if trait is missing name property', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    responses:',
+        '      503:',
+        '        description: Server Unavailable. Check Your Rate Limits.',
+        '/:',
+        '  is: [ rateLimited: { parameter: value } ]'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/every trait must have a name property/).and.notify(done);
+    });
+    it('should fail if use property is not an array', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/:',
+        '  is: throttled ]'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/use property must be an array/).and.notify(done);
+    });
+    it('should fail on invalid trait name', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    responses:',
+        '      503:',
+        '        description: Server Unavailable. Check Your Rate Limits.',
+        '/:',
+        '  is: [ throttled, rateLimited: { parameter: value } ]'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/there is no trait named throttled/).and.notify(done);
+    });
+    it('should allow using "use" as a resource name', function(done) {
+      var definition = [
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://www.api.com/{version}/{company}',
+        'version: v1.1',
+        '/users:',
+        ' name: Tags',
+        ' get:',
+        '  summary: Get a list of recently tagged media',
+        ' post:',
+        '  summary: Create a new tag',
+        ' /{userid}:',
+        '  name: Search'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        baseUri: 'http://www.api.com/{version}/{company}',
+        version: 'v1.1',
+        resources: [
+          {
+            name: 'Tags',
+            relativeUri: '/users',
+            methods: [
+              {
+                summary: 'Get a list of recently tagged media',
+                method: 'get'
+
               },
-              'post?': {
+              {
+                summary: 'Create a new tag',
+                method: 'post'
+
+              }
+            ],
+            resources: [{
+              name: 'Search',
+              relativeUri: '/{userid}'
+            }]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should not add intermediate structures in optional keys for missing properties', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    headers:',
+        '      If-None-Match?:',
+        '        description: |',
+        '          If-None-Match headers ensure that you don’t retrieve unnecessary data',
+        '          if you already have the most current version on-hand.',
+        '        type: string',
+        '      On-Behalf-Of?:',
+        '        description: |',
+        '          Used for enterprise administrators to make API calls on behalf of their',
+        '          managed users. To enable this functionality, please contact us with your',
+        '          API key.',
+        '        type: string',
+        '/leagues:',
+        '  is: [ rateLimited ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            'headers': {
+              'If-None-Match?': {
+                description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
+                type: 'string'
+              },
+              'On-Behalf-Of?' : {
+                description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
+                type: 'string'
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            is: [ 'rateLimited' ],
+            relativeUri: '/leagues',
+            methods: [
+              {
+                headers: { },
+                method: 'get',
                 responses: {
-                  '429': {
-                    description: 'API Limit Exceeded'
+                  '200': {
+                    description: 'Retrieve a list of leagues'
                   }
+                }
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should allow dictionary keys as names of traits', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    get?:',
+        '      headers?:',
+        '        If-None-Match?:',
+        '          description: |',
+        '            If-None-Match headers ensure that you don’t retrieve unnecessary data',
+        '            if you already have the most current version on-hand.',
+        '          type: string',
+        '        On-Behalf-Of?:',
+        '          description: |',
+        '            Used for enterprise administrators to make API calls on behalf of their',
+        '            managed users. To enable this functionality, please contact us with your',
+        '            API key.',
+        '          type: string',
+        '/leagues:',
+        '  is: [ rateLimited: {} ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            'get?': {
+              'headers?': {
+                'If-None-Match?': {
+                  description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
+                  type: 'string'
+                },
+                'On-Behalf-Of?' : {
+                  description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
+                  type: 'string'
                 }
               }
             }
@@ -1009,11 +1377,586 @@ describe('Parser', function() {
         },
         resources: [
           {
+            is: [ { rateLimited: {} }],
             relativeUri: '/leagues',
-            use: [ 'rateLimited' ],
             methods: [
               {
                 method: 'get',
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should allow parameters in a trait usage', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    get?:',
+        '      headers?:',
+        '        If-None-Match?:',
+        '          description: |',
+        '            If-None-Match headers ensure that you don’t retrieve unnecessary data',
+        '            if you already have the most current version on-hand.',
+        '          type: string',
+        '        On-Behalf-Of?:',
+        '          description: |',
+        '            Used for enterprise administrators to make API calls on behalf of their',
+        '            managed users. To enable this functionality, please contact us with your',
+        '            API key.',
+        '          type: string',
+        '/leagues:',
+        '  is: [ rateLimited: { param1: value, param2: value} ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            'get?': {
+              'headers?': {
+                'If-None-Match?': {
+                  description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
+                  type: 'string'
+                },
+                'On-Behalf-Of?' : {
+                  description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
+                  type: 'string'
+                }
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            is: [
+              {
+                rateLimited: {
+                  param1: 'value',
+                  param2: 'value'
+                }
+              }
+            ],
+            relativeUri: '/leagues',
+            methods: [
+              {
+                method: 'get',
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should reject parameters whose value is an array', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    get?:',
+        '      headers?:',
+        '        If-None-Match?:',
+        '          description: |',
+        '            If-None-Match headers ensure that you don’t retrieve unnecessary data',
+        '            if you already have the most current version on-hand.',
+        '          type: string',
+        '        On-Behalf-Of?:',
+        '          description: |',
+        '            Used for enterprise administrators to make API calls on behalf of their',
+        '            managed users. To enable this functionality, please contact us with your',
+        '            API key.',
+        '          type: string',
+        '/leagues:',
+        '  is: [ rateLimited: { param1: ["string"], param2: value} ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
+    });
+    it('should reject parameters whose value is a mapping', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '/leagues:',
+        '  is: [ rateLimited: { param1: {key: "value"}, param2: value} ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited'
+          }
+        },
+        resources: [
+          {
+            is: [
+              {
+                rateLimited: {
+                  param1: 'value',
+                  param2: 'value'
+                }
+              }
+            ],
+            relativeUri: '/leagues',
+            methods: [
+              {
+                method: 'get',
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
+    });
+    it('should reject trait with missing provided parameters', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    get:',
+        '      Authorization:',
+        '        description: <<lalalalala>> <<pepepepepepep>>',
+        '/leagues:',
+        '  is: [ rateLimited: { param1: value1, param2: value2} ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/value was not provided for parameter: lalalalala/).and.notify(done);
+    });
+    it('should apply parameters in traits', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    headers:',
+        '      Authorization:',
+        '        description: <<param1>> <<param2>>',
+        '/leagues:',
+        '  is: [ rateLimited: { param1: "value1", param2: "value2"} ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            'headers': {
+              'Authorization': {
+                description: '<<param1>> <<param2>>'
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            is: [ { rateLimited: { param1: 'value1', param2: 'value2'} }],
+            relativeUri: '/leagues',
+            methods: [
+              {
+                'headers': {
+                  'Authorization': {
+                    description: 'value1 value2'
+                  }
+                },
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                },
+                method: 'get'
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should apply parameters in traits in each occurrence', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    headers:',
+        '      Authorization:',
+        '        description: <<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>>',
+        '      X-Random-Header:',
+        '        description: <<param2>><<param2>><<param2>>',
+        '      <<param2>><<param2>>:',
+        '        description: <<param1>>',
+        '/leagues:',
+        '  is: [ rateLimited: { param1: "value1", param2: "value2"} ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            'headers': {
+              'Authorization': {
+                description: '<<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>>'
+              },
+              'X-Random-Header': {
+                description: '<<param2>><<param2>><<param2>>'
+              },
+              '<<param2>><<param2>>': {
+                description: '<<param1>>'
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            is: [ { rateLimited: { param1: 'value1', param2: 'value2'} }],
+            relativeUri: '/leagues',
+            methods: [
+              {
+                'headers': {
+                  'Authorization': {
+                    description: 'value1 value2value1 value2value1 value2value1 value2value1 value2value1 value2'
+                  },
+                  'X-Random-Header': {
+                    description: 'value2value2value2'
+                  },
+                  'value2value2': {
+                    description: 'value1'
+                  }
+                },
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                },
+                method: 'get'
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should apply parameters in keys in traits', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    headers:',
+        '      <<header>>:',
+        '        description: <<param1>> <<param2>>',
+        '/leagues:',
+        '  is: [ rateLimited: { header: "Authorization", param1: "value1", param2: "value2"} ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            'headers': {
+              '<<header>>': {
+                description: '<<param1>> <<param2>>'
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            is: [ { rateLimited: { header: "Authorization", param1: 'value1', param2: 'value2'} }],
+            relativeUri: '/leagues',
+            methods: [
+              {
+                'headers': {
+                  'Authorization': {
+                    description: 'value1 value2'
+                  }
+                },
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                },
+                method: 'get'
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should apply traits in all methods', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    headers:',
+        '      <<header>>:',
+        '        description: <<param1>> <<param2>>',
+        '/leagues:',
+        '  is: [ rateLimited: { header: "Authorization", param1: "value1", param2: "value2"} ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues',
+        '  post:',
+        '    responses:',
+        '      200:',
+        '        description: creates a new league'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            'headers': {
+              '<<header>>': {
+                description: '<<param1>> <<param2>>'
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            is: [ { rateLimited: { header: "Authorization", param1: 'value1', param2: 'value2'} }],
+            relativeUri: '/leagues',
+            methods: [
+              {
+                'headers': {
+                  'Authorization': {
+                    description: 'value1 value2'
+                  }
+                },
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                },
+                method: 'get'
+              },
+              {
+                'headers': {
+                  'Authorization': {
+                    description: 'value1 value2'
+                  }
+                },
+                responses: {
+                  '200': {
+                    description: 'creates a new league'
+                  }
+                },
+                method: 'post'
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+  });
+  describe('Traits at method level', function() {
+    it('should succeed when applying traits across !include boundaries', function(done) {
+      var definition = [
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  customTrait: !include http://localhost:9001/test/customtrait.yml',
+        '/: !include http://localhost:9001/test/traitsAtResourceLevel.yml'
+      ].join('\n');
+
+      raml.load(definition).should.eventually.deep.equal({
+        title: 'Test',
+        traits: {
+          customTrait: {
+            name: 'Custom Trait',
+            description: 'This is a custom trait',
+            responses: {
+              429: {
+                description: 'API Limit Exceeded'
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            name: "Root",
+            relativeUri: "/",
+            methods: [
+              {
+                is: [ "customTrait" ],
+                responses: {
+                  429: {
+                    description: 'API Limit Exceeded'
+                  }
+                },
+                description: "Root resource",
+                method: "get"
+              }
+            ],
+            resources: [
+              {
+                relativeUri: "/anotherResource",
+                name: "Another Resource",
+                methods: [
+                  {
+                    is: [ "customTrait" ],
+                    description: "Another resource",
+                    method: "get",
+                    responses: {
+                      429: {
+                        description: 'API Limit Exceeded'
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }).and.notify(done);
+    });
+    it('should succeed when applying multiple traits', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    responses:',
+        '      429:',
+        '        description: API Limit Exceeded',
+        '  queryable:',
+        '    name: Queryable',
+        '    queryParameters:',
+        '      q:',
+        '         type: string',
+        '/leagues:',
+        '  get:',
+        '    is: [ rateLimited, queryable ]',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      raml.load(definition).should.become({
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            responses: {
+              '429': {
+                description: 'API Limit Exceeded'
+              }
+            }
+          },
+          queryable: {
+            name: 'Queryable',
+            queryParameters: {
+              q: {
+                type: 'string'
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            relativeUri: '/leagues',
+            methods: [
+              {
+                is: [ 'rateLimited', 'queryable' ],
+                method: 'get',
+                queryParameters: {
+                  q: {
+                    type: 'string'
+                  }
+                },
                 responses: {
                   '200': {
                     description: 'Retrieve a list of leagues'
@@ -1028,25 +1971,7 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
-    it('should fail if unknown property is used inside a trait', function(done) {
-      var definition = [
-        '%YAML 1.2',
-        '%TAG ! tag:raml.org,0.1:',
-        '---',
-        'title: Test',
-        'traits:',
-        '  rateLimited:',
-        '    what:',
-        '      responses:',
-        '        503:',
-        '          description: Server Unavailable. Check Your Rate Limits.',
-        '/:',
-        '  use: [ throttled, rateLimited: { parameter: value } ]'
-      ].join('\n');
-
-      raml.load(definition).should.be.rejected.with(/unknown property what/).and.notify(done);
-    });
-    it('should fail if trait is missing provides property', function(done) {
+    it('should remove nodes with question mark that are not used', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -1055,11 +1980,43 @@ describe('Parser', function() {
         'traits:',
         '  rateLimited:',
         '    name: Rate Limited',
-        '/:',
-        '  use: [ rateLimited: { parameter: value } ]'
+        '    headers?:',
+        '      x-header-extra: API Limit Exceeded',
+        '/leagues:',
+        '  get:',
+        '    is: [ rateLimited ]',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/every trait must have a provides property/).and.notify(done);
+      raml.load(definition).should.become({
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            "headers?": {
+              "x-header-extra": "API Limit Exceeded"
+            }
+          }
+        },
+        resources: [
+          {
+            relativeUri: '/leagues',
+            methods: [
+              {
+                is: [ 'rateLimited' ],
+                method: 'get',
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }).and.notify(done);
     });
     it('should fail if trait is missing name property', function(done) {
       var definition = [
@@ -1069,13 +2026,9 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  rateLimited:',
-        '    provides:',
-        '      get?:',
-        '        responses:',
-        '          503:',
-        '            description: Server Unavailable. Check Your Rate Limits.',
-        '/:',
-        '  use: [ rateLimited: { parameter: value } ]'
+        '    responses:',
+        '      503:',
+        '        description: Server Unavailable. Check Your Rate Limits.'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/every trait must have a name property/).and.notify(done);
@@ -1087,7 +2040,8 @@ describe('Parser', function() {
         '---',
         'title: Test',
         '/:',
-        '  use: throttled ]'
+        '  get:',
+        '    is: throttled ]'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/use property must be an array/).and.notify(done);
@@ -1101,16 +2055,414 @@ describe('Parser', function() {
         'traits:',
         '  rateLimited:',
         '    name: Rate Limited',
-        '    provides:',
-        '      get?:',
-        '        responses:',
-        '          503:',
-        '            description: Server Unavailable. Check Your Rate Limits.',
+        '    responses:',
+        '      503:',
+        '        description: Server Unavailable. Check Your Rate Limits.',
         '/:',
-        '  use: [ throttled, rateLimited: { parameter: value } ]'
+        '  get:',
+        '    is: [ throttled, rateLimited: { parameter: value } ]'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/there is no trait named throttled/).and.notify(done);
+    });
+    it('should not add intermediate structures in optional keys for missing properties', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    headers:',
+        '      If-None-Match?:',
+        '        description: |',
+        '          If-None-Match headers ensure that you don’t retrieve unnecessary data',
+        '          if you already have the most current version on-hand.',
+        '        type: string',
+        '      On-Behalf-Of?:',
+        '        description: |',
+        '          Used for enterprise administrators to make API calls on behalf of their',
+        '          managed users. To enable this functionality, please contact us with your',
+        '          API key.',
+        '        type: string',
+        '/leagues:',
+        '  get:',
+        '    is: [ rateLimited ]',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            'headers': {
+              'If-None-Match?': {
+                description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
+                type: 'string'
+              },
+              'On-Behalf-Of?' : {
+                description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
+                type: 'string'
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            relativeUri: '/leagues',
+            methods: [
+              {
+                is: [ 'rateLimited' ],
+                headers: { },
+                method: 'get',
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should allow dictionary keys as names of traits', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    get?:',
+        '      headers?:',
+        '        If-None-Match?:',
+        '          description: |',
+        '            If-None-Match headers ensure that you don’t retrieve unnecessary data',
+        '            if you already have the most current version on-hand.',
+        '          type: string',
+        '        On-Behalf-Of?:',
+        '          description: |',
+        '            Used for enterprise administrators to make API calls on behalf of their',
+        '            managed users. To enable this functionality, please contact us with your',
+        '            API key.',
+        '          type: string',
+        '/leagues:',
+        '  get:',
+        '    is: [ rateLimited: {} ]',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            'get?': {
+              'headers?': {
+                'If-None-Match?': {
+                  description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
+                  type: 'string'
+                },
+                'On-Behalf-Of?' : {
+                  description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
+                  type: 'string'
+                }
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            relativeUri: '/leagues',
+            methods: [
+              {
+                is: [ { rateLimited: {} }],
+                method: 'get',
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should allow parameters in a trait usage', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    get?:',
+        '      headers?:',
+        '        If-None-Match?:',
+        '          description: |',
+        '            If-None-Match headers ensure that you don’t retrieve unnecessary data',
+        '            if you already have the most current version on-hand.',
+        '          type: string',
+        '        On-Behalf-Of?:',
+        '          description: |',
+        '            Used for enterprise administrators to make API calls on behalf of their',
+        '            managed users. To enable this functionality, please contact us with your',
+        '            API key.',
+        '          type: string',
+        '/leagues:',
+        '  get:',
+        '    is: [ rateLimited: { param1: value, param2: value} ]',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            'get?': {
+              'headers?': {
+                'If-None-Match?': {
+                  description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
+                  type: 'string'
+                },
+                'On-Behalf-Of?' : {
+                  description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
+                  type: 'string'
+                }
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            relativeUri: '/leagues',
+            methods: [
+              {
+                is: [
+                  {
+                    rateLimited: {
+                      param1: 'value',
+                      param2: 'value'
+                    }
+                  }
+                ],
+                method: 'get',
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should reject parameters whose value is an array', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    get?:',
+        '      headers?:',
+        '        If-None-Match?:',
+        '          description: |',
+        '            If-None-Match headers ensure that you don’t retrieve unnecessary data',
+        '            if you already have the most current version on-hand.',
+        '          type: string',
+        '        On-Behalf-Of?:',
+        '          description: |',
+        '            Used for enterprise administrators to make API calls on behalf of their',
+        '            managed users. To enable this functionality, please contact us with your',
+        '            API key.',
+        '          type: string',
+        '/leagues:',
+        '  get:',
+        '    is: [ rateLimited: { param1: ["string"], param2: value} ]',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
+    });
+    it('should reject parameters whose value is a mapping', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '/leagues:',
+        '  get:',
+        '    is: [ rateLimited: { param1: {key: "value"}, param2: value} ]',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
+    });
+    it('should reject trait with missing provided parameters', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    get:',
+        '      Authorization:',
+        '        description: <<lalalalala>> <<pepepepepepep>>',
+        '/leagues:',
+        '  get:',
+        '    is: [ rateLimited: { param1: value1, param2: value2} ]',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/value was not provided for parameter: lalalalala/).and.notify(done);
+    });
+    it('should apply parameters in traits', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    headers:',
+        '      Authorization:',
+        '        description: <<param1>> <<param2>>',
+        '/leagues:',
+        '  get:',
+        '    is: [ rateLimited: { param1: "value1", param2: "value2"} ]',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            'headers': {
+              'Authorization': {
+                description: '<<param1>> <<param2>>'
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            relativeUri: '/leagues',
+            methods: [
+              {
+                is: [ { rateLimited: { param1: 'value1', param2: 'value2'} }],
+                'headers': {
+                  'Authorization': {
+                    description: 'value1 value2'
+                  }
+                },
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                },
+                method: 'get'
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should apply parameters in keys in traits', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    headers:',
+        '      <<header>>:',
+        '        description: <<param1>> <<param2>>',
+        '/leagues:',
+        '  get:',
+        '    is: [ rateLimited: { header: "Authorization", param1: "value1", param2: "value2"} ]',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            'headers': {
+              '<<header>>': {
+                description: '<<param1>> <<param2>>'
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            relativeUri: '/leagues',
+            methods: [
+              {
+                is: [ { rateLimited: { header: "Authorization", param1: 'value1', param2: 'value2'} }],
+                'headers': {
+                  'Authorization': {
+                    description: 'value1 value2'
+                  }
+                },
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                },
+                method: 'get'
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
     });
   });
   describe('Error reporting', function () {
@@ -1124,20 +2476,19 @@ describe('Parser', function() {
         'traits:',
         '  rateLimited:',
         '    name: Rate Limited',
-        '    provides:',
-        '      get?:',
-        '        responses:',
-        '          503:',
-        '            description: Server Unavailable. Check Your Rate Limits.',
+        '    get?:',
+        '      responses:',
+        '        503:',
+        '          description: Server Unavailable. Check Your Rate Limits.',
         '/:',
-        '  use: [ throttled, rateLimited: { parameter: value } ]'
+        '  is: [ throttled, rateLimited: { parameter: value } ]'
       ].join('\n');
 
       raml.load(definition).then(noop, function (error) {
         setTimeout(function () {
           expect(error.problem_mark).to.exist;
-          error.problem_mark.column.should.be.equal(9);
-          error.problem_mark.line.should.be.equal(13);
+          error.problem_mark.column.should.be.equal(8);
+          error.problem_mark.line.should.be.equal(12);
           done();
         }, 0);
       });

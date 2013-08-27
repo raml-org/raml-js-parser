@@ -1,6 +1,7 @@
 ;(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
 (function() {
-  var __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+  var _ref,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -110,6 +111,23 @@
     return MarkedYAMLError;
 
   })(this.YAMLError);
+
+  /*
+  The Validator throws these.
+  */
+
+
+  this.ValidationError = (function(_super) {
+    __extends(ValidationError, _super);
+
+    function ValidationError() {
+      _ref = ValidationError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return ValidationError;
+
+  })(this.MarkedYAMLError);
 
 }).call(this);
 
@@ -8104,28 +8122,44 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       return temp;
     };
 
-    MappingNode.prototype.combine = function(node) {
+    MappingNode.prototype.cloneTrait = function() {
+      var properties, temp,
+        _this = this;
+      properties = [];
+      this.value.forEach(function(property) {
+        var name, value;
+        name = property[0].clone();
+        value = property[1].clone();
+        if (!(/^name$/i.test(name.value) || /^description$/i.test(name.value))) {
+          return properties.push([name, value]);
+        }
+      });
+      temp = new this.constructor(this.tag, properties, this.start_mark, this.end_mark, this.flow_style);
+      return temp;
+    };
+
+    MappingNode.prototype.combine = function(resourceNode) {
       var _this = this;
-      if (!(node instanceof MappingNode)) {
+      if (!(resourceNode instanceof MappingNode)) {
         throw new exports.ApplicationError('while applying node', null, 'different YAML structures', this.start_mark);
       }
-      return node.value.forEach(function(property2) {
-        var has_property, name;
-        name = property2[0].value;
-        has_property = _this.value.some(function(property1) {
-          return (property1[0].value === name) || ((property1[0].value + '?') === name) || (property1[0].value === (name + '?'));
+      return resourceNode.value.forEach(function(resourceProperty) {
+        var name, trait_has_property;
+        name = resourceProperty[0].value;
+        trait_has_property = _this.value.some(function(someProperty) {
+          return (someProperty[0].value === name) || ((someProperty[0].value + '?') === name) || (someProperty[0].value === (name + '?'));
         });
-        if (has_property) {
-          return _this.value.forEach(function(property1) {
-            if ((property1[0].value === name) || ((property1[0].value + '?') === name) || (property1[0].value === (name + '?'))) {
-              property1[1].combine(property2[1]);
-              if (property1[0].value.indexOf('?', property1[0].value.length - 1) !== -1) {
-                return property1[0].value = property1[0].value.substring(0, property1[0].value.length - 1);
-              }
+        if (trait_has_property) {
+          return _this.value.forEach(function(traitProperty) {
+            var traitPropertyName;
+            traitPropertyName = traitProperty[0].value;
+            if ((traitPropertyName === name) || ((traitPropertyName + '?') === name) || (traitPropertyName === (name + '?'))) {
+              traitProperty[1].combine(resourceProperty[1]);
+              return traitProperty[0].value = traitProperty[0].value.replace(/\?$/, '');
             }
           });
         } else {
-          return _this.value.push([property2[0].clone(), property2[1].clone()]);
+          return _this.value.push([resourceProperty[0].clone(), resourceProperty[1].clone()]);
         }
       });
     };
@@ -10590,7 +10624,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
     }
 
     Traits.prototype.has_traits = function(node) {
-      if (this.has_property(node, /^traits$/i)) {
+      if (this.declaredTraits.length === 0 && this.has_property(node, /^traits$/i)) {
         this.declaredTraits = this.property_value(node, /^traits$/i);
       }
       return this.declaredTraits.length > 0;
@@ -10603,32 +10637,84 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       if (this.has_traits(node)) {
         resources = this.child_resources(node);
         return resources.forEach(function(resource) {
-          var uses;
-          if (_this.has_property(resource[1], /^use$/i)) {
-            uses = _this.property_value(resource[1], /^use$/i);
+          var methods, uses;
+          methods = _this.child_methods(resource[1]);
+          if (_this.has_property(resource[1], /^is$/i)) {
+            uses = _this.property_value(resource[1], /^is$/i);
             uses.forEach(function(use) {
-              var temp, trait;
-              trait = _this.get_trait(_this.key_or_value(use));
-              temp = trait.clone();
-              temp.combine(resource[1]);
-              return resource[1] = temp;
+              return methods.forEach(function(method) {
+                return _this.apply_trait(method, use);
+              });
             });
           }
+          methods.forEach(function(method) {
+            if (_this.has_property(method[1], /^is$/i)) {
+              uses = _this.property_value(method[1], /^is$/i);
+              return uses.forEach(function(use) {
+                return _this.apply_trait(method, use);
+              });
+            }
+          });
           resource[1].remove_question_mark_properties();
           return _this.apply_traits(resource[1]);
         });
       }
     };
 
+    Traits.prototype.apply_parameters = function(resource, parameters, useKey) {
+      var parameterUse,
+        _this = this;
+      if (resource.tag === 'tag:yaml.org,2002:str') {
+        parameterUse = [];
+        if (parameterUse = resource.value.match(/<<([^>]+)>>/g)) {
+          parameterUse.forEach(function(parameter) {
+            parameter = parameter.replace(/[<>]+/g, '').trim();
+            if (!(parameter in parameters)) {
+              throw new exports.TraitError('while aplying parameters', null, 'value was not provided for parameter: ' + parameter, useKey.start_mark);
+            }
+            return resource.value = resource.value.replace("<<" + parameter + ">>", parameters[parameter]);
+          });
+        }
+      }
+      if (resource.tag === 'tag:yaml.org,2002:seq') {
+        resource.forEach(function(node) {
+          return _this.apply_parameters(node, parameters, useKey);
+        });
+      }
+      if (resource.tag === 'tag:yaml.org,2002:map') {
+        return resource.value.forEach(function(res) {
+          _this.apply_parameters(res[0], parameters, useKey);
+          return _this.apply_parameters(res[1], parameters, useKey);
+        });
+      }
+    };
+
+    Traits.prototype.apply_trait = function(method, useKey) {
+      var parameters, plainParameters, temp, trait,
+        _this = this;
+      trait = this.get_trait(this.key_or_value(useKey));
+      parameters = this.value_or_undefined(useKey);
+      plainParameters = {};
+      if (parameters) {
+        parameters[0][1].value.forEach(function(parameter) {
+          if (parameter[1].tag !== 'tag:yaml.org,2002:str') {
+            throw new exports.TraitError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
+          }
+          return plainParameters[parameter[0].value] = parameter[1].value;
+        });
+      }
+      temp = trait.cloneTrait();
+      this.apply_parameters(temp, plainParameters, useKey);
+      temp.combine(method[1]);
+      return method[1] = temp;
+    };
+
     Traits.prototype.get_trait = function(traitName) {
-      var provides, trait;
+      var trait;
       trait = this.declaredTraits.filter(function(declaredTrait) {
         return declaredTrait[0].value === traitName;
       });
-      provides = trait[0][1].value.filter(function(property) {
-        return property[0].value === 'provides';
-      });
-      return provides[0][1];
+      return trait[0][1];
     };
 
     return Traits;
@@ -11322,9 +11408,6 @@ function decode(str) {
         traits = this.property_value(node, /^traits$/i);
         return traits.forEach(function(trait) {
           _this.valid_traits_properties(trait[1]);
-          if (!(_this.has_property(trait[1], /^provides$/i))) {
-            throw new exports.ValidationError('while validating trait properties', null, 'every trait must have a provides property', node.start_mark);
-          }
           if (!(_this.has_property(trait[1], /^name$/i))) {
             throw new exports.ValidationError('while validating trait properties', null, 'every trait must have a name property', node.start_mark);
           }
@@ -11336,7 +11419,7 @@ function decode(str) {
       var invalid;
       this.check_is_map(node);
       invalid = node.value.filter(function(childNode) {
-        return !(childNode[0].value.match(/^name$/i) || childNode[0].value.match(/^description$/i) || childNode[0].value.match(/^provides$/i));
+        return childNode[0].value.match(/^is$/i) || childNode[0].value.match(/^type$/i);
       });
       if (invalid.length > 0) {
         throw new exports.ValidationError('while validating trait properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark);
@@ -11344,10 +11427,10 @@ function decode(str) {
     };
 
     Validator.prototype.valid_common_parameter_properties = function(node) {
-      var invalid, type;
+      var invalid, required, type;
       this.check_is_map(node);
       invalid = node.value.filter(function(childNode) {
-        return !(childNode[0].value.match(/^name$/i) || childNode[0].value.match(/^description$/i) || childNode[0].value.match(/^type$/i) || childNode[0].value.match(/^enum$/i) || childNode[0].value.match(/^pattern$/i) || childNode[0].value.match(/^minLength$/i) || childNode[0].value.match(/^maxLength$/i) || childNode[0].value.match(/^minimum$/i) || childNode[0].value.match(/^maximum$/i) || childNode[0].value.match(/^default$/i));
+        return !(childNode[0].value.match(/^name$/i) || childNode[0].value.match(/^description$/i) || childNode[0].value.match(/^type$/i) || childNode[0].value.match(/^enum$/i) || childNode[0].value.match(/^pattern$/i) || childNode[0].value.match(/^minLength$/i) || childNode[0].value.match(/^maxLength$/i) || childNode[0].value.match(/^minimum$/i) || childNode[0].value.match(/^maximum$/i) || childNode[0].value.match(/^required$/i) || childNode[0].value.match(/^requires$/i) || childNode[0].value.match(/^excludes$/i) || childNode[0].value.match(/^default$/i));
       });
       if (invalid.length > 0) {
         throw new exports.ValidationError('while validating parameter properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark);
@@ -11378,6 +11461,13 @@ function decode(str) {
           throw new exports.ValidationError('while validating parameter properties', null, 'type can either be: string, number, integer or date', node.start_mark);
         }
       }
+      if (this.has_property(node, /^required$/i)) {
+        required = this.property_value(node, /^required$/i);
+        if (!required.match(/^(y|yes|YES|t|true|TRUE|n|no|NO|f|false|FALSE)$/)) {
+          console.log(required);
+          throw new exports.ValidationError('while validating parameter properties', null, '"' + required + '"' + 'required can be any of: y, yes, YES, t, true, n, no, NO, f, false, FALSE', node.start_mark);
+        }
+      }
     };
 
     Validator.prototype.valid_root_properties = function(node) {
@@ -11397,10 +11487,19 @@ function decode(str) {
       });
     };
 
-    Validator.prototype.has_property = function(node, property) {
-      return node.value.some(function(childNode) {
-        return childNode[0].value.match(property);
+    Validator.prototype.child_methods = function(node) {
+      return node.value.filter(function(childNode) {
+        return childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/);
       });
+    };
+
+    Validator.prototype.has_property = function(node, property) {
+      if (node.value && typeof node.value === "object") {
+        return node.value.some(function(childNode) {
+          return childNode[0].value && childNode[0].value.match(property);
+        });
+      }
+      return false;
     };
 
     Validator.prototype.property_value = function(node, property) {
@@ -11518,6 +11617,13 @@ function decode(str) {
       }
     };
 
+    Validator.prototype.value_or_undefined = function(node) {
+      if (node instanceof nodes.MappingNode) {
+        return node.value;
+      }
+      return void 0;
+    };
+
     Validator.prototype.valid_trait_consumption = function(node, traits) {
       var resources,
         _this = this;
@@ -11530,9 +11636,9 @@ function decode(str) {
       }
       resources = this.child_resources(node);
       return resources.forEach(function(resource) {
-        var uses;
-        if (_this.has_property(resource[1], /^use$/i)) {
-          uses = _this.property_value(resource[1], /^use$/i);
+        var methods, uses;
+        if (_this.has_property(resource[1], /^is$/i)) {
+          uses = _this.property_value(resource[1], /^is$/i);
           if (!(uses instanceof Array)) {
             throw new exports.ValidationError('while validating trait consumption', null, 'use property must be an array', node.start_mark);
           }
@@ -11544,6 +11650,22 @@ function decode(str) {
             }
           });
         }
+        methods = _this.child_methods(resource[1]);
+        methods.forEach(function(method) {
+          if (_this.has_property(method[1], /^is$/i)) {
+            uses = _this.property_value(method[1], /^is$/i);
+            if (!(uses instanceof Array)) {
+              throw new exports.ValidationError('while validating trait consumption', null, 'use property must be an array', node.start_mark);
+            }
+            return uses.forEach(function(use) {
+              if (!traits.some(function(trait) {
+                return trait[0].value === _this.key_or_value(use);
+              })) {
+                throw new exports.ValidationError('while validating trait consumption', null, 'there is no trait named ' + _this.key_or_value(use), use.start_mark);
+              }
+            });
+          }
+        });
         return _this.valid_trait_consumption(resource[1], traits);
       });
     };

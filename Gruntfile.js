@@ -86,6 +86,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('compile', ['coffee']);
   grunt.registerTask('default', ['coffee', 'browserify', 'uglify']);
-  grunt.registerTask('test', ['coffee', 'browserify', 'uglify', 'connect', 'mochacli', 'mocha_phantomjs']);
+  //grunt.registerTask('test', ['coffee', 'browserify', 'uglify', 'connect', 'mochacli', 'mocha_phantomjs']);
+  grunt.registerTask('test', ['coffee', 'browserify', 'uglify', 'connect', 'mocha_phantomjs']);
   grunt.registerTask('server', ['default', 'connect', 'watch']);
 };
