@@ -503,7 +503,7 @@ describe('Parser', function() {
         '    name: A',
         '    description: This is A',
         '    type: date',
-        '    required: y',
+        '    required: y'
       ].join('\n');
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -521,7 +521,7 @@ describe('Parser', function() {
         '    name: A',
         '    description: This is A',
         '    type: date',
-        '    required: yes',
+        '    required: yes'
       ].join('\n');
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -539,7 +539,7 @@ describe('Parser', function() {
         '    name: A',
         '    description: This is A',
         '    type: date',
-        '    required: YES',
+        '    required: YES'
       ].join('\n');
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -557,7 +557,7 @@ describe('Parser', function() {
         '    name: A',
         '    description: This is A',
         '    type: date',
-        '    required: t',
+        '    required: t'
       ].join('\n');
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -575,7 +575,7 @@ describe('Parser', function() {
         '    name: A',
         '    description: This is A',
         '    type: date',
-        '    required: true',
+        '    required: true'
       ].join('\n');
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -593,7 +593,7 @@ describe('Parser', function() {
         '    name: A',
         '    description: This is A',
         '    type: date',
-        '    required: TRUE',
+        '    required: TRUE'
       ].join('\n');
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -611,7 +611,7 @@ describe('Parser', function() {
         '    name: A',
         '    description: This is A',
         '    type: date',
-        '    required: n',
+        '    required: n'
       ].join('\n');
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -629,7 +629,7 @@ describe('Parser', function() {
         '    name: A',
         '    description: This is A',
         '    type: date',
-        '    required: no',
+        '    required: no'
       ].join('\n');
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -647,7 +647,7 @@ describe('Parser', function() {
         '    name: A',
         '    description: This is A',
         '    type: date',
-        '    required: NO',
+        '    required: NO'
       ].join('\n');
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -665,7 +665,7 @@ describe('Parser', function() {
         '    name: A',
         '    description: This is A',
         '    type: date',
-        '    required: f',
+        '    required: f'
       ].join('\n');
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -683,7 +683,7 @@ describe('Parser', function() {
         '    name: A',
         '    description: This is A',
         '    type: date',
-        '    required: false',
+        '    required: false'
       ].join('\n');
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -701,7 +701,7 @@ describe('Parser', function() {
         '    name: A',
         '    description: This is A',
         '    type: date',
-        '    required: FALSE',
+        '    required: FALSE'
       ].join('\n');
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -837,6 +837,105 @@ describe('Parser', function() {
           ]
       }).and.notify(done);
     });
+    it('should allow resources named like HTTP verbs', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/getSomething:',
+        '  name: GetSomething',
+        '/postSomething:',
+        '  name: PostSomething',
+        '/putSomething:',
+        '  name: PutSomething',
+        '/deleteSomething:',
+        '  name: DeleteSomething',
+        '/headSomething:',
+        '  name: HeadSomething',
+        '/patchSomething:',
+        '  name: PatchSomething',
+        '/optionsSomething:',
+        '  name: OptionsSomething',
+        '/get:',
+        '  name: Get',
+        '/post:',
+        '  name: Post',
+        '/put:',
+        '  name: Put',
+        '/delete:',
+        '  name: Delete',
+        '/head:',
+        '  name: Head',
+        '/patch:',
+        '  name: Patch',
+        '/options:',
+        '  name: Options'
+      ].join('\n');
+
+      raml.load(definition).should.become({
+        title: 'Test',
+        resources: [
+          {
+            relativeUri: '/getSomething',
+            name: 'GetSomething'
+          },
+          {
+            relativeUri: '/postSomething',
+            name: 'PostSomething'
+          },
+          {
+            relativeUri: '/putSomething',
+            name: 'PutSomething'
+          },
+          {
+            relativeUri: '/deleteSomething',
+            name: 'DeleteSomething'
+          },
+          {
+            relativeUri: '/headSomething',
+            name: 'HeadSomething'
+          },
+          {
+            relativeUri: '/patchSomething',
+            name: 'PatchSomething'
+          },
+          {
+            relativeUri: '/optionsSomething',
+            name: 'OptionsSomething'
+          },
+          {
+            relativeUri: '/get',
+            name: 'Get'
+          },
+          {
+            relativeUri: '/post',
+            name: 'Post'
+          },
+          {
+            relativeUri: '/put',
+            name: 'Put'
+          },
+          {
+            relativeUri: '/delete',
+            name: 'Delete'
+          },
+          {
+            relativeUri: '/head',
+            name: 'Head'
+          },
+          {
+            relativeUri: '/patch',
+            name: 'Patch'
+          },
+          {
+            relativeUri: '/options',
+            name: 'Options'
+          }
+        ]
+      }).and.notify(done);
+    });
+
   });
   describe('Resource Responses', function() {
     it('should succeed with arrays as keys', function(done) {
