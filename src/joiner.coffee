@@ -29,11 +29,11 @@ class @Joiner
       
   join_methods: (node) ->
     methods = node.value.filter (childNode) ->
-      return childNode[0].value.match(/get|post|put|delete|head|patch|options/i)
+      return childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/i)
     methodsArray = []  
     if methods.length > 0
       node.value = node.value.filter (childNode) -> 
-        return not childNode[0].value.match(/get|post|put|delete|head|patch|options/i)
+        return not childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/i)
       methodsName = new nodes.ScalarNode 'tag:yaml.org,2002:str', 'methods', methods[0][0].start_mark, methods[ methods.length - 1 ][1].end_mark
       
       methods.forEach (method) =>
