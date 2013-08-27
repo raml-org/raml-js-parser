@@ -45,10 +45,10 @@ class @Traits
       parameterUse = []
       if parameterUse = resource.value.match(/<<([^>]+)>>/g)
         parameterUse.forEach (parameter) =>
-          parameter = parameter.replace(/[<>]+/g, '')
-          unless parameter in parameters
+          parameter = parameter.replace(/[<>]+/g, '').trim()
+          unless parameter of parameters
             throw new exports.TraitError 'while aplying parameters', null, 'value was not provided for parameter: ' + parameter , useKey.start_mark
-          resource.value.replace "<<" + parameter + ">>", parameters[parameter]
+          resource.value = resource.value.replace "<<" + parameter + ">>", parameters[parameter]
     if resource.tag == 'tag:yaml.org,2002:seq'
       resource.forEach (node) =>
         @apply_parameters node, parameters, useKey

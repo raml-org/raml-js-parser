@@ -1395,7 +1395,6 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
-
     it('should allow parameters in a trait usage', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -1472,7 +1471,6 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
-
     it('should reject parameters whose value is an array', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -1578,6 +1576,123 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/value was not provided for parameter: lalalalala/).and.notify(done);
     });
+    it('should apply parameters in traits', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    headers:',
+        '      Authorization:',
+        '        description: <<param1>> <<param2>>',
+        '/leagues:',
+        '  use: [ rateLimited: { param1: "value1", param2: "value2"} ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            'headers': {
+              'Authorization': {
+                description: '<<param1>> <<param2>>'
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            use: [ { rateLimited: { param1: 'value1', param2: 'value2'} }],
+            relativeUri: '/leagues',
+            methods: [
+              {
+                'headers': {
+                  'Authorization': {
+                    description: 'value1 value2'
+                  }
+                },
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                },
+                method: 'get'
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+
+
+    it('should apply parameters in keys in traits', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    headers:',
+        '      <<header>>:',
+        '        description: <<param1>> <<param2>>',
+        '/leagues:',
+        '  use: [ rateLimited: { header: "Authorization", param1: "value1", param2: "value2"} ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            'headers': {
+              '<<header>>': {
+                description: '<<param1>> <<param2>>'
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            use: [ { rateLimited: { header: "Authorization", param1: 'value1', param2: 'value2'} }],
+            relativeUri: '/leagues',
+            methods: [
+              {
+                'headers': {
+                  'Authorization': {
+                    description: 'value1 value2'
+                  }
+                },
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                },
+                method: 'get'
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+
   });
   describe('Error reporting', function () {
     it('should report correct line/column for invalid trait error', function(done) {
