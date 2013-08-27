@@ -73,8 +73,8 @@ class @Validator
     @check_is_map node
     invalid = node.value.filter (childNode) -> 
       return (
-        childNode[0].value.match(/^use$/i) or
-        childNode[0].value.match(/^is$/i))
+        childNode[0].value.match(/^is$/i) or
+        childNode[0].value.match(/^type$/i))
     if invalid.length > 0 
       throw new exports.ValidationError 'while validating trait properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
 
@@ -235,8 +235,8 @@ class @Validator
     resources = @child_resources node
 
     resources.forEach (resource) =>
-      if @has_property resource[1], /^use$/i
-        uses = @property_value resource[1], /^use$/i
+      if @has_property resource[1], /^is$/i
+        uses = @property_value resource[1], /^is$/i
         if not (uses instanceof Array)
           throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', node.start_mark
         uses.forEach (use) =>
@@ -245,8 +245,8 @@ class @Validator
 
       methods = @child_methods resource[1]
       methods.forEach (method) =>
-        if @has_property method[1], /^use$/i
-          uses = @property_value method[1], /^use$/i
+        if @has_property method[1], /^is$/i
+          uses = @property_value method[1], /^is$/i
           if not (uses instanceof Array)
             throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', node.start_mark
           uses.forEach (use) =>

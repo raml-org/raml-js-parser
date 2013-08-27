@@ -25,15 +25,15 @@ class @Traits
       resources.forEach (resource) =>
         methods = @child_methods resource[1]
         # apply traits at the resource level, which is basically the same as applying to each method in the resource
-        if @has_property resource[1], /^use$/i
-            uses = @property_value resource[1], /^use$/i
+        if @has_property resource[1], /^is$/i
+            uses = @property_value resource[1], /^is$/i
             uses.forEach (use) =>
               methods.forEach (method) =>
                 @apply_trait method, use
         # iterate over all methods and apply all their traits
         methods.forEach (method) =>
-          if @has_property method[1], /^use$/i
-            uses = @property_value method[1], /^use$/i
+          if @has_property method[1], /^is$/i
+            uses = @property_value method[1], /^is$/i
             uses.forEach (use) =>
               @apply_trait method, use
 

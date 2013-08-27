@@ -993,7 +993,7 @@ describe('Parser', function() {
           },
           resources: [
               {
-                  use: [ "customTrait" ],
+                  is: [ "customTrait" ],
                   name: "Root",
                   relativeUri: "/",
                   methods: [
@@ -1011,7 +1011,7 @@ describe('Parser', function() {
                       {
                           relativeUri: "/anotherResource",
                           name: "Another Resource",
-                          use: [ "customTrait" ],
+                          is: [ "customTrait" ],
                           methods: [
                               {
                                 description: "Another resource",
@@ -1047,7 +1047,7 @@ describe('Parser', function() {
         '      q:',
         '         type: string',
         '/leagues:',
-        '  use: [ rateLimited, queryable ]',
+        '  is: [ rateLimited, queryable ]',
         '  get:',
         '    responses:',
         '      200:',
@@ -1077,7 +1077,7 @@ describe('Parser', function() {
         resources: [
           {
             relativeUri: '/leagues',
-            use: [ 'rateLimited', 'queryable' ],
+            is: [ 'rateLimited', 'queryable' ],
             methods: [
               {
                 method: 'get',
@@ -1112,7 +1112,7 @@ describe('Parser', function() {
         '    headers?:',
         '      x-header-extra: API Limit Exceeded',
         '/leagues:',
-        '  use: [ rateLimited ]',
+        '  is: [ rateLimited ]',
         '  get:',
         '    responses:',
         '      200:',
@@ -1132,7 +1132,7 @@ describe('Parser', function() {
         resources: [
           {
             relativeUri: '/leagues',
-            use: [ 'rateLimited' ],
+            is: [ 'rateLimited' ],
             methods: [
               {
                 method: 'get',
@@ -1160,7 +1160,7 @@ describe('Parser', function() {
 //        '      503:',
 //        '        description: Server Unavailable. Check Your Rate Limits.',
 //        '/:',
-//        '  use: [ rateLimited: { parameter: value } ]'
+//        '  is: [ rateLimited: { parameter: value } ]'
 //      ].join('\n');
 //
 //      raml.load(definition).should.be.rejected.with(/unknown property what/).and.notify(done);
@@ -1177,7 +1177,7 @@ describe('Parser', function() {
         '      503:',
         '        description: Server Unavailable. Check Your Rate Limits.',
         '/:',
-        '  use: [ rateLimited: { parameter: value } ]'
+        '  is: [ rateLimited: { parameter: value } ]'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/every trait must have a name property/).and.notify(done);
@@ -1189,7 +1189,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         '/:',
-        '  use: throttled ]'
+        '  is: throttled ]'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/use property must be an array/).and.notify(done);
@@ -1207,7 +1207,7 @@ describe('Parser', function() {
         '      503:',
         '        description: Server Unavailable. Check Your Rate Limits.',
         '/:',
-        '  use: [ throttled, rateLimited: { parameter: value } ]'
+        '  is: [ throttled, rateLimited: { parameter: value } ]'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/there is no trait named throttled/).and.notify(done);
@@ -1281,7 +1281,7 @@ describe('Parser', function() {
         '          API key.',
         '        type: string',
         '/leagues:',
-        '  use: [ rateLimited ]',
+        '  is: [ rateLimited ]',
         '  get:',
         '    responses:',
         '      200:',
@@ -1307,7 +1307,7 @@ describe('Parser', function() {
         },
         resources: [
           {
-            use: [ 'rateLimited' ],
+            is: [ 'rateLimited' ],
             relativeUri: '/leagues',
             methods: [
               {
@@ -1349,7 +1349,7 @@ describe('Parser', function() {
         '            API key.',
         '          type: string',
         '/leagues:',
-        '  use: [ rateLimited: {} ]',
+        '  is: [ rateLimited: {} ]',
         '  get:',
         '    responses:',
         '      200:',
@@ -1377,7 +1377,7 @@ describe('Parser', function() {
         },
         resources: [
           {
-            use: [ { rateLimited: {} }],
+            is: [ { rateLimited: {} }],
             relativeUri: '/leagues',
             methods: [
               {
@@ -1418,7 +1418,7 @@ describe('Parser', function() {
         '            API key.',
         '          type: string',
         '/leagues:',
-        '  use: [ rateLimited: { param1: value, param2: value} ]',
+        '  is: [ rateLimited: { param1: value, param2: value} ]',
         '  get:',
         '    responses:',
         '      200:',
@@ -1446,7 +1446,7 @@ describe('Parser', function() {
         },
         resources: [
           {
-            use: [
+            is: [
               {
                 rateLimited: {
                   param1: 'value',
@@ -1494,7 +1494,7 @@ describe('Parser', function() {
         '            API key.',
         '          type: string',
         '/leagues:',
-        '  use: [ rateLimited: { param1: ["string"], param2: value} ]',
+        '  is: [ rateLimited: { param1: ["string"], param2: value} ]',
         '  get:',
         '    responses:',
         '      200:',
@@ -1513,7 +1513,7 @@ describe('Parser', function() {
         '  rateLimited:',
         '    name: Rate Limited',
         '/leagues:',
-        '  use: [ rateLimited: { param1: {key: "value"}, param2: value} ]',
+        '  is: [ rateLimited: { param1: {key: "value"}, param2: value} ]',
         '  get:',
         '    responses:',
         '      200:',
@@ -1529,7 +1529,7 @@ describe('Parser', function() {
         },
         resources: [
           {
-            use: [
+            is: [
               {
                 rateLimited: {
                   param1: 'value',
@@ -1567,7 +1567,7 @@ describe('Parser', function() {
         '      Authorization:',
         '        description: <<lalalalala>> <<pepepepepepep>>',
         '/leagues:',
-        '  use: [ rateLimited: { param1: value1, param2: value2} ]',
+        '  is: [ rateLimited: { param1: value1, param2: value2} ]',
         '  get:',
         '    responses:',
         '      200:',
@@ -1589,7 +1589,7 @@ describe('Parser', function() {
         '      Authorization:',
         '        description: <<param1>> <<param2>>',
         '/leagues:',
-        '  use: [ rateLimited: { param1: "value1", param2: "value2"} ]',
+        '  is: [ rateLimited: { param1: "value1", param2: "value2"} ]',
         '  get:',
         '    responses:',
         '      200:',
@@ -1610,7 +1610,7 @@ describe('Parser', function() {
         },
         resources: [
           {
-            use: [ { rateLimited: { param1: 'value1', param2: 'value2'} }],
+            is: [ { rateLimited: { param1: 'value1', param2: 'value2'} }],
             relativeUri: '/leagues',
             methods: [
               {
@@ -1650,7 +1650,7 @@ describe('Parser', function() {
         '      <<param2>><<param2>>:',
         '        description: <<param1>>',
         '/leagues:',
-        '  use: [ rateLimited: { param1: "value1", param2: "value2"} ]',
+        '  is: [ rateLimited: { param1: "value1", param2: "value2"} ]',
         '  get:',
         '    responses:',
         '      200:',
@@ -1677,7 +1677,7 @@ describe('Parser', function() {
         },
         resources: [
           {
-            use: [ { rateLimited: { param1: 'value1', param2: 'value2'} }],
+            is: [ { rateLimited: { param1: 'value1', param2: 'value2'} }],
             relativeUri: '/leagues',
             methods: [
               {
@@ -1719,7 +1719,7 @@ describe('Parser', function() {
         '      <<header>>:',
         '        description: <<param1>> <<param2>>',
         '/leagues:',
-        '  use: [ rateLimited: { header: "Authorization", param1: "value1", param2: "value2"} ]',
+        '  is: [ rateLimited: { header: "Authorization", param1: "value1", param2: "value2"} ]',
         '  get:',
         '    responses:',
         '      200:',
@@ -1740,7 +1740,7 @@ describe('Parser', function() {
         },
         resources: [
           {
-            use: [ { rateLimited: { header: "Authorization", param1: 'value1', param2: 'value2'} }],
+            is: [ { rateLimited: { header: "Authorization", param1: 'value1', param2: 'value2'} }],
             relativeUri: '/leagues',
             methods: [
               {
@@ -1776,7 +1776,7 @@ describe('Parser', function() {
         '      <<header>>:',
         '        description: <<param1>> <<param2>>',
         '/leagues:',
-        '  use: [ rateLimited: { header: "Authorization", param1: "value1", param2: "value2"} ]',
+        '  is: [ rateLimited: { header: "Authorization", param1: "value1", param2: "value2"} ]',
         '  get:',
         '    responses:',
         '      200:',
@@ -1801,7 +1801,7 @@ describe('Parser', function() {
         },
         resources: [
           {
-            use: [ { rateLimited: { header: "Authorization", param1: 'value1', param2: 'value2'} }],
+            is: [ { rateLimited: { header: "Authorization", param1: 'value1', param2: 'value2'} }],
             relativeUri: '/leagues',
             methods: [
               {
@@ -1837,7 +1837,6 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
-
   });
   describe('Traits at method level', function() {
     it('should succeed when applying traits across !include boundaries', function(done) {
@@ -1869,7 +1868,7 @@ describe('Parser', function() {
             relativeUri: "/",
             methods: [
               {
-                use: [ "customTrait" ],
+                is: [ "customTrait" ],
                 responses: {
                   429: {
                     description: 'API Limit Exceeded'
@@ -1885,7 +1884,7 @@ describe('Parser', function() {
                 name: "Another Resource",
                 methods: [
                   {
-                    use: [ "customTrait" ],
+                    is: [ "customTrait" ],
                     description: "Another resource",
                     method: "get",
                     responses: {
@@ -1920,7 +1919,7 @@ describe('Parser', function() {
         '         type: string',
         '/leagues:',
         '  get:',
-        '    use: [ rateLimited, queryable ]',
+        '    is: [ rateLimited, queryable ]',
         '    responses:',
         '      200:',
         '        description: Retrieve a list of leagues'
@@ -1951,7 +1950,7 @@ describe('Parser', function() {
             relativeUri: '/leagues',
             methods: [
               {
-                use: [ 'rateLimited', 'queryable' ],
+                is: [ 'rateLimited', 'queryable' ],
                 method: 'get',
                 queryParameters: {
                   q: {
@@ -1985,7 +1984,7 @@ describe('Parser', function() {
         '      x-header-extra: API Limit Exceeded',
         '/leagues:',
         '  get:',
-        '    use: [ rateLimited ]',
+        '    is: [ rateLimited ]',
         '    responses:',
         '      200:',
         '        description: Retrieve a list of leagues'
@@ -2006,7 +2005,7 @@ describe('Parser', function() {
             relativeUri: '/leagues',
             methods: [
               {
-                use: [ 'rateLimited' ],
+                is: [ 'rateLimited' ],
                 method: 'get',
                 responses: {
                   '200': {
@@ -2042,7 +2041,7 @@ describe('Parser', function() {
         'title: Test',
         '/:',
         '  get:',
-        '    use: throttled ]'
+        '    is: throttled ]'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/use property must be an array/).and.notify(done);
@@ -2061,7 +2060,7 @@ describe('Parser', function() {
         '        description: Server Unavailable. Check Your Rate Limits.',
         '/:',
         '  get:',
-        '    use: [ throttled, rateLimited: { parameter: value } ]'
+        '    is: [ throttled, rateLimited: { parameter: value } ]'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/there is no trait named throttled/).and.notify(done);
@@ -2089,7 +2088,7 @@ describe('Parser', function() {
         '        type: string',
         '/leagues:',
         '  get:',
-        '    use: [ rateLimited ]',
+        '    is: [ rateLimited ]',
         '    responses:',
         '      200:',
         '        description: Retrieve a list of leagues'
@@ -2117,7 +2116,7 @@ describe('Parser', function() {
             relativeUri: '/leagues',
             methods: [
               {
-                use: [ 'rateLimited' ],
+                is: [ 'rateLimited' ],
                 headers: { },
                 method: 'get',
                 responses: {
@@ -2157,7 +2156,7 @@ describe('Parser', function() {
         '          type: string',
         '/leagues:',
         '  get:',
-        '    use: [ rateLimited: {} ]',
+        '    is: [ rateLimited: {} ]',
         '    responses:',
         '      200:',
         '        description: Retrieve a list of leagues'
@@ -2187,7 +2186,7 @@ describe('Parser', function() {
             relativeUri: '/leagues',
             methods: [
               {
-                use: [ { rateLimited: {} }],
+                is: [ { rateLimited: {} }],
                 method: 'get',
                 responses: {
                   '200': {
@@ -2226,7 +2225,7 @@ describe('Parser', function() {
         '          type: string',
         '/leagues:',
         '  get:',
-        '    use: [ rateLimited: { param1: value, param2: value} ]',
+        '    is: [ rateLimited: { param1: value, param2: value} ]',
         '    responses:',
         '      200:',
         '        description: Retrieve a list of leagues'
@@ -2256,7 +2255,7 @@ describe('Parser', function() {
             relativeUri: '/leagues',
             methods: [
               {
-                use: [
+                is: [
                   {
                     rateLimited: {
                       param1: 'value',
@@ -2302,7 +2301,7 @@ describe('Parser', function() {
         '          type: string',
         '/leagues:',
         '  get:',
-        '    use: [ rateLimited: { param1: ["string"], param2: value} ]',
+        '    is: [ rateLimited: { param1: ["string"], param2: value} ]',
         '    responses:',
         '      200:',
         '        description: Retrieve a list of leagues'
@@ -2321,7 +2320,7 @@ describe('Parser', function() {
         '    name: Rate Limited',
         '/leagues:',
         '  get:',
-        '    use: [ rateLimited: { param1: {key: "value"}, param2: value} ]',
+        '    is: [ rateLimited: { param1: {key: "value"}, param2: value} ]',
         '    responses:',
         '      200:',
         '        description: Retrieve a list of leagues'
@@ -2343,7 +2342,7 @@ describe('Parser', function() {
         '        description: <<lalalalala>> <<pepepepepepep>>',
         '/leagues:',
         '  get:',
-        '    use: [ rateLimited: { param1: value1, param2: value2} ]',
+        '    is: [ rateLimited: { param1: value1, param2: value2} ]',
         '    responses:',
         '      200:',
         '        description: Retrieve a list of leagues'
@@ -2351,7 +2350,6 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/value was not provided for parameter: lalalalala/).and.notify(done);
     });
-
     it('should apply parameters in traits', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -2366,7 +2364,7 @@ describe('Parser', function() {
         '        description: <<param1>> <<param2>>',
         '/leagues:',
         '  get:',
-        '    use: [ rateLimited: { param1: "value1", param2: "value2"} ]',
+        '    is: [ rateLimited: { param1: "value1", param2: "value2"} ]',
         '    responses:',
         '      200:',
         '        description: Retrieve a list of leagues'
@@ -2389,7 +2387,7 @@ describe('Parser', function() {
             relativeUri: '/leagues',
             methods: [
               {
-                use: [ { rateLimited: { param1: 'value1', param2: 'value2'} }],
+                is: [ { rateLimited: { param1: 'value1', param2: 'value2'} }],
                 'headers': {
                   'Authorization': {
                     description: 'value1 value2'
@@ -2409,7 +2407,6 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
-
     it('should apply parameters in keys in traits', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -2424,7 +2421,7 @@ describe('Parser', function() {
         '        description: <<param1>> <<param2>>',
         '/leagues:',
         '  get:',
-        '    use: [ rateLimited: { header: "Authorization", param1: "value1", param2: "value2"} ]',
+        '    is: [ rateLimited: { header: "Authorization", param1: "value1", param2: "value2"} ]',
         '    responses:',
         '      200:',
         '        description: Retrieve a list of leagues'
@@ -2447,7 +2444,7 @@ describe('Parser', function() {
             relativeUri: '/leagues',
             methods: [
               {
-                use: [ { rateLimited: { header: "Authorization", param1: 'value1', param2: 'value2'} }],
+                is: [ { rateLimited: { header: "Authorization", param1: 'value1', param2: 'value2'} }],
                 'headers': {
                   'Authorization': {
                     description: 'value1 value2'
@@ -2484,13 +2481,13 @@ describe('Parser', function() {
         '        503:',
         '          description: Server Unavailable. Check Your Rate Limits.',
         '/:',
-        '  use: [ throttled, rateLimited: { parameter: value } ]'
+        '  is: [ throttled, rateLimited: { parameter: value } ]'
       ].join('\n');
 
       raml.load(definition).then(noop, function (error) {
         setTimeout(function () {
           expect(error.problem_mark).to.exist;
-          error.problem_mark.column.should.be.equal(9);
+          error.problem_mark.column.should.be.equal(8);
           error.problem_mark.line.should.be.equal(12);
           done();
         }, 0);

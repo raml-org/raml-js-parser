@@ -2,10 +2,10 @@
 ---
 name: Root
 get:
-  use: [ "customTrait" ]
+  is: [ "customTrait" ]
   description: Root resource
 /anotherResource:
   name: Another Resource
   get:
-    use: [ "customTrait" ]
+    is: [ "customTrait" ]
     description: Another resource

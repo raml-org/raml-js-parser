@@ -10639,8 +10639,8 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
         return resources.forEach(function(resource) {
           var methods, uses;
           methods = _this.child_methods(resource[1]);
-          if (_this.has_property(resource[1], /^use$/i)) {
-            uses = _this.property_value(resource[1], /^use$/i);
+          if (_this.has_property(resource[1], /^is$/i)) {
+            uses = _this.property_value(resource[1], /^is$/i);
             uses.forEach(function(use) {
               return methods.forEach(function(method) {
                 return _this.apply_trait(method, use);
@@ -10648,8 +10648,8 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
             });
           }
           methods.forEach(function(method) {
-            if (_this.has_property(method[1], /^use$/i)) {
-              uses = _this.property_value(method[1], /^use$/i);
+            if (_this.has_property(method[1], /^is$/i)) {
+              uses = _this.property_value(method[1], /^is$/i);
               return uses.forEach(function(use) {
                 return _this.apply_trait(method, use);
               });
@@ -11419,7 +11419,7 @@ function decode(str) {
       var invalid;
       this.check_is_map(node);
       invalid = node.value.filter(function(childNode) {
-        return childNode[0].value.match(/^use$/i) || childNode[0].value.match(/^is$/i);
+        return childNode[0].value.match(/^is$/i) || childNode[0].value.match(/^type$/i);
       });
       if (invalid.length > 0) {
         throw new exports.ValidationError('while validating trait properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark);
@@ -11637,8 +11637,8 @@ function decode(str) {
       resources = this.child_resources(node);
       return resources.forEach(function(resource) {
         var methods, uses;
-        if (_this.has_property(resource[1], /^use$/i)) {
-          uses = _this.property_value(resource[1], /^use$/i);
+        if (_this.has_property(resource[1], /^is$/i)) {
+          uses = _this.property_value(resource[1], /^is$/i);
           if (!(uses instanceof Array)) {
             throw new exports.ValidationError('while validating trait consumption', null, 'use property must be an array', node.start_mark);
           }
@@ -11652,8 +11652,8 @@ function decode(str) {
         }
         methods = _this.child_methods(resource[1]);
         methods.forEach(function(method) {
-          if (_this.has_property(method[1], /^use$/i)) {
-            uses = _this.property_value(method[1], /^use$/i);
+          if (_this.has_property(method[1], /^is$/i)) {
+            uses = _this.property_value(method[1], /^is$/i);
             if (!(uses instanceof Array)) {
               throw new exports.ValidationError('while validating trait consumption', null, 'use property must be an array', node.start_mark);
             }
