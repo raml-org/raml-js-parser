@@ -13,7 +13,7 @@ if (typeof window === 'undefined') {
 }
 
 describe('Parser', function() {
-  describe('Basic Information', function(done) {
+  describe('Basic Information', function() {
     it('should fail unsupported yaml version', function(done) {
       var definition = [
         '%YAML 1.1',
@@ -1633,6 +1633,79 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+    it('should apply parameters in traits in each occurrence', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    headers:',
+        '      Authorization:',
+        '        description: <<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>>',
+        '      X-Random-Header:',
+        '        description: <<param2>><<param2>><<param2>>',
+        '      <<param2>><<param2>>:',
+        '        description: <<param1>>',
+        '/leagues:',
+        '  use: [ rateLimited: { param1: "value1", param2: "value2"} ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            'headers': {
+              'Authorization': {
+                description: '<<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>>'
+              },
+              'X-Random-Header': {
+                description: '<<param2>><<param2>><<param2>>'
+              },
+              '<<param2>><<param2>>': {
+                description: '<<param1>>'
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            use: [ { rateLimited: { param1: 'value1', param2: 'value2'} }],
+            relativeUri: '/leagues',
+            methods: [
+              {
+                'headers': {
+                  'Authorization': {
+                    description: 'value1 value2value1 value2value1 value2value1 value2value1 value2value1 value2'
+                  },
+                  'X-Random-Header': {
+                    description: 'value2value2value2'
+                  },
+                  'value2value2': {
+                    description: 'value1'
+                  }
+                },
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                },
+                method: 'get'
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
     it('should apply parameters in keys in traits', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -1690,6 +1763,81 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+    it('should apply traits in all methods', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  rateLimited:',
+        '    name: Rate Limited',
+        '    headers:',
+        '      <<header>>:',
+        '        description: <<param1>> <<param2>>',
+        '/leagues:',
+        '  use: [ rateLimited: { header: "Authorization", param1: "value1", param2: "value2"} ]',
+        '  get:',
+        '    responses:',
+        '      200:',
+        '        description: Retrieve a list of leagues',
+        '  post:',
+        '    responses:',
+        '      200:',
+        '        description: creates a new league'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        traits: {
+          rateLimited: {
+            name: 'Rate Limited',
+            'headers': {
+              '<<header>>': {
+                description: '<<param1>> <<param2>>'
+              }
+            }
+          }
+        },
+        resources: [
+          {
+            use: [ { rateLimited: { header: "Authorization", param1: 'value1', param2: 'value2'} }],
+            relativeUri: '/leagues',
+            methods: [
+              {
+                'headers': {
+                  'Authorization': {
+                    description: 'value1 value2'
+                  }
+                },
+                responses: {
+                  '200': {
+                    description: 'Retrieve a list of leagues'
+                  }
+                },
+                method: 'get'
+              },
+              {
+                'headers': {
+                  'Authorization': {
+                    description: 'value1 value2'
+                  }
+                },
+                responses: {
+                  '200': {
+                    description: 'creates a new league'
+                  }
+                },
+                method: 'post'
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+
   });
   describe('Traits at method level', function() {
     it('should succeed when applying traits across !include boundaries', function(done) {

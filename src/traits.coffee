@@ -53,8 +53,9 @@ class @Traits
       resource.forEach (node) =>
         @apply_parameters node, parameters, useKey
     if resource.tag == 'tag:yaml.org,2002:map'
-      @apply_parameters resource.value[0][0], parameters, useKey
-      @apply_parameters resource.value[0][1], parameters, useKey
+      resource.value.forEach (res) =>
+        @apply_parameters res[0], parameters, useKey
+        @apply_parameters res[1], parameters, useKey
 
   apply_trait: (method, useKey) ->
     trait = @get_trait @key_or_value useKey
