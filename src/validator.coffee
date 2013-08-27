@@ -116,7 +116,7 @@ class @Validator
       required = @property_value node, /^required$/i
       unless required.match(/^(y|yes|YES|t|true|TRUE|n|no|NO|f|false|FALSE)$/)
         console.log(required)
-        throw new exports.ValidationError 'while validating parameter properties', null, '"'+required+'"' + 'required can be any of: y, yes, YES, t, true, n, no, NO, f, false, FALSE', node.start_mark
+        throw new exports.ValidationError 'while validating parameter properties', null, '"' + required + '"' + 'required can be any of: y, yes, YES, t, true, n, no, NO, f, false, FALSE', node.start_mark
     #TODO: add validations for requires, it should be an array, all keys scalar
     #TODO: add validations for excludes, it should be an array, all keys scalar
 
@@ -140,8 +140,13 @@ class @Validator
     return node.value.filter (childNode) -> return childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/);
     
   has_property: (node, property) ->
-    return node.value.some( (childNode) -> return childNode[0].value.match(property) )
-    
+    if node.value and typeof node.value is "object"
+      return node.value.some(
+        (childNode) ->
+          return childNode[0].value and childNode[0].value.match(property)
+      )
+    return false
+
   property_value: (node, property) ->
     filteredNodes = node.value.filter (childNode) -> return childNode[0].value.match(property)
     return filteredNodes[0][1].value;
@@ -228,6 +233,7 @@ class @Validator
     if not traits? and @has_property node, /^traits$/i
       traits = @property_value node, /^traits$/i
     resources = @child_resources node
+
     resources.forEach (resource) =>
       if @has_property resource[1], /^use$/i
         uses = @property_value resource[1], /^use$/i
@@ -236,6 +242,17 @@ class @Validator
         uses.forEach (use) =>
           if not traits.some( (trait) => trait[0].value == @key_or_value use)
             throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
+
+      methods = @child_methods resource[1]
+      methods.forEach (method) =>
+        if @has_property method[1], /^use$/i
+          uses = @property_value method[1], /^use$/i
+          if not (uses instanceof Array)
+            throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', node.start_mark
+          uses.forEach (use) =>
+            if not traits.some( (trait) => trait[0].value == @key_or_value use)
+              throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
+
       @valid_trait_consumption resource[1], traits
     
   has_title: (node) ->
