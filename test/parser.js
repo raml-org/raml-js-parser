@@ -506,7 +506,7 @@ describe('Parser', function() {
         '    required: y'
       ].join('\n');
 
-      raml.load(definition).should.be.fulfilled.and.notify(done);
+      raml.load(definition).should.be.rejected.and.notify(done);
     });
 
     it('should succeed when a URI parameter has required "yes"', function(done) {
@@ -524,7 +524,7 @@ describe('Parser', function() {
         '    required: yes'
       ].join('\n');
 
-      raml.load(definition).should.be.fulfilled.and.notify(done);
+      raml.load(definition).should.be.rejected.and.notify(done);
     });
 
     it('should succeed when a URI parameter has required "YES"', function(done) {
@@ -542,7 +542,7 @@ describe('Parser', function() {
         '    required: YES'
       ].join('\n');
 
-      raml.load(definition).should.be.fulfilled.and.notify(done);
+      raml.load(definition).should.be.rejected.and.notify(done);
     });
 
     it('should succeed when a URI parameter has required "t"', function(done) {
@@ -560,7 +560,7 @@ describe('Parser', function() {
         '    required: t'
       ].join('\n');
 
-      raml.load(definition).should.be.fulfilled.and.notify(done);
+      raml.load(definition).should.be.rejected.and.notify(done);
     });
 
     it('should succeed when a URI parameter has required "true"', function(done) {
@@ -596,7 +596,7 @@ describe('Parser', function() {
         '    required: TRUE'
       ].join('\n');
 
-      raml.load(definition).should.be.fulfilled.and.notify(done);
+      raml.load(definition).should.be.rejected.and.notify(done);
     });
 
     it('should succeed when a URI parameter has required "n"', function(done) {
@@ -614,7 +614,7 @@ describe('Parser', function() {
         '    required: n'
       ].join('\n');
 
-      raml.load(definition).should.be.fulfilled.and.notify(done);
+      raml.load(definition).should.be.rejected.and.notify(done);
     });
 
     it('should succeed when a URI parameter has required "no"', function(done) {
@@ -632,7 +632,7 @@ describe('Parser', function() {
         '    required: no'
       ].join('\n');
 
-      raml.load(definition).should.be.fulfilled.and.notify(done);
+      raml.load(definition).should.be.rejected.and.notify(done);
     });
 
     it('should succeed when a URI parameter has required "NO"', function(done) {
@@ -650,7 +650,7 @@ describe('Parser', function() {
         '    required: NO'
       ].join('\n');
 
-      raml.load(definition).should.be.fulfilled.and.notify(done);
+      raml.load(definition).should.be.rejected.and.notify(done);
     });
 
     it('should succeed when a URI parameter has required "f"', function(done) {
@@ -668,7 +668,7 @@ describe('Parser', function() {
         '    required: f'
       ].join('\n');
 
-      raml.load(definition).should.be.fulfilled.and.notify(done);
+      raml.load(definition).should.be.rejected.and.notify(done);
     });
 
     it('should succeed when a URI parameter has required "false"', function(done) {
@@ -704,10 +704,8 @@ describe('Parser', function() {
         '    required: FALSE'
       ].join('\n');
 
-      raml.load(definition).should.be.fulfilled.and.notify(done);
+      raml.load(definition).should.be.rejected.and.notify(done);
     });
-
-
   });
   describe('Resources', function() {
     it('should succeed extracting resource information', function(done) {

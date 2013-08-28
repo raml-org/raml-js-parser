@@ -114,9 +114,8 @@ class @Validator
         throw new exports.ValidationError 'while validating parameter properties', null, 'type can either be: string, number, integer or date', node.start_mark
     if @has_property node, /^required$/i
       required = @property_value node, /^required$/i
-      unless required.match(/^(y|yes|YES|t|true|TRUE|n|no|NO|f|false|FALSE)$/)
-        console.log(required)
-        throw new exports.ValidationError 'while validating parameter properties', null, '"' + required + '"' + 'required can be any of: y, yes, YES, t, true, n, no, NO, f, false, FALSE', node.start_mark
+      unless required.match(/^(true|false)$/)
+        throw new exports.ValidationError 'while validating parameter properties', null, '"' + required + '"' + 'required can be any either true or false', node.start_mark
     #TODO: add validations for requires, it should be an array, all keys scalar
     #TODO: add validations for excludes, it should be an array, all keys scalar
 
