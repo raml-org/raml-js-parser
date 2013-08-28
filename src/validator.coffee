@@ -91,8 +91,7 @@ class @Validator
                   childNode[0].value.match(/^minimum$/i) or
                   childNode[0].value.match(/^maximum$/i) or
                   childNode[0].value.match(/^required$/i) or
-                  childNode[0].value.match(/^requires$/i) or
-                  childNode[0].value.match(/^excludes$/i) or
+                  childNode[0].value.match(/^repeat$/i) or
                   childNode[0].value.match(/^default$/i))
     if invalid.length > 0
       throw new exports.ValidationError 'while validating parameter properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
@@ -116,8 +115,10 @@ class @Validator
       required = @property_value node, /^required$/i
       unless required.match(/^(true|false)$/)
         throw new exports.ValidationError 'while validating parameter properties', null, '"' + required + '"' + 'required can be any either true or false', node.start_mark
-    #TODO: add validations for requires, it should be an array, all keys scalar
-    #TODO: add validations for excludes, it should be an array, all keys scalar
+    if @has_property node, /^repeat$/i
+      repeat = @property_value node, /^repeat$/i
+      unless repeat.match(/^(true|false)$/)
+        throw new exports.ValidationError 'while validating parameter properties', null, '"' + repeat + '"' + 'repeat can be any either true or false', node.start_mark
 
   valid_root_properties: (node) ->
     @check_is_map node

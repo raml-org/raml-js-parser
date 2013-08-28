@@ -2469,6 +2469,9 @@ return Q;
 
 })(require("__browserify_process"))
 },{"__browserify_process":5}],7:[function(require,module,exports){
+// nothing to see here... no file methods for the browser
+
+},{}],8:[function(require,module,exports){
 var punycode = { encode : function (s) { return s } };
 
 exports.parse = urlParse;
@@ -3074,10 +3077,7 @@ function parseHost(host) {
   return out;
 }
 
-},{"querystring":8}],9:[function(require,module,exports){
-// nothing to see here... no file methods for the browser
-
-},{}],10:[function(require,module,exports){
+},{"querystring":9}],10:[function(require,module,exports){
 window.RAML = {}
 
 window.RAML.Parser = require('../lib/raml')
@@ -3283,7 +3283,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./events":2,"./nodes":13,"./raml":11,"url":7}],14:[function(require,module,exports){
+},{"./errors":1,"./events":2,"./nodes":13,"./raml":11,"url":8}],14:[function(require,module,exports){
 require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{1:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
@@ -7963,7 +7963,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./traits":23,"./util":4,"./validator":22}],13:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./joiner":16,"./parser":19,"./reader":20,"./resolver":21,"./scanner":18,"./traits":23,"./util":4,"./validator":22}],13:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -8179,7 +8179,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],20:[function(require,module,exports){
+},{"./errors":1}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, events, tokens, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -8790,7 +8790,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./events":2,"./tokens":3}],18:[function(require,module,exports){
+},{"./errors":1,"./events":2,"./tokens":3}],20:[function(require,module,exports){
 (function() {
   var Mark, YAMLError, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9103,7 +9103,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./util":4}],19:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4}],18:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10723,7 +10723,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],8:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],9:[function(require,module,exports){
 
 /**
  * Object#toString() ref for stringify().
@@ -11284,7 +11284,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":24}],22:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":19,"./reader":20,"./resolver":21,"./scanner":18,"./tokens":3,"fs":7,"q":6,"url":8,"xmlhttprequest":24}],22:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, uritemplate, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11427,10 +11427,10 @@ function decode(str) {
     };
 
     Validator.prototype.valid_common_parameter_properties = function(node) {
-      var invalid, required, type;
+      var invalid, repeat, required, type;
       this.check_is_map(node);
       invalid = node.value.filter(function(childNode) {
-        return !(childNode[0].value.match(/^name$/i) || childNode[0].value.match(/^description$/i) || childNode[0].value.match(/^type$/i) || childNode[0].value.match(/^enum$/i) || childNode[0].value.match(/^pattern$/i) || childNode[0].value.match(/^minLength$/i) || childNode[0].value.match(/^maxLength$/i) || childNode[0].value.match(/^minimum$/i) || childNode[0].value.match(/^maximum$/i) || childNode[0].value.match(/^required$/i) || childNode[0].value.match(/^requires$/i) || childNode[0].value.match(/^excludes$/i) || childNode[0].value.match(/^default$/i));
+        return !(childNode[0].value.match(/^name$/i) || childNode[0].value.match(/^description$/i) || childNode[0].value.match(/^type$/i) || childNode[0].value.match(/^enum$/i) || childNode[0].value.match(/^pattern$/i) || childNode[0].value.match(/^minLength$/i) || childNode[0].value.match(/^maxLength$/i) || childNode[0].value.match(/^minimum$/i) || childNode[0].value.match(/^maximum$/i) || childNode[0].value.match(/^required$/i) || childNode[0].value.match(/^repeat$/i) || childNode[0].value.match(/^default$/i));
       });
       if (invalid.length > 0) {
         throw new exports.ValidationError('while validating parameter properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark);
@@ -11465,6 +11465,12 @@ function decode(str) {
         required = this.property_value(node, /^required$/i);
         if (!required.match(/^(true|false)$/)) {
           throw new exports.ValidationError('while validating parameter properties', null, '"' + required + '"' + 'required can be any either true or false', node.start_mark);
+        }
+      }
+      if (this.has_property(node, /^repeat$/i)) {
+        repeat = this.property_value(node, /^repeat$/i);
+        if (!repeat.match(/^(true|false)$/)) {
+          throw new exports.ValidationError('while validating parameter properties', null, '"' + repeat + '"' + 'repeat can be any either true or false', node.start_mark);
         }
       }
     };
@@ -12303,7 +12309,7 @@ exports.XMLHttpRequest = function() {
 };
 
 })(require("__browserify_process"),require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":14,"__browserify_process":5,"child_process":26,"fs":9,"http":27,"https":28,"url":7}],25:[function(require,module,exports){
+},{"__browserify_buffer":14,"__browserify_process":5,"child_process":26,"fs":7,"http":27,"https":28,"url":8}],25:[function(require,module,exports){
 (function(global){/*global unescape, module, define, window, global*/
 
 /*
@@ -13589,7 +13595,128 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":29,"util":32}],32:[function(require,module,exports){
+},{"events":29,"util":32}],33:[function(require,module,exports){
+var Stream = require('stream');
+
+var Response = module.exports = function (res) {
+    this.offset = 0;
+    this.readable = true;
+};
+
+Response.prototype = new Stream;
+
+var capable = {
+    streaming : true,
+    status2 : true
+};
+
+function parseHeaders (res) {
+    var lines = res.getAllResponseHeaders().split(/\r?\n/);
+    var headers = {};
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (line === '') continue;
+        
+        var m = line.match(/^([^:]+):\s*(.*)/);
+        if (m) {
+            var key = m[1].toLowerCase(), value = m[2];
+            
+            if (headers[key] !== undefined) {
+            
+                if (isArray(headers[key])) {
+                    headers[key].push(value);
+                }
+                else {
+                    headers[key] = [ headers[key], value ];
+                }
+            }
+            else {
+                headers[key] = value;
+            }
+        }
+        else {
+            headers[line] = true;
+        }
+    }
+    return headers;
+}
+
+Response.prototype.getResponse = function (xhr) {
+    var respType = String(xhr.responseType).toLowerCase();
+    if (respType === 'blob') return xhr.responseBlob || xhr.response;
+    if (respType === 'arraybuffer') return xhr.response;
+    return xhr.responseText;
+}
+
+Response.prototype.getHeader = function (key) {
+    return this.headers[key.toLowerCase()];
+};
+
+Response.prototype.handle = function (res) {
+    if (res.readyState === 2 && capable.status2) {
+        try {
+            this.statusCode = res.status;
+            this.headers = parseHeaders(res);
+        }
+        catch (err) {
+            capable.status2 = false;
+        }
+        
+        if (capable.status2) {
+            this.emit('ready');
+        }
+    }
+    else if (capable.streaming && res.readyState === 3) {
+        try {
+            if (!this.statusCode) {
+                this.statusCode = res.status;
+                this.headers = parseHeaders(res);
+                this.emit('ready');
+            }
+        }
+        catch (err) {}
+        
+        try {
+            this._emitData(res);
+        }
+        catch (err) {
+            capable.streaming = false;
+        }
+    }
+    else if (res.readyState === 4) {
+        if (!this.statusCode) {
+            this.statusCode = res.status;
+            this.emit('ready');
+        }
+        this._emitData(res);
+        
+        if (res.error) {
+            this.emit('error', this.getResponse(res));
+        }
+        else this.emit('end');
+        
+        this.emit('close');
+    }
+};
+
+Response.prototype._emitData = function (res) {
+    var respBody = this.getResponse(res);
+    if (respBody.toString().match(/ArrayBuffer/)) {
+        this.emit('data', new Uint8Array(respBody, this.offset));
+        this.offset = respBody.byteLength;
+        return;
+    }
+    if (respBody.length > this.offset) {
+        this.emit('data', respBody.slice(this.offset));
+        this.offset = respBody.length;
+    }
+};
+
+var isArray = Array.isArray || function (xs) {
+    return Object.prototype.toString.call(xs) === '[object Array]';
+};
+
+},{"stream":31}],32:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -13936,7 +14063,7 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":29}],33:[function(require,module,exports){
+},{"events":29}],34:[function(require,module,exports){
 (function(){// UTILITY
 var util = require('util');
 var Buffer = require("buffer").Buffer;
@@ -14251,128 +14378,141 @@ assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
 assert.ifError = function(err) { if (err) {throw err;}};
 
 })()
-},{"buffer":34,"util":32}],35:[function(require,module,exports){
-var Stream = require('stream');
+},{"buffer":35,"util":32}],30:[function(require,module,exports){
+(function(){var Stream = require('stream');
+var Response = require('./response');
+var concatStream = require('concat-stream')
+var Buffer = require('buffer')
 
-var Response = module.exports = function (res) {
-    this.offset = 0;
-    this.readable = true;
-};
-
-Response.prototype = new Stream;
-
-var capable = {
-    streaming : true,
-    status2 : true
-};
-
-function parseHeaders (res) {
-    var lines = res.getAllResponseHeaders().split(/\r?\n/);
-    var headers = {};
-    for (var i = 0; i < lines.length; i++) {
-        var line = lines[i];
-        if (line === '') continue;
-        
-        var m = line.match(/^([^:]+):\s*(.*)/);
-        if (m) {
-            var key = m[1].toLowerCase(), value = m[2];
-            
-            if (headers[key] !== undefined) {
-            
-                if (isArray(headers[key])) {
-                    headers[key].push(value);
+var Request = module.exports = function (xhr, params) {
+    var self = this;
+    self.writable = true;
+    self.xhr = xhr;
+    self.body = concatStream()
+    
+    var uri = params.host
+        + (params.port ? ':' + params.port : '')
+        + (params.path || '/')
+    ;
+    
+    xhr.open(
+        params.method || 'GET',
+        (params.scheme || 'http') + '://' + uri,
+        true
+    );
+    
+    if (params.headers) {
+        var keys = objectKeys(params.headers);
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            if (!self.isSafeRequestHeader(key)) continue;
+            var value = params.headers[key];
+            if (isArray(value)) {
+                for (var j = 0; j < value.length; j++) {
+                    xhr.setRequestHeader(key, value[j]);
                 }
-                else {
-                    headers[key] = [ headers[key], value ];
-                }
             }
-            else {
-                headers[key] = value;
-            }
-        }
-        else {
-            headers[line] = true;
+            else xhr.setRequestHeader(key, value)
         }
     }
-    return headers;
-}
+    
+    if (params.auth) {
+        //basic auth
+        this.setHeader('Authorization', 'Basic ' + new Buffer(params.auth).toString('base64'));
+    }
 
-Response.prototype.getResponse = function (xhr) {
-    var respType = String(xhr.responseType).toLowerCase();
-    if (respType === 'blob') return xhr.responseBlob || xhr.response;
-    if (respType === 'arraybuffer') return xhr.response;
-    return xhr.responseText;
-}
-
-Response.prototype.getHeader = function (key) {
-    return this.headers[key.toLowerCase()];
+    var res = new Response;
+    res.on('close', function () {
+        self.emit('close');
+    });
+    
+    res.on('ready', function () {
+        self.emit('response', res);
+    });
+    
+    xhr.onreadystatechange = function () {
+        res.handle(xhr);
+    };
 };
 
-Response.prototype.handle = function (res) {
-    if (res.readyState === 2 && capable.status2) {
-        try {
-            this.statusCode = res.status;
-            this.headers = parseHeaders(res);
-        }
-        catch (err) {
-            capable.status2 = false;
-        }
-        
-        if (capable.status2) {
-            this.emit('ready');
+Request.prototype = new Stream;
+
+Request.prototype.setHeader = function (key, value) {
+    if (isArray(value)) {
+        for (var i = 0; i < value.length; i++) {
+            this.xhr.setRequestHeader(key, value[i]);
         }
     }
-    else if (capable.streaming && res.readyState === 3) {
-        try {
-            if (!this.statusCode) {
-                this.statusCode = res.status;
-                this.headers = parseHeaders(res);
-                this.emit('ready');
-            }
-        }
-        catch (err) {}
-        
-        try {
-            this._emitData(res);
-        }
-        catch (err) {
-            capable.streaming = false;
-        }
-    }
-    else if (res.readyState === 4) {
-        if (!this.statusCode) {
-            this.statusCode = res.status;
-            this.emit('ready');
-        }
-        this._emitData(res);
-        
-        if (res.error) {
-            this.emit('error', this.getResponse(res));
-        }
-        else this.emit('end');
-        
-        this.emit('close');
+    else {
+        this.xhr.setRequestHeader(key, value);
     }
 };
 
-Response.prototype._emitData = function (res) {
-    var respBody = this.getResponse(res);
-    if (respBody.toString().match(/ArrayBuffer/)) {
-        this.emit('data', new Uint8Array(respBody, this.offset));
-        this.offset = respBody.byteLength;
-        return;
-    }
-    if (respBody.length > this.offset) {
-        this.emit('data', respBody.slice(this.offset));
-        this.offset = respBody.length;
-    }
+Request.prototype.write = function (s) {
+    this.body.write(s);
+};
+
+Request.prototype.destroy = function (s) {
+    this.xhr.abort();
+    this.emit('close');
+};
+
+Request.prototype.end = function (s) {
+    if (s !== undefined) this.body.write(s);
+    this.body.end()
+    this.xhr.send(this.body.getBody());
+};
+
+// Taken from http://dxr.mozilla.org/mozilla/mozilla-central/content/base/src/nsXMLHttpRequest.cpp.html
+Request.unsafeHeaders = [
+    "accept-charset",
+    "accept-encoding",
+    "access-control-request-headers",
+    "access-control-request-method",
+    "connection",
+    "content-length",
+    "cookie",
+    "cookie2",
+    "content-transfer-encoding",
+    "date",
+    "expect",
+    "host",
+    "keep-alive",
+    "origin",
+    "referer",
+    "te",
+    "trailer",
+    "transfer-encoding",
+    "upgrade",
+    "user-agent",
+    "via"
+];
+
+Request.prototype.isSafeRequestHeader = function (headerName) {
+    if (!headerName) return false;
+    return indexOf(Request.unsafeHeaders, headerName.toLowerCase()) === -1;
+};
+
+var objectKeys = Object.keys || function (obj) {
+    var keys = [];
+    for (var key in obj) keys.push(key);
+    return keys;
 };
 
 var isArray = Array.isArray || function (xs) {
     return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{"stream":31}],36:[function(require,module,exports){
+var indexOf = function (xs, x) {
+    if (xs.indexOf) return xs.indexOf(x);
+    for (var i = 0; i < xs.length; i++) {
+        if (xs[i] === x) return i;
+    }
+    return -1;
+};
+
+})()
+},{"./response":33,"buffer":35,"concat-stream":36,"stream":31}],37:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -14458,7 +14598,7 @@ exports.writeIEEE754 = function(buffer, value, offset, isBE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 (function(){var assert = require('assert');
 exports.Buffer = Buffer;
 exports.SlowBuffer = Buffer;
@@ -15542,141 +15682,58 @@ Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
 };
 
 })()
-},{"./buffer_ieee754":36,"assert":33,"base64-js":37}],30:[function(require,module,exports){
-(function(){var Stream = require('stream');
-var Response = require('./response');
-var concatStream = require('concat-stream')
-var Buffer = require('buffer')
+},{"./buffer_ieee754":37,"assert":34,"base64-js":38}],36:[function(require,module,exports){
+(function(Buffer){var stream = require('stream')
+var util = require('util')
 
-var Request = module.exports = function (xhr, params) {
-    var self = this;
-    self.writable = true;
-    self.xhr = xhr;
-    self.body = concatStream()
-    
-    var uri = params.host
-        + (params.port ? ':' + params.port : '')
-        + (params.path || '/')
-    ;
-    
-    xhr.open(
-        params.method || 'GET',
-        (params.scheme || 'http') + '://' + uri,
-        true
-    );
-    
-    if (params.headers) {
-        var keys = objectKeys(params.headers);
-        for (var i = 0; i < keys.length; i++) {
-            var key = keys[i];
-            if (!self.isSafeRequestHeader(key)) continue;
-            var value = params.headers[key];
-            if (isArray(value)) {
-                for (var j = 0; j < value.length; j++) {
-                    xhr.setRequestHeader(key, value[j]);
-                }
-            }
-            else xhr.setRequestHeader(key, value)
-        }
-    }
-    
-    if (params.auth) {
-        //basic auth
-        this.setHeader('Authorization', 'Basic ' + new Buffer(params.auth).toString('base64'));
-    }
+function ConcatStream(cb) {
+  stream.Stream.call(this)
+  this.writable = true
+  if (cb) this.cb = cb
+  this.body = []
+  if (this.cb) this.on('error', cb)
+}
 
-    var res = new Response;
-    res.on('close', function () {
-        self.emit('close');
-    });
-    
-    res.on('ready', function () {
-        self.emit('response', res);
-    });
-    
-    xhr.onreadystatechange = function () {
-        res.handle(xhr);
-    };
-};
+util.inherits(ConcatStream, stream.Stream)
 
-Request.prototype = new Stream;
+ConcatStream.prototype.write = function(chunk) {
+  this.body.push(chunk)
+}
 
-Request.prototype.setHeader = function (key, value) {
-    if (isArray(value)) {
-        for (var i = 0; i < value.length; i++) {
-            this.xhr.setRequestHeader(key, value[i]);
-        }
-    }
-    else {
-        this.xhr.setRequestHeader(key, value);
-    }
-};
+ConcatStream.prototype.arrayConcat = function(arrs) {
+  if (arrs.length === 0) return []
+  if (arrs.length === 1) return arrs[0]
+  return arrs.reduce(function (a, b) { return a.concat(b) })
+}
 
-Request.prototype.write = function (s) {
-    this.body.write(s);
-};
+ConcatStream.prototype.isArray = function(arr) {
+  var isArray = Array.isArray(arr)
+  var isTypedArray = arr.toString().match(/Array/)
+  return isArray || isTypedArray
+}
 
-Request.prototype.destroy = function (s) {
-    this.xhr.abort();
-    this.emit('close');
-};
+ConcatStream.prototype.getBody = function () {
+  if (this.body.length === 0) return
+  if (typeof(this.body[0]) === "string") return this.body.join('')
+  if (this.isArray(this.body[0])) return this.arrayConcat(this.body)
+  if (typeof(Buffer) !== "undefined" && Buffer.isBuffer(this.body[0])) {
+    return Buffer.concat(this.body)
+  }
+  return this.body
+}
 
-Request.prototype.end = function (s) {
-    if (s !== undefined) this.body.write(s);
-    this.body.end()
-    this.xhr.send(this.body.getBody());
-};
+ConcatStream.prototype.end = function() {
+  if (this.cb) this.cb(false, this.getBody())
+}
 
-// Taken from http://dxr.mozilla.org/mozilla/mozilla-central/content/base/src/nsXMLHttpRequest.cpp.html
-Request.unsafeHeaders = [
-    "accept-charset",
-    "accept-encoding",
-    "access-control-request-headers",
-    "access-control-request-method",
-    "connection",
-    "content-length",
-    "cookie",
-    "cookie2",
-    "content-transfer-encoding",
-    "date",
-    "expect",
-    "host",
-    "keep-alive",
-    "origin",
-    "referer",
-    "te",
-    "trailer",
-    "transfer-encoding",
-    "upgrade",
-    "user-agent",
-    "via"
-];
+module.exports = function(cb) {
+  return new ConcatStream(cb)
+}
 
-Request.prototype.isSafeRequestHeader = function (headerName) {
-    if (!headerName) return false;
-    return indexOf(Request.unsafeHeaders, headerName.toLowerCase()) === -1;
-};
+module.exports.ConcatStream = ConcatStream
 
-var objectKeys = Object.keys || function (obj) {
-    var keys = [];
-    for (var key in obj) keys.push(key);
-    return keys;
-};
-
-var isArray = Array.isArray || function (xs) {
-    return Object.prototype.toString.call(xs) === '[object Array]';
-};
-
-var indexOf = function (xs, x) {
-    if (xs.indexOf) return xs.indexOf(x);
-    for (var i = 0; i < xs.length; i++) {
-        if (xs[i] === x) return i;
-    }
-    return -1;
-};
-
-})()
-},{"./response":35,"buffer":34,"concat-stream":38,"stream":31}],37:[function(require,module,exports){
+})(require("__browserify_buffer").Buffer)
+},{"__browserify_buffer":14,"stream":31,"util":32}],38:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 
@@ -15762,56 +15819,5 @@ var indexOf = function (xs, x) {
 	module.exports.fromByteArray = uint8ToBase64;
 }());
 
-},{}],38:[function(require,module,exports){
-(function(Buffer){var stream = require('stream')
-var util = require('util')
-
-function ConcatStream(cb) {
-  stream.Stream.call(this)
-  this.writable = true
-  if (cb) this.cb = cb
-  this.body = []
-  if (this.cb) this.on('error', cb)
-}
-
-util.inherits(ConcatStream, stream.Stream)
-
-ConcatStream.prototype.write = function(chunk) {
-  this.body.push(chunk)
-}
-
-ConcatStream.prototype.arrayConcat = function(arrs) {
-  if (arrs.length === 0) return []
-  if (arrs.length === 1) return arrs[0]
-  return arrs.reduce(function (a, b) { return a.concat(b) })
-}
-
-ConcatStream.prototype.isArray = function(arr) {
-  var isArray = Array.isArray(arr)
-  var isTypedArray = arr.toString().match(/Array/)
-  return isArray || isTypedArray
-}
-
-ConcatStream.prototype.getBody = function () {
-  if (this.body.length === 0) return
-  if (typeof(this.body[0]) === "string") return this.body.join('')
-  if (this.isArray(this.body[0])) return this.arrayConcat(this.body)
-  if (typeof(Buffer) !== "undefined" && Buffer.isBuffer(this.body[0])) {
-    return Buffer.concat(this.body)
-  }
-  return this.body
-}
-
-ConcatStream.prototype.end = function() {
-  if (this.cb) this.cb(false, this.getBody())
-}
-
-module.exports = function(cb) {
-  return new ConcatStream(cb)
-}
-
-module.exports.ConcatStream = ConcatStream
-
-})(require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":14,"stream":31,"util":32}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,19,3,23,4,22,6])
+},{}]},{},[10,12,15,1,2,16,17,13,19,11,20,21,18,3,23,4,22,6])
 ;

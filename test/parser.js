@@ -491,7 +491,7 @@ describe('Parser', function() {
       promise.should.eventually.deep.equal({ title: 'MyApi', version: 'v1', baseUri: 'http://myapi.com/{version}' }).and.notify(done);
     });
 
-    it('should succeed when a URI parameter has required "y"', function(done) {
+    it('should fail when a URI parameter has required "y"', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -509,7 +509,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.and.notify(done);
     });
 
-    it('should succeed when a URI parameter has required "yes"', function(done) {
+    it('should fail when a URI parameter has required "yes"', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -527,7 +527,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.and.notify(done);
     });
 
-    it('should succeed when a URI parameter has required "YES"', function(done) {
+    it('should fail when a URI parameter has required "YES"', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -545,7 +545,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.and.notify(done);
     });
 
-    it('should succeed when a URI parameter has required "t"', function(done) {
+    it('should fail when a URI parameter has required "t"', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -581,7 +581,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
 
-    it('should succeed when a URI parameter has required "TRUE"', function(done) {
+    it('should fail when a URI parameter has required "TRUE"', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -599,7 +599,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.and.notify(done);
     });
 
-    it('should succeed when a URI parameter has required "n"', function(done) {
+    it('should fail when a URI parameter has required "n"', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -617,7 +617,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.and.notify(done);
     });
 
-    it('should succeed when a URI parameter has required "no"', function(done) {
+    it('should fail when a URI parameter has required "no"', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -635,7 +635,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.and.notify(done);
     });
 
-    it('should succeed when a URI parameter has required "NO"', function(done) {
+    it('should fail when a URI parameter has required "NO"', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -653,7 +653,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.and.notify(done);
     });
 
-    it('should succeed when a URI parameter has required "f"', function(done) {
+    it('should fail when a URI parameter has required "f"', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -689,7 +689,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
 
-    it('should succeed when a URI parameter has required "FALSE"', function(done) {
+    it('should fail when a URI parameter has required "FALSE"', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -702,6 +702,78 @@ describe('Parser', function() {
         '    description: This is A',
         '    type: date',
         '    required: FALSE'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has repeat "false"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    repeat: false'
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should fail when a URI parameter has repeat "FALSE"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    repeat: FALSE'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.and.notify(done);
+    });
+
+    it('should succeed when a URI parameter has repeat "true"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    repeat: true'
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should fail when a URI parameter has repeat "TRUE"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    name: A',
+        '    description: This is A',
+        '    type: date',
+        '    repeat: TRUE'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.and.notify(done);
