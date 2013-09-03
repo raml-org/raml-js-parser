@@ -66,7 +66,9 @@ class @Traits
         unless parameter[1].tag == 'tag:yaml.org,2002:str'
           throw new exports.TraitError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
         plainParameters[parameter[0].value] = parameter[1].value
-    temp = trait.cloneTrait()
+
+    temp = trait.cloneForTrait()
+
     # by aplying the parameter mapping first, we allow users to rename things in the trait,
     # and then merge it with the resource
     @apply_parameters temp, plainParameters, useKey
@@ -74,6 +76,10 @@ class @Traits
     method[1] = temp
 
   get_trait: (traitName) ->
-    trait = @declaredTraits.filter( (declaredTrait) -> return declaredTrait[0].value == traitName );
-    return trait[0][1];
+    result = {}
+    @declaredTraits.forEach (trait_item) =>
+      trait = trait_item.value.filter((declaredTrait) -> return declaredTrait[0].value == traitName );
+      if trait[0]
+        result = trait[0][1];
+    return result
     

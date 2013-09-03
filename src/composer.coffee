@@ -44,6 +44,7 @@ class @Composer
       @validate_document document
       
     if apply
+      @apply_types document
       @apply_traits document
       
     if join
