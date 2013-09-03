@@ -66,7 +66,7 @@ class @MappingNode extends @CollectionNode
     temp = new @constructor( @tag, properties, @start_mark, @end_mark, @flow_style)
     return temp
 
-  cloneTrait: ->
+  cloneForTrait: ->
     properties = []
     @value.forEach (property) =>
       name = property[0].clone()
@@ -85,17 +85,17 @@ class @MappingNode extends @CollectionNode
     resourceNode.value.forEach (resourceProperty) =>
       name = resourceProperty[0].value
 
-      trait_has_property = @value.some (someProperty) ->
+      node_has_property = @value.some (someProperty) ->
         return (someProperty[0].value == name) or ((someProperty[0].value + '?') == name) or (someProperty[0].value == (name + '?'))
 
-      if trait_has_property
-        @value.forEach (traitProperty) ->
-          traitPropertyName = traitProperty[0].value
-          if (traitPropertyName == name) or
-             ((traitPropertyName + '?') == name) or (traitPropertyName == (name + '?'))
-            traitProperty[1].combine resourceProperty[1]
+      if node_has_property
+        @value.forEach (ownNodeProperty) ->
+          ownNodePropertyName = ownNodeProperty[0].value
+          if (ownNodePropertyName == name) or
+             ((ownNodePropertyName + '?') == name) or (ownNodePropertyName == (name + '?'))
+            ownNodeProperty[1].combine resourceProperty[1]
             # remove the '?' at the end of the property name
-            traitProperty[0].value = traitProperty[0].value.replace /\?$/, ''
+            ownNodeProperty[0].value = ownNodeProperty[0].value.replace /\?$/, ''
       else
         @value.push [ resourceProperty[0].clone(), resourceProperty[1].clone() ]
 

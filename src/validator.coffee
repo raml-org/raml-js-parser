@@ -64,11 +64,18 @@ class @Validator
     @check_is_map node
     if @has_property node, /^traits$/i
       traits = @property_value node, /^traits$/i
-      traits.forEach (trait) =>
-        @valid_traits_properties trait[1]
-        if not (@has_property trait[1], /^name$/i)
-          throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a name property', node.start_mark
-      
+
+      unless typeof traits is "object"
+        throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits deffinition, it must an array', traits.start_mark
+
+      traits.forEach (trait_entry) =>
+        unless trait_entry and trait_entry.value
+          throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits deffinition, it must an array', trait_entry.start_mark
+        trait_entry.value.forEach (trait) =>
+          @valid_traits_properties trait[1]
+          if not (@has_property trait[1], /^name$/i)
+            throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a name property', node.start_mark
+
   valid_traits_properties: (node) ->  
     @check_is_map node
     invalid = node.value.filter (childNode) -> 
@@ -232,15 +239,15 @@ class @Validator
     @check_is_map node
     if not traits? and @has_property node, /^traits$/i
       traits = @property_value node, /^traits$/i
-    resources = @child_resources node
 
+    resources = @child_resources node
     resources.forEach (resource) =>
       if @has_property resource[1], /^is$/i
         uses = @property_value resource[1], /^is$/i
         if not (uses instanceof Array)
           throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', node.start_mark
         uses.forEach (use) =>
-          if not traits.some( (trait) => trait[0].value == @key_or_value use)
+          if not traits.some( (trait_entry) => trait_entry.value.some((trait) => trait[0].value == @key_or_value use))
             throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
 
       methods = @child_methods resource[1]
@@ -250,7 +257,7 @@ class @Validator
           if not (uses instanceof Array)
             throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', node.start_mark
           uses.forEach (use) =>
-            if not traits.some( (trait) => trait[0].value == @key_or_value use)
+            if not traits.some( (trait_entry) => trait_entry.value.some((trait) => trait[0].value == @key_or_value use))
               throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
 
       @valid_trait_consumption resource[1], traits

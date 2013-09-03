@@ -19,6 +19,7 @@ module.exports = function(grunt) {
             'lib/tokens.js': 'src/tokens.coffee',
             'lib/util.js': 'src/util.coffee',
             'lib/traits.js': 'src/traits.coffee',
+            'lib/resourceTypes.js': 'src/resourceTypes.coffee',
             'lib/joiner.js': 'src/joiner.coffee',            
             'lib/raml.js': 'src/raml.coffee'
           }
@@ -86,7 +87,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('compile', ['coffee']);
   grunt.registerTask('default', ['coffee', 'browserify', 'uglify']);
-  //grunt.registerTask('test', ['coffee', 'browserify', 'uglify', 'connect', 'mochacli', 'mocha_phantomjs']);
+  grunt.registerTask('test-ui', ['coffee', 'browserify', 'uglify', 'connect', 'mochacli', 'mocha_phantomjs']);
   grunt.registerTask('test', ['coffee', 'browserify', 'uglify', 'connect', 'mocha_phantomjs']);
   grunt.registerTask('server', ['default', 'connect', 'watch']);
 };
