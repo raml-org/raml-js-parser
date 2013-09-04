@@ -87,7 +87,7 @@ class @Validator
         typeProperty = (resource[1].value.filter (childNode) -> return childNode[0].value.match(/^type$/))[0][1]
         typeName = typeProperty.value
         if (typeName instanceof Array)
-          throw new exports.ValidationError 'while validating resource types consumption', null, 'type property must be a scalar', node.start_mark
+          throw new exports.ValidationError 'while validating resource types consumption', null, 'type property must be a scalar', typeProperty.start_mark
         if not types.some( (types_entry) => types_entry.value.some((type) => type[0].value == typeName))
           throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + typeName, typeProperty.start_mark
       @valid_type_consumption resource[1], types, false
@@ -100,9 +100,9 @@ class @Validator
             typeProperty = (type[1].value.filter (childNode) -> return childNode[0].value.match(/^type$/))[0][1]
             inheritsFrom = typeProperty.value
             if (inheritsFrom instanceof Array)
-              throw new exports.ValidationError 'while validating resource types consumption', null, 'type property must be a scalar', node.start_mark
+              throw new exports.ValidationError 'while validating resource types consumption', null, 'type property must be a scalar', typeProperty.start_mark
             if not types.some( (types_entry) => types_entry.value.some((defined_type) => defined_type[0].value == inheritsFrom))
-              throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + inheritsFrom, type.start_mark
+              throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + inheritsFrom, typeProperty.start_mark
 
   validate_traits: (node) ->
     @check_is_map node
