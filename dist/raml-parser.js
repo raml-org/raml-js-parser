@@ -1,138 +1,5 @@
 ;(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
 (function() {
-  var _ref,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  this.Mark = (function() {
-    function Mark(name, line, column, buffer, pointer) {
-      this.name = name;
-      this.line = line;
-      this.column = column;
-      this.buffer = buffer;
-      this.pointer = pointer;
-    }
-
-    Mark.prototype.get_snippet = function(indent, max_length) {
-      var break_chars, end, head, start, tail, _ref, _ref1;
-      if (indent == null) {
-        indent = 4;
-      }
-      if (max_length == null) {
-        max_length = 75;
-      }
-      if (this.buffer == null) {
-        return null;
-      }
-      break_chars = '\x00\r\n\x85\u2028\u2029';
-      head = '';
-      start = this.pointer;
-      while (start > 0 && (_ref = this.buffer[start - 1], __indexOf.call(break_chars, _ref) < 0)) {
-        start--;
-        if (this.pointer - start > max_length / 2 - 1) {
-          head = ' ... ';
-          start += 5;
-          break;
-        }
-      }
-      tail = '';
-      end = this.pointer;
-      while (end < this.buffer.length && (_ref1 = this.buffer[end], __indexOf.call(break_chars, _ref1) < 0)) {
-        end++;
-        if (end - this.pointer > max_length / 2 - 1) {
-          tail = ' ... ';
-          end -= 5;
-          break;
-        }
-      }
-      return "" + ((new Array(indent)).join(' ')) + head + this.buffer.slice(start, end) + tail + "\n" + ((new Array(indent + this.pointer - start + head.length)).join(' ')) + "^";
-    };
-
-    Mark.prototype.toString = function() {
-      var snippet, where;
-      snippet = this.get_snippet();
-      where = "  in \"" + this.name + "\", line " + (this.line + 1) + ", column " + (this.column + 1);
-      if (snippet) {
-        return where;
-      } else {
-        return "" + where + ":\n" + snippet;
-      }
-    };
-
-    return Mark;
-
-  })();
-
-  this.YAMLError = (function(_super) {
-    __extends(YAMLError, _super);
-
-    function YAMLError() {
-      YAMLError.__super__.constructor.call(this);
-    }
-
-    return YAMLError;
-
-  })(Error);
-
-  this.MarkedYAMLError = (function(_super) {
-    __extends(MarkedYAMLError, _super);
-
-    function MarkedYAMLError(context, context_mark, message, problem_mark, note) {
-      this.context = context;
-      this.context_mark = context_mark;
-      this.message = message;
-      this.problem_mark = problem_mark;
-      this.note = note;
-      MarkedYAMLError.__super__.constructor.call(this);
-    }
-
-    MarkedYAMLError.prototype.toString = function() {
-      var lines;
-      lines = [];
-      if (this.context != null) {
-        lines.push(this.context);
-      }
-      if ((this.context_mark != null) && ((this.message == null) || (this.problem_mark == null) || this.context_mark.name !== this.problem_mark.name || this.context_mark.line !== this.problem_mark.line || this.context_mark.column !== this.problem_mark.column)) {
-        lines.push(this.context_mark.toString());
-      }
-      if (this.message != null) {
-        lines.push(this.message);
-      }
-      if (this.problem_mark != null) {
-        lines.push(this.problem_mark.toString());
-      }
-      if (this.note != null) {
-        lines.push(this.note);
-      }
-      return lines.join('\n');
-    };
-
-    return MarkedYAMLError;
-
-  })(this.YAMLError);
-
-  /*
-  The Validator throws these.
-  */
-
-
-  this.ValidationError = (function(_super) {
-    __extends(ValidationError, _super);
-
-    function ValidationError() {
-      _ref = ValidationError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return ValidationError;
-
-  })(this.MarkedYAMLError);
-
-}).call(this);
-
-},{}],2:[function(require,module,exports){
-(function() {
   var _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -318,6 +185,139 @@
     return MappingEndEvent;
 
   })(this.CollectionEndEvent);
+
+}).call(this);
+
+},{}],2:[function(require,module,exports){
+(function() {
+  var _ref,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  this.Mark = (function() {
+    function Mark(name, line, column, buffer, pointer) {
+      this.name = name;
+      this.line = line;
+      this.column = column;
+      this.buffer = buffer;
+      this.pointer = pointer;
+    }
+
+    Mark.prototype.get_snippet = function(indent, max_length) {
+      var break_chars, end, head, start, tail, _ref, _ref1;
+      if (indent == null) {
+        indent = 4;
+      }
+      if (max_length == null) {
+        max_length = 75;
+      }
+      if (this.buffer == null) {
+        return null;
+      }
+      break_chars = '\x00\r\n\x85\u2028\u2029';
+      head = '';
+      start = this.pointer;
+      while (start > 0 && (_ref = this.buffer[start - 1], __indexOf.call(break_chars, _ref) < 0)) {
+        start--;
+        if (this.pointer - start > max_length / 2 - 1) {
+          head = ' ... ';
+          start += 5;
+          break;
+        }
+      }
+      tail = '';
+      end = this.pointer;
+      while (end < this.buffer.length && (_ref1 = this.buffer[end], __indexOf.call(break_chars, _ref1) < 0)) {
+        end++;
+        if (end - this.pointer > max_length / 2 - 1) {
+          tail = ' ... ';
+          end -= 5;
+          break;
+        }
+      }
+      return "" + ((new Array(indent)).join(' ')) + head + this.buffer.slice(start, end) + tail + "\n" + ((new Array(indent + this.pointer - start + head.length)).join(' ')) + "^";
+    };
+
+    Mark.prototype.toString = function() {
+      var snippet, where;
+      snippet = this.get_snippet();
+      where = "  in \"" + this.name + "\", line " + (this.line + 1) + ", column " + (this.column + 1);
+      if (snippet) {
+        return where;
+      } else {
+        return "" + where + ":\n" + snippet;
+      }
+    };
+
+    return Mark;
+
+  })();
+
+  this.YAMLError = (function(_super) {
+    __extends(YAMLError, _super);
+
+    function YAMLError() {
+      YAMLError.__super__.constructor.call(this);
+    }
+
+    return YAMLError;
+
+  })(Error);
+
+  this.MarkedYAMLError = (function(_super) {
+    __extends(MarkedYAMLError, _super);
+
+    function MarkedYAMLError(context, context_mark, message, problem_mark, note) {
+      this.context = context;
+      this.context_mark = context_mark;
+      this.message = message;
+      this.problem_mark = problem_mark;
+      this.note = note;
+      MarkedYAMLError.__super__.constructor.call(this);
+    }
+
+    MarkedYAMLError.prototype.toString = function() {
+      var lines;
+      lines = [];
+      if (this.context != null) {
+        lines.push(this.context);
+      }
+      if ((this.context_mark != null) && ((this.message == null) || (this.problem_mark == null) || this.context_mark.name !== this.problem_mark.name || this.context_mark.line !== this.problem_mark.line || this.context_mark.column !== this.problem_mark.column)) {
+        lines.push(this.context_mark.toString());
+      }
+      if (this.message != null) {
+        lines.push(this.message);
+      }
+      if (this.problem_mark != null) {
+        lines.push(this.problem_mark.toString());
+      }
+      if (this.note != null) {
+        lines.push(this.note);
+      }
+      return lines.join('\n');
+    };
+
+    return MarkedYAMLError;
+
+  })(this.YAMLError);
+
+  /*
+  The Validator throws these.
+  */
+
+
+  this.ValidationError = (function(_super) {
+    __extends(ValidationError, _super);
+
+    function ValidationError() {
+      _ref = ValidationError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return ValidationError;
+
+  })(this.MarkedYAMLError);
 
 }).call(this);
 
@@ -3284,7 +3284,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./events":2,"./nodes":13,"./raml":11,"url":7}],14:[function(require,module,exports){
+},{"./errors":2,"./events":1,"./nodes":13,"./raml":11,"url":7}],14:[function(require,module,exports){
 require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{1:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
@@ -7784,7 +7784,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 }).call(this);
 
 })(require("__browserify_buffer").Buffer)
-},{"./errors":1,"./nodes":13,"./util":4,"__browserify_buffer":14}],16:[function(require,module,exports){
+},{"./errors":2,"./nodes":13,"./util":4,"__browserify_buffer":14}],16:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -7878,7 +7878,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],17:[function(require,module,exports){
+},{"./errors":2,"./nodes":13}],17:[function(require,module,exports){
 (function() {
   var composer, construct, joiner, parser, reader, resolver, scanner, traits, types, util, validator;
 
@@ -8185,7 +8185,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],20:[function(require,module,exports){
+},{"./errors":2}],20:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, events, tokens, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -8796,7 +8796,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./events":2,"./tokens":3}],18:[function(require,module,exports){
+},{"./errors":2,"./events":1,"./tokens":3}],18:[function(require,module,exports){
 (function() {
   var Mark, YAMLError, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -8900,7 +8900,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],21:[function(require,module,exports){
+},{"./errors":2}],21:[function(require,module,exports){
 (function() {
   var YAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -9109,7 +9109,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./util":4}],24:[function(require,module,exports){
+},{"./errors":2,"./nodes":13,"./util":4}],24:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9189,7 +9189,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],19:[function(require,module,exports){
+},{"./errors":2,"./nodes":13}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10672,7 +10672,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./tokens":3,"./util":4}],23:[function(require,module,exports){
+},{"./errors":2,"./tokens":3,"./util":4}],23:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10817,7 +10817,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],8:[function(require,module,exports){
+},{"./errors":2,"./nodes":13}],8:[function(require,module,exports){
 
 /**
  * Object#toString() ref for stringify().
@@ -11378,7 +11378,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":25}],22:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./errors":2,"./events":1,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":25}],22:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, uritemplate, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11450,7 +11450,7 @@ function decode(str) {
     };
 
     Validator.prototype.validate_uri_parameters = function(uri, node) {
-      var child_resources, err, expressions, template, uriParameters,
+      var child_resources, err, expressions, template, uriParameters, uriProperty,
         _this = this;
       this.check_is_map(node);
       if (this.has_property(node, /^uriParameters$/i)) {
@@ -11458,7 +11458,8 @@ function decode(str) {
           template = uritemplate.parse(uri);
         } catch (_error) {
           err = _error;
-          throw new exports.ValidationError('while validating uri parameters', null, err.options.message, node.start_mark);
+          uriProperty = this.get_property(node, /^uriParameters$/i);
+          throw new exports.ValidationError('while validating uri parameters', null, err.options.message, uriProperty.start_mark);
         }
         expressions = template.expressions.filter(function(expr) {
           return expr.hasOwnProperty('templateText');
@@ -11538,7 +11539,7 @@ function decode(str) {
         var typeName, typeProperty;
         if (_this.has_property(resource[1], /^type$/i)) {
           typeProperty = (resource[1].value.filter(function(childNode) {
-            return childNode[0].value.match(/^type$/);
+            return !(childNode[0].value === "object") && childNode[0].value.match(/^type$/);
           }))[0][1];
           typeName = typeProperty.value;
           if (typeName instanceof Array) {
@@ -11560,7 +11561,7 @@ function decode(str) {
             var inheritsFrom, typeProperty;
             if (_this.has_property(type[1], /^type$/i)) {
               typeProperty = (type[1].value.filter(function(childNode) {
-                return childNode[0].value.match(/^type$/);
+                return !(childNode[0].value === "object") && childNode[0].value.match(/^type$/);
               }))[0][1];
               inheritsFrom = typeProperty.value;
               if (inheritsFrom instanceof Array) {
@@ -11595,7 +11596,7 @@ function decode(str) {
           return trait_entry.value.forEach(function(trait) {
             _this.valid_traits_properties(trait[1]);
             if (!(_this.has_property(trait[1], /^name$/i))) {
-              throw new exports.ValidationError('while validating trait properties', null, 'every trait must have a name property', node.start_mark);
+              throw new exports.ValidationError('while validating trait properties', null, 'every trait must have a name property', trait.start_mark);
             }
           });
         });
@@ -11606,58 +11607,71 @@ function decode(str) {
       var invalid;
       this.check_is_map(node);
       invalid = node.value.filter(function(childNode) {
+        if (typeof childNode[0].value === "object") {
+          return true;
+        }
         return childNode[0].value.match(/^is$/i) || childNode[0].value.match(/^type$/i);
       });
       if (invalid.length > 0) {
-        throw new exports.ValidationError('while validating trait properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark);
+        throw new exports.ValidationError('while validating trait properties', null, 'unknown property ' + invalid[0][0].value, invalid[0][0].start_mark);
       }
     };
 
     Validator.prototype.valid_common_parameter_properties = function(node) {
-      var invalid, repeat, required, type;
+      var invalid, maxLengthProperty, maxProperty, minLengthProperty, minProperty, repeat, repeatProperty, required, requiredProperty, type, typeProperty;
       this.check_is_map(node);
       invalid = node.value.filter(function(childNode) {
+        if (typeof childNode[0].value === "object") {
+          return true;
+        }
         return !(childNode[0].value.match(/^name$/i) || childNode[0].value.match(/^description$/i) || childNode[0].value.match(/^type$/i) || childNode[0].value.match(/^enum$/i) || childNode[0].value.match(/^pattern$/i) || childNode[0].value.match(/^minLength$/i) || childNode[0].value.match(/^maxLength$/i) || childNode[0].value.match(/^minimum$/i) || childNode[0].value.match(/^maximum$/i) || childNode[0].value.match(/^required$/i) || childNode[0].value.match(/^repeat$/i) || childNode[0].value.match(/^default$/i));
       });
       if (invalid.length > 0) {
-        throw new exports.ValidationError('while validating parameter properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark);
+        throw new exports.ValidationError('while validating parameter properties', null, 'unknown property ' + invalid[0][0].value, invalid[0][0].start_mark);
       }
       if (this.has_property(node, /^minLength$/i)) {
         if (isNaN(this.property_value(node, /^minLength$/i))) {
-          throw new exports.ValidationError('while validating parameter properties', null, 'the value of minLength must be a number', node.start_mark);
+          minLengthProperty = this.get_property(node, /^minLength$/i);
+          throw new exports.ValidationError('while validating parameter properties', null, 'the value of minLength must be a number', minLengthProperty.start_mark);
         }
       }
       if (this.has_property(node, /^maxLength$/i)) {
         if (isNaN(this.property_value(node, /^maxLength$/i))) {
-          throw new exports.ValidationError('while validating parameter properties', null, 'the value of maxLength must be a number', node.start_mark);
+          maxLengthProperty = this.get_property(node, /^maxLength$/i);
+          throw new exports.ValidationError('while validating parameter properties', null, 'the value of maxLength must be a number', maxLengthProperty.start_mark);
         }
       }
       if (this.has_property(node, /^minimum$/i)) {
         if (isNaN(this.property_value(node, /^minimum$/i))) {
-          throw new exports.ValidationError('while validating parameter properties', null, 'the value of minimum must be a number', node.start_mark);
+          minProperty = this.get_property(node, /^minimum$/i);
+          throw new exports.ValidationError('while validating parameter properties', null, 'the value of minimum must be a number', minProperty.start_mark);
         }
       }
       if (this.has_property(node, /^maximum$/i)) {
         if (isNaN(this.property_value(node, /^maximum$/i))) {
-          throw new exports.ValidationError('while validating parameter properties', null, 'the value of maximum must be a number', node.start_mark);
+          maxProperty = this.get_property(node, /^maximum$/i);
+          throw new exports.ValidationError('while validating parameter properties', null, 'the value of maximum must be a number', maxProperty.start_mark);
         }
       }
       if (this.has_property(node, /^type$/i)) {
         type = this.property_value(node, /^type$/i);
         if (type !== 'string' && type !== 'number' && type !== 'integer' && type !== 'date') {
-          throw new exports.ValidationError('while validating parameter properties', null, 'type can either be: string, number, integer or date', node.start_mark);
+          typeProperty = this.get_property(node, /^type$/i);
+          throw new exports.ValidationError('while validating parameter properties', null, 'type can either be: string, number, integer or date', typeProperty.start_mark);
         }
       }
       if (this.has_property(node, /^required$/i)) {
         required = this.property_value(node, /^required$/i);
         if (!required.match(/^(true|false)$/)) {
-          throw new exports.ValidationError('while validating parameter properties', null, '"' + required + '"' + 'required can be any either true or false', node.start_mark);
+          requiredProperty = this.get_property(node, /^required$/i);
+          throw new exports.ValidationError('while validating parameter properties', null, '"' + required + '"' + 'required can be any either true or false', requiredProperty.start_mark);
         }
       }
       if (this.has_property(node, /^repeat$/i)) {
         repeat = this.property_value(node, /^repeat$/i);
         if (!repeat.match(/^(true|false)$/)) {
-          throw new exports.ValidationError('while validating parameter properties', null, '"' + repeat + '"' + 'repeat can be any either true or false', node.start_mark);
+          repeatProperty = this.get_property(node, /^repeat$/i);
+          throw new exports.ValidationError('while validating parameter properties', null, '"' + repeat + '"' + 'repeat can be any either true or false', repeatProperty.start_mark);
         }
       }
     };
@@ -11666,10 +11680,13 @@ function decode(str) {
       var invalid;
       this.check_is_map(node);
       invalid = node.value.filter(function(childNode) {
+        if (typeof childNode[0].value === "object") {
+          return true;
+        }
         return !(childNode[0].value.match(/^title$/i) || childNode[0].value.match(/^baseUri$/i) || childNode[0].value.match(/^version$/i) || childNode[0].value.match(/^traits$/i) || childNode[0].value.match(/^documentation$/i) || childNode[0].value.match(/^uriParameters$/i) || childNode[0].value.match(/^resourceTypes$/i) || childNode[0].value.match(/^\//i));
       });
       if (invalid.length > 0) {
-        throw new exports.ValidationError('while validating root properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark);
+        throw new exports.ValidationError('while validating root properties', null, 'unknown property ' + invalid[0][0].value, invalid[0][0].start_mark);
       }
     };
 
@@ -11688,7 +11705,7 @@ function decode(str) {
     Validator.prototype.has_property = function(node, property) {
       if (node.value && typeof node.value === "object") {
         return node.value.some(function(childNode) {
-          return childNode[0].value && childNode[0].value.match(property);
+          return childNode[0].value && typeof childNode[0].value !== "object" && childNode[0].value.match(property);
         });
       }
       return false;
@@ -11697,9 +11714,17 @@ function decode(str) {
     Validator.prototype.property_value = function(node, property) {
       var filteredNodes;
       filteredNodes = node.value.filter(function(childNode) {
-        return childNode[0].value.match(property);
+        return typeof childNode[0].value !== "object" && childNode[0].value.match(property);
       });
       return filteredNodes[0][1].value;
+    };
+
+    Validator.prototype.get_property = function(node, property) {
+      var filteredNodes;
+      filteredNodes = node.value.filter(function(childNode) {
+        return typeof childNode[0].value !== "object" && childNode[0].value.match(property);
+      });
+      return filteredNodes[0][1];
     };
 
     Validator.prototype.check_is_map = function(node) {
@@ -11828,11 +11853,12 @@ function decode(str) {
       }
       resources = this.child_resources(node);
       return resources.forEach(function(resource) {
-        var methods, uses;
+        var methods, useProperty, uses;
         if (_this.has_property(resource[1], /^is$/i)) {
+          useProperty = _this.get_property(resource[1], /^is$/i);
           uses = _this.property_value(resource[1], /^is$/i);
           if (!(uses instanceof Array)) {
-            throw new exports.ValidationError('while validating trait consumption', null, 'use property must be an array', node.start_mark);
+            throw new exports.ValidationError('while validating trait consumption', null, 'use property must be an array', useProperty.start_mark);
           }
           uses.forEach(function(use) {
             if (!traits.some(function(trait_entry) {
@@ -11847,9 +11873,10 @@ function decode(str) {
         methods = _this.child_methods(resource[1]);
         methods.forEach(function(method) {
           if (_this.has_property(method[1], /^is$/i)) {
+            useProperty = _this.get_property(method[1], /^is$/i);
             uses = _this.property_value(method[1], /^is$/i);
             if (!(uses instanceof Array)) {
-              throw new exports.ValidationError('while validating trait consumption', null, 'use property must be an array', node.start_mark);
+              throw new exports.ValidationError('while validating trait consumption', null, 'use property must be an array', useProperty.start_mark);
             }
             return uses.forEach(function(use) {
               if (!traits.some(function(trait_entry) {
@@ -11872,18 +11899,18 @@ function decode(str) {
       if (!this.has_property(node, /^title$/i)) {
         throw new exports.ValidationError('while validating title', null, 'missing title', node.start_mark);
       }
-      title = this.property_value(node, "title");
-      if (!(typeof title === 'string' || typeof title === 'number')) {
-        throw new exports.ValidationError('while validating title', null, 'not a scalar', node.start_mark);
+      title = this.get_property(node, "title");
+      if (!(typeof title.value === 'string' || typeof title.value === 'number')) {
+        throw new exports.ValidationError('while validating title', null, 'not a scalar', title.start_mark);
       }
     };
 
     Validator.prototype.title_is_correct_length = function(node) {
       var title;
       this.check_is_map(node);
-      title = this.property_value(node, "title");
-      if (!(title.length <= MAX_TITLE_LENGTH)) {
-        throw new exports.ValidationError('while validating title', null, 'too long', node.start_mark);
+      title = this.get_property(node, "title");
+      if (!(title.value.length <= MAX_TITLE_LENGTH)) {
+        throw new exports.ValidationError('while validating title', null, 'too long', title.start_mark);
       }
     };
 
@@ -11895,14 +11922,15 @@ function decode(str) {
     };
 
     Validator.prototype.valid_base_uri = function(node) {
-      var baseUri, err, expression, expressions, template, _i, _len, _results;
+      var baeUriNode, baseUri, err, expression, expressions, template, _i, _len, _results;
       if (this.has_property(node, /^baseUri$/i)) {
+        baeUriNode = this.get_property(node, /^baseUri$/i);
         baseUri = this.property_value(node, /^baseUri$/i);
         try {
           template = uritemplate.parse(baseUri);
         } catch (_error) {
           err = _error;
-          throw new exports.ValidationError('while validating baseUri', null, err.options.message, node.start_mark);
+          throw new exports.ValidationError('while validating baseUri', null, err.options.message, baeUriNode.start_mark);
         }
         expressions = template.expressions.filter(function(expr) {
           return expr.hasOwnProperty('templateText');
@@ -11934,7 +11962,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"uritemplate":26}],25:[function(require,module,exports){
+},{"./errors":2,"./nodes":13,"uritemplate":26}],25:[function(require,module,exports){
 (function(process,Buffer){/**
  * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
  *
@@ -16010,5 +16038,5 @@ module.exports = function(cb) {
 module.exports.ConcatStream = ConcatStream
 
 })(require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":14,"stream":32,"util":33}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,24,19,3,4,23,22,6])
+},{"__browserify_buffer":14,"stream":32,"util":33}]},{},[10,12,15,2,1,16,17,13,20,11,18,21,24,19,3,23,4,22,6])
 ;

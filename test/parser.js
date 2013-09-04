@@ -80,11 +80,21 @@ describe('Parser', function() {
         raml.load(definition).should.become({ title: 54, baseUri: 'http://myapi.com' }).and.notify(done);
       });
       it('should fail if there is a root property with wrong name', function(done) {
+        var definition = [
+          '---',
+          'title: MyApi',
+          'version: v1',
+          'wrongPropertyName: http://myapi.com/{version}'
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/unknown property/).and.notify(done);
+    });
+    it('should not fail if there is a root property with array', function(done) {
       var definition = [
         '---',
         'title: MyApi',
         'version: v1',
-        'wrongPropertyName: http://myapi.com/{version}'
+        '[1,2]: v1'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/unknown property/).and.notify(done);
