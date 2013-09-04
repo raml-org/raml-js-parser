@@ -24,12 +24,11 @@ class @Validator
   MAX_TITLE_LENGTH = 48
 
   constructor: ->
-    @validations = [@has_title, @title_is_correct_length, @valid_base_uri, @validate_base_uri_parameters, @valid_root_properties, @validate_traits, @valid_absolute_uris, @valid_trait_consumption]
+    @validations = [@has_title, @title_is_correct_length, @valid_base_uri, @validate_base_uri_parameters, @valid_root_properties, @validate_traits, @validate_types, @valid_absolute_uris, @valid_trait_consumption, @valid_type_consumption]
 
   validate_document: (node) ->
     @validations.forEach (validation) =>
       validation.call @, node
-
     return true
     
   validate_uri_parameters: (uri, node) ->
@@ -59,18 +58,61 @@ class @Validator
         throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', node.start_mark
       baseUri = @property_value node, /^baseUri$/i
       @validate_uri_parameters baseUri, node
-    
+
+  validate_types: (node) ->
+    @check_is_map node
+    if @has_property node, /^resourceTypes$/i
+      types = @property_value node, /^resourceTypes$/i
+      unless typeof types is "object"
+        throw new exports.ValidationError 'while validating trait properties', null, 'invalid resourceTypes definition, it must be an array', types.start_mark
+      types.forEach (type_entry) =>
+        unless type_entry and type_entry.value
+          throw new exports.ValidationError 'while validating trait properties', null, 'invalid resourceTypes definition, it must be an array', type_entry.start_mark
+        type_entry.value.forEach (type) =>
+          if not (@has_property type[1], /^name$/i)
+            throw new exports.ValidationError 'while validating trait properties', null, 'every resource type must have a name property', node.start_mark
+
+          resources = @child_resources type[1]
+          if resources.length
+            throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', node.start_mark
+
+  valid_type_consumption: (node, types = undefined, check_types = true) ->
+    if not types? and @has_property node, /^resourceTypes$/i
+      types = @property_value node, /^resourceTypes$/i
+    resources = @child_resources node
+
+    # Validate inheritance in resources
+    resources.forEach (resource) =>
+      if @has_property resource[1], /^type$/i
+        typeProperty = (resource[1].value.filter (childNode) -> return childNode[0].value.match(/^type$/))[0][1]
+        typeName = typeProperty.value
+        if (typeName instanceof Array)
+          throw new exports.ValidationError 'while validating resource types consumption', null, 'type property must be a scalar', typeProperty.start_mark
+        if not types.some( (types_entry) => types_entry.value.some((type) => type[0].value == typeName))
+          throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + typeName, typeProperty.start_mark
+      @valid_type_consumption resource[1], types, false
+
+    # validate inheritance in types
+    if types and check_types
+      types.forEach (type_entry) =>
+        type_entry.value.forEach (type) =>
+          if @has_property type[1], /^type$/i
+            typeProperty = (type[1].value.filter (childNode) -> return childNode[0].value.match(/^type$/))[0][1]
+            inheritsFrom = typeProperty.value
+            if (inheritsFrom instanceof Array)
+              throw new exports.ValidationError 'while validating resource types consumption', null, 'type property must be a scalar', typeProperty.start_mark
+            if not types.some( (types_entry) => types_entry.value.some((defined_type) => defined_type[0].value == inheritsFrom))
+              throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + inheritsFrom, typeProperty.start_mark
+
   validate_traits: (node) ->
     @check_is_map node
     if @has_property node, /^traits$/i
       traits = @property_value node, /^traits$/i
-
       unless typeof traits is "object"
-        throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits deffinition, it must an array', traits.start_mark
-
+        throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits definition, it must be an array', traits.start_mark
       traits.forEach (trait_entry) =>
         unless trait_entry and trait_entry.value
-          throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits deffinition, it must an array', trait_entry.start_mark
+          throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits definition, it must be an array', trait_entry.start_mark
         trait_entry.value.forEach (trait) =>
           @valid_traits_properties trait[1]
           if not (@has_property trait[1], /^name$/i)
@@ -135,7 +177,8 @@ class @Validator
                   childNode[0].value.match(/^version$/i) or \
                   childNode[0].value.match(/^traits$/i) or \
                   childNode[0].value.match(/^documentation$/i) or \
-                  childNode[0].value.match(/^uriParameters$/i) or \
+                  childNode[0].value.match(/^uriParameters$/i) or
+                  childNode[0].value.match(/^resourceTypes$/i) or
                   childNode[0].value.match(/^\//i))
     if invalid.length > 0 
       throw new exports.ValidationError 'while validating root properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark

@@ -19,17 +19,17 @@ class @ResourceTypes
     return @declaredTypes.length > 0
 
   apply_types: (node) ->
-    @check_is_map node
-    if @has_types node
-      resources = @child_resources node
-      resources.forEach (resource) =>
-        if @has_property resource[1], /^type$/i
-          type = @property_value resource[1], /^type$/i
-          @apply_type resource[1], type
-        resource[1].remove_question_mark_properties()
+#    @check_is_map node
+#    if @has_types node
+#      resources = @child_resources node
+#      resources.forEach (resource) =>
+#        if @has_property resource[1], /^type$/i
+#          type = @property_value resource[1], /^type$/i
+#          @apply_type resource[1], type
+#        resource[1].remove_question_mark_properties()
 
   apply_type: (method, typeKey) ->
-    trait = get_type @key_or_value typeKey
+    type = @get_type @key_or_value typeKey
     parameters = @value_or_undefined typeKey
     plainParameters = {}
     if parameters
@@ -37,7 +37,7 @@ class @ResourceTypes
         unless parameter[1].tag == 'tag:yaml.org,2002:str'
           throw new exports.TraitError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
         plainParameters[parameter[0].value] = parameter[1].value
-    temp = trait.cloneTrait()
+    temp = type.cloneForTrait()
 
     # by aplying the parameter mapping first, we allow users to rename things in the trait,
     # and then merge it with the resource
