@@ -1,5 +1,138 @@
 ;(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
 (function() {
+  var _ref,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  this.Mark = (function() {
+    function Mark(name, line, column, buffer, pointer) {
+      this.name = name;
+      this.line = line;
+      this.column = column;
+      this.buffer = buffer;
+      this.pointer = pointer;
+    }
+
+    Mark.prototype.get_snippet = function(indent, max_length) {
+      var break_chars, end, head, start, tail, _ref, _ref1;
+      if (indent == null) {
+        indent = 4;
+      }
+      if (max_length == null) {
+        max_length = 75;
+      }
+      if (this.buffer == null) {
+        return null;
+      }
+      break_chars = '\x00\r\n\x85\u2028\u2029';
+      head = '';
+      start = this.pointer;
+      while (start > 0 && (_ref = this.buffer[start - 1], __indexOf.call(break_chars, _ref) < 0)) {
+        start--;
+        if (this.pointer - start > max_length / 2 - 1) {
+          head = ' ... ';
+          start += 5;
+          break;
+        }
+      }
+      tail = '';
+      end = this.pointer;
+      while (end < this.buffer.length && (_ref1 = this.buffer[end], __indexOf.call(break_chars, _ref1) < 0)) {
+        end++;
+        if (end - this.pointer > max_length / 2 - 1) {
+          tail = ' ... ';
+          end -= 5;
+          break;
+        }
+      }
+      return "" + ((new Array(indent)).join(' ')) + head + this.buffer.slice(start, end) + tail + "\n" + ((new Array(indent + this.pointer - start + head.length)).join(' ')) + "^";
+    };
+
+    Mark.prototype.toString = function() {
+      var snippet, where;
+      snippet = this.get_snippet();
+      where = "  in \"" + this.name + "\", line " + (this.line + 1) + ", column " + (this.column + 1);
+      if (snippet) {
+        return where;
+      } else {
+        return "" + where + ":\n" + snippet;
+      }
+    };
+
+    return Mark;
+
+  })();
+
+  this.YAMLError = (function(_super) {
+    __extends(YAMLError, _super);
+
+    function YAMLError() {
+      YAMLError.__super__.constructor.call(this);
+    }
+
+    return YAMLError;
+
+  })(Error);
+
+  this.MarkedYAMLError = (function(_super) {
+    __extends(MarkedYAMLError, _super);
+
+    function MarkedYAMLError(context, context_mark, message, problem_mark, note) {
+      this.context = context;
+      this.context_mark = context_mark;
+      this.message = message;
+      this.problem_mark = problem_mark;
+      this.note = note;
+      MarkedYAMLError.__super__.constructor.call(this);
+    }
+
+    MarkedYAMLError.prototype.toString = function() {
+      var lines;
+      lines = [];
+      if (this.context != null) {
+        lines.push(this.context);
+      }
+      if ((this.context_mark != null) && ((this.message == null) || (this.problem_mark == null) || this.context_mark.name !== this.problem_mark.name || this.context_mark.line !== this.problem_mark.line || this.context_mark.column !== this.problem_mark.column)) {
+        lines.push(this.context_mark.toString());
+      }
+      if (this.message != null) {
+        lines.push(this.message);
+      }
+      if (this.problem_mark != null) {
+        lines.push(this.problem_mark.toString());
+      }
+      if (this.note != null) {
+        lines.push(this.note);
+      }
+      return lines.join('\n');
+    };
+
+    return MarkedYAMLError;
+
+  })(this.YAMLError);
+
+  /*
+  The Validator throws these.
+  */
+
+
+  this.ValidationError = (function(_super) {
+    __extends(ValidationError, _super);
+
+    function ValidationError() {
+      _ref = ValidationError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return ValidationError;
+
+  })(this.MarkedYAMLError);
+
+}).call(this);
+
+},{}],2:[function(require,module,exports){
+(function() {
   var _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -185,139 +318,6 @@
     return MappingEndEvent;
 
   })(this.CollectionEndEvent);
-
-}).call(this);
-
-},{}],2:[function(require,module,exports){
-(function() {
-  var _ref,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  this.Mark = (function() {
-    function Mark(name, line, column, buffer, pointer) {
-      this.name = name;
-      this.line = line;
-      this.column = column;
-      this.buffer = buffer;
-      this.pointer = pointer;
-    }
-
-    Mark.prototype.get_snippet = function(indent, max_length) {
-      var break_chars, end, head, start, tail, _ref, _ref1;
-      if (indent == null) {
-        indent = 4;
-      }
-      if (max_length == null) {
-        max_length = 75;
-      }
-      if (this.buffer == null) {
-        return null;
-      }
-      break_chars = '\x00\r\n\x85\u2028\u2029';
-      head = '';
-      start = this.pointer;
-      while (start > 0 && (_ref = this.buffer[start - 1], __indexOf.call(break_chars, _ref) < 0)) {
-        start--;
-        if (this.pointer - start > max_length / 2 - 1) {
-          head = ' ... ';
-          start += 5;
-          break;
-        }
-      }
-      tail = '';
-      end = this.pointer;
-      while (end < this.buffer.length && (_ref1 = this.buffer[end], __indexOf.call(break_chars, _ref1) < 0)) {
-        end++;
-        if (end - this.pointer > max_length / 2 - 1) {
-          tail = ' ... ';
-          end -= 5;
-          break;
-        }
-      }
-      return "" + ((new Array(indent)).join(' ')) + head + this.buffer.slice(start, end) + tail + "\n" + ((new Array(indent + this.pointer - start + head.length)).join(' ')) + "^";
-    };
-
-    Mark.prototype.toString = function() {
-      var snippet, where;
-      snippet = this.get_snippet();
-      where = "  in \"" + this.name + "\", line " + (this.line + 1) + ", column " + (this.column + 1);
-      if (snippet) {
-        return where;
-      } else {
-        return "" + where + ":\n" + snippet;
-      }
-    };
-
-    return Mark;
-
-  })();
-
-  this.YAMLError = (function(_super) {
-    __extends(YAMLError, _super);
-
-    function YAMLError() {
-      YAMLError.__super__.constructor.call(this);
-    }
-
-    return YAMLError;
-
-  })(Error);
-
-  this.MarkedYAMLError = (function(_super) {
-    __extends(MarkedYAMLError, _super);
-
-    function MarkedYAMLError(context, context_mark, message, problem_mark, note) {
-      this.context = context;
-      this.context_mark = context_mark;
-      this.message = message;
-      this.problem_mark = problem_mark;
-      this.note = note;
-      MarkedYAMLError.__super__.constructor.call(this);
-    }
-
-    MarkedYAMLError.prototype.toString = function() {
-      var lines;
-      lines = [];
-      if (this.context != null) {
-        lines.push(this.context);
-      }
-      if ((this.context_mark != null) && ((this.message == null) || (this.problem_mark == null) || this.context_mark.name !== this.problem_mark.name || this.context_mark.line !== this.problem_mark.line || this.context_mark.column !== this.problem_mark.column)) {
-        lines.push(this.context_mark.toString());
-      }
-      if (this.message != null) {
-        lines.push(this.message);
-      }
-      if (this.problem_mark != null) {
-        lines.push(this.problem_mark.toString());
-      }
-      if (this.note != null) {
-        lines.push(this.note);
-      }
-      return lines.join('\n');
-    };
-
-    return MarkedYAMLError;
-
-  })(this.YAMLError);
-
-  /*
-  The Validator throws these.
-  */
-
-
-  this.ValidationError = (function(_super) {
-    __extends(ValidationError, _super);
-
-    function ValidationError() {
-      _ref = ValidationError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return ValidationError;
-
-  })(this.MarkedYAMLError);
 
 }).call(this);
 
@@ -3284,7 +3284,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":2,"./events":1,"./nodes":13,"./raml":11,"url":7}],14:[function(require,module,exports){
+},{"./errors":1,"./events":2,"./nodes":13,"./raml":11,"url":7}],14:[function(require,module,exports){
 require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{1:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
@@ -7784,7 +7784,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 }).call(this);
 
 })(require("__browserify_buffer").Buffer)
-},{"./errors":2,"./nodes":13,"./util":4,"__browserify_buffer":14}],16:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4,"__browserify_buffer":14}],16:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -7878,7 +7878,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":2,"./nodes":13}],17:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],17:[function(require,module,exports){
 (function() {
   var composer, construct, joiner, parser, reader, resolver, scanner, traits, types, util, validator;
 
@@ -8185,7 +8185,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":2}],20:[function(require,module,exports){
+},{"./errors":1}],20:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, events, tokens, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -8796,7 +8796,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":2,"./events":1,"./tokens":3}],18:[function(require,module,exports){
+},{"./errors":1,"./events":2,"./tokens":3}],18:[function(require,module,exports){
 (function() {
   var Mark, YAMLError, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -8900,7 +8900,87 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":2}],21:[function(require,module,exports){
+},{"./errors":1}],24:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, nodes, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  /*
+  The ResourceTypes throws these.
+  */
+
+
+  this.ResourceTypeError = (function(_super) {
+    __extends(ResourceTypeError, _super);
+
+    function ResourceTypeError() {
+      _ref = ResourceTypeError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return ResourceTypeError;
+
+  })(MarkedYAMLError);
+
+  /*
+  The ResourceTypes class deals with applying ResourceTypes to resources according to the spec
+  */
+
+
+  this.ResourceTypes = (function() {
+    function ResourceTypes() {
+      this.declaredTypes = [];
+    }
+
+    ResourceTypes.prototype.has_types = function(node) {
+      if (this.declaredTypes.length === 0 && this.has_property(node, /^resourceTypes$/i)) {
+        this.declaredTypes = this.property_value(node, /^resourceTypes$/i);
+      }
+      return this.declaredTypes.length > 0;
+    };
+
+    ResourceTypes.prototype.apply_types = function(node) {};
+
+    ResourceTypes.prototype.apply_type = function(method, typeKey) {
+      var parameters, plainParameters, temp, type,
+        _this = this;
+      type = this.get_type(this.key_or_value(typeKey));
+      parameters = this.value_or_undefined(typeKey);
+      plainParameters = {};
+      if (parameters) {
+        parameters[0][1].value.forEach(function(parameter) {
+          if (parameter[1].tag !== 'tag:yaml.org,2002:str') {
+            throw new exports.TraitError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
+          }
+          return plainParameters[parameter[0].value] = parameter[1].value;
+        });
+      }
+      temp = type.cloneForTrait();
+      this.apply_parameters(temp, plainParameters, useKey);
+      temp.combine(method[1]);
+      return method[1] = temp;
+    };
+
+    ResourceTypes.prototype.get_type = function(typeName) {
+      var type;
+      type = this.declaredTypes.filter(function(declaredType) {
+        return declaredType[0].value === typeName;
+      });
+      return type[0][1];
+    };
+
+    return ResourceTypes;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./nodes":13}],21:[function(require,module,exports){
 (function() {
   var YAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -9109,87 +9189,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":2,"./nodes":13,"./util":4}],24:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, nodes, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  /*
-  The ResourceTypes throws these.
-  */
-
-
-  this.ResourceTypeError = (function(_super) {
-    __extends(ResourceTypeError, _super);
-
-    function ResourceTypeError() {
-      _ref = ResourceTypeError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return ResourceTypeError;
-
-  })(MarkedYAMLError);
-
-  /*
-  The ResourceTypes class deals with applying ResourceTypes to resources according to the spec
-  */
-
-
-  this.ResourceTypes = (function() {
-    function ResourceTypes() {
-      this.declaredTypes = [];
-    }
-
-    ResourceTypes.prototype.has_types = function(node) {
-      if (this.declaredTypes.length === 0 && this.has_property(node, /^resourceTypes$/i)) {
-        this.declaredTypes = this.property_value(node, /^resourceTypes$/i);
-      }
-      return this.declaredTypes.length > 0;
-    };
-
-    ResourceTypes.prototype.apply_types = function(node) {};
-
-    ResourceTypes.prototype.apply_type = function(method, typeKey) {
-      var parameters, plainParameters, temp, type,
-        _this = this;
-      type = this.get_type(this.key_or_value(typeKey));
-      parameters = this.value_or_undefined(typeKey);
-      plainParameters = {};
-      if (parameters) {
-        parameters[0][1].value.forEach(function(parameter) {
-          if (parameter[1].tag !== 'tag:yaml.org,2002:str') {
-            throw new exports.TraitError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
-          }
-          return plainParameters[parameter[0].value] = parameter[1].value;
-        });
-      }
-      temp = type.cloneForTrait();
-      this.apply_parameters(temp, plainParameters, useKey);
-      temp.combine(method[1]);
-      return method[1] = temp;
-    };
-
-    ResourceTypes.prototype.get_type = function(typeName) {
-      var type;
-      type = this.declaredTypes.filter(function(declaredType) {
-        return declaredType[0].value === typeName;
-      });
-      return type[0][1];
-    };
-
-    return ResourceTypes;
-
-  })();
-
-}).call(this);
-
-},{"./errors":2,"./nodes":13}],19:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10672,7 +10672,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":2,"./tokens":3,"./util":4}],23:[function(require,module,exports){
+},{"./errors":1,"./tokens":3,"./util":4}],23:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10817,7 +10817,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":2,"./nodes":13}],8:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],8:[function(require,module,exports){
 
 /**
  * Object#toString() ref for stringify().
@@ -11378,7 +11378,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./errors":2,"./events":1,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":25}],22:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":25}],22:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, uritemplate, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11433,12 +11433,8 @@ function decode(str) {
 
 
   this.Validator = (function() {
-    var MAX_TITLE_LENGTH;
-
-    MAX_TITLE_LENGTH = 48;
-
     function Validator() {
-      this.validations = [this.has_title, this.title_is_correct_length, this.valid_base_uri, this.validate_base_uri_parameters, this.valid_root_properties, this.validate_traits, this.validate_types, this.valid_absolute_uris, this.valid_trait_consumption, this.valid_type_consumption];
+      this.validations = [this.has_title, this.valid_base_uri, this.validate_base_uri_parameters, this.valid_root_properties, this.validate_traits, this.validate_types, this.valid_absolute_uris, this.valid_trait_consumption, this.valid_type_consumption];
     }
 
     Validator.prototype.validate_document = function(node) {
@@ -11905,15 +11901,6 @@ function decode(str) {
       }
     };
 
-    Validator.prototype.title_is_correct_length = function(node) {
-      var title;
-      this.check_is_map(node);
-      title = this.get_property(node, "title");
-      if (!(title.value.length <= MAX_TITLE_LENGTH)) {
-        throw new exports.ValidationError('while validating title', null, 'too long', title.start_mark);
-      }
-    };
-
     Validator.prototype.has_version = function(node) {
       this.check_is_map(node);
       if (!this.has_property(node, /^version$/i)) {
@@ -11962,7 +11949,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":2,"./nodes":13,"uritemplate":26}],25:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"uritemplate":26}],25:[function(require,module,exports){
 (function(process,Buffer){/**
  * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
  *
@@ -16038,5 +16025,5 @@ module.exports = function(cb) {
 module.exports.ConcatStream = ConcatStream
 
 })(require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":14,"stream":32,"util":33}]},{},[10,12,15,2,1,16,17,13,20,11,18,21,24,19,3,23,4,22,6])
+},{"__browserify_buffer":14,"stream":32,"util":33}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,24,19,3,23,4,22,6])
 ;
