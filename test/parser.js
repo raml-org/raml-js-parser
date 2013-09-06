@@ -61,14 +61,14 @@ describe('Parser', function() {
 
           raml.load(definition).should.be.rejected.with(/not a scalar/).and.notify(done);
       });
-      it('should fail if title is longer than 48 chars', function(done) {
+      it('should succeed if title is longer than 48 chars', function(done) {
           var definition = [
               '---',
               'title: this is a very long title, it should fail the length validation for titles with an exception clearly marking it so',
               'baseUri: http://myapi.com'
           ].join('\n');
 
-          raml.load(definition).should.be.rejected.with(/too long/).and.notify(done);
+          raml.load(definition).should.become({title:"this is a very long title, it should fail the length validation for titles with an exception clearly marking it so", baseUri: "http://myapi.com"}).and.notify(done);
       });
       it('should allow number title', function(done) {
         var definition = [
@@ -80,11 +80,21 @@ describe('Parser', function() {
         raml.load(definition).should.become({ title: 54, baseUri: 'http://myapi.com' }).and.notify(done);
       });
       it('should fail if there is a root property with wrong name', function(done) {
+        var definition = [
+          '---',
+          'title: MyApi',
+          'version: v1',
+          'wrongPropertyName: http://myapi.com/{version}'
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/unknown property/).and.notify(done);
+    });
+    it('should not fail if there is a root property with array', function(done) {
       var definition = [
         '---',
         'title: MyApi',
         'version: v1',
-        'wrongPropertyName: http://myapi.com/{version}'
+        '[1,2]: v1'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/unknown property/).and.notify(done);

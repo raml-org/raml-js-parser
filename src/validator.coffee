@@ -21,10 +21,8 @@ class @ValidationErrors extends MarkedYAMLError
 The Validator class deals with validating a YAML file according to the spec
 ###
 class @Validator
-  MAX_TITLE_LENGTH = 48
-
   constructor: ->
-    @validations = [@has_title, @title_is_correct_length, @valid_base_uri, @validate_base_uri_parameters, @valid_root_properties, @validate_traits, @validate_types, @valid_absolute_uris, @valid_trait_consumption, @valid_type_consumption]
+    @validations = [@has_title, @valid_base_uri, @validate_base_uri_parameters, @valid_root_properties, @validate_traits, @validate_types, @valid_absolute_uris, @valid_trait_consumption, @valid_type_consumption]
 
   validate_document: (node) ->
     @validations.forEach (validation) =>
@@ -37,7 +35,8 @@ class @Validator
       try
         template = uritemplate.parse uri
       catch err
-        throw new exports.ValidationError 'while validating uri parameters', null, err.options.message, node.start_mark
+        uriProperty = @get_property node, /^uriParameters$/i
+        throw new exports.ValidationError 'while validating uri parameters', null, err.options.message, uriProperty.start_mark
       expressions = template.expressions.filter((expr) -> return expr.hasOwnProperty('templateText'))
       uriParameters = @property_value node, /^uriParameters$/i
       uriParameters.forEach (uriParameter) =>
@@ -84,7 +83,7 @@ class @Validator
     # Validate inheritance in resources
     resources.forEach (resource) =>
       if @has_property resource[1], /^type$/i
-        typeProperty = (resource[1].value.filter (childNode) -> return childNode[0].value.match(/^type$/))[0][1]
+        typeProperty = (resource[1].value.filter (childNode) -> return !(childNode[0].value is "object") and childNode[0].value.match(/^type$/))[0][1]
         typeName = typeProperty.value
         if (typeName instanceof Array)
           throw new exports.ValidationError 'while validating resource types consumption', null, 'type property must be a scalar', typeProperty.start_mark
@@ -97,7 +96,7 @@ class @Validator
       types.forEach (type_entry) =>
         type_entry.value.forEach (type) =>
           if @has_property type[1], /^type$/i
-            typeProperty = (type[1].value.filter (childNode) -> return childNode[0].value.match(/^type$/))[0][1]
+            typeProperty = (type[1].value.filter (childNode) -> return !(childNode[0].value is "object") and childNode[0].value.match(/^type$/))[0][1]
             inheritsFrom = typeProperty.value
             if (inheritsFrom instanceof Array)
               throw new exports.ValidationError 'while validating resource types consumption', null, 'type property must be a scalar', typeProperty.start_mark
@@ -116,20 +115,24 @@ class @Validator
         trait_entry.value.forEach (trait) =>
           @valid_traits_properties trait[1]
           if not (@has_property trait[1], /^name$/i)
-            throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a name property', node.start_mark
+            throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a name property', trait.start_mark
 
   valid_traits_properties: (node) ->  
     @check_is_map node
-    invalid = node.value.filter (childNode) -> 
+    invalid = node.value.filter (childNode) ->
+      if typeof childNode[0].value is "object"
+        return true
       return (
         childNode[0].value.match(/^is$/i) or
         childNode[0].value.match(/^type$/i))
     if invalid.length > 0 
-      throw new exports.ValidationError 'while validating trait properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
+      throw new exports.ValidationError 'while validating trait properties', null, 'unknown property ' + invalid[0][0].value, invalid[0][0].start_mark
 
   valid_common_parameter_properties: (node) ->
     @check_is_map node
-    invalid = node.value.filter (childNode) -> 
+    invalid = node.value.filter (childNode) ->
+      if typeof childNode[0].value is "object"
+        return true
       return not (childNode[0].value.match(/^name$/i) or
                   childNode[0].value.match(/^description$/i) or
                   childNode[0].value.match(/^type$/i) or
@@ -143,35 +146,44 @@ class @Validator
                   childNode[0].value.match(/^repeat$/i) or
                   childNode[0].value.match(/^default$/i))
     if invalid.length > 0
-      throw new exports.ValidationError 'while validating parameter properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
+      throw new exports.ValidationError 'while validating parameter properties', null, 'unknown property ' + invalid[0][0].value, invalid[0][0].start_mark
     if @has_property node, /^minLength$/i
       if isNaN(@property_value(node, /^minLength$/i))
-        throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minLength must be a number', node.start_mark
+        minLengthProperty = @get_property node, /^minLength$/i
+        throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minLength must be a number', minLengthProperty.start_mark
     if @has_property node, /^maxLength$/i
       if isNaN(@property_value(node, /^maxLength$/i))
-        throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maxLength must be a number', node.start_mark
+        maxLengthProperty = @get_property node, /^maxLength$/i
+        throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maxLength must be a number', maxLengthProperty.start_mark
     if @has_property node, /^minimum$/i
       if isNaN(@property_value(node, /^minimum$/i))
-        throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minimum must be a number', node.start_mark
+        minProperty = @get_property node, /^minimum$/i
+        throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minimum must be a number', minProperty.start_mark
     if @has_property node, /^maximum$/i
       if isNaN(@property_value(node, /^maximum$/i))
-        throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maximum must be a number', node.start_mark
+        maxProperty = @get_property node, /^maximum$/i
+        throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maximum must be a number', maxProperty.start_mark
     if @has_property node, /^type$/i
       type = @property_value node, /^type$/i
       if type != 'string' and type != 'number' and type != 'integer' and type != 'date'
-        throw new exports.ValidationError 'while validating parameter properties', null, 'type can either be: string, number, integer or date', node.start_mark
+        typeProperty = @get_property node, /^type$/i
+        throw new exports.ValidationError 'while validating parameter properties', null, 'type can either be: string, number, integer or date', typeProperty.start_mark
     if @has_property node, /^required$/i
       required = @property_value node, /^required$/i
       unless required.match(/^(true|false)$/)
-        throw new exports.ValidationError 'while validating parameter properties', null, '"' + required + '"' + 'required can be any either true or false', node.start_mark
+        requiredProperty = @get_property node, /^required$/i
+        throw new exports.ValidationError 'while validating parameter properties', null, '"' + required + '"' + 'required can be any either true or false', requiredProperty.start_mark
     if @has_property node, /^repeat$/i
       repeat = @property_value node, /^repeat$/i
       unless repeat.match(/^(true|false)$/)
-        throw new exports.ValidationError 'while validating parameter properties', null, '"' + repeat + '"' + 'repeat can be any either true or false', node.start_mark
+        repeatProperty = @get_property node, /^repeat$/i
+        throw new exports.ValidationError 'while validating parameter properties', null, '"' + repeat + '"' + 'repeat can be any either true or false', repeatProperty.start_mark
 
   valid_root_properties: (node) ->
     @check_is_map node
-    invalid = node.value.filter (childNode) -> 
+    invalid = node.value.filter (childNode) ->
+      if typeof childNode[0].value is "object"
+        return true
       return not (childNode[0].value.match(/^title$/i) or \
                   childNode[0].value.match(/^baseUri$/i) or \
                   childNode[0].value.match(/^version$/i) or \
@@ -180,8 +192,8 @@ class @Validator
                   childNode[0].value.match(/^uriParameters$/i) or
                   childNode[0].value.match(/^resourceTypes$/i) or
                   childNode[0].value.match(/^\//i))
-    if invalid.length > 0 
-      throw new exports.ValidationError 'while validating root properties', null, 'unknown property ' + invalid[0][0].value, node.start_mark
+    if invalid.length > 0
+      throw new exports.ValidationError 'while validating root properties', null, 'unknown property ' + invalid[0][0].value, invalid[0][0].start_mark
         
   child_resources: (node) ->
     return node.value.filter (childNode) -> return childNode[0].value.match(/^\//i);
@@ -193,14 +205,21 @@ class @Validator
     if node.value and typeof node.value is "object"
       return node.value.some(
         (childNode) ->
-          return childNode[0].value and childNode[0].value.match(property)
+          return childNode[0].value and typeof childNode[0].value != "object" and childNode[0].value.match(property)
       )
     return false
 
   property_value: (node, property) ->
-    filteredNodes = node.value.filter (childNode) -> return childNode[0].value.match(property)
+    filteredNodes = node.value.filter (childNode) ->
+      return typeof childNode[0].value != "object" and childNode[0].value.match(property)
+
     return filteredNodes[0][1].value;
-    
+
+  get_property: (node, property) ->
+    filteredNodes = node.value.filter (childNode) ->
+      return typeof childNode[0].value != "object" and childNode[0].value.match(property)
+    return filteredNodes[0][1];
+
   check_is_map: (node) ->
     if not node instanceof nodes.MappingNode
       throw new exports.ValidationError 'while validating node', null, 'must be a map', node.start_mark
@@ -286,9 +305,10 @@ class @Validator
     resources = @child_resources node
     resources.forEach (resource) =>
       if @has_property resource[1], /^is$/i
+        useProperty = @get_property resource[1], /^is$/i
         uses = @property_value resource[1], /^is$/i
         if not (uses instanceof Array)
-          throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', node.start_mark
+          throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', useProperty.start_mark
         uses.forEach (use) =>
           if not traits.some( (trait_entry) => trait_entry.value.some((trait) => trait[0].value == @key_or_value use))
             throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
@@ -296,9 +316,10 @@ class @Validator
       methods = @child_methods resource[1]
       methods.forEach (method) =>
         if @has_property method[1], /^is$/i
+          useProperty = @get_property method[1], /^is$/i
           uses = @property_value method[1], /^is$/i
           if not (uses instanceof Array)
-            throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', node.start_mark
+            throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', useProperty.start_mark
           uses.forEach (use) =>
             if not traits.some( (trait_entry) => trait_entry.value.some((trait) => trait[0].value == @key_or_value use))
               throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
@@ -309,15 +330,9 @@ class @Validator
     @check_is_map node
     unless @has_property node, /^title$/i
       throw new exports.ValidationError 'while validating title', null, 'missing title', node.start_mark
-    title = @property_value node, "title"
-    unless typeof title is 'string' or typeof title is 'number'
-      throw new exports.ValidationError 'while validating title', null, 'not a scalar', node.start_mark
-
-   title_is_correct_length: (node) ->
-    @check_is_map node
-    title = @property_value node, "title"
-    unless title.length <= MAX_TITLE_LENGTH
-      throw new exports.ValidationError 'while validating title', null, 'too long', node.start_mark
+    title = @get_property node, "title"
+    unless typeof title.value is 'string' or typeof title.value is 'number'
+      throw new exports.ValidationError 'while validating title', null, 'not a scalar', title.start_mark
 
   has_version: (node) ->
     @check_is_map node
@@ -326,11 +341,12 @@ class @Validator
 
   valid_base_uri: (node) ->
     if @has_property node, /^baseUri$/i
+      baeUriNode = @get_property node, /^baseUri$/i
       baseUri = @property_value node, /^baseUri$/i
       try
         template = uritemplate.parse baseUri
       catch err
-        throw new exports.ValidationError 'while validating baseUri', null, err.options.message, node.start_mark
+        throw new exports.ValidationError 'while validating baseUri', null, err.options.message, baeUriNode.start_mark
       expressions = template.expressions.filter((expr) -> return expr.hasOwnProperty('templateText'))
       for expression in expressions
         if expression.templateText == 'version' 
