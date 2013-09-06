@@ -67,10 +67,11 @@ class @Validator
       types.forEach (type_entry) =>
         unless type_entry and type_entry.value
           throw new exports.ValidationError 'while validating trait properties', null, 'invalid resourceTypes definition, it must be an array', type_entry.start_mark
+        unless type_entry.tag == "tag:yaml.org,2002:map"
+          throw new exports.ValidationError 'while validating trait properties', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
         type_entry.value.forEach (type) =>
           if not (@has_property type[1], /^name$/i)
             throw new exports.ValidationError 'while validating trait properties', null, 'every resource type must have a name property', node.start_mark
-
           resources = @child_resources type[1]
           if resources.length
             throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', node.start_mark
@@ -84,8 +85,8 @@ class @Validator
     resources.forEach (resource) =>
       if @has_property resource[1], /^type$/i
         typeProperty = (resource[1].value.filter (childNode) -> return !(childNode[0].value is "object") and childNode[0].value.match(/^type$/))[0][1]
-        typeName = typeProperty.value
-        if (typeName instanceof Array)
+        typeName = @key_or_value typeProperty
+        unless typeProperty.tag == "tag:yaml.org,2002:map" or typeProperty.tag == "tag:yaml.org,2002:str"
           throw new exports.ValidationError 'while validating resource types consumption', null, 'type property must be a scalar', typeProperty.start_mark
         if not types.some( (types_entry) => types_entry.value.some((type) => type[0].value == typeName))
           throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + typeName, typeProperty.start_mark
@@ -97,8 +98,8 @@ class @Validator
         type_entry.value.forEach (type) =>
           if @has_property type[1], /^type$/i
             typeProperty = (type[1].value.filter (childNode) -> return !(childNode[0].value is "object") and childNode[0].value.match(/^type$/))[0][1]
-            inheritsFrom = typeProperty.value
-            if (inheritsFrom instanceof Array)
+            inheritsFrom = @key_or_value typeProperty
+            unless typeProperty.tag == "tag:yaml.org,2002:map" or typeProperty.tag == "tag:yaml.org,2002:str"
               throw new exports.ValidationError 'while validating resource types consumption', null, 'type property must be a scalar', typeProperty.start_mark
             if not types.some( (types_entry) => types_entry.value.some((defined_type) => defined_type[0].value == inheritsFrom))
               throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + inheritsFrom, typeProperty.start_mark
@@ -119,6 +120,8 @@ class @Validator
 
   valid_traits_properties: (node) ->  
     @check_is_map node
+    if !node.value
+      return
     invalid = node.value.filter (childNode) ->
       if typeof childNode[0].value is "object"
         return true

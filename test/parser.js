@@ -13,6 +13,41 @@ if (typeof window === 'undefined') {
 }
 
 describe('Parser', function() {
+  describe('Reported Bugs', function () {
+    it('it should not fail to parse an empty trait', function(done) {
+      var definition = [
+        'title: MyApi',
+        'traits:',
+        '  - pepe:',
+        '    name: Pepe'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/every trait must have a name property/).and.notify(done);
+    });
+    it('it should not fail to parse an empty trait list', function(done) {
+      var definition = [
+        '%RAML 0.2',
+        '---',
+        'title: Test',
+        'baseUri: http://www.api.com/{version}/{company}',
+        'version: v1.1',
+        'traits:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/invalid traits definition, it must be an array/).and.notify(done);
+    });
+    it('it should fail to parse a RAML header ', function(done) {
+      var noop = function () {};
+      var definition = [
+        '%RAML 0.2'
+      ].join('\n');
+
+      raml.load(definition).then(noop, function (error) {
+        setTimeout(function () {
+          error.context.should.match(/expected '<document start>', but found <stream end>/);
+          done();
+        }, 0);
+      });
+    });
+  });
   describe('Basic Information', function() {
     it('should fail unsupported yaml version', function(done) {
       var definition = [
@@ -2925,26 +2960,6 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/type property must be a scalar/).and.notify(done);
     });
-    it('should fail if type is a mapping', function(done) {
-      var definition = [
-        '%YAML 1.2',
-        '%TAG ! tag:raml.org,0.1:',
-        '---',
-        'title: Test',
-        'resourceTypes:',
-        '  - collection:',
-        '      name: Collection',
-        '      description: This resourceType should be used for any collection of items',
-        '      summary: The collection of <<resourcePathName>>',
-        '      get:',
-        '        summary: Get all <<resourcePathName>>, optionally filtered',
-        '      post:',
-        '        summary: Create a new <<resourcePathName | !singularize>>',
-        '/:',
-        '  type: { foo }'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/type property must be a scalar/).and.notify(done);
-    });
     it('should fail if resource is of a missing type', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -2964,6 +2979,61 @@ describe('Parser', function() {
         '  type: foo'
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/there is no type named foo/).and.notify(done);
+    });
+    it('should fail if resource type is missing name', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'resourceTypes:',
+        '  - collection:',
+        '      description: This resourceType should be used for any collection of items',
+        '      summary: The collection of <<resourcePathName>>',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/every resource type must have a name property/).and.notify(done);
+    });
+    it('should fail if resource type is null', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'resourceTypes:',
+        '  - collection: null',
+        '  -',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/every resource type must have a name property/).and.notify(done);
+    });
+    it('should fail if resource type is null', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'resourceTypes:',
+        '  -',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/invalid resourceTypes definition, it must be an array/).and.notify(done);
+    });
+    it('should fail if resource type is not mapping', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'resourceTypes:',
+        '  - string',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/invalid resourceType definition, it must be a mapping/).and.notify(done);
     });
     it('should fail if resource type declares a sub resource', function(done) {
       var definition = [
@@ -2998,6 +3068,285 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/there is no type named missing/).and.notify(done);
     });
+    it('should apply a resource type', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'resourceTypes:',
+        '  - collection:',
+        '      name: Collection',
+        '      description: This resourceType should be used for any collection of items',
+        '      post:',
+        '       foo:',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+
+      var expected = {
+        title: "Test",
+        resourceTypes: [
+          {
+            collection:
+            {
+              name: "Collection",
+              description: "This resourceType should be used for any collection of items",
+              post:
+              {
+                foo: null
+              }
+            }
+          }
+        ],
+        resources: [
+          {
+            type: "collection",
+            relativeUri: "/",
+            methods: [
+              {
+                method: "post",
+                foo: null
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should apply last resource type declared if names collide', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'resourceTypes:',
+        '  - collection:',
+        '      name: Collection',
+        '      description: This resourceType should be used for any collection of items',
+        '      post:',
+        '       foo:',
+        '  - collection:',
+        '      name: Collection2',
+        '      description: This resourceType should be used for any collection of items2',
+        '      post:',
+        '       foo: 2',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+
+      var expected = {
+        title: "Test",
+        resourceTypes: [
+          {
+            collection:
+            {
+              name: "Collection",
+              description: "This resourceType should be used for any collection of items",
+              post:
+              {
+                foo: null
+              }
+            }
+          },
+          {
+            collection:
+            {
+              name: "Collection2",
+              description: "This resourceType should be used for any collection of items2",
+              post:
+              {
+                foo: 2
+              }
+            }
+          }
+        ],
+        resources: [
+          {
+            type: "collection",
+            relativeUri: "/",
+            methods: [
+              {
+                method: "post",
+                foo: 2
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should apply a resource type if type key is mapping', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'resourceTypes:',
+        '  - collection:',
+        '      name: Collection',
+        '      description: This resourceType should be used for any collection of items',
+        '      post:',
+        '       foo:',
+        '/:',
+        '  type: { collection }'
+      ].join('\n');
+
+      var expected = {
+        title: "Test",
+        resourceTypes: [
+          {
+            collection:
+            {
+              name: "Collection",
+              description: "This resourceType should be used for any collection of items",
+              post:
+              {
+                foo: null
+              }
+            }
+          }
+        ],
+        resources: [
+          {
+            type: {
+              collection: null
+            },
+            relativeUri: "/",
+            methods: [
+              {
+                method: "post",
+                foo: null
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should apply a resource type if type key is mapping and type name is mapping', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'resourceTypes:',
+        '  - collection:',
+        '      name: Collection',
+        '      description: This resourceType should be used for any collection of items',
+        '      post:',
+        '       foo:',
+        '/:',
+        '  type: { collection: { foo: bar } }'
+      ].join('\n');
+
+      var expected = {
+        title: "Test",
+        resourceTypes: [
+          {
+            collection:
+            {
+              name: "Collection",
+              description: "This resourceType should be used for any collection of items",
+              post:
+              {
+                foo: null
+              }
+            }
+          }
+        ],
+        resources: [
+          {
+            type: {
+              collection: {
+                foo: "bar"
+              }
+            },
+            relativeUri: "/",
+            methods: [
+              {
+                method: "post",
+                foo: null
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should apply a resource type to a type', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'resourceTypes:',
+        '  - foo:',
+        '      type: bar',
+        '      name: Collection post',
+        '      description: This resourceType should be used for any collection of items post',
+        '      post:',
+        '       foo:',
+        '  - bar:',
+        '      name: Collection get',
+        '      description: This resourceType should be used for any collection of items get',
+        '      get:',
+        '       bar:',
+        '/:',
+        '  type: post'
+      ].join('\n');
+
+      var expected = {
+        title: "Test",
+        resourceTypes: [
+          {
+            post:
+            {
+              type: "get",
+              name: "Collection post",
+              description: "This resourceType should be used for any collection of items post",
+              post:
+              {
+                foo: null
+              }
+            }
+          },
+          {
+            post:
+            {
+              name: "Collection get",
+              description: "This resourceType should be used for any collection of items get",
+              get:
+              {
+                bar: null
+              }
+            }
+          }
+        ],
+        resources: [
+          {
+            type: "post",
+            relativeUri: "/",
+            methods: [
+              {
+                foo: null,
+                method: "post"
+              },
+              {
+                bar: null,
+                method: "get"
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
   });
   describe('Error reporting', function () {
     it('should report correct line/column for invalid trait error', function(done) {
@@ -3026,7 +3375,6 @@ describe('Parser', function() {
           done();
         }, 0);
       });
-      //raml.load(definition).should.be.rejected.with(/there is no trait named throttled/).and.notify(done);
     });
   });
 });
