@@ -13,14 +13,29 @@ class @ResourceTypes
   constructor: ->
     @declaredTypes = {}
 
-  has_types: (node) =>
-    if Object.keys(@declaredTypes).length == 0 and @has_property node, /^resourceTypes$/i
+  # Loading is extra careful because it is done before validation (so it can be used for validation)
+  load_types: (node) =>
+    if @has_property node, /^resourceTypes$/i
       allTypes = @property_value node, /^resourceTypes$/i
       if allTypes and typeof allTypes is "object"
         allTypes.forEach (type_item) =>
-          type_item.value.forEach (type) =>
-            @declaredTypes[type[0].value] = type
+          if type_item and typeof type_item is "object" and typeof type_item.value is "object"
+            type_item.value.forEach (type) =>
+              @declaredTypes[type[0].value] = type
+
+  has_types: (node) =>
+    if Object.keys(@declaredTypes).length == 0 and @has_property node, /^resourceTypes$/i
+      load_types node
     return Object.keys(@declaredTypes).length > 0
+
+  get_type: (typeName) =>
+    return @declaredTypes[typeName]
+
+  get_parent_type_name: (typeName) ->
+    type = (@get_type typeName)[1]
+    if type and @has_property type, /^type$/i
+      return @property_value type, /^type$/i
+    return null
 
   apply_types: (node) =>
     @check_is_map node
@@ -32,60 +47,56 @@ class @ResourceTypes
           @apply_type resource, type
         resource[1].remove_question_mark_properties()
 
-  get_type: (typeName) =>
-    return @declaredTypes[typeName]
-
   apply_type: (resource, typeKey) =>
-    type = @get_type @key_or_value typeKey
-    tempType = (@resolve_inheritance_chain type[1], typeKey).cloneForTrait()
+    tempType = @resolve_inheritance_chain typeKey
     tempType.combine resource[1]
     resource[1] = tempType
 
-  get_parent_type_name: (type) ->
-    if @has_property type, /^type$/i
-      return @property_value type, /^type$/i
-    return null
+  # calculates and resolve the inheritance chain from a starting type to the root_parent, applies parameters and traits
+  # in all steps in the middle
+  resolve_inheritance_chain: (typeKey) ->
+    typeName = @key_or_value typeKey
+    compiledTypes = {}
+    compiledTypes[ typeName ] = @apply_parameters_to_type typeName, typeKey
+    typesToApply = [ typeName ]
+    child_type = typeName
+    parentTypeName = null
 
-  resolve_inheritance_chain: (type, typeKey) ->
-    inheritanceMap = {}
-    inheritanceMap[@key_or_value typeKey] = true
+    # Unwind the inheritance chain and check for circular references, while resolving final type shape
+    while parentTypeName = @get_parent_type_name child_type
+      if parentTypeName of compiledTypes
+        throw new exports.ResourceTypeError 'while aplying resourceTypes', null, 'circular reference detected: ' + parentTypeName + "->" + typesToApply , child_type.start_mark
 
-    typesToApply = [ {type: @key_or_value typeKey, typeKey: typeKey} ]
-    child_type = type
-    parentType = null
+      # apply parameters
+      child_type_key = @get_property @get_type(child_type)[1], /^type$/i
+      parentTypeMapping = @apply_parameters_to_type parentTypeName, child_type_key
+      compiledTypes[parentTypeName] = parentTypeMapping
 
-    # Unwind the inheritance chain and check for circular references
-    while parentType = @get_parent_type_name child_type
-      if inheritanceMap[parentType]
-        throw new exports.ResourceTypeError 'while aplying resourceTypes', null, 'circular reference detected: ' + parentType + "->" + typesToApply , child_type.start_mark
+      # apply headers
+      @apply_traits_to_resource parentTypeMapping
 
-      parameters = @get_parameters_from_type_key @get_property child_type, /^type$/i
-      @apply_parameters parentType, parameters, baseTypeKey
-
-      inheritanceMap[parentType] = true
-      typesToApply.push  { type: parentType, typeKey: @get_property child_type, /^type$/i }
-      child_type = @get_type parentType
+      typesToApply.push parentTypeName
+      child_type = parentTypeName
 
     root_type = typesToApply.pop()
-    baseType = @get_type root_type.type
-    baseTypeKey = root_type.typeKey
-
-    if baseTypeKey
-      parameters = @get_parameters_from_type_key baseTypeKey
-      @apply_parameters baseType, parameters, baseTypeKey
-
+    baseType = compiledTypes[root_type]
+    result = baseType
 
     while inherits_from = typesToApply.pop()
-      console.log "sarasa"
+      baseType = compiledTypes[inherits_from]
+      baseType.combine result
+      result = baseType
 
+    return result
+
+  apply_parameters_to_type: (typeName, typeKey) =>
+    type = (@get_type typeName)[1].cloneForTrait()
+    parameters = @get_parameters_from_type_key typeKey
+    @apply_parameters type, parameters, typeKey
     return type
 
-  get_parameters_from_type_key: (typeKey) ->
-    parameters = @value_or_undefined typeKey
-    result = {}
-    if parameters
-      parameters[0][1].value.forEach (parameter) ->
-        unless parameter[1].tag == 'tag:yaml.org,2002:str'
-          throw new exports.ResourceTypeError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
-        result[parameter[0].value] = parameter[1].value
-    return result
+
+
+
+
+

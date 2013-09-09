@@ -42,12 +42,12 @@ class @Composer
 
     if validate or apply
       @load_traits document
+      @load_types document
 
     if validate
       @validate_document document
       
     if apply
-      # Load traits so that they are available
       @apply_types document
       @apply_traits document
       

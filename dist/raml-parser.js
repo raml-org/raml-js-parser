@@ -3153,6 +3153,7 @@ window.RAML.Parser = require('../lib/raml')
       this.get_event();
       if (validate || apply) {
         this.load_traits(document);
+        this.load_types(document);
       }
       if (validate) {
         this.validate_document(document);
@@ -9147,27 +9148,50 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
   this.ResourceTypes = (function() {
     function ResourceTypes() {
+      this.apply_parameters_to_type = __bind(this.apply_parameters_to_type, this);
       this.apply_type = __bind(this.apply_type, this);
-      this.get_type = __bind(this.get_type, this);
       this.apply_types = __bind(this.apply_types, this);
+      this.get_type = __bind(this.get_type, this);
       this.has_types = __bind(this.has_types, this);
+      this.load_types = __bind(this.load_types, this);
       this.declaredTypes = {};
     }
 
-    ResourceTypes.prototype.has_types = function(node) {
+    ResourceTypes.prototype.load_types = function(node) {
       var allTypes,
         _this = this;
-      if (Object.keys(this.declaredTypes).length === 0 && this.has_property(node, /^resourceTypes$/i)) {
+      if (this.has_property(node, /^resourceTypes$/i)) {
         allTypes = this.property_value(node, /^resourceTypes$/i);
         if (allTypes && typeof allTypes === "object") {
-          allTypes.forEach(function(type_item) {
-            return type_item.value.forEach(function(type) {
-              return _this.declaredTypes[type[0].value] = type;
-            });
+          return allTypes.forEach(function(type_item) {
+            if (type_item && typeof type_item === "object" && typeof type_item.value === "object") {
+              return type_item.value.forEach(function(type) {
+                return _this.declaredTypes[type[0].value] = type;
+              });
+            }
           });
         }
       }
+    };
+
+    ResourceTypes.prototype.has_types = function(node) {
+      if (Object.keys(this.declaredTypes).length === 0 && this.has_property(node, /^resourceTypes$/i)) {
+        load_types(node);
+      }
       return Object.keys(this.declaredTypes).length > 0;
+    };
+
+    ResourceTypes.prototype.get_type = function(typeName) {
+      return this.declaredTypes[typeName];
+    };
+
+    ResourceTypes.prototype.get_parent_type_name = function(typeName) {
+      var type;
+      type = (this.get_type(typeName))[1];
+      if (type && this.has_property(type, /^type$/i)) {
+        return this.property_value(type, /^type$/i);
+      }
+      return null;
     };
 
     ResourceTypes.prototype.apply_types = function(node) {
@@ -9187,77 +9211,49 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       }
     };
 
-    ResourceTypes.prototype.get_type = function(typeName) {
-      return this.declaredTypes[typeName];
-    };
-
     ResourceTypes.prototype.apply_type = function(resource, typeKey) {
-      var tempType, type;
-      type = this.get_type(this.key_or_value(typeKey));
-      tempType = (this.resolve_inheritance_chain(type[1], typeKey)).cloneForTrait();
+      var tempType;
+      tempType = this.resolve_inheritance_chain(typeKey);
       tempType.combine(resource[1]);
       return resource[1] = tempType;
     };
 
-    ResourceTypes.prototype.get_parent_type_name = function(type) {
-      if (this.has_property(type, /^type$/i)) {
-        return this.property_value(type, /^type$/i);
-      }
-      return null;
-    };
-
-    ResourceTypes.prototype.resolve_inheritance_chain = function(type, typeKey) {
-      var baseType, baseTypeKey, child_type, inheritanceMap, inherits_from, parameters, parentType, root_type, typesToApply;
-      inheritanceMap = {};
-      inheritanceMap[this.key_or_value(typeKey)] = true;
-      typesToApply = [
-        {
-          type: this.key_or_value(typeKey, {
-            typeKey: typeKey
-          })
+    ResourceTypes.prototype.resolve_inheritance_chain = function(typeKey) {
+      var baseType, child_type, child_type_key, compiledTypes, inherits_from, parentTypeMapping, parentTypeName, result, root_type, typeName, typesToApply;
+      typeName = this.key_or_value(typeKey);
+      compiledTypes = {};
+      compiledTypes[typeName] = this.apply_parameters_to_type(typeName, typeKey);
+      typesToApply = [typeName];
+      child_type = typeName;
+      parentTypeName = null;
+      while (parentTypeName = this.get_parent_type_name(child_type)) {
+        if (parentTypeName in compiledTypes) {
+          throw new exports.ResourceTypeError('while aplying resourceTypes', null, 'circular reference detected: ' + parentTypeName + "->" + typesToApply, child_type.start_mark);
         }
-      ];
-      child_type = type;
-      parentType = null;
-      while (parentType = this.get_parent_type_name(child_type)) {
-        if (inheritanceMap[parentType]) {
-          throw new exports.ResourceTypeError('while aplying resourceTypes', null, 'circular reference detected: ' + parentType + "->" + typesToApply, child_type.start_mark);
-        }
-        parameters = this.get_parameters_from_type_key(this.get_property(child_type, /^type$/i));
-        this.apply_parameters(parentType, parameters, baseTypeKey);
-        inheritanceMap[parentType] = true;
-        typesToApply.push({
-          type: parentType,
-          typeKey: this.get_property(child_type, /^type$/i)
-        });
-        child_type = this.get_type(parentType);
+        child_type_key = this.get_property(this.get_type(child_type)[1], /^type$/i);
+        parentTypeMapping = this.apply_parameters_to_type(parentTypeName, child_type_key);
+        compiledTypes[parentTypeName] = parentTypeMapping;
+        this.apply_traits_to_resource(parentTypeMapping);
+        typesToApply.push(parentTypeName);
+        child_type = parentTypeName;
       }
       root_type = typesToApply.pop();
-      baseType = this.get_type(root_type.type);
-      baseTypeKey = root_type.typeKey;
-      if (baseTypeKey) {
-        parameters = this.get_parameters_from_type_key(baseTypeKey);
-        this.apply_parameters(baseType, parameters, baseTypeKey);
-      }
+      baseType = compiledTypes[root_type];
+      result = baseType;
       while (inherits_from = typesToApply.pop()) {
-        console.log("sarasa");
-      }
-      return type;
-    };
-
-    ResourceTypes.prototype.get_parameters_from_type_key = function(typeKey) {
-      var parameters, result;
-      parameters = this.value_or_undefined(typeKey);
-      result = {};
-      if (parameters) {
-        parameters[0][1].value.forEach(function(parameter) {
-          if (parameter[1].tag !== 'tag:yaml.org,2002:str') {
-            throw new exports.ResourceTypeError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
-          }
-          return result[parameter[0].value] = parameter[1].value;
-        });
+        baseType = compiledTypes[inherits_from];
+        baseType.combine(result);
+        result = baseType;
       }
       return result;
+    };
+
+    ResourceTypes.prototype.apply_parameters_to_type = function(typeName, typeKey) {
+      var parameters, type;
+      type = (this.get_type(typeName))[1].cloneForTrait();
+      parameters = this.get_parameters_from_type_key(typeKey);
+      this.apply_parameters(type, parameters, typeKey);
+      return type;
     };
 
     return ResourceTypes;
@@ -10753,8 +10749,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   MarkedYAMLError = require('./errors').MarkedYAMLError;
 
@@ -10784,7 +10779,6 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
   this.Traits = (function() {
     function Traits() {
-      this.get_type = __bind(this.get_type, this);
       this.declaredTraits = {};
     }
 
@@ -10812,8 +10806,11 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       return Object.keys(this.declaredTraits).length > 0;
     };
 
-    Traits.prototype.get_type = function(traitName) {
-      return this.declaredTraits[traitName];
+    Traits.prototype.get_trait = function(traitName) {
+      if (traitName in this.declaredTraits) {
+        return this.declaredTraits[traitName][1];
+      }
+      return null;
     };
 
     Traits.prototype.apply_traits = function(node) {
@@ -10823,33 +10820,51 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       if (this.has_traits(node)) {
         resources = this.child_resources(node);
         return resources.forEach(function(resource) {
-          var methods, uses;
-          methods = _this.child_methods(resource[1]);
-          if (_this.has_property(resource[1], /^is$/i)) {
-            uses = _this.property_value(resource[1], /^is$/i);
-            uses.forEach(function(use) {
-              return methods.forEach(function(method) {
-                return _this.apply_trait(method, use);
-              });
-            });
-          }
-          methods.forEach(function(method) {
-            if (_this.has_property(method[1], /^is$/i)) {
-              uses = _this.property_value(method[1], /^is$/i);
-              return uses.forEach(function(use) {
-                return _this.apply_trait(method, use);
-              });
-            }
-          });
-          resource[1].remove_question_mark_properties();
-          return _this.apply_traits(resource[1]);
+          return _this.apply_traits_to_resource(resource[1]);
         });
       }
+    };
+
+    Traits.prototype.apply_traits_to_resource = function(resource) {
+      var methods, uses,
+        _this = this;
+      methods = this.child_methods(resource);
+      if (this.has_property(resource, /^is$/i)) {
+        uses = this.property_value(resource, /^is$/i);
+        uses.forEach(function(use) {
+          return methods.forEach(function(method) {
+            return _this.apply_trait(method, use);
+          });
+        });
+      }
+      methods.forEach(function(method) {
+        if (_this.has_property(method[1], /^is$/i)) {
+          uses = _this.property_value(method[1], /^is$/i);
+          return uses.forEach(function(use) {
+            return _this.apply_trait(method, use);
+          });
+        }
+      });
+      resource.remove_question_mark_properties();
+      return this.apply_traits(resource);
+    };
+
+    Traits.prototype.apply_trait = function(method, useKey) {
+      var plainParameters, temp, trait;
+      trait = this.get_trait(this.key_or_value(useKey));
+      plainParameters = this.get_parameters_from_type_key(useKey);
+      temp = trait.cloneForTrait();
+      this.apply_parameters(temp, plainParameters, useKey);
+      temp.combine(method[1]);
+      return method[1] = temp;
     };
 
     Traits.prototype.apply_parameters = function(resource, parameters, useKey) {
       var parameterUse,
         _this = this;
+      if (!resource) {
+        return;
+      }
       if (resource.tag === 'tag:yaml.org,2002:str') {
         parameterUse = [];
         if (parameterUse = resource.value.match(/<<([^>]+)>>/g)) {
@@ -10875,31 +10890,19 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       }
     };
 
-    Traits.prototype.apply_trait = function(method, useKey) {
-      var parameters, plainParameters, temp, trait,
-        _this = this;
-      trait = this.get_trait(this.key_or_value(useKey));
-      parameters = this.value_or_undefined(useKey);
-      plainParameters = {};
-      if (parameters) {
+    Traits.prototype.get_parameters_from_type_key = function(typeKey) {
+      var parameters, result;
+      parameters = this.value_or_undefined(typeKey);
+      result = {};
+      if (parameters && parameters[0] && parameters[0][1] && parameters[0][1].value) {
         parameters[0][1].value.forEach(function(parameter) {
           if (parameter[1].tag !== 'tag:yaml.org,2002:str') {
-            throw new exports.TraitError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
+            throw new exports.ResourceTypeError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
           }
-          return plainParameters[parameter[0].value] = parameter[1].value;
+          return result[parameter[0].value] = parameter[1].value;
         });
       }
-      temp = trait.cloneForTrait();
-      this.apply_parameters(temp, plainParameters, useKey);
-      temp.combine(method[1]);
-      return method[1] = temp;
-    };
-
-    Traits.prototype.get_trait = function(traitName) {
-      if (traitName in this.declaredTraits) {
-        return this.declaredTraits[traitName][1];
-      }
-      return null;
+      return result;
     };
 
     return Traits;

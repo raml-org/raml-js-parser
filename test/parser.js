@@ -3362,7 +3362,7 @@ describe('Parser', function() {
             }
           },
           {
-            post:
+            get:
             {
               displayName: "Collection get",
               description: "This resourceType should be used for any collection of items get",
@@ -3393,6 +3393,173 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+    it('should resolve a 3 level deep inheritance chain', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'resourceTypes:',
+        '  - post:',
+        '      type: get',
+        '      displayName: Collection post',
+        '      description: This resourceType should be used for any collection of items post',
+        '      post:',
+        '       foo:',
+        '  - get:',
+        '      type: delete',
+        '      displayName: Collection get',
+        '      description: This resourceType should be used for any collection of items get',
+        '      get:',
+        '       bar:',
+        '  - delete:',
+        '      displayName: Collection delete',
+        '      description: This resourceType should be used for any collection of items delete',
+        '      delete:',
+        '       baz:',
+        '/:',
+        '  type: post'
+      ].join('\n');
+
+      var expected = {
+        title: "Test",
+        resourceTypes: [
+          {
+            post:
+            {
+              type: "get",
+              displayName: "Collection post",
+              description: "This resourceType should be used for any collection of items post",
+              post:
+              {
+                foo: null
+              }
+            }
+          },
+          {
+            get:
+            {
+              type: "delete",
+              displayName: "Collection get",
+              description: "This resourceType should be used for any collection of items get",
+              get:
+              {
+                bar: null
+              }
+            }
+          }
+          ,
+          {
+            delete:
+            {
+              displayName: "Collection delete",
+              description: "This resourceType should be used for any collection of items delete",
+              delete:
+              {
+                baz: null
+              }
+            }
+          }
+        ],
+        resources: [
+          {
+            type: "post",
+            relativeUri: "/",
+            methods: [
+              {
+                foo: null,
+                method: "post"
+              },
+              {
+                bar: null,
+                method: "get"
+              },
+              {
+                baz: null,
+                method: "delete"
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should apply parameters to a resource type', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'resourceTypes:',
+        '  - collection:',
+        '      displayName: Collection',
+        '      description: <<foo>> resourceType should be used for any collection of items',
+        '      post:',
+        '       foo: <<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>',
+        '       <<foo>>: <<bar>>',
+        '/:',
+        '  type: { collection: { foo: bar, bar: foo} }'
+      ].join('\n');
+
+      var expected = {
+        title: "Test",
+        resourceTypes: [
+          {
+            collection:
+            {
+              displayName: "Collection",
+              description: "<<foo>> resourceType should be used for any collection of items",
+              post:
+              {
+                foo: "<<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>",
+                "<<foo>>": "<<bar>>"
+              }
+            }
+          }
+        ],
+        resources: [
+          {
+            type: {
+              collection:{
+                foo: "bar",
+                bar: "foo"
+              }
+            },
+            relativeUri: "/",
+            methods: [
+              {
+                method: "post",
+                foo: "barbarbar fixed text foofoofoo",
+                bar: "foo"
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should fail if parameters are missing', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'resourceTypes:',
+        '  - collection:',
+        '      displayName: Collection',
+        '      description: <<foo>> resourceType should be used for any collection of items',
+        '      post:',
+        '       foo: <<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>',
+        '       <<foo>>: <<bar>>',
+        '/:',
+        '  type: { collection: { foo: bar } }'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/value was not provided for parameter: bar/).and.notify(done);
+    });
+
   });
   describe('Error reporting', function () {
     it('should report correct line/column for invalid trait error', function(done) {

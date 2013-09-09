@@ -13,6 +13,7 @@ class @Traits
   constructor: ->
     @declaredTraits = {}
 
+  # Loading is extra careful because it is done before validation (so it can be used for validation)
   load_traits: (node) ->
     if @has_property node, /^traits$/i
       allTraits = @property_value node, /^traits$/i
@@ -27,32 +28,49 @@ class @Traits
       load_traits node
     return Object.keys(@declaredTraits).length > 0
 
-  get_type: (traitName) =>
-    return @declaredTraits[traitName]
+  get_trait: (traitName) ->
+    if traitName of @declaredTraits
+      return @declaredTraits[traitName][1]
+    return null
 
   apply_traits: (node) ->
     @check_is_map node
     if @has_traits node
       resources = @child_resources node
       resources.forEach (resource) =>
-        methods = @child_methods resource[1]
-        # apply traits at the resource level, which is basically the same as applying to each method in the resource
-        if @has_property resource[1], /^is$/i
-            uses = @property_value resource[1], /^is$/i
-            uses.forEach (use) =>
-              methods.forEach (method) =>
-                @apply_trait method, use
-        # iterate over all methods and apply all their traits
-        methods.forEach (method) =>
-          if @has_property method[1], /^is$/i
-            uses = @property_value method[1], /^is$/i
-            uses.forEach (use) =>
-              @apply_trait method, use
+        @apply_traits_to_resource resource[1]
 
-        resource[1].remove_question_mark_properties()
-        @apply_traits resource[1]
+  apply_traits_to_resource: (resource) ->
+    methods = @child_methods resource
+    # apply traits at the resource level, which is basically the same as applying to each method in the resource
+    if @has_property resource, /^is$/i
+        uses = @property_value resource, /^is$/i
+        uses.forEach (use) =>
+          methods.forEach (method) =>
+            @apply_trait method, use
+    # iterate over all methods and apply all their traits
+    methods.forEach (method) =>
+      if @has_property method[1], /^is$/i
+        uses = @property_value method[1], /^is$/i
+        uses.forEach (use) =>
+          @apply_trait method, use
+
+    resource.remove_question_mark_properties()
+    @apply_traits resource
+
+  apply_trait: (method, useKey) ->
+    trait = @get_trait @key_or_value useKey
+    plainParameters = @get_parameters_from_type_key useKey
+    temp = trait.cloneForTrait()
+    # by aplying the parameter mapping first, we allow users to rename things in the trait,
+    # and then merge it with the resource
+    @apply_parameters temp, plainParameters, useKey
+    temp.combine method[1]
+    method[1] = temp
 
   apply_parameters: (resource, parameters, useKey) ->
+    unless resource
+      return
     if resource.tag == 'tag:yaml.org,2002:str'
       parameterUse = []
       if parameterUse = resource.value.match(/<<([^>]+)>>/g)
@@ -69,24 +87,12 @@ class @Traits
         @apply_parameters res[0], parameters, useKey
         @apply_parameters res[1], parameters, useKey
 
-  apply_trait: (method, useKey) ->
-    trait = @get_trait @key_or_value useKey
-    parameters = @value_or_undefined useKey
-    plainParameters = {}
-    if parameters
-      parameters[0][1].value.forEach (parameter) =>
+  get_parameters_from_type_key: (typeKey) ->
+    parameters = @value_or_undefined typeKey
+    result = {}
+    if parameters and parameters[0] and parameters[0][1] and parameters[0][1].value
+      parameters[0][1].value.forEach (parameter) ->
         unless parameter[1].tag == 'tag:yaml.org,2002:str'
-          throw new exports.TraitError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
-        plainParameters[parameter[0].value] = parameter[1].value
-    temp = trait.cloneForTrait()
-    # by aplying the parameter mapping first, we allow users to rename things in the trait,
-    # and then merge it with the resource
-    @apply_parameters temp, plainParameters, useKey
-    temp.combine method[1]
-    method[1] = temp
-
-  get_trait: (traitName) ->
-    if traitName of @declaredTraits
-      return @declaredTraits[traitName][1]
-    return null
-    
+          throw new exports.ResourceTypeError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
+        result[parameter[0].value] = parameter[1].value
+    return result
