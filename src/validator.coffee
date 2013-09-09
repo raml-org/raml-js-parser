@@ -225,10 +225,12 @@ class @Validator
     return node.value.filter (childNode) -> return childNode[0].value.match(/^\//i);
 
   child_methods: (node) ->
+    unless node and node.value
+      return []
     return node.value.filter (childNode) -> return childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/);
     
   has_property: (node, property) ->
-    if node.value and typeof node.value is "object"
+    if node and node.value and typeof node.value is "object"
       return node.value.some(
         (childNode) ->
           return childNode[0].value and typeof childNode[0].value != "object" and childNode[0].value.match(property)

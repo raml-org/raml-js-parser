@@ -1336,7 +1336,7 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
-    it('should succeed when applying multiple traits in a single array entr', function(done) {
+    it('should succeed when applying multiple traits in a single array entry', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -3558,6 +3558,204 @@ describe('Parser', function() {
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/value was not provided for parameter: bar/).and.notify(done);
+    });
+    it('should fail if resourceType uses a missing trait', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  - secured:',
+        '      displayName: OAuth 2.0 security',
+        '      queryParameters:',
+        '       access_token:',
+        '         description: OAuth Access token',
+        'resourceTypes:',
+        '  - collection:',
+        '      is: [ blah ]',
+        '      displayName: Collection',
+        '      description: This resourceType should be used for any collection of items',
+        '      post:',
+        '       foo:',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/there is no trait named blah/).and.notify(done);
+    });
+    it('should apply a trait to a resource type', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  - secured:',
+        '      displayName: OAuth 2.0 security',
+        '      queryParameters:',
+        '       access_token:',
+        '         description: OAuth Access token',
+        'resourceTypes:',
+        '  - collection:',
+        '      is: [ secured ]',
+        '      displayName: Collection',
+        '      description: This resourceType should be used for any collection of items',
+        '      post:',
+        '       foo:',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+
+      var expected = {
+        title: "Test",
+        traits: [
+          {
+            secured: {
+              displayName: "OAuth 2.0 security",
+              queryParameters: {
+                access_token: {
+                  description: "OAuth Access token"
+                }
+              }
+            }
+          }
+        ],
+        resourceTypes: [
+          {
+            collection:
+            {
+              is: [ "secured" ],
+              displayName: "Collection",
+              description: "This resourceType should be used for any collection of items",
+              post:
+              {
+                foo: null
+              }
+            }
+          }
+        ],
+        resources: [
+          {
+            type: "collection",
+            relativeUri: "/",
+            methods: [
+              {
+                foo: null,
+                method: "post",
+                queryParameters: {
+                  access_token: {
+                    description: "OAuth Access token"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should apply a resource type skipping missing optional parameter', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'resourceTypes:',
+        '  - collection:',
+        '      displayName: Collection',
+        '      description: This resourceType should be used for any collection of items',
+        '      post:',
+        '       foo:',
+        '      "get?":',
+        '       foo:',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+
+      var expected = {
+        title: "Test",
+        resourceTypes: [
+          {
+            collection:
+            {
+              displayName: "Collection",
+              description: "This resourceType should be used for any collection of items",
+              post:
+              {
+                foo: null
+              },
+              "get?":
+              {
+                foo: null
+              }
+            }
+          }
+        ],
+        resources: [
+          {
+            type: "collection",
+            relativeUri: "/",
+            methods: [
+              {
+                method: "post",
+                foo: null
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should apply a resource type adding optional parameter', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'resourceTypes:',
+        '  - collection:',
+        '      displayName: Collection',
+        '      description: This resourceType should be used for any collection of items',
+        '      post?:',
+        '       foo:',
+        '/:',
+        '  type: collection',
+        '  post: {}'
+      ].join('\n');
+
+      var expected = {
+        title: "Test",
+        resourceTypes: [
+          {
+            collection:
+            {
+              displayName: "Collection",
+              description: "This resourceType should be used for any collection of items",
+              "post?":
+              {
+                foo: null
+              },
+            }
+          }
+        ],
+        resources: [
+          {
+            type: "collection",
+            relativeUri: "/",
+            methods: [
+              {
+                method: "post",
+                foo: null
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
     });
 
   });

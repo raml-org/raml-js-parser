@@ -45,19 +45,22 @@ class @ResourceTypes
         if @has_property resource[1], /^type$/i
           type = @get_property resource[1], /^type$/i
           @apply_type resource, type
-        resource[1].remove_question_mark_properties()
+#        resource[1].remove_question_mark_properties()
 
   apply_type: (resource, typeKey) =>
     tempType = @resolve_inheritance_chain typeKey
     tempType.combine resource[1]
     resource[1] = tempType
+    resource[1].remove_question_mark_properties()
 
   # calculates and resolve the inheritance chain from a starting type to the root_parent, applies parameters and traits
   # in all steps in the middle
   resolve_inheritance_chain: (typeKey) ->
     typeName = @key_or_value typeKey
     compiledTypes = {}
-    compiledTypes[ typeName ] = @apply_parameters_to_type typeName, typeKey
+    type = @apply_parameters_to_type typeName, typeKey
+    @apply_traits_to_resource type, false
+    compiledTypes[ typeName ] = type
     typesToApply = [ typeName ]
     child_type = typeName
     parentTypeName = null
@@ -66,24 +69,21 @@ class @ResourceTypes
     while parentTypeName = @get_parent_type_name child_type
       if parentTypeName of compiledTypes
         throw new exports.ResourceTypeError 'while aplying resourceTypes', null, 'circular reference detected: ' + parentTypeName + "->" + typesToApply , child_type.start_mark
-
       # apply parameters
       child_type_key = @get_property @get_type(child_type)[1], /^type$/i
       parentTypeMapping = @apply_parameters_to_type parentTypeName, child_type_key
       compiledTypes[parentTypeName] = parentTypeMapping
-
-      # apply headers
-      @apply_traits_to_resource parentTypeMapping
-
+      # apply traits
+      @apply_traits_to_resource parentTypeMapping[1], false
       typesToApply.push parentTypeName
       child_type = parentTypeName
 
     root_type = typesToApply.pop()
-    baseType = compiledTypes[root_type]
+    baseType = compiledTypes[root_type].cloneRemoveIs()
     result = baseType
 
     while inherits_from = typesToApply.pop()
-      baseType = compiledTypes[inherits_from]
+      baseType = compiledTypes[inherits_from].cloneRemoveIs()
       baseType.combine result
       result = baseType
 

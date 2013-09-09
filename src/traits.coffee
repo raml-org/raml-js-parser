@@ -33,20 +33,21 @@ class @Traits
       return @declaredTraits[traitName][1]
     return null
 
-  apply_traits: (node) ->
+  apply_traits: (node, removeQs = true) ->
     @check_is_map node
     if @has_traits node
       resources = @child_resources node
       resources.forEach (resource) =>
-        @apply_traits_to_resource resource[1]
+        @apply_traits_to_resource resource[1], removeQs
 
-  apply_traits_to_resource: (resource) ->
+  apply_traits_to_resource: (resource, removeQs) ->
+    return unless resource
     methods = @child_methods resource
     # apply traits at the resource level, which is basically the same as applying to each method in the resource
     if @has_property resource, /^is$/i
-        uses = @property_value resource, /^is$/i
-        uses.forEach (use) =>
-          methods.forEach (method) =>
+      uses = @property_value resource, /^is$/i
+      uses.forEach (use) =>
+        methods.forEach (method) =>
             @apply_trait method, use
     # iterate over all methods and apply all their traits
     methods.forEach (method) =>
@@ -55,8 +56,10 @@ class @Traits
         uses.forEach (use) =>
           @apply_trait method, use
 
-    resource.remove_question_mark_properties()
-    @apply_traits resource
+    if removeQs
+      resource.remove_question_mark_properties()
+
+    @apply_traits resource, removeQs
 
   apply_trait: (method, useKey) ->
     trait = @get_trait @key_or_value useKey
@@ -80,7 +83,7 @@ class @Traits
             throw new exports.TraitError 'while aplying parameters', null, 'value was not provided for parameter: ' + parameter , useKey.start_mark
           resource.value = resource.value.replace "<<" + parameter + ">>", parameters[parameter]
     if resource.tag == 'tag:yaml.org,2002:seq'
-      resource.forEach (node) =>
+      resource.value.forEach (node) =>
         @apply_parameters node, parameters, useKey
     if resource.tag == 'tag:yaml.org,2002:map'
       resource.value.forEach (res) =>

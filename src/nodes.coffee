@@ -72,11 +72,24 @@ class @MappingNode extends @CollectionNode
       name = property[0].clone()
       value = property[1].clone()
 
-      # skip 'name' and 'description' property
-      unless  /^displayName$/i.test(name.value) or /^description$/i.test(name.value)
+      # skip 'displayName' and 'description' property
+      unless name.value.match(/^(displayName|description)$/i)
         properties.push [ name, value ]
     temp = new @constructor( @tag, properties, @start_mark, @end_mark, @flow_style)
     return temp
+
+  cloneRemoveIs: ->
+    properties = []
+    @value.forEach (property) =>
+      name = property[0].clone()
+      value = property[1].clone()
+
+      # skip 'is', 'displayName' and 'description' property
+      unless name.value.match(/^(is)$/i)
+        properties.push [ name, value ]
+    temp = new @constructor( @tag, properties, @start_mark, @end_mark, @flow_style)
+    return temp
+
 
   combine: (resourceNode) ->
     if not (resourceNode instanceof MappingNode)
