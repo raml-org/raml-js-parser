@@ -73,7 +73,7 @@ class @MappingNode extends @CollectionNode
       value = property[1].clone()
 
       # skip 'name' and 'description' property
-      unless  /^name$/i.test(name.value) or /^description$/i.test(name.value)
+      unless  /^displayName$/i.test(name.value) or /^description$/i.test(name.value)
         properties.push [ name, value ]
     temp = new @constructor( @tag, properties, @start_mark, @end_mark, @flow_style)
     return temp

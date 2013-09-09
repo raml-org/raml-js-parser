@@ -14,7 +14,7 @@ A collection of multiple validation errors
 class @ValidationErrors extends MarkedYAMLError
   constructor: (validation_errors) ->
     @validation_errors = validation_errors
-    
+
   get_validation_errors: ->
     return @validation_errors
 
@@ -71,8 +71,8 @@ class @Validator
         unless type_entry.tag == "tag:yaml.org,2002:map"
           throw new exports.ValidationError 'while validating trait properties', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
         type_entry.value.forEach (type) =>
-          if not (@has_property type[1], /^name$/i)
-            throw new exports.ValidationError 'while validating trait properties', null, 'every resource type must have a name property', node.start_mark
+          if not (@has_property type[1], /^displayName$/i)
+            throw new exports.ValidationError 'while validating trait properties', null, 'every resource type must have a displayName property', node.start_mark
           resources = @child_resources type[1]
           if resources.length
             throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', node.start_mark
@@ -138,8 +138,8 @@ class @Validator
           throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits definition, it must be an array', trait_entry.start_mark
         trait_entry.value.forEach (trait) =>
           @valid_traits_properties trait[1]
-          if not (@has_property trait[1], /^name$/i)
-            throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a name property', trait.start_mark
+          if not (@has_property trait[1], /^displayName$/i)
+            throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a displayName property', trait.start_mark
 
   valid_traits_properties: (node) ->  
     @check_is_map node
@@ -159,7 +159,7 @@ class @Validator
     invalid = node.value.filter (childNode) ->
       if typeof childNode[0].value is "object"
         return true
-      return not (childNode[0].value.match(/^name$/i) or
+      return not (childNode[0].value.match(/^displayName$/i) or
                   childNode[0].value.match(/^description$/i) or
                   childNode[0].value.match(/^type$/i) or
                   childNode[0].value.match(/^enum$/i) or
@@ -263,8 +263,8 @@ class @Validator
       else
         resourceResponse.uri = childResource[0].value
       
-      if @has_property childResource[1], /^name$/i
-        resourceResponse.name = @property_value childResource[1], /^name$/i
+      if @has_property childResource[1], /^displayName$/i
+        resourceResponse.displayName = @property_value childResource[1], /^displayName$/i
 
       if @has_property childResource[1], /^get$/i
         resourceResponse.methods.push 'get'

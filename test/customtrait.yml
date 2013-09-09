@@ -1,4 +1,4 @@
-name: Custom Trait
+displayName: Custom Trait
 description: This is a custom trait
 responses:
   429:

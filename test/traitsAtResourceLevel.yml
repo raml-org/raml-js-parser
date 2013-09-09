@@ -1,11 +1,11 @@
 %TAG ! tag:raml.org,0.1:
 ---
-name: Root
+displayName: Root
 get:
   is: [ "customTrait" ]
   description: Root resource
 /anotherResource:
-  name: Another Resource
+  displayName: Another Resource
   get:
     is: [ "customTrait" ]
     description: Another resource

@@ -19,9 +19,9 @@ describe('Parser', function() {
         'title: MyApi',
         'traits:',
         '  - pepe:',
-        '    name: Pepe'
+        '    displayName: Pepe'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/every trait must have a name property/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/every trait must have a displayName property/).and.notify(done);
     });
     it('it should not fail to parse an empty trait list', function(done) {
       var definition = [
@@ -72,10 +72,10 @@ describe('Parser', function() {
         'title: MyApi',
         'baseUri: http://myapi.com',
         '/:',
-        '  name: Root'
+        '  displayName: Root'
       ].join('\n');
 
-      raml.load(definition).should.become({ title: 'MyApi', baseUri: 'http://myapi.com', resources: [ { relativeUri: '/', name: 'Root' } ] }).and.notify(done);
+      raml.load(definition).should.become({ title: 'MyApi', baseUri: 'http://myapi.com', resources: [ { relativeUri: '/', displayName: 'Root' } ] }).and.notify(done);
     });
       it('should fail if no title', function(done) {
       var definition = [
@@ -121,7 +121,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.become({ title: 54, baseUri: 'http://myapi.com' }).and.notify(done);
       });
-      it('should fail if there is a root property with wrong name', function(done) {
+      it('should fail if there is a root property with wrong displayName', function(done) {
         var definition = [
           '---',
           'title: MyApi',
@@ -199,7 +199,7 @@ describe('Parser', function() {
             [
             {
               customTrait1: {
-                name: 'Custom Trait',
+                displayName: 'Custom Trait',
                 description: 'This is a custom trait',
                 responses: {
                   429: {
@@ -210,7 +210,7 @@ describe('Parser', function() {
             },
             {
               customTrait2: {
-                name: 'Custom Trait',
+                displayName: 'Custom Trait',
                 description: 'This is a custom trait',
                 responses: {
                   429: {
@@ -232,7 +232,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         ''
       ].join('\n');
@@ -242,7 +242,7 @@ describe('Parser', function() {
         baseUri: 'http://{a}.myapi.org',
         uriParameters: {
           'a': {
-            name: 'A',
+            displayName: 'A',
             description: 'This is A'
           }
         }
@@ -258,7 +258,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  b:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         ''
       ].join('\n');
@@ -275,12 +275,12 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '/{hello}:',
         '  uriParameters:',
         '    a:',
-        '      name: A',
+        '      displayName: A',
         '      description: This is A'
       ].join('\n');
 
@@ -296,7 +296,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    wrongPropertyName: X'
       ].join('\n');
@@ -313,7 +313,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    minLength: 123'
       ].join('\n');
@@ -330,7 +330,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    maxLength: 123'
       ].join('\n');
@@ -347,7 +347,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    minimum: 123'
       ].join('\n');
@@ -364,7 +364,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    maximum: 123'
       ].join('\n');
@@ -381,7 +381,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    minLength: X'
       ].join('\n');
@@ -398,7 +398,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    maxLength: X'
       ].join('\n');
@@ -415,7 +415,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    minimum: X'
       ].join('\n');
@@ -432,7 +432,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    maximum: X'
       ].join('\n');
@@ -449,7 +449,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: X'
       ].join('\n');
@@ -466,7 +466,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: string'
       ].join('\n');
@@ -483,7 +483,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: number'
       ].join('\n');
@@ -500,7 +500,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: integer'
       ].join('\n');
@@ -517,7 +517,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date'
       ].join('\n');
@@ -566,7 +566,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date',
         '    required: y'
@@ -584,7 +584,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date',
         '    required: yes'
@@ -602,7 +602,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date',
         '    required: YES'
@@ -620,7 +620,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date',
         '    required: t'
@@ -638,7 +638,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date',
         '    required: true'
@@ -656,7 +656,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date',
         '    required: TRUE'
@@ -674,7 +674,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date',
         '    required: n'
@@ -692,7 +692,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date',
         '    required: no'
@@ -710,7 +710,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date',
         '    required: NO'
@@ -728,7 +728,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date',
         '    required: f'
@@ -746,7 +746,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date',
         '    required: false'
@@ -764,7 +764,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date',
         '    required: FALSE'
@@ -782,7 +782,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date',
         '    repeat: false'
@@ -800,7 +800,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date',
         '    repeat: FALSE'
@@ -818,7 +818,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date',
         '    repeat: true'
@@ -836,7 +836,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'uriParameters:',
         '  a:',
-        '    name: A',
+        '    displayName: A',
         '    description: This is A',
         '    type: date',
         '    repeat: TRUE'
@@ -853,14 +853,14 @@ describe('Parser', function() {
         '---',
         'title: Test',
         '/a:',
-        '  name: A',
+        '  displayName: A',
         '  get:',
         '  /b:',
-        '    name: AB',
+        '    displayName: AB',
         '    get:',
         '    put:',
         '/a/c:',
-        '  name: AC',
+        '  displayName: AC',
         '  post:',
         ''
       ].join('\n');
@@ -871,7 +871,7 @@ describe('Parser', function() {
             "get"
           ],
           "uri": "/a",
-          "name": "A",
+          "displayName": "A",
           "line": 5,
           "column": 1
         },
@@ -881,7 +881,7 @@ describe('Parser', function() {
             "put"
           ],
           "uri": "/a/b",
-          "name": "AB",
+          "displayName": "AB",
           "line": 8,
           "column": 3
         },
@@ -890,7 +890,7 @@ describe('Parser', function() {
             "post"
           ],
           "uri": "/a/c",
-          "name": "AC",
+          "displayName": "AC",
           "line": 12,
           "column": 1
         }
@@ -903,11 +903,11 @@ describe('Parser', function() {
         '---',
         'title: Test',
         '/a:',
-        '  name: A',
+        '  displayName: A',
         '  /b:',
-        '    name: B',
+        '    displayName: B',
         '/a/b:',
-        '  name: AB'
+        '  displayName: AB'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/two resources share same URI \/a\/b/).and.notify(done);
@@ -919,11 +919,11 @@ describe('Parser', function() {
         '---',
         'title: Test',
         '/a:',
-        '  name: A',
+        '  displayName: A',
         '  /b:',
-        '    name: B',
+        '    displayName: B',
         '/a/c:',
-        '  name: AC'
+        '  displayName: AC'
       ].join('\n');
 
       raml.load(definition).should.become({
@@ -931,17 +931,17 @@ describe('Parser', function() {
         resources: [
           {
             relativeUri: '/a',
-            name: 'A',
+            displayName: 'A',
             resources: [
               {
                 relativeUri: '/b',
-                name: 'B'
+                displayName: 'B'
               }
             ]
           },
           {
             relativeUri: '/a/c',
-            name: 'AC'
+            displayName: 'AC'
           }
         ]
       }).and.notify(done);
@@ -953,7 +953,7 @@ describe('Parser', function() {
           '---',
           'title: Test',
           '/a:',
-          '  name: A',
+          '  displayName: A',
           '  get: ~'
       ].join('\n');
 
@@ -962,7 +962,7 @@ describe('Parser', function() {
           resources: [
               {
                   relativeUri: '/a',
-                  name: 'A',
+                  displayName: 'A',
                   methods: [
                       {
                           method: "get"
@@ -980,33 +980,33 @@ describe('Parser', function() {
         '---',
         'title: Test',
         '/getSomething:',
-        '  name: GetSomething',
+        '  displayName: GetSomething',
         '/postSomething:',
-        '  name: PostSomething',
+        '  displayName: PostSomething',
         '/putSomething:',
-        '  name: PutSomething',
+        '  displayName: PutSomething',
         '/deleteSomething:',
-        '  name: DeleteSomething',
+        '  displayName: DeleteSomething',
         '/headSomething:',
-        '  name: HeadSomething',
+        '  displayName: HeadSomething',
         '/patchSomething:',
-        '  name: PatchSomething',
+        '  displayName: PatchSomething',
         '/optionsSomething:',
-        '  name: OptionsSomething',
+        '  displayName: OptionsSomething',
         '/get:',
-        '  name: Get',
+        '  displayName: Get',
         '/post:',
-        '  name: Post',
+        '  displayName: Post',
         '/put:',
-        '  name: Put',
+        '  displayName: Put',
         '/delete:',
-        '  name: Delete',
+        '  displayName: Delete',
         '/head:',
-        '  name: Head',
+        '  displayName: Head',
         '/patch:',
-        '  name: Patch',
+        '  displayName: Patch',
         '/options:',
-        '  name: Options'
+        '  displayName: Options'
       ].join('\n');
 
       raml.load(definition).should.become({
@@ -1014,59 +1014,59 @@ describe('Parser', function() {
         resources: [
           {
             relativeUri: '/getSomething',
-            name: 'GetSomething'
+            displayName: 'GetSomething'
           },
           {
             relativeUri: '/postSomething',
-            name: 'PostSomething'
+            displayName: 'PostSomething'
           },
           {
             relativeUri: '/putSomething',
-            name: 'PutSomething'
+            displayName: 'PutSomething'
           },
           {
             relativeUri: '/deleteSomething',
-            name: 'DeleteSomething'
+            displayName: 'DeleteSomething'
           },
           {
             relativeUri: '/headSomething',
-            name: 'HeadSomething'
+            displayName: 'HeadSomething'
           },
           {
             relativeUri: '/patchSomething',
-            name: 'PatchSomething'
+            displayName: 'PatchSomething'
           },
           {
             relativeUri: '/optionsSomething',
-            name: 'OptionsSomething'
+            displayName: 'OptionsSomething'
           },
           {
             relativeUri: '/get',
-            name: 'Get'
+            displayName: 'Get'
           },
           {
             relativeUri: '/post',
-            name: 'Post'
+            displayName: 'Post'
           },
           {
             relativeUri: '/put',
-            name: 'Put'
+            displayName: 'Put'
           },
           {
             relativeUri: '/delete',
-            name: 'Delete'
+            displayName: 'Delete'
           },
           {
             relativeUri: '/head',
-            name: 'Head'
+            displayName: 'Head'
           },
           {
             relativeUri: '/patch',
-            name: 'Patch'
+            displayName: 'Patch'
           },
           {
             relativeUri: '/options',
-            name: 'Options'
+            displayName: 'Options'
           }
         ]
       }).and.notify(done);
@@ -1080,7 +1080,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         '/foo:',
-        '  name: A',
+        '  displayName: A',
         '  get:' ,
         '    description: Blah',
         '    responses:',
@@ -1092,7 +1092,7 @@ describe('Parser', function() {
       var expected = {
         title: 'Test',
         resources: [{
-          name: 'A',
+          displayName: 'A',
           relativeUri: '/foo',
           methods:[{
             description: 'Blah',
@@ -1115,7 +1115,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         '/foo:',
-        '  name: A',
+        '  displayName: A',
         '  get:' ,
         '    description: Blah',
         '    responses:',
@@ -1129,7 +1129,7 @@ describe('Parser', function() {
       var expected = {
         title: 'Test',
         resources: [{
-          name: 'A',
+          displayName: 'A',
           relativeUri: '/foo',
           methods:[{
             description: 'Blah',
@@ -1152,7 +1152,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         '/foo:',
-        '  name: A',
+        '  displayName: A',
         '  get:' ,
         '    description: Blah',
         '    responses:',
@@ -1166,7 +1166,7 @@ describe('Parser', function() {
       var expected = {
         title: 'Test',
         resources: [{
-          name: 'A',
+          displayName: 'A',
           relativeUri: '/foo',
           methods:[{
             description: 'Blah',
@@ -1189,7 +1189,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         '/foo:',
-        '  name: A',
+        '  displayName: A',
         '  get:' ,
         '    description: Blah',
         '    responses:',
@@ -1216,7 +1216,7 @@ describe('Parser', function() {
           title: 'Test',
           traits: [{
               customTrait: {
-                  name: 'Custom Trait',
+                  displayName: 'Custom Trait',
                   description: 'This is a custom trait',
                   responses: {
                       429: {
@@ -1228,7 +1228,7 @@ describe('Parser', function() {
           resources: [
               {
                   is: [ "customTrait" ],
-                  name: "Root",
+                  displayName: "Root",
                   relativeUri: "/",
                   methods: [
                       {
@@ -1244,7 +1244,7 @@ describe('Parser', function() {
                   resources: [
                       {
                           relativeUri: "/anotherResource",
-                          name: "Another Resource",
+                          displayName: "Another Resource",
                           is: [ "customTrait" ],
                           methods: [
                               {
@@ -1271,12 +1271,12 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      responses:',
         '        429:',
         '          description: API Limit Exceeded',
         '  - queryable:',
-        '      name: Queryable',
+        '      displayName: Queryable',
         '      queryParameters:',
         '        q:',
         '          type: string',
@@ -1292,7 +1292,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             responses: {
               '429': {
                 description: 'API Limit Exceeded'
@@ -1302,7 +1302,7 @@ describe('Parser', function() {
           },
           {
             queryable: {
-            name: 'Queryable',
+            displayName: 'Queryable',
             queryParameters: {
               q: {
                 type: 'string'
@@ -1344,12 +1344,12 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      responses:',
         '        429:',
         '          description: API Limit Exceeded',
         '    queryable:',
-        '      name: Queryable',
+        '      displayName: Queryable',
         '      queryParameters:',
         '        q:',
         '          type: string',
@@ -1365,7 +1365,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             responses: {
               '429': {
                 description: 'API Limit Exceeded'
@@ -1373,7 +1373,7 @@ describe('Parser', function() {
             }
           },
           queryable: {
-            name: 'Queryable',
+            displayName: 'Queryable',
             queryParameters: {
               q: {
                 type: 'string'
@@ -1415,7 +1415,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      headers?:',
         '        x-header-extra: API Limit Exceeded',
         '/leagues:',
@@ -1430,7 +1430,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             "headers?": {
               "x-header-extra": "API Limit Exceeded"
             }
@@ -1462,7 +1462,7 @@ describe('Parser', function() {
 //        'title: Test',
 //        'traits:',
 //        '  rateLimited:',
-//        '    name: Rate Limited',
+//        '    displayName: Rate Limited',
 //        '    responses:',
 //        '      503:',
 //        '        description: Server Unavailable. Check Your Rate Limits.',
@@ -1472,7 +1472,7 @@ describe('Parser', function() {
 //
 //      raml.load(definition).should.be.rejected.with(/unknown property what/).and.notify(done);
 //    });
-    it('should fail if trait is missing name property', function(done) {
+    it('should fail if trait is missing displayName property', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -1487,7 +1487,7 @@ describe('Parser', function() {
         '  is: [ rateLimited: { parameter: value } ]'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/every trait must have a name property/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/every trait must have a displayName property/).and.notify(done);
     });
     it('should fail if traits value is scalar', function(done) {
       var definition = [
@@ -1509,7 +1509,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  trait1:',
-        '    name: foo',
+        '    displayName: foo',
         '/:',
         '  is: [ rateLimited: { parameter: value } ]'
       ].join('\n');
@@ -1535,7 +1535,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      responses:',
         '        503:',
         '          description: Server Unavailable. Check Your Rate Limits.',
@@ -1553,13 +1553,13 @@ describe('Parser', function() {
         'baseUri: http://www.api.com/{version}/{company}',
         'version: v1.1',
         '/users:',
-        ' name: Tags',
+        ' displayName: Tags',
         ' get:',
         '  summary: Get a list of recently tagged media',
         ' post:',
         '  summary: Create a new tag',
         ' /{userid}:',
-        '  name: Search'
+        '  displayName: Search'
       ].join('\n');
 
       var expected = {
@@ -1568,7 +1568,7 @@ describe('Parser', function() {
         version: 'v1.1',
         resources: [
           {
-            name: 'Tags',
+            displayName: 'Tags',
             relativeUri: '/users',
             methods: [
               {
@@ -1583,7 +1583,7 @@ describe('Parser', function() {
               }
             ],
             resources: [{
-              name: 'Search',
+              displayName: 'Search',
               relativeUri: '/{userid}'
             }]
           }
@@ -1600,7 +1600,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      headers:',
         '        If-None-Match?:',
         '          description: |',
@@ -1625,7 +1625,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             'headers': {
               'If-None-Match?': {
                 description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
@@ -1667,7 +1667,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      get?:',
         '        headers?:',
         '          If-None-Match?:',
@@ -1693,7 +1693,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             'get?': {
               'headers?': {
                 'If-None-Match?': {
@@ -1736,7 +1736,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      get?:',
         '        headers?:',
         '          If-None-Match?:',
@@ -1762,7 +1762,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             'get?': {
               'headers?': {
                 'If-None-Match?': {
@@ -1812,7 +1812,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      get?:',
         '        headers?:',
         '          If-None-Match?:',
@@ -1844,7 +1844,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '/leagues:',
         '  is: [ rateLimited: { param1: {key: "value"}, param2: value} ]',
         '  get:',
@@ -1857,7 +1857,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited'
+            displayName: 'Rate Limited'
           }
         }],
         resources: [
@@ -1895,7 +1895,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      get:',
         '        Authorization:',
         '        description: <<lalalalala>> <<pepepepepepep>>',
@@ -1917,7 +1917,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      headers:',
         '        Authorization:',
         '          description: <<param1>> <<param2>>',
@@ -1933,7 +1933,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             'headers': {
               'Authorization': {
                 description: '<<param1>> <<param2>>'
@@ -1974,7 +1974,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      headers:',
         '        Authorization:',
         '          description: <<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>>',
@@ -1994,7 +1994,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             'headers': {
               'Authorization': {
                 description: '<<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>>'
@@ -2047,7 +2047,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      headers:',
         '        <<header>>:',
         '          description: <<param1>> <<param2>>',
@@ -2063,7 +2063,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             'headers': {
               '<<header>>': {
                 description: '<<param1>> <<param2>>'
@@ -2104,7 +2104,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      headers:',
         '        <<header>>:',
         '          description: <<param1>> <<param2>>',
@@ -2124,7 +2124,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             'headers': {
               '<<header>>': {
                 description: '<<param1>> <<param2>>'
@@ -2186,7 +2186,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           customTrait: {
-            name: 'Custom Trait',
+            displayName: 'Custom Trait',
             description: 'This is a custom trait',
             responses: {
               429: {
@@ -2197,7 +2197,7 @@ describe('Parser', function() {
         }],
         resources: [
           {
-            name: "Root",
+            displayName: "Root",
             relativeUri: "/",
             methods: [
               {
@@ -2214,7 +2214,7 @@ describe('Parser', function() {
             resources: [
               {
                 relativeUri: "/anotherResource",
-                name: "Another Resource",
+                displayName: "Another Resource",
                 methods: [
                   {
                     is: [ "customTrait" ],
@@ -2241,12 +2241,12 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      responses:',
         '        429:',
         '          description: API Limit Exceeded',
         '  - queryable:',
-        '      name: Queryable',
+        '      displayName: Queryable',
         '      queryParameters:',
         '        q:',
         '           type: string',
@@ -2262,7 +2262,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             responses: {
               '429': {
                 description: 'API Limit Exceeded'
@@ -2270,7 +2270,7 @@ describe('Parser', function() {
             }
           }},
           {queryable: {
-            name: 'Queryable',
+            displayName: 'Queryable',
             queryParameters: {
               q: {
                 type: 'string'
@@ -2312,7 +2312,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      headers?:',
         '        x-header-extra: API Limit Exceeded',
         '/leagues:',
@@ -2327,7 +2327,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             "headers?": {
               "x-header-extra": "API Limit Exceeded"
             }
@@ -2351,7 +2351,7 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
-    it('should fail if trait is missing name property', function(done) {
+    it('should fail if trait is missing displayName property', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -2364,7 +2364,7 @@ describe('Parser', function() {
         '          description: Server Unavailable. Check Your Rate Limits.'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/every trait must have a name property/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/every trait must have a displayName property/).and.notify(done);
     });
     it('should fail if use property is not an array', function(done) {
       var definition = [
@@ -2387,7 +2387,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      responses:',
         '        503:',
         '          description: Server Unavailable. Check Your Rate Limits.',
@@ -2406,7 +2406,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      headers:',
         '        If-None-Match?:',
         '          description: |',
@@ -2431,7 +2431,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             'headers': {
               'If-None-Match?': {
                 description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
@@ -2473,7 +2473,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      get?:',
         '        headers?:',
         '          If-None-Match?:',
@@ -2499,7 +2499,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             'get?': {
               'headers?': {
                 'If-None-Match?': {
@@ -2542,7 +2542,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      get?:',
         '        headers?:',
         '          If-None-Match?:',
@@ -2568,7 +2568,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             'get?': {
               'headers?': {
                 'If-None-Match?': {
@@ -2618,7 +2618,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      get?:',
         '        headers?:',
         '          If-None-Match?:',
@@ -2650,7 +2650,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '/leagues:',
         '  get:',
         '    is: [ rateLimited: { param1: {key: "value"}, param2: value} ]',
@@ -2669,7 +2669,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      get:',
         '        Authorization:',
         '          description: <<lalalalala>> <<pepepepepepep>>',
@@ -2691,7 +2691,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      headers:',
         '        Authorization:',
         '          description: <<param1>> <<param2>>',
@@ -2707,7 +2707,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             'headers': {
               'Authorization': {
                 description: '<<param1>> <<param2>>'
@@ -2748,7 +2748,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      headers:',
         '        <<header>>:',
         '          description: <<param1>> <<param2>>',
@@ -2764,7 +2764,7 @@ describe('Parser', function() {
         title: 'Test',
         traits: [{
           rateLimited: {
-            name: 'Rate Limited',
+            displayName: 'Rate Limited',
             'headers': {
               '<<header>>': {
                 description: '<<param1>> <<param2>>'
@@ -2807,7 +2807,7 @@ describe('Parser', function() {
         'title: Test',
         'resourceTypes:',
         '  - collection:',
-        '      name: Collection',
+        '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      summary: The collection of <<resourcePathName>>',
         '      get:',
@@ -2815,14 +2815,14 @@ describe('Parser', function() {
         '      post:',
         '        summary: Create a new <<resourcePathName | !singularize>>',
         '/:',
-        '  name: Root'
+        '  displayName: Root'
       ].join('\n');
 
       var expected = {
         title: 'Test',
         resourceTypes: [{
           collection: {
-            name: 'Collection',
+            displayName: 'Collection',
             description: 'This resourceType should be used for any collection of items',
             summary: 'The collection of <<resourcePathName>>',
             get: {
@@ -2835,7 +2835,7 @@ describe('Parser', function() {
         }],
         resources: [
           {
-            name: "Root",
+            displayName: "Root",
             relativeUri: "/"
 
           }
@@ -2852,7 +2852,7 @@ describe('Parser', function() {
         'title: Test',
         'resourceTypes:',
         '  - collection:',
-        '      name: Collection',
+        '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      summary: The collection of <<resourcePathName>>',
         '      get:',
@@ -2860,7 +2860,7 @@ describe('Parser', function() {
         '      post:',
         '        summary: Create a new <<resourcePathName | !singularize>>',
         '  - item:',
-        '      name: Item',
+        '      displayName: Item',
         '      description: This resourceType should be used for any individual items',
         '      summary: A single <<resourcePathName>>',
         '      get:',
@@ -2872,7 +2872,7 @@ describe('Parser', function() {
         '      delete:',
         '        summary: Update a <<resourcePathName | !singularize>>',
         '/:',
-        '  name: Root'
+        '  displayName: Root'
       ].join('\n');
 
       var expected = {
@@ -2880,7 +2880,7 @@ describe('Parser', function() {
         resourceTypes: [
           {
             collection: {
-              name: 'Collection',
+              displayName: 'Collection',
               description: 'This resourceType should be used for any collection of items',
               summary: 'The collection of <<resourcePathName>>',
               get: {
@@ -2893,7 +2893,7 @@ describe('Parser', function() {
           },
           {
             item: {
-              name: 'Item',
+              displayName: 'Item',
               description: 'This resourceType should be used for any individual items',
               summary: 'A single <<resourcePathName>>',
               get: {
@@ -2914,7 +2914,7 @@ describe('Parser', function() {
         ],
         resources: [
           {
-            name: "Root",
+            displayName: "Root",
             relativeUri: "/"
 
           }
@@ -2942,7 +2942,7 @@ describe('Parser', function() {
         'title: Test',
         'resourceTypes:',
         '  type1:',
-        '    name: foo',
+        '    displayName: foo',
         '/:'
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid resourceTypes definition, it must be an array/).and.notify(done);
@@ -2955,7 +2955,7 @@ describe('Parser', function() {
         'title: Test',
         'resourceTypes:',
         '  - collection:',
-        '      name: Collection',
+        '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      summary: The collection of <<resourcePathName>>',
         '      get:',
@@ -2975,7 +2975,7 @@ describe('Parser', function() {
         'title: Test',
         'resourceTypes:',
         '  - collection:',
-        '      name: Collection',
+        '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      summary: The collection of <<resourcePathName>>',
         '      get:',
@@ -2987,7 +2987,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/there is no type named foo/).and.notify(done);
     });
-    it('should fail if resource type is missing name', function(done) {
+    it('should fail if resource type is missing displayName', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -3000,7 +3000,7 @@ describe('Parser', function() {
         '/:',
         '  type: collection'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/every resource type must have a name property/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/every resource type must have a displayName property/).and.notify(done);
     });
     it('should fail if resource type is null', function(done) {
       var definition = [
@@ -3014,7 +3014,7 @@ describe('Parser', function() {
         '/:',
         '  type: collection'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/every resource type must have a name property/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/every resource type must have a displayName property/).and.notify(done);
     });
     it('should fail if resource type is null', function(done) {
       var definition = [
@@ -3050,7 +3050,7 @@ describe('Parser', function() {
         'title: Test',
         'resourceTypes:',
         '  - collection:',
-        '      name: Collection',
+        '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      summary: The collection of <<resourcePathName>>',
         '      /bar:',
@@ -3068,7 +3068,7 @@ describe('Parser', function() {
         'resourceTypes:',
         '  - collection:',
         '      type: missing',
-        '      name: Collection',
+        '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '/:',
         '  type: collection'
@@ -3083,11 +3083,11 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - foo:',
-        '     name: Foo',
+        '     displayName: Foo',
         'resourceTypes:',
         '  - collection:',
         '     is: [foo, bar]',
-        '     name: Collection',
+        '     displayName: Collection',
         '     description: This resourceType should be used for any collection of items',
         '/:',
         '  type: collection'
@@ -3102,10 +3102,10 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - foo:',
-        '     name: Foo',
+        '     displayName: Foo',
         'resourceTypes:',
         '  - collection:',
-        '     name: Collection',
+        '     displayName: Collection',
         '     description: This resourceType should be used for any collection of items',
         '     get:',
         '       is: [foo, bar]',
@@ -3122,7 +3122,7 @@ describe('Parser', function() {
         'title: Test',
         'resourceTypes:',
         '  - collection:',
-        '      name: Collection',
+        '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
         '       foo:',
@@ -3136,7 +3136,7 @@ describe('Parser', function() {
           {
             collection:
             {
-              name: "Collection",
+              displayName: "Collection",
               description: "This resourceType should be used for any collection of items",
               post:
               {
@@ -3169,12 +3169,12 @@ describe('Parser', function() {
         'title: Test',
         'resourceTypes:',
         '  - collection:',
-        '      name: Collection',
+        '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
         '       foo:',
         '  - collection:',
-        '      name: Collection2',
+        '      displayName: Collection2',
         '      description: This resourceType should be used for any collection of items2',
         '      post:',
         '       foo: 2',
@@ -3188,7 +3188,7 @@ describe('Parser', function() {
           {
             collection:
             {
-              name: "Collection",
+              displayName: "Collection",
               description: "This resourceType should be used for any collection of items",
               post:
               {
@@ -3199,7 +3199,7 @@ describe('Parser', function() {
           {
             collection:
             {
-              name: "Collection2",
+              displayName: "Collection2",
               description: "This resourceType should be used for any collection of items2",
               post:
               {
@@ -3232,7 +3232,7 @@ describe('Parser', function() {
         'title: Test',
         'resourceTypes:',
         '  - collection:',
-        '      name: Collection',
+        '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
         '       foo:',
@@ -3246,7 +3246,7 @@ describe('Parser', function() {
           {
             collection:
             {
-              name: "Collection",
+              displayName: "Collection",
               description: "This resourceType should be used for any collection of items",
               post:
               {
@@ -3281,7 +3281,7 @@ describe('Parser', function() {
         'title: Test',
         'resourceTypes:',
         '  - collection:',
-        '      name: Collection',
+        '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
         '       foo:',
@@ -3295,7 +3295,7 @@ describe('Parser', function() {
           {
             collection:
             {
-              name: "Collection",
+              displayName: "Collection",
               description: "This resourceType should be used for any collection of items",
               post:
               {
@@ -3333,12 +3333,12 @@ describe('Parser', function() {
         'resourceTypes:',
         '  - post:',
         '      type: get',
-        '      name: Collection post',
+        '      displayName: Collection post',
         '      description: This resourceType should be used for any collection of items post',
         '      post:',
         '       foo:',
         '  - get:',
-        '      name: Collection get',
+        '      displayName: Collection get',
         '      description: This resourceType should be used for any collection of items get',
         '      get:',
         '       bar:',
@@ -3353,7 +3353,7 @@ describe('Parser', function() {
             post:
             {
               type: "get",
-              name: "Collection post",
+              displayName: "Collection post",
               description: "This resourceType should be used for any collection of items post",
               post:
               {
@@ -3364,7 +3364,7 @@ describe('Parser', function() {
           {
             post:
             {
-              name: "Collection get",
+              displayName: "Collection get",
               description: "This resourceType should be used for any collection of items get",
               get:
               {
@@ -3404,7 +3404,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - wrongKey:',
-        '      name: Rate Limited',
+        '      displayName: Rate Limited',
         '      get?:',
         '        responses:',
         '          503:',
