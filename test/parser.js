@@ -47,6 +47,13 @@ describe('Parser', function() {
         }, 0);
       });
     });
+    it('it should not fail to parse a RAML file only with headers', function(done) {
+      var definition = [
+        '%RAML 0.2',
+        '---'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/missing title/).and.notify(done);
+    });
   });
   describe('Basic Information', function() {
     it('should fail unsupported yaml version', function(done) {
@@ -3068,6 +3075,45 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/there is no type named missing/).and.notify(done);
     });
+    it('should fail if a resource type applies a missing trait', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  - foo:',
+        '     name: Foo',
+        'resourceTypes:',
+        '  - collection:',
+        '     is: [foo, bar]',
+        '     name: Collection',
+        '     description: This resourceType should be used for any collection of items',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
+    });
+    it('should fail if a resource type\'s method applies a missing trait', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  - foo:',
+        '     name: Foo',
+        'resourceTypes:',
+        '  - collection:',
+        '     name: Collection',
+        '     description: This resourceType should be used for any collection of items',
+        '     get:',
+        '       is: [foo, bar]',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
+    });
     it('should apply a resource type', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -3285,13 +3331,13 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'resourceTypes:',
-        '  - foo:',
-        '      type: bar',
+        '  - post:',
+        '      type: get',
         '      name: Collection post',
         '      description: This resourceType should be used for any collection of items post',
         '      post:',
         '       foo:',
-        '  - bar:',
+        '  - get:',
         '      name: Collection get',
         '      description: This resourceType should be used for any collection of items get',
         '      get:',

@@ -11,13 +11,25 @@ The Traits class deals with applying traits to resources according to the spec
 ###
 class @Traits
   constructor: ->
-    @declaredTraits = []
-    
+    @declaredTraits = {}
+
+  load_traits: (node) ->
+    if @has_property node, /^traits$/i
+      allTraits = @property_value node, /^traits$/i
+      if allTraits and typeof allTraits is "object"
+        allTraits.forEach (trait_item) =>
+          if trait_item and typeof trait_item is "object" and typeof trait_item.value is "object"
+            trait_item.value.forEach (trait) =>
+               @declaredTraits[trait[0].value] = trait
+
   has_traits: (node) ->
     if @declaredTraits.length == 0 and @has_property node, /^traits$/i
-      @declaredTraits = @property_value node, /^traits$/i
-    return @declaredTraits.length > 0
-  
+      load_traits node
+    return Object.keys(@declaredTraits).length > 0
+
+  get_type: (traitName) =>
+    return @declaredTraits[traitName]
+
   apply_traits: (node) ->
     @check_is_map node
     if @has_traits node
@@ -66,9 +78,7 @@ class @Traits
         unless parameter[1].tag == 'tag:yaml.org,2002:str'
           throw new exports.TraitError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
         plainParameters[parameter[0].value] = parameter[1].value
-
     temp = trait.cloneForTrait()
-
     # by aplying the parameter mapping first, we allow users to rename things in the trait,
     # and then merge it with the resource
     @apply_parameters temp, plainParameters, useKey
@@ -76,10 +86,7 @@ class @Traits
     method[1] = temp
 
   get_trait: (traitName) ->
-    result = {}
-    @declaredTraits.forEach (trait_item) =>
-      trait = trait_item.value.filter((declaredTrait) -> return declaredTrait[0].value == traitName );
-      if trait[0]
-        result = trait[0][1];
-    return result
+    if traitName of @declaredTraits
+      return @declaredTraits[traitName][1]
+    return null
     

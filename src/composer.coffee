@@ -39,11 +39,15 @@ class @Composer
     
     # Drop the STREAM-END event.
     @get_event()
-    
+
+    if validate or apply
+      @load_traits document
+
     if validate
       @validate_document document
       
     if apply
+      # Load traits so that they are available
       @apply_types document
       @apply_traits document
       

@@ -16,9 +16,10 @@ class @ResourceTypes
   has_types: (node) =>
     if Object.keys(@declaredTypes).length == 0 and @has_property node, /^resourceTypes$/i
       allTypes = @property_value node, /^resourceTypes$/i
-      allTypes.forEach (type_item) =>
-        type_item.value.forEach (type) =>
-          @declaredTypes[type[0].value] = type
+      if allTypes and typeof allTypes is "object"
+        allTypes.forEach (type_item) =>
+          type_item.value.forEach (type) =>
+            @declaredTypes[type[0].value] = type
     return Object.keys(@declaredTypes).length > 0
 
   apply_types: (node) =>
@@ -46,40 +47,38 @@ class @ResourceTypes
     return null
 
   resolve_inheritance_chain: (type, typeKey) ->
-    console.log (type)
-    return type
-
     inheritanceMap = {}
     inheritanceMap[@key_or_value typeKey] = true
 
-    typesToApply = [{ type: @key_or_value typeKey, typeKey: typeKey }]
+    typesToApply = [ {type: @key_or_value typeKey, typeKey: typeKey} ]
     child_type = type
     parentType = null
 
-    # Unloop the inheritance chain and check for circular references
+    # Unwind the inheritance chain and check for circular references
     while parentType = @get_parent_type_name child_type
       if inheritanceMap[parentType]
         throw new exports.ResourceTypeError 'while aplying resourceTypes', null, 'circular reference detected: ' + parentType + "->" + typesToApply , child_type.start_mark
 
       parameters = @get_parameters_from_type_key @get_property child_type, /^type$/i
-      @apply_parameters tempType, parameters, baseTypeKey
-
+      @apply_parameters parentType, parameters, baseTypeKey
 
       inheritanceMap[parentType] = true
-      typesToApply.push  {
-        type: parentType,
-        typeKey: @get_property child_type, /^type$/i
-      }
+      typesToApply.push  { type: parentType, typeKey: @get_property child_type, /^type$/i }
       child_type = @get_type parentType
 
-    root_type = typesToApply.pop
+    root_type = typesToApply.pop()
     baseType = @get_type root_type.type
     baseTypeKey = root_type.typeKey
-    while inherits_from = typesToApply.pop
-      tempType = baseType.cloneForTrait()
-      if baseTypeKey
-        parameters = @get_parameters_from_type_key baseTypeKey
-        @apply_parameters tempType, parameters, baseTypeKey
+
+    if baseTypeKey
+      parameters = @get_parameters_from_type_key baseTypeKey
+      @apply_parameters baseType, parameters, baseTypeKey
+
+
+    while inherits_from = typesToApply.pop()
+      console.log "sarasa"
+
+    return type
 
   get_parameters_from_type_key: (typeKey) ->
     parameters = @value_or_undefined typeKey
