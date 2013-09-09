@@ -1,5 +1,6 @@
 {MarkedYAMLError} = require './errors'
 nodes             = require './nodes'
+traits            = require './traits'
 uritemplate       = require 'uritemplate'
 
 ###
@@ -13,7 +14,7 @@ A collection of multiple validation errors
 class @ValidationErrors extends MarkedYAMLError
   constructor: (validation_errors) ->
     @validation_errors = validation_errors
-    
+
   get_validation_errors: ->
     return @validation_errors
 
@@ -67,13 +68,36 @@ class @Validator
       types.forEach (type_entry) =>
         unless type_entry and type_entry.value
           throw new exports.ValidationError 'while validating trait properties', null, 'invalid resourceTypes definition, it must be an array', type_entry.start_mark
+        unless type_entry.tag == "tag:yaml.org,2002:map"
+          throw new exports.ValidationError 'while validating trait properties', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
         type_entry.value.forEach (type) =>
-          if not (@has_property type[1], /^name$/i)
-            throw new exports.ValidationError 'while validating trait properties', null, 'every resource type must have a name property', node.start_mark
-
+          if not (@has_property type[1], /^displayName$/i)
+            throw new exports.ValidationError 'while validating trait properties', null, 'every resource type must have a displayName property', node.start_mark
           resources = @child_resources type[1]
           if resources.length
             throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', node.start_mark
+
+          # check traits at resourceType level
+          if @has_property type[1], /^is$/i
+            useProperty = @get_property type[1], /^is$/i
+            uses = @property_value type[1], /^is$/i
+            if not (uses instanceof Array)
+              throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', useProperty.start_mark
+            uses.forEach (use) =>
+              if not @get_trait @key_or_value use
+                throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
+
+          # check traits at method level within the resourceType
+          methods = @child_methods type[1]
+          methods.forEach (method) =>
+            if @has_property method[1], /^is$/i
+              useProperty = @get_property method[1], /^is$/i
+              uses = @property_value method[1], /^is$/i
+              if not (uses instanceof Array)
+                throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', useProperty.start_mark
+              uses.forEach (use) =>
+                if not @get_trait @key_or_value use
+                  throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
 
   valid_type_consumption: (node, types = undefined, check_types = true) ->
     if not types? and @has_property node, /^resourceTypes$/i
@@ -84,8 +108,8 @@ class @Validator
     resources.forEach (resource) =>
       if @has_property resource[1], /^type$/i
         typeProperty = (resource[1].value.filter (childNode) -> return !(childNode[0].value is "object") and childNode[0].value.match(/^type$/))[0][1]
-        typeName = typeProperty.value
-        if (typeName instanceof Array)
+        typeName = @key_or_value typeProperty
+        unless typeProperty.tag == "tag:yaml.org,2002:map" or typeProperty.tag == "tag:yaml.org,2002:str"
           throw new exports.ValidationError 'while validating resource types consumption', null, 'type property must be a scalar', typeProperty.start_mark
         if not types.some( (types_entry) => types_entry.value.some((type) => type[0].value == typeName))
           throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + typeName, typeProperty.start_mark
@@ -97,8 +121,8 @@ class @Validator
         type_entry.value.forEach (type) =>
           if @has_property type[1], /^type$/i
             typeProperty = (type[1].value.filter (childNode) -> return !(childNode[0].value is "object") and childNode[0].value.match(/^type$/))[0][1]
-            inheritsFrom = typeProperty.value
-            if (inheritsFrom instanceof Array)
+            inheritsFrom = @key_or_value typeProperty
+            unless typeProperty.tag == "tag:yaml.org,2002:map" or typeProperty.tag == "tag:yaml.org,2002:str"
               throw new exports.ValidationError 'while validating resource types consumption', null, 'type property must be a scalar', typeProperty.start_mark
             if not types.some( (types_entry) => types_entry.value.some((defined_type) => defined_type[0].value == inheritsFrom))
               throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + inheritsFrom, typeProperty.start_mark
@@ -106,19 +130,21 @@ class @Validator
   validate_traits: (node) ->
     @check_is_map node
     if @has_property node, /^traits$/i
-      traits = @property_value node, /^traits$/i
-      unless typeof traits is "object"
+      traitsList = @property_value node, /^traits$/i
+      unless typeof traitsList is "object"
         throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits definition, it must be an array', traits.start_mark
-      traits.forEach (trait_entry) =>
+      traitsList.forEach (trait_entry) =>
         unless trait_entry and trait_entry.value
           throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits definition, it must be an array', trait_entry.start_mark
         trait_entry.value.forEach (trait) =>
           @valid_traits_properties trait[1]
-          if not (@has_property trait[1], /^name$/i)
-            throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a name property', trait.start_mark
+          if not (@has_property trait[1], /^displayName$/i)
+            throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a displayName property', trait.start_mark
 
   valid_traits_properties: (node) ->  
     @check_is_map node
+    if !node.value
+      return
     invalid = node.value.filter (childNode) ->
       if typeof childNode[0].value is "object"
         return true
@@ -133,7 +159,7 @@ class @Validator
     invalid = node.value.filter (childNode) ->
       if typeof childNode[0].value is "object"
         return true
-      return not (childNode[0].value.match(/^name$/i) or
+      return not (childNode[0].value.match(/^displayName$/i) or
                   childNode[0].value.match(/^description$/i) or
                   childNode[0].value.match(/^type$/i) or
                   childNode[0].value.match(/^enum$/i) or
@@ -199,10 +225,12 @@ class @Validator
     return node.value.filter (childNode) -> return childNode[0].value.match(/^\//i);
 
   child_methods: (node) ->
+    unless node and node.value
+      return []
     return node.value.filter (childNode) -> return childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/);
     
   has_property: (node, property) ->
-    if node.value and typeof node.value is "object"
+    if node and node.value and typeof node.value is "object"
       return node.value.some(
         (childNode) ->
           return childNode[0].value and typeof childNode[0].value != "object" and childNode[0].value.match(property)
@@ -237,8 +265,8 @@ class @Validator
       else
         resourceResponse.uri = childResource[0].value
       
-      if @has_property childResource[1], /^name$/i
-        resourceResponse.name = @property_value childResource[1], /^name$/i
+      if @has_property childResource[1], /^displayName$/i
+        resourceResponse.displayName = @property_value childResource[1], /^displayName$/i
 
       if @has_property childResource[1], /^get$/i
         resourceResponse.methods.push 'get'
@@ -299,8 +327,6 @@ class @Validator
 
   valid_trait_consumption: (node, traits = undefined) ->
     @check_is_map node
-    if not traits? and @has_property node, /^traits$/i
-      traits = @property_value node, /^traits$/i
 
     resources = @child_resources node
     resources.forEach (resource) =>
@@ -310,7 +336,7 @@ class @Validator
         if not (uses instanceof Array)
           throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', useProperty.start_mark
         uses.forEach (use) =>
-          if not traits.some( (trait_entry) => trait_entry.value.some((trait) => trait[0].value == @key_or_value use))
+          if not @get_trait @key_or_value use
             throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
 
       methods = @child_methods resource[1]
@@ -321,11 +347,11 @@ class @Validator
           if not (uses instanceof Array)
             throw new exports.ValidationError 'while validating trait consumption', null, 'use property must be an array', useProperty.start_mark
           uses.forEach (use) =>
-            if not traits.some( (trait_entry) => trait_entry.value.some((trait) => trait[0].value == @key_or_value use))
+            if not @get_trait @key_or_value use
               throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
 
       @valid_trait_consumption resource[1], traits
-    
+
   has_title: (node) ->
     @check_is_map node
     unless @has_property node, /^title$/i

@@ -39,7 +39,11 @@ class @Composer
     
     # Drop the STREAM-END event.
     @get_event()
-    
+
+    if validate or apply
+      @load_traits document
+      @load_types document
+
     if validate
       @validate_document document
       
