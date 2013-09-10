@@ -3759,6 +3759,63 @@ describe('Parser', function() {
     });
 
   });
+  describe('Schema support', function(){
+    it('should not fail when specifying schemas at the root level', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'schemas:',
+        '  foo: |',
+        '       Blah blah',
+        '/:'
+      ].join('\n');
+
+      var expected = {
+        title: "Test",
+        schemas: {
+          foo: "Blah blah\n"
+        },
+        resources : [
+          {
+            relativeUri: "/"
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+  });
+  describe('Schema support', function(){
+    it('should not fail when specifying schemas at the root level', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'schemas:',
+        '  foo: |',
+        '      Blah blah',
+        '/:'
+      ].join('\n');
+
+      var expected = {
+        title: "Test",
+        schemas: {
+          foo: "Blah blah\n"
+        },
+        resources : [
+          {
+            relativeUri: "/"
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+  });
+
   describe('Error reporting', function () {
     it('should report correct line/column for invalid trait error', function(done) {
       var noop = function () {};

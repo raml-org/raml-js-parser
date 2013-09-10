@@ -53,7 +53,7 @@ class @Composer
       
     if join
       @join_resources document
-    
+
     return document
   
   compose_document: ->

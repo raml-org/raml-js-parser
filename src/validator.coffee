@@ -111,7 +111,7 @@ class @Validator
         typeName = @key_or_value typeProperty
         unless typeProperty.tag == "tag:yaml.org,2002:map" or typeProperty.tag == "tag:yaml.org,2002:str"
           throw new exports.ValidationError 'while validating resource types consumption', null, 'type property must be a scalar', typeProperty.start_mark
-        if not types.some( (types_entry) => types_entry.value.some((type) => type[0].value == typeName))
+        unless @get_type typeName
           throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + typeName, typeProperty.start_mark
       @valid_type_consumption resource[1], types, false
 
@@ -124,7 +124,7 @@ class @Validator
             inheritsFrom = @key_or_value typeProperty
             unless typeProperty.tag == "tag:yaml.org,2002:map" or typeProperty.tag == "tag:yaml.org,2002:str"
               throw new exports.ValidationError 'while validating resource types consumption', null, 'type property must be a scalar', typeProperty.start_mark
-            if not types.some( (types_entry) => types_entry.value.some((defined_type) => defined_type[0].value == inheritsFrom))
+            unless @get_type inheritsFrom
               throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + inheritsFrom, typeProperty.start_mark
 
   validate_traits: (node) ->
@@ -138,7 +138,7 @@ class @Validator
           throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits definition, it must be an array', trait_entry.start_mark
         trait_entry.value.forEach (trait) =>
           @valid_traits_properties trait[1]
-          if not (@has_property trait[1], /^displayName$/i)
+          unless (@has_property trait[1], /^displayName$/i)
             throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a displayName property', trait.start_mark
 
   valid_traits_properties: (node) ->  
@@ -212,16 +212,19 @@ class @Validator
         return true
       return not (childNode[0].value.match(/^title$/i) or \
                   childNode[0].value.match(/^baseUri$/i) or \
+                  childNode[0].value.match(/^schemas$/i) or \
                   childNode[0].value.match(/^version$/i) or \
                   childNode[0].value.match(/^traits$/i) or \
                   childNode[0].value.match(/^documentation$/i) or \
-                  childNode[0].value.match(/^uriParameters$/i) or
-                  childNode[0].value.match(/^resourceTypes$/i) or
+                  childNode[0].value.match(/^uriParameters$/i) or \
+                  childNode[0].value.match(/^resourceTypes$/i) or \
                   childNode[0].value.match(/^\//i))
     if invalid.length > 0
       throw new exports.ValidationError 'while validating root properties', null, 'unknown property ' + invalid[0][0].value, invalid[0][0].start_mark
         
   child_resources: (node) ->
+    unless node and node.value
+      return []
     return node.value.filter (childNode) -> return childNode[0].value.match(/^\//i);
 
   child_methods: (node) ->

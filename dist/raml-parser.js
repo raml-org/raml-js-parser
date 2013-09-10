@@ -3078,6 +3078,10 @@ function parseHost(host) {
 // nothing to see here... no file methods for the browser
 
 },{}],10:[function(require,module,exports){
+window.RAML = {}
+
+window.RAML.Parser = require('../lib/raml')
+},{"../lib/raml":11}],12:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, events, nodes, raml, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -3284,7 +3288,7 @@ function parseHost(host) {
 
 }).call(this);
 
-},{"./errors":1,"./events":2,"./nodes":11,"./raml":12,"url":7}],13:[function(require,module,exports){
+},{"./errors":1,"./events":2,"./nodes":13,"./raml":11,"url":7}],14:[function(require,module,exports){
 require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{1:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
@@ -7149,7 +7153,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 },{}]},{},[])
 ;;module.exports=require("buffer-browserify")
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 (function(Buffer){(function() {
   var MarkedYAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -7784,11 +7788,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 }).call(this);
 
 })(require("__browserify_buffer").Buffer)
-},{"./errors":1,"./nodes":11,"./util":4,"__browserify_buffer":13}],15:[function(require,module,exports){
-window.RAML = {}
-
-window.RAML.Parser = require('../lib/raml')
-},{"../lib/raml":12}],16:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4,"__browserify_buffer":14}],16:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -7823,26 +7823,38 @@ window.RAML.Parser = require('../lib/raml')
   this.Joiner = (function() {
     function Joiner() {}
 
-    Joiner.prototype.join_resources = function(node) {
+    Joiner.prototype.join_resources = function(node, call) {
       var resources, resourcesArray, resourcesName, resourcesValue,
         _this = this;
-      resources = node.value.filter(function(childNode) {
-        return childNode[0].value.match(/^\//i);
-      });
+      if (call == null) {
+        call = 0;
+      }
+      resources = [];
+      if (node != null ? node.value : void 0) {
+        resources = node.value.filter(function(childNode) {
+          var _ref1;
+          return (_ref1 = childNode[0]) != null ? _ref1.value.match(/^\//i) : void 0;
+        });
+      }
       resourcesArray = [];
       if (resources.length > 0) {
-        node.value = node.value.filter(function(childNode) {
-          return !childNode[0].value.match(/^\//i);
-        });
+        if (node != null ? node.value : void 0) {
+          node.value = node.value.filter(function(childNode) {
+            return !childNode[0].value.match(/^\//i);
+          });
+        }
         resourcesName = new nodes.ScalarNode('tag:yaml.org,2002:str', 'resources', resources[0][0].start_mark, resources[resources.length - 1][1].end_mark);
         resources.forEach(function(resource) {
           var relativeUriName, relativeUriValue;
           relativeUriName = new nodes.ScalarNode('tag:yaml.org,2002:str', 'relativeUri', resource[0].start_mark, resource[1].end_mark);
           relativeUriValue = new nodes.ScalarNode('tag:yaml.org,2002:str', resource[0].value, resource[0].start_mark, resource[1].end_mark);
+          if (resource[1].tag === "tag:yaml.org,2002:null") {
+            resource[1] = new nodes.MappingNode('tag:yaml.org,2002:map', [], resource[0].start_mark, resource[1].end_mark);
+          }
           resource[1].value.push([relativeUriName, relativeUriValue]);
           resourcesArray.push(resource[1]);
           _this.join_methods(resource[1]);
-          return _this.join_resources(resource[1]);
+          return _this.join_resources(resource[1], ++call);
         });
         resourcesValue = new nodes.SequenceNode('tag:yaml.org,2002:seq', resourcesArray, resources[0][0].start_mark, resources[resources.length - 1][1].end_mark);
         return node.value.push([resourcesName, resourcesValue]);
@@ -7852,9 +7864,12 @@ window.RAML.Parser = require('../lib/raml')
     Joiner.prototype.join_methods = function(node) {
       var methods, methodsArray, methodsName, methodsValue,
         _this = this;
-      methods = node.value.filter(function(childNode) {
-        return childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/i);
-      });
+      methods = [];
+      if (node && node.value) {
+        methods = node.value.filter(function(childNode) {
+          return childNode[0] && childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/i);
+        });
+      }
       methodsArray = [];
       if (methods.length > 0) {
         node.value = node.value.filter(function(childNode) {
@@ -7882,7 +7897,330 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11}],17:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],17:[function(require,module,exports){
+(function() {
+  var composer, construct, joiner, parser, reader, resolver, scanner, traits, types, util, validator;
+
+  util = require('./util');
+
+  reader = require('./reader');
+
+  scanner = require('./scanner');
+
+  parser = require('./parser');
+
+  composer = require('./composer');
+
+  resolver = require('./resolver');
+
+  construct = require('./construct');
+
+  validator = require('./validator');
+
+  joiner = require('./joiner');
+
+  traits = require('./traits');
+
+  types = require('./resourceTypes');
+
+  this.make_loader = function(Reader, Scanner, Parser, Composer, Resolver, Validator, ResourceTypes, Traits, Joiner, Constructor) {
+    if (Reader == null) {
+      Reader = reader.Reader;
+    }
+    if (Scanner == null) {
+      Scanner = scanner.Scanner;
+    }
+    if (Parser == null) {
+      Parser = parser.Parser;
+    }
+    if (Composer == null) {
+      Composer = composer.Composer;
+    }
+    if (Resolver == null) {
+      Resolver = resolver.Resolver;
+    }
+    if (Validator == null) {
+      Validator = validator.Validator;
+    }
+    if (ResourceTypes == null) {
+      ResourceTypes = types.ResourceTypes;
+    }
+    if (Traits == null) {
+      Traits = traits.Traits;
+    }
+    if (Joiner == null) {
+      Joiner = joiner.Joiner;
+    }
+    if (Constructor == null) {
+      Constructor = construct.Constructor;
+    }
+    return (function() {
+      var component, components;
+
+      components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Joiner, Constructor];
+
+      util.extend.apply(util, [_Class.prototype].concat((function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = components.length; _i < _len; _i++) {
+          component = components[_i];
+          _results.push(component.prototype);
+        }
+        return _results;
+      })()));
+
+      function _Class(stream, location) {
+        var _i, _len, _ref;
+        components[0].call(this, stream, location);
+        _ref = components.slice(1);
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          component = _ref[_i];
+          component.call(this);
+        }
+      }
+
+      return _Class;
+
+    })();
+  };
+
+  this.Loader = this.make_loader();
+
+}).call(this);
+
+},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./traits":23,"./util":4,"./validator":22}],13:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  unique_id = 0;
+
+  this.ApplicationError = (function(_super) {
+    __extends(ApplicationError, _super);
+
+    function ApplicationError() {
+      _ref = ApplicationError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return ApplicationError;
+
+  })(MarkedYAMLError);
+
+  this.Node = (function() {
+    function Node(tag, value, start_mark, end_mark) {
+      this.tag = tag;
+      this.value = value;
+      this.start_mark = start_mark;
+      this.end_mark = end_mark;
+      this.unique_id = "node_" + (unique_id++);
+    }
+
+    Node.prototype.clone = function() {
+      var temp;
+      temp = new this.constructor(this.tag, this.value.clone(), this.start_mark, this.end_mark);
+      return temp;
+    };
+
+    return Node;
+
+  })();
+
+  this.ScalarNode = (function(_super) {
+    __extends(ScalarNode, _super);
+
+    ScalarNode.prototype.id = 'scalar';
+
+    function ScalarNode(tag, value, start_mark, end_mark, style) {
+      this.tag = tag;
+      this.value = value;
+      this.start_mark = start_mark;
+      this.end_mark = end_mark;
+      this.style = style;
+      ScalarNode.__super__.constructor.apply(this, arguments);
+    }
+
+    ScalarNode.prototype.clone = function() {
+      var temp;
+      temp = new this.constructor(this.tag, this.value, this.start_mark, this.end_mark);
+      return temp;
+    };
+
+    ScalarNode.prototype.combine = function(node) {
+      if (!(node instanceof ScalarNode)) {
+        throw new exports.ApplicationError('while applying node', null, 'different YAML structures', this.start_mark);
+      }
+      return this.value = node.value;
+    };
+
+    ScalarNode.prototype.remove_question_mark_properties = function() {};
+
+    return ScalarNode;
+
+  })(this.Node);
+
+  this.CollectionNode = (function(_super) {
+    __extends(CollectionNode, _super);
+
+    function CollectionNode(tag, value, start_mark, end_mark, flow_style) {
+      this.tag = tag;
+      this.value = value;
+      this.start_mark = start_mark;
+      this.end_mark = end_mark;
+      this.flow_style = flow_style;
+      CollectionNode.__super__.constructor.apply(this, arguments);
+    }
+
+    return CollectionNode;
+
+  })(this.Node);
+
+  this.SequenceNode = (function(_super) {
+    __extends(SequenceNode, _super);
+
+    function SequenceNode() {
+      _ref1 = SequenceNode.__super__.constructor.apply(this, arguments);
+      return _ref1;
+    }
+
+    SequenceNode.prototype.id = 'sequence';
+
+    SequenceNode.prototype.clone = function() {
+      var items, temp,
+        _this = this;
+      items = [];
+      this.value.forEach(function(item) {
+        var value;
+        value = item.clone();
+        return items.push(value);
+      });
+      temp = new this.constructor(this.tag, items, this.start_mark, this.end_mark, this.flow_style);
+      return temp;
+    };
+
+    SequenceNode.prototype.combine = function(node) {
+      var _this = this;
+      if (!(node instanceof SequenceNode)) {
+        throw new exports.ApplicationError('while applying node', null, 'different YAML structures', this.start_mark);
+      }
+      return node.value.forEach(function(property) {
+        var value;
+        value = property.clone();
+        return _this.value.push(value);
+      });
+    };
+
+    SequenceNode.prototype.remove_question_mark_properties = function() {
+      return this.value.forEach(function(item) {
+        return item.remove_question_mark_properties();
+      });
+    };
+
+    return SequenceNode;
+
+  })(this.CollectionNode);
+
+  this.MappingNode = (function(_super) {
+    __extends(MappingNode, _super);
+
+    function MappingNode() {
+      _ref2 = MappingNode.__super__.constructor.apply(this, arguments);
+      return _ref2;
+    }
+
+    MappingNode.prototype.id = 'mapping';
+
+    MappingNode.prototype.clone = function() {
+      var properties, temp,
+        _this = this;
+      properties = [];
+      this.value.forEach(function(property) {
+        var name, value;
+        name = property[0].clone();
+        value = property[1].clone();
+        return properties.push([name, value]);
+      });
+      temp = new this.constructor(this.tag, properties, this.start_mark, this.end_mark, this.flow_style);
+      return temp;
+    };
+
+    MappingNode.prototype.cloneForTrait = function() {
+      var properties, temp,
+        _this = this;
+      properties = [];
+      this.value.forEach(function(property) {
+        var name, value;
+        name = property[0].clone();
+        value = property[1].clone();
+        if (!name.value.match(/^(displayName|description)$/i)) {
+          return properties.push([name, value]);
+        }
+      });
+      temp = new this.constructor(this.tag, properties, this.start_mark, this.end_mark, this.flow_style);
+      return temp;
+    };
+
+    MappingNode.prototype.cloneRemoveIs = function() {
+      var properties, temp,
+        _this = this;
+      properties = [];
+      this.value.forEach(function(property) {
+        var name, value;
+        name = property[0].clone();
+        value = property[1].clone();
+        if (!name.value.match(/^(is)$/i)) {
+          return properties.push([name, value]);
+        }
+      });
+      temp = new this.constructor(this.tag, properties, this.start_mark, this.end_mark, this.flow_style);
+      return temp;
+    };
+
+    MappingNode.prototype.combine = function(resourceNode) {
+      var _this = this;
+      if (!(resourceNode instanceof MappingNode)) {
+        throw new exports.ApplicationError('while applying node', null, 'different YAML structures', this.start_mark);
+      }
+      return resourceNode.value.forEach(function(resourceProperty) {
+        var name, node_has_property;
+        name = resourceProperty[0].value;
+        node_has_property = _this.value.some(function(someProperty) {
+          return (someProperty[0].value === name) || ((someProperty[0].value + '?') === name) || (someProperty[0].value === (name + '?'));
+        });
+        if (node_has_property) {
+          return _this.value.forEach(function(ownNodeProperty) {
+            var ownNodePropertyName;
+            ownNodePropertyName = ownNodeProperty[0].value;
+            if ((ownNodePropertyName === name) || ((ownNodePropertyName + '?') === name) || (ownNodePropertyName === (name + '?'))) {
+              ownNodeProperty[1].combine(resourceProperty[1]);
+              return ownNodeProperty[0].value = ownNodeProperty[0].value.replace(/\?$/, '');
+            }
+          });
+        } else {
+          return _this.value.push([resourceProperty[0].clone(), resourceProperty[1].clone()]);
+        }
+      });
+    };
+
+    MappingNode.prototype.remove_question_mark_properties = function() {
+      this.value = this.value.filter(function(property) {
+        return property[0].value.indexOf('?', property[0].value.length - 1) === -1;
+      });
+      return this.value.forEach(function(property) {
+        return property[1].remove_question_mark_properties();
+      });
+    };
+
+    return MappingNode;
+
+  })(this.CollectionNode);
+
+}).call(this);
+
+},{"./errors":1}],20:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, events, tokens, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -8495,329 +8833,6 @@ window.RAML.Parser = require('../lib/raml')
 
 },{"./errors":1,"./events":2,"./tokens":3}],18:[function(require,module,exports){
 (function() {
-  var composer, construct, joiner, parser, reader, resolver, scanner, traits, types, util, validator;
-
-  util = require('./util');
-
-  reader = require('./reader');
-
-  scanner = require('./scanner');
-
-  parser = require('./parser');
-
-  composer = require('./composer');
-
-  resolver = require('./resolver');
-
-  construct = require('./construct');
-
-  validator = require('./validator');
-
-  joiner = require('./joiner');
-
-  traits = require('./traits');
-
-  types = require('./resourceTypes');
-
-  this.make_loader = function(Reader, Scanner, Parser, Composer, Resolver, Validator, ResourceTypes, Traits, Joiner, Constructor) {
-    if (Reader == null) {
-      Reader = reader.Reader;
-    }
-    if (Scanner == null) {
-      Scanner = scanner.Scanner;
-    }
-    if (Parser == null) {
-      Parser = parser.Parser;
-    }
-    if (Composer == null) {
-      Composer = composer.Composer;
-    }
-    if (Resolver == null) {
-      Resolver = resolver.Resolver;
-    }
-    if (Validator == null) {
-      Validator = validator.Validator;
-    }
-    if (ResourceTypes == null) {
-      ResourceTypes = types.ResourceTypes;
-    }
-    if (Traits == null) {
-      Traits = traits.Traits;
-    }
-    if (Joiner == null) {
-      Joiner = joiner.Joiner;
-    }
-    if (Constructor == null) {
-      Constructor = construct.Constructor;
-    }
-    return (function() {
-      var component, components;
-
-      components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Joiner, Constructor];
-
-      util.extend.apply(util, [_Class.prototype].concat((function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = components.length; _i < _len; _i++) {
-          component = components[_i];
-          _results.push(component.prototype);
-        }
-        return _results;
-      })()));
-
-      function _Class(stream, location) {
-        var _i, _len, _ref;
-        components[0].call(this, stream, location);
-        _ref = components.slice(1);
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          component = _ref[_i];
-          component.call(this);
-        }
-      }
-
-      return _Class;
-
-    })();
-  };
-
-  this.Loader = this.make_loader();
-
-}).call(this);
-
-},{"./composer":10,"./construct":14,"./joiner":16,"./parser":17,"./reader":19,"./resolver":21,"./resourceTypes":23,"./scanner":20,"./traits":24,"./util":4,"./validator":22}],11:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  unique_id = 0;
-
-  this.ApplicationError = (function(_super) {
-    __extends(ApplicationError, _super);
-
-    function ApplicationError() {
-      _ref = ApplicationError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return ApplicationError;
-
-  })(MarkedYAMLError);
-
-  this.Node = (function() {
-    function Node(tag, value, start_mark, end_mark) {
-      this.tag = tag;
-      this.value = value;
-      this.start_mark = start_mark;
-      this.end_mark = end_mark;
-      this.unique_id = "node_" + (unique_id++);
-    }
-
-    Node.prototype.clone = function() {
-      var temp;
-      temp = new this.constructor(this.tag, this.value.clone(), this.start_mark, this.end_mark);
-      return temp;
-    };
-
-    return Node;
-
-  })();
-
-  this.ScalarNode = (function(_super) {
-    __extends(ScalarNode, _super);
-
-    ScalarNode.prototype.id = 'scalar';
-
-    function ScalarNode(tag, value, start_mark, end_mark, style) {
-      this.tag = tag;
-      this.value = value;
-      this.start_mark = start_mark;
-      this.end_mark = end_mark;
-      this.style = style;
-      ScalarNode.__super__.constructor.apply(this, arguments);
-    }
-
-    ScalarNode.prototype.clone = function() {
-      var temp;
-      temp = new this.constructor(this.tag, this.value, this.start_mark, this.end_mark);
-      return temp;
-    };
-
-    ScalarNode.prototype.combine = function(node) {
-      if (!(node instanceof ScalarNode)) {
-        throw new exports.ApplicationError('while applying node', null, 'different YAML structures', this.start_mark);
-      }
-      return this.value = node.value;
-    };
-
-    ScalarNode.prototype.remove_question_mark_properties = function() {};
-
-    return ScalarNode;
-
-  })(this.Node);
-
-  this.CollectionNode = (function(_super) {
-    __extends(CollectionNode, _super);
-
-    function CollectionNode(tag, value, start_mark, end_mark, flow_style) {
-      this.tag = tag;
-      this.value = value;
-      this.start_mark = start_mark;
-      this.end_mark = end_mark;
-      this.flow_style = flow_style;
-      CollectionNode.__super__.constructor.apply(this, arguments);
-    }
-
-    return CollectionNode;
-
-  })(this.Node);
-
-  this.SequenceNode = (function(_super) {
-    __extends(SequenceNode, _super);
-
-    function SequenceNode() {
-      _ref1 = SequenceNode.__super__.constructor.apply(this, arguments);
-      return _ref1;
-    }
-
-    SequenceNode.prototype.id = 'sequence';
-
-    SequenceNode.prototype.clone = function() {
-      var items, temp,
-        _this = this;
-      items = [];
-      this.value.forEach(function(item) {
-        var value;
-        value = item.clone();
-        return items.push(value);
-      });
-      temp = new this.constructor(this.tag, items, this.start_mark, this.end_mark, this.flow_style);
-      return temp;
-    };
-
-    SequenceNode.prototype.combine = function(node) {
-      var _this = this;
-      if (!(node instanceof SequenceNode)) {
-        throw new exports.ApplicationError('while applying node', null, 'different YAML structures', this.start_mark);
-      }
-      return node.value.forEach(function(property) {
-        var value;
-        value = property.clone();
-        return _this.value.push(value);
-      });
-    };
-
-    SequenceNode.prototype.remove_question_mark_properties = function() {
-      return this.value.forEach(function(item) {
-        return item.remove_question_mark_properties();
-      });
-    };
-
-    return SequenceNode;
-
-  })(this.CollectionNode);
-
-  this.MappingNode = (function(_super) {
-    __extends(MappingNode, _super);
-
-    function MappingNode() {
-      _ref2 = MappingNode.__super__.constructor.apply(this, arguments);
-      return _ref2;
-    }
-
-    MappingNode.prototype.id = 'mapping';
-
-    MappingNode.prototype.clone = function() {
-      var properties, temp,
-        _this = this;
-      properties = [];
-      this.value.forEach(function(property) {
-        var name, value;
-        name = property[0].clone();
-        value = property[1].clone();
-        return properties.push([name, value]);
-      });
-      temp = new this.constructor(this.tag, properties, this.start_mark, this.end_mark, this.flow_style);
-      return temp;
-    };
-
-    MappingNode.prototype.cloneForTrait = function() {
-      var properties, temp,
-        _this = this;
-      properties = [];
-      this.value.forEach(function(property) {
-        var name, value;
-        name = property[0].clone();
-        value = property[1].clone();
-        if (!name.value.match(/^(displayName|description)$/i)) {
-          return properties.push([name, value]);
-        }
-      });
-      temp = new this.constructor(this.tag, properties, this.start_mark, this.end_mark, this.flow_style);
-      return temp;
-    };
-
-    MappingNode.prototype.cloneRemoveIs = function() {
-      var properties, temp,
-        _this = this;
-      properties = [];
-      this.value.forEach(function(property) {
-        var name, value;
-        name = property[0].clone();
-        value = property[1].clone();
-        if (!name.value.match(/^(is)$/i)) {
-          return properties.push([name, value]);
-        }
-      });
-      temp = new this.constructor(this.tag, properties, this.start_mark, this.end_mark, this.flow_style);
-      return temp;
-    };
-
-    MappingNode.prototype.combine = function(resourceNode) {
-      var _this = this;
-      if (!(resourceNode instanceof MappingNode)) {
-        throw new exports.ApplicationError('while applying node', null, 'different YAML structures', this.start_mark);
-      }
-      return resourceNode.value.forEach(function(resourceProperty) {
-        var name, node_has_property;
-        name = resourceProperty[0].value;
-        node_has_property = _this.value.some(function(someProperty) {
-          return (someProperty[0].value === name) || ((someProperty[0].value + '?') === name) || (someProperty[0].value === (name + '?'));
-        });
-        if (node_has_property) {
-          return _this.value.forEach(function(ownNodeProperty) {
-            var ownNodePropertyName;
-            ownNodePropertyName = ownNodeProperty[0].value;
-            if ((ownNodePropertyName === name) || ((ownNodePropertyName + '?') === name) || (ownNodePropertyName === (name + '?'))) {
-              ownNodeProperty[1].combine(resourceProperty[1]);
-              return ownNodeProperty[0].value = ownNodeProperty[0].value.replace(/\?$/, '');
-            }
-          });
-        } else {
-          return _this.value.push([resourceProperty[0].clone(), resourceProperty[1].clone()]);
-        }
-      });
-    };
-
-    MappingNode.prototype.remove_question_mark_properties = function() {
-      this.value = this.value.filter(function(property) {
-        return property[0].value.indexOf('?', property[0].value.length - 1) === -1;
-      });
-      return this.value.forEach(function(property) {
-        return property[1].remove_question_mark_properties();
-      });
-    };
-
-    return MappingNode;
-
-  })(this.CollectionNode);
-
-}).call(this);
-
-},{"./errors":1}],19:[function(require,module,exports){
-(function() {
   var Mark, YAMLError, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -9129,7 +9144,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11,"./util":4}],23:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4}],24:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9280,7 +9295,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11}],20:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10763,7 +10778,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./tokens":3,"./util":4}],24:[function(require,module,exports){
+},{"./errors":1,"./tokens":3,"./util":4}],23:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10937,7 +10952,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11}],8:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],8:[function(require,module,exports){
 
 /**
  * Object#toString() ref for stringify().
@@ -11256,7 +11271,7 @@ function decode(str) {
   }
 }
 
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function() {
   var _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11498,7 +11513,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./composer":10,"./construct":14,"./errors":1,"./events":2,"./loader":18,"./nodes":11,"./parser":17,"./reader":19,"./resolver":21,"./scanner":20,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":25}],22:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":25}],22:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, traits, uritemplate, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11693,11 +11708,7 @@ function decode(str) {
           if (!(typeProperty.tag === "tag:yaml.org,2002:map" || typeProperty.tag === "tag:yaml.org,2002:str")) {
             throw new exports.ValidationError('while validating resource types consumption', null, 'type property must be a scalar', typeProperty.start_mark);
           }
-          if (!types.some(function(types_entry) {
-            return types_entry.value.some(function(type) {
-              return type[0].value === typeName;
-            });
-          })) {
+          if (!_this.get_type(typeName)) {
             throw new exports.ValidationError('while validating trait consumption', null, 'there is no type named ' + typeName, typeProperty.start_mark);
           }
         }
@@ -11715,11 +11726,7 @@ function decode(str) {
               if (!(typeProperty.tag === "tag:yaml.org,2002:map" || typeProperty.tag === "tag:yaml.org,2002:str")) {
                 throw new exports.ValidationError('while validating resource types consumption', null, 'type property must be a scalar', typeProperty.start_mark);
               }
-              if (!types.some(function(types_entry) {
-                return types_entry.value.some(function(defined_type) {
-                  return defined_type[0].value === inheritsFrom;
-                });
-              })) {
+              if (!_this.get_type(inheritsFrom)) {
                 throw new exports.ValidationError('while validating trait consumption', null, 'there is no type named ' + inheritsFrom, typeProperty.start_mark);
               }
             }
@@ -11834,7 +11841,7 @@ function decode(str) {
         if (typeof childNode[0].value === "object") {
           return true;
         }
-        return !(childNode[0].value.match(/^title$/i) || childNode[0].value.match(/^baseUri$/i) || childNode[0].value.match(/^version$/i) || childNode[0].value.match(/^traits$/i) || childNode[0].value.match(/^documentation$/i) || childNode[0].value.match(/^uriParameters$/i) || childNode[0].value.match(/^resourceTypes$/i) || childNode[0].value.match(/^\//i));
+        return !(childNode[0].value.match(/^title$/i) || childNode[0].value.match(/^baseUri$/i) || childNode[0].value.match(/^schemas$/i) || childNode[0].value.match(/^version$/i) || childNode[0].value.match(/^traits$/i) || childNode[0].value.match(/^documentation$/i) || childNode[0].value.match(/^uriParameters$/i) || childNode[0].value.match(/^resourceTypes$/i) || childNode[0].value.match(/^\//i));
       });
       if (invalid.length > 0) {
         throw new exports.ValidationError('while validating root properties', null, 'unknown property ' + invalid[0][0].value, invalid[0][0].start_mark);
@@ -11842,6 +11849,9 @@ function decode(str) {
     };
 
     Validator.prototype.child_resources = function(node) {
+      if (!(node && node.value)) {
+        return [];
+      }
       return node.value.filter(function(childNode) {
         return childNode[0].value.match(/^\//i);
       });
@@ -12096,7 +12106,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11,"./traits":24,"uritemplate":26}],25:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./traits":23,"uritemplate":26}],25:[function(require,module,exports){
 (function(process,Buffer){/**
  * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
  *
@@ -12662,7 +12672,7 @@ exports.XMLHttpRequest = function() {
 };
 
 })(require("__browserify_process"),require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":13,"__browserify_process":5,"child_process":27,"fs":9,"http":28,"https":29,"url":7}],26:[function(require,module,exports){
+},{"__browserify_buffer":14,"__browserify_process":5,"child_process":27,"fs":9,"http":28,"https":29,"url":7}],26:[function(require,module,exports){
 (function(global){/*global unescape, module, define, window, global*/
 
 /*
@@ -16172,5 +16182,5 @@ module.exports = function(cb) {
 module.exports.ConcatStream = ConcatStream
 
 })(require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":13,"stream":32,"util":33}]},{},[15,10,14,1,2,16,18,17,11,12,19,21,23,20,3,24,4,22,6])
+},{"__browserify_buffer":14,"stream":32,"util":33}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,24,19,3,23,4,22,6])
 ;
