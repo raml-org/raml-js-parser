@@ -1420,7 +1420,7 @@ describe('Parser', function() {
         '  get:',
       ].join('\n');
 
-      raml.load(definition).should.become({
+      var expected = {
         title: 'Test',
         traits: [{
           rateLimited: {
@@ -1436,7 +1436,7 @@ describe('Parser', function() {
         resources: [
           {
             relativeUri: '/leagues',
-            is: [ 'rateLimited', 'queryable' ],
+            is: [ 'rateLimited' ],
             methods: [
               {
                 method: 'get',
@@ -1449,7 +1449,9 @@ describe('Parser', function() {
             ]
           }
         ]
-      }).and.notify(done);
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
     });
     it('should succeed when applying multiple traits in a single array entry', function(done) {
       var definition = [
