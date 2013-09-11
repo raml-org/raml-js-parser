@@ -25,7 +25,7 @@ class @Traits
 
   has_traits: (node) ->
     if @declaredTraits.length == 0 and @has_property node, /^traits$/i
-      load_traits node
+      @load_traits node
     return Object.keys(@declaredTraits).length > 0
 
   get_trait: (traitName) ->
@@ -67,6 +67,8 @@ class @Traits
     temp = trait.cloneForTrait()
     # by aplying the parameter mapping first, we allow users to rename things in the trait,
     # and then merge it with the resource
+    if method[1].tag is "tag:yaml.org,2002:null"
+      method[1] = new nodes.MappingNode 'tag:yaml.org,2002:map', [], method[0].start_mark, method[1].end_mark
     @apply_parameters temp, plainParameters, useKey
     temp.combine method[1]
     method[1] = temp
@@ -96,6 +98,6 @@ class @Traits
     if parameters and parameters[0] and parameters[0][1] and parameters[0][1].value
       parameters[0][1].value.forEach (parameter) ->
         unless parameter[1].tag == 'tag:yaml.org,2002:str'
-          throw new exports.ResourceTypeError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
+          throw new exports.TraitError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
         result[parameter[0].value] = parameter[1].value
     return result

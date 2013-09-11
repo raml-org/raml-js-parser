@@ -41,6 +41,7 @@ class @Composer
     @get_event()
 
     if validate or apply
+      @load_schemas document
       @load_traits document
       @load_types document
 
@@ -50,10 +51,11 @@ class @Composer
     if apply
       @apply_types document
       @apply_traits document
+      @apply_schemas document
       
     if join
       @join_resources document
-    
+
     return document
   
   compose_document: ->

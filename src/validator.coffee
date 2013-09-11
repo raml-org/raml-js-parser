@@ -23,7 +23,22 @@ The Validator class deals with validating a YAML file according to the spec
 ###
 class @Validator
   constructor: ->
-    @validations = [@has_title, @valid_base_uri, @validate_base_uri_parameters, @valid_root_properties, @validate_traits, @validate_types, @valid_absolute_uris, @valid_trait_consumption, @valid_type_consumption]
+    @validations = [@is_map, @has_title, @valid_base_uri, @validate_base_uri_parameters, @valid_root_properties, @validate_resources, @validate_traits, @validate_types, @validate_schemas, @valid_absolute_uris, @valid_trait_consumption, @valid_type_consumption]
+
+  validate_schemas: (node) ->
+    if @has_property node, /^schemas$/i
+      schemas = @get_property node, /^schemas$/i
+      if schemas?.tag is "tag:yaml.org,2002:str" or schemas?.tag is "tag:yaml.org,2002:seq"
+        throw new exports.ValidationError 'while validating schemas', null, 'schemas property must be a mapping', schemas.start_mark
+      schemaList = @get_all_schemas node
+      for schemaName, schema of schemaList
+        if schema[1].tag is "tag:yaml.org,2002:seq" or schema[1].tag is "tag:yaml.org,2002:null"
+          throw new exports.ValidationError 'while validating schemas', null, 'schema ' + schemaName + ' must be a scalar', schema[0].start_mark
+
+  is_map: (node) ->
+    unless node
+      throw new exports.ValidationError 'while validating root', null, 'empty document', 0
+    @check_is_map node
 
   validate_document: (node) ->
     @validations.forEach (validation) =>
@@ -40,13 +55,14 @@ class @Validator
         throw new exports.ValidationError 'while validating uri parameters', null, err.options.message, uriProperty.start_mark
       expressions = template.expressions.filter((expr) -> return expr.hasOwnProperty('templateText'))
       uriParameters = @property_value node, /^uriParameters$/i
-      uriParameters.forEach (uriParameter) =>
-        @valid_common_parameter_properties uriParameter[1]
-        uriParameterName = uriParameter[0].value
-        found = expressions.filter (expression) -> 
-          expression.templateText == uriParameterName
-        if found.length == 0 
-           throw new exports.ValidationError 'while validating baseUri', null, uriParameterName + ' uri parameter unused', uriParameter[0].start_mark
+      if typeof uriParameters is "object"
+        uriParameters.forEach (uriParameter) =>
+          @valid_common_parameter_properties uriParameter[1]
+          uriParameterName = uriParameter[0].value
+          found = expressions.filter (expression) ->
+            expression.templateText == uriParameterName
+          if found.length == 0
+             throw new exports.ValidationError 'while validating baseUri', null, uriParameterName + ' uri parameter unused', uriParameter[0].start_mark
     child_resources = @child_resources node
     child_resources.forEach (childResource) =>
       @validate_uri_parameters childResource[0].value, childResource[1]
@@ -71,8 +87,6 @@ class @Validator
         unless type_entry.tag == "tag:yaml.org,2002:map"
           throw new exports.ValidationError 'while validating trait properties', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
         type_entry.value.forEach (type) =>
-          if not (@has_property type[1], /^displayName$/i)
-            throw new exports.ValidationError 'while validating trait properties', null, 'every resource type must have a displayName property', node.start_mark
           resources = @child_resources type[1]
           if resources.length
             throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', node.start_mark
@@ -111,7 +125,7 @@ class @Validator
         typeName = @key_or_value typeProperty
         unless typeProperty.tag == "tag:yaml.org,2002:map" or typeProperty.tag == "tag:yaml.org,2002:str"
           throw new exports.ValidationError 'while validating resource types consumption', null, 'type property must be a scalar', typeProperty.start_mark
-        if not types.some( (types_entry) => types_entry.value.some((type) => type[0].value == typeName))
+        unless @get_type typeName
           throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + typeName, typeProperty.start_mark
       @valid_type_consumption resource[1], types, false
 
@@ -124,7 +138,7 @@ class @Validator
             inheritsFrom = @key_or_value typeProperty
             unless typeProperty.tag == "tag:yaml.org,2002:map" or typeProperty.tag == "tag:yaml.org,2002:str"
               throw new exports.ValidationError 'while validating resource types consumption', null, 'type property must be a scalar', typeProperty.start_mark
-            if not types.some( (types_entry) => types_entry.value.some((defined_type) => defined_type[0].value == inheritsFrom))
+            unless @get_type inheritsFrom
               throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + inheritsFrom, typeProperty.start_mark
 
   validate_traits: (node) ->
@@ -136,10 +150,6 @@ class @Validator
       traitsList.forEach (trait_entry) =>
         unless trait_entry and trait_entry.value
           throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits definition, it must be an array', trait_entry.start_mark
-        trait_entry.value.forEach (trait) =>
-          @valid_traits_properties trait[1]
-          if not (@has_property trait[1], /^displayName$/i)
-            throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a displayName property', trait.start_mark
 
   valid_traits_properties: (node) ->  
     @check_is_map node
@@ -148,9 +158,8 @@ class @Validator
     invalid = node.value.filter (childNode) ->
       if typeof childNode[0].value is "object"
         return true
-      return (
-        childNode[0].value.match(/^is$/i) or
-        childNode[0].value.match(/^type$/i))
+      return (  childNode[0].value.match(/^is$/i) or
+                childNode[0].value.match(/^type$/i))
     if invalid.length > 0 
       throw new exports.ValidationError 'while validating trait properties', null, 'unknown property ' + invalid[0][0].value, invalid[0][0].start_mark
 
@@ -212,29 +221,35 @@ class @Validator
         return true
       return not (childNode[0].value.match(/^title$/i) or \
                   childNode[0].value.match(/^baseUri$/i) or \
+                  childNode[0].value.match(/^schemas$/i) or \
                   childNode[0].value.match(/^version$/i) or \
                   childNode[0].value.match(/^traits$/i) or \
                   childNode[0].value.match(/^documentation$/i) or \
-                  childNode[0].value.match(/^uriParameters$/i) or
-                  childNode[0].value.match(/^resourceTypes$/i) or
+                  childNode[0].value.match(/^uriParameters$/i) or \
+                  childNode[0].value.match(/^resourceTypes$/i) or \
                   childNode[0].value.match(/^\//i))
     if invalid.length > 0
       throw new exports.ValidationError 'while validating root properties', null, 'unknown property ' + invalid[0][0].value, invalid[0][0].start_mark
         
   child_resources: (node) ->
-    return node.value.filter (childNode) -> return childNode[0].value.match(/^\//i);
+    if node?.tag is "tag:yaml.org,2002:map"
+      return node.value.filter (childNode) -> return childNode[0].value.match(/^\//i);
+    return []
+
+  validate_resources: (node) ->
+    resources = @child_resources node
+    resources.forEach (resource) ->
+      unless resource[1]?.tag is "tag:yaml.org,2002:map" or resource[1]?.tag is "tag:yaml.org,2002:null"
+        throw new exports.ValidationError 'while validating resources', null, 'resource is not a mapping', resource[1].start_mark
 
   child_methods: (node) ->
-    unless node and node.value
+    unless node?.tag is "tag:yaml.org,2002:map"
       return []
     return node.value.filter (childNode) -> return childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/);
-    
+
   has_property: (node, property) ->
-    if node and node.value and typeof node.value is "object"
-      return node.value.some(
-        (childNode) ->
-          return childNode[0].value and typeof childNode[0].value != "object" and childNode[0].value.match(property)
-      )
+    if node?.tag is "tag:yaml.org,2002:map"
+      return node.value.some((childNode) -> return childNode[0].value and typeof childNode[0].value != "object" and childNode[0].value.match(property))
     return false
 
   property_value: (node, property) ->
@@ -244,14 +259,28 @@ class @Validator
     return filteredNodes[0][1].value;
 
   get_property: (node, property) ->
-    filteredNodes = node.value.filter (childNode) ->
-      return typeof childNode[0].value != "object" and childNode[0].value.match(property)
-    return filteredNodes[0][1];
+    if node?.tag is "tag:yaml.org,2002:map"
+      filteredNodes = node.value.filter (childNode) ->
+        return childNode[0].tag is "tag:yaml.org,2002:str" and childNode[0].value.match(property)
+      if filteredNodes.length > 0
+        if filteredNodes[0].length > 0
+          return filteredNodes[0][1]
+    return []
+
+  get_properties: (node, property) =>
+    properties = []
+    if node?.tag is "tag:yaml.org,2002:map"
+      node.value.forEach (prop) =>
+        if prop[0].tag is "tag:yaml.org,2002:str" and prop[0].value.match(property)
+          properties.push prop
+        else
+          properties = properties.concat @get_properties prop[1], property
+    return properties
 
   check_is_map: (node) ->
     if not node instanceof nodes.MappingNode
       throw new exports.ValidationError 'while validating node', null, 'must be a map', node.start_mark
-      
+
   resources: ( node = @get_single_node(true, true, false), parentPath ) ->
     @check_is_map node
     response = []
@@ -301,8 +330,9 @@ class @Validator
     
   get_absolute_uris: ( node = @get_single_node(true, true, false), parentPath ) ->
     @check_is_map node
-    
     response = []
+    unless node?.tag is "tag:yaml.org,2002:map" or node?.tag is "tag:yaml.org,2002:null"
+      throw new exports.ValidationError 'while validating resources', null, 'resource is not a mapping', node.start_mark
     child_resources = @child_resources node
     child_resources.forEach (childResource) =>
       if parentPath?
@@ -327,7 +357,6 @@ class @Validator
 
   valid_trait_consumption: (node, traits = undefined) ->
     @check_is_map node
-
     resources = @child_resources node
     resources.forEach (resource) =>
       if @has_property resource[1], /^is$/i

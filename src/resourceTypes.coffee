@@ -25,7 +25,7 @@ class @ResourceTypes
 
   has_types: (node) =>
     if Object.keys(@declaredTypes).length == 0 and @has_property node, /^resourceTypes$/i
-      load_types node
+      @load_types node
     return Object.keys(@declaredTypes).length > 0
 
   get_type: (typeName) =>
@@ -91,10 +91,19 @@ class @ResourceTypes
 
   apply_parameters_to_type: (typeName, typeKey) =>
     type = (@get_type typeName)[1].cloneForTrait()
-    parameters = @get_parameters_from_type_key typeKey
+    parameters = @_get_parameters_from_type_key typeKey
     @apply_parameters type, parameters, typeKey
     return type
 
+  _get_parameters_from_type_key: (typeKey) ->
+    parameters = @value_or_undefined typeKey
+    result = {}
+    if parameters and parameters[0] and parameters[0][1] and parameters[0][1].value
+      parameters[0][1].value.forEach (parameter) ->
+        unless parameter[1].tag == 'tag:yaml.org,2002:str'
+          throw new exports.ResourceTypeError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
+        result[parameter[0].value] = parameter[1].value
+    return result
 
 
 
