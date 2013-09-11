@@ -45,7 +45,7 @@ class @ResourceTypes
         if @has_property resource[1], /^type$/i
           type = @get_property resource[1], /^type$/i
           @apply_type resource, type
-#        resource[1].remove_question_mark_properties()
+        @apply_types resource[1]
 
   apply_type: (resource, typeKey) =>
     tempType = @resolve_inheritance_chain typeKey
