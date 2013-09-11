@@ -87,8 +87,6 @@ class @Validator
         unless type_entry.tag == "tag:yaml.org,2002:map"
           throw new exports.ValidationError 'while validating trait properties', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
         type_entry.value.forEach (type) =>
-          if not (@has_property type[1], /^displayName$/i)
-            throw new exports.ValidationError 'while validating trait properties', null, 'every resource type must have a displayName property', node.start_mark
           resources = @child_resources type[1]
           if resources.length
             throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', node.start_mark
@@ -152,10 +150,6 @@ class @Validator
       traitsList.forEach (trait_entry) =>
         unless trait_entry and trait_entry.value
           throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits definition, it must be an array', trait_entry.start_mark
-        trait_entry.value.forEach (trait) =>
-          @valid_traits_properties trait[1]
-          unless (@has_property trait[1], /^displayName$/i)
-            throw new exports.ValidationError 'while validating trait properties', null, 'every trait must have a displayName property', trait[1].start_mark
 
   valid_traits_properties: (node) ->  
     @check_is_map node

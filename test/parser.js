@@ -28,7 +28,17 @@ describe('Parser', function() {
         '  - pepe:',
         '    displayName: Pepe'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/every trait must have a displayName property/).and.notify(done);
+      var expected = {
+        title: "MyApi",
+        traits: [
+          {
+            pepe: null,
+            displayName: "Pepe"
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
     });
     it('it should not fail to parse an empty trait list', function(done) {
       var definition = [
@@ -1417,7 +1427,7 @@ describe('Parser', function() {
         '          description: API Limit Exceeded',
         '/leagues:',
         '  is: [ rateLimited ]',
-        '  get:',
+        '  get:'
       ].join('\n');
 
       var expected = {
@@ -1571,7 +1581,7 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
-    it('should fail if trait is missing displayName property', function(done) {
+    it('should succeed if trait is missing displayName property', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -1586,7 +1596,35 @@ describe('Parser', function() {
         '  is: [ rateLimited: { parameter: value } ]'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/every trait must have a displayName property/).and.notify(done);
+      var expected =   {
+        "title": "Test",
+        "traits": [
+          {
+            "rateLimited": {
+              "responses": {
+                "503": {
+                  "description": "Server Unavailable. Check Your Rate Limits."
+                }
+              }
+            }
+          }
+        ],
+        "resources": [
+          {
+            "is": [
+              {
+                "rateLimited": {
+                  "parameter": "value"
+                }
+              }
+            ],
+            "relativeUri": "/"
+          }
+        ]
+      };
+
+
+      raml.load(definition).should.become(expected).and.notify(done);
     });
     it('should fail if traits value is scalar', function(done) {
       var definition = [
@@ -2448,7 +2486,7 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
-    it('should fail if trait is missing displayName property', function(done) {
+    it('should succeed if trait is missing displayName property', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -2461,7 +2499,22 @@ describe('Parser', function() {
         '          description: Server Unavailable. Check Your Rate Limits.'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/every trait must have a displayName property/).and.notify(done);
+      var expected = {
+        title: "Test",
+        traits: [
+          {
+            rateLimited: {
+              responses: {
+                503: {
+                  description: "Server Unavailable. Check Your Rate Limits."
+                }
+              }
+            }
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
     });
     it('should fail if use property is not an array', function(done) {
       var definition = [
@@ -3084,7 +3137,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/there is no type named foo/).and.notify(done);
     });
-    it('should fail if resource type is missing displayName', function(done) {
+    it('should succeed if resource type is missing displayName', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -3093,11 +3146,31 @@ describe('Parser', function() {
         'resourceTypes:',
         '  - collection:',
         '      description: This resourceType should be used for any collection of items',
-        '      summary: The collection of <<resourcePathName>>',
+        '      summary: The collection of Blah',
         '/:',
         '  type: collection'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/every resource type must have a displayName property/).and.notify(done);
+
+      var expected =  {
+        "title": "Test",
+        "resourceTypes": [
+          {
+            "collection": {
+              "description": "This resourceType should be used for any collection of items",
+              "summary": "The collection of Blah"
+            }
+          }
+        ],
+        "resources": [
+          {
+            "summary": "The collection of Blah",
+            "type": "collection",
+            "relativeUri": "/"
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
     });
     it('should fail if resource type is null', function(done) {
       var definition = [
@@ -3111,7 +3184,7 @@ describe('Parser', function() {
         '/:',
         '  type: collection'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/every resource type must have a displayName property/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/invalid resourceTypes definition, it must be an array/).and.notify(done);
     });
     it('should fail if resource type is null', function(done) {
       var definition = [
@@ -4194,6 +4267,38 @@ describe('Parser', function() {
           expect(error.problem_mark).to.exist;
           error.problem_mark.column.should.be.equal(8);
           error.problem_mark.line.should.be.equal(12);
+          done();
+        }, 0);
+      });
+    });
+    it('should report correct line/column for missing title', function(done) {
+      var noop = function () {};
+      var definition = [
+        '%YAML 1.2',
+        '---',
+        '/:',
+        '  is: [ throttled, rateLimited: { parameter: value } ]'
+      ].join('\n');
+      raml.load(definition).then(noop, function (error) {
+        setTimeout(function () {
+          expect(error.problem_mark).to.exist;
+          error.problem_mark.column.should.be.equal(0);
+          error.problem_mark.line.should.be.equal(2);
+          done();
+        }, 0);
+      });
+    });
+    it('should report correct line/column for missing title', function(done) {
+      var noop = function () {};
+      var definition = [
+        '#%YAML 1.2',
+        '---'
+      ].join('\n');
+      raml.load(definition).then(noop, function (error) {
+        setTimeout(function () {
+          expect(error.problem_mark).to.exist;
+          error.problem_mark.column.should.be.equal(3);
+          error.problem_mark.line.should.be.equal(1);
           done();
         }, 0);
       });
