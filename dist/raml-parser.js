@@ -3152,6 +3152,7 @@ window.RAML.Parser = require('../lib/raml')
       }
       this.get_event();
       if (validate || apply) {
+        this.load_schemas(document);
         this.load_traits(document);
         this.load_types(document);
       }
@@ -3161,6 +3162,7 @@ window.RAML.Parser = require('../lib/raml')
       if (apply) {
         this.apply_types(document);
         this.apply_traits(document);
+        this.apply_schemas(document);
       }
       if (join) {
         this.join_resources(document);
@@ -7899,7 +7901,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 },{"./errors":1,"./nodes":13}],17:[function(require,module,exports){
 (function() {
-  var composer, construct, joiner, parser, reader, resolver, scanner, traits, types, util, validator;
+  var composer, construct, joiner, parser, reader, resolver, scanner, schemas, traits, types, util, validator;
 
   util = require('./util');
 
@@ -7923,7 +7925,9 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
   types = require('./resourceTypes');
 
-  this.make_loader = function(Reader, Scanner, Parser, Composer, Resolver, Validator, ResourceTypes, Traits, Joiner, Constructor) {
+  schemas = require('./schemas');
+
+  this.make_loader = function(Reader, Scanner, Parser, Composer, Resolver, Validator, ResourceTypes, Traits, Schemas, Joiner, Constructor) {
     if (Reader == null) {
       Reader = reader.Reader;
     }
@@ -7948,6 +7952,9 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
     if (Traits == null) {
       Traits = traits.Traits;
     }
+    if (Schemas == null) {
+      Schemas = schemas.Schemas;
+    }
     if (Joiner == null) {
       Joiner = joiner.Joiner;
     }
@@ -7957,7 +7964,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
     return (function() {
       var component, components;
 
-      components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Joiner, Constructor];
+      components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Schemas, Joiner, Constructor];
 
       util.extend.apply(util, [_Class.prototype].concat((function() {
         var _i, _len, _results;
@@ -7988,7 +7995,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./traits":23,"./util":4,"./validator":22}],13:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./traits":23,"./util":4,"./validator":22}],13:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -9207,7 +9214,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
     ResourceTypes.prototype.has_types = function(node) {
       if (Object.keys(this.declaredTypes).length === 0 && this.has_property(node, /^resourceTypes$/i)) {
-        load_types(node);
+        this.load_types(node);
       }
       return Object.keys(this.declaredTypes).length > 0;
     };
@@ -9284,9 +9291,24 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
     ResourceTypes.prototype.apply_parameters_to_type = function(typeName, typeKey) {
       var parameters, type;
       type = (this.get_type(typeName))[1].cloneForTrait();
-      parameters = this.get_parameters_from_type_key(typeKey);
+      parameters = this._get_parameters_from_type_key(typeKey);
       this.apply_parameters(type, parameters, typeKey);
       return type;
+    };
+
+    ResourceTypes.prototype._get_parameters_from_type_key = function(typeKey) {
+      var parameters, result;
+      parameters = this.value_or_undefined(typeKey);
+      result = {};
+      if (parameters && parameters[0] && parameters[0][1] && parameters[0][1].value) {
+        parameters[0][1].value.forEach(function(parameter) {
+          if (parameter[1].tag !== 'tag:yaml.org,2002:str') {
+            throw new exports.ResourceTypeError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
+          }
+          return result[parameter[0].value] = parameter[1].value;
+        });
+      }
+      return result;
     };
 
     return ResourceTypes;
@@ -10778,7 +10800,107 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./tokens":3,"./util":4}],23:[function(require,module,exports){
+},{"./errors":1,"./tokens":3,"./util":4}],25:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, nodes, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  /*
+  The Schemas throws these.
+  */
+
+
+  this.SchemaError = (function(_super) {
+    __extends(SchemaError, _super);
+
+    function SchemaError() {
+      _ref = SchemaError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return SchemaError;
+
+  })(MarkedYAMLError);
+
+  /*
+    The Schemas class deals with applying schemas to resources according to the spec
+  */
+
+
+  this.Schemas = (function() {
+    function Schemas() {
+      this.get_schemas_used = __bind(this.get_schemas_used, this);
+      this.apply_schemas = __bind(this.apply_schemas, this);
+      this.get_all_schemas = __bind(this.get_all_schemas, this);
+      this.has_schemas = __bind(this.has_schemas, this);
+      this.load_schemas = __bind(this.load_schemas, this);
+      this.declaredSchemas = {};
+    }
+
+    Schemas.prototype.load_schemas = function(node) {
+      var allSchemas,
+        _this = this;
+      if (this.has_property(node, /^schemas$/i)) {
+        allSchemas = this.property_value(node, /^schemas$/i);
+        if (allSchemas && typeof allSchemas === "object") {
+          return allSchemas.forEach(function(schema) {
+            return _this.declaredSchemas[schema[0].value] = schema;
+          });
+        }
+      }
+    };
+
+    Schemas.prototype.has_schemas = function(node) {
+      if (this.declaredSchemas.length === 0 && this.has_property(node, /^schemas$/i)) {
+        this.load_schemas(node);
+      }
+      return Object.keys(this.declaredSchemas).length > 0;
+    };
+
+    Schemas.prototype.get_all_schemas = function() {
+      return this.declaredSchemas;
+    };
+
+    Schemas.prototype.apply_schemas = function(node) {
+      var resources, schemas,
+        _this = this;
+      resources = this.child_resources(node);
+      schemas = this.get_schemas_used(resources);
+      return schemas.forEach(function(schema) {
+        if (schema[1].tag !== "tag:yaml.org,2002:str") {
+          throw new exports.SchemaError('while aplying schemas', null, 'schema is not a scalar', schema[1].start_mark);
+        }
+        if (schema[1].value in _this.declaredSchemas) {
+          return schema[1].value = _this.declaredSchemas[schema[1].value][1].value;
+        }
+      });
+    };
+
+    Schemas.prototype.get_schemas_used = function(resources) {
+      var schemas,
+        _this = this;
+      schemas = [];
+      resources.forEach(function(resource) {
+        var properties;
+        properties = _this.get_properties(resource[1], /^schema$/i);
+        return schemas = schemas.concat(properties);
+      });
+      return schemas;
+    };
+
+    return Schemas;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./nodes":13}],23:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10834,7 +10956,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
     Traits.prototype.has_traits = function(node) {
       if (this.declaredTraits.length === 0 && this.has_property(node, /^traits$/i)) {
-        load_traits(node);
+        this.load_traits(node);
       }
       return Object.keys(this.declaredTraits).length > 0;
     };
@@ -10938,7 +11060,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       if (parameters && parameters[0] && parameters[0][1] && parameters[0][1].value) {
         parameters[0][1].value.forEach(function(parameter) {
           if (parameter[1].tag !== 'tag:yaml.org,2002:str') {
-            throw new exports.ResourceTypeError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
+            throw new exports.TraitError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
           }
           return result[parameter[0].value] = parameter[1].value;
         });
@@ -11513,11 +11635,12 @@ function decode(str) {
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":25}],22:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":26}],22:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, traits, uritemplate, _ref,
     __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   MarkedYAMLError = require('./errors').MarkedYAMLError;
 
@@ -11571,8 +11694,37 @@ function decode(str) {
 
   this.Validator = (function() {
     function Validator() {
-      this.validations = [this.has_title, this.valid_base_uri, this.validate_base_uri_parameters, this.valid_root_properties, this.validate_traits, this.validate_types, this.valid_absolute_uris, this.valid_trait_consumption, this.valid_type_consumption];
+      this.get_properties = __bind(this.get_properties, this);
+      this.validations = [this.is_map, this.has_title, this.valid_base_uri, this.validate_base_uri_parameters, this.valid_root_properties, this.validate_resources, this.validate_traits, this.validate_types, this.validate_schemas, this.valid_absolute_uris, this.valid_trait_consumption, this.valid_type_consumption];
     }
+
+    Validator.prototype.validate_schemas = function(node) {
+      var schema, schemaList, schemaName, schemas, _results;
+      if (this.has_property(node, /^schemas$/i)) {
+        schemas = this.get_property(node, /^schemas$/i);
+        if ((schemas != null ? schemas.tag : void 0) === "tag:yaml.org,2002:str" || (schemas != null ? schemas.tag : void 0) === "tag:yaml.org,2002:seq") {
+          throw new exports.ValidationError('while validating schemas', null, 'schemas property must be a mapping', schemas.start_mark);
+        }
+        schemaList = this.get_all_schemas(node);
+        _results = [];
+        for (schemaName in schemaList) {
+          schema = schemaList[schemaName];
+          if (schema[1].tag === "tag:yaml.org,2002:seq" || schema[1].tag === "tag:yaml.org,2002:null") {
+            throw new exports.ValidationError('while validating schemas', null, 'schema ' + schemaName + ' must be a scalar', schema[0].start_mark);
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      }
+    };
+
+    Validator.prototype.is_map = function(node) {
+      if (!node) {
+        throw new exports.ValidationError('while validating root', null, 'empty document', 0);
+      }
+      return this.check_is_map(node);
+    };
 
     Validator.prototype.validate_document = function(node) {
       var _this = this;
@@ -11598,17 +11750,19 @@ function decode(str) {
           return expr.hasOwnProperty('templateText');
         });
         uriParameters = this.property_value(node, /^uriParameters$/i);
-        uriParameters.forEach(function(uriParameter) {
-          var found, uriParameterName;
-          _this.valid_common_parameter_properties(uriParameter[1]);
-          uriParameterName = uriParameter[0].value;
-          found = expressions.filter(function(expression) {
-            return expression.templateText === uriParameterName;
+        if (typeof uriParameters === "object") {
+          uriParameters.forEach(function(uriParameter) {
+            var found, uriParameterName;
+            _this.valid_common_parameter_properties(uriParameter[1]);
+            uriParameterName = uriParameter[0].value;
+            found = expressions.filter(function(expression) {
+              return expression.templateText === uriParameterName;
+            });
+            if (found.length === 0) {
+              throw new exports.ValidationError('while validating baseUri', null, uriParameterName + ' uri parameter unused', uriParameter[0].start_mark);
+            }
           });
-          if (found.length === 0) {
-            throw new exports.ValidationError('while validating baseUri', null, uriParameterName + ' uri parameter unused', uriParameter[0].start_mark);
-          }
-        });
+        }
       }
       child_resources = this.child_resources(node);
       return child_resources.forEach(function(childResource) {
@@ -11751,7 +11905,7 @@ function decode(str) {
           return trait_entry.value.forEach(function(trait) {
             _this.valid_traits_properties(trait[1]);
             if (!(_this.has_property(trait[1], /^displayName$/i))) {
-              throw new exports.ValidationError('while validating trait properties', null, 'every trait must have a displayName property', trait.start_mark);
+              throw new exports.ValidationError('while validating trait properties', null, 'every trait must have a displayName property', trait[1].start_mark);
             }
           });
         });
@@ -11849,16 +12003,27 @@ function decode(str) {
     };
 
     Validator.prototype.child_resources = function(node) {
-      if (!(node && node.value)) {
-        return [];
+      if ((node != null ? node.tag : void 0) === "tag:yaml.org,2002:map") {
+        return node.value.filter(function(childNode) {
+          return childNode[0].value.match(/^\//i);
+        });
       }
-      return node.value.filter(function(childNode) {
-        return childNode[0].value.match(/^\//i);
+      return [];
+    };
+
+    Validator.prototype.validate_resources = function(node) {
+      var resources;
+      resources = this.child_resources(node);
+      return resources.forEach(function(resource) {
+        var _ref1, _ref2;
+        if (!(((_ref1 = resource[1]) != null ? _ref1.tag : void 0) === "tag:yaml.org,2002:map" || ((_ref2 = resource[1]) != null ? _ref2.tag : void 0) === "tag:yaml.org,2002:null")) {
+          throw new exports.ValidationError('while validating resources', null, 'resource is not a mapping', resource[1].start_mark);
+        }
       });
     };
 
     Validator.prototype.child_methods = function(node) {
-      if (!(node && node.value)) {
+      if ((node != null ? node.tag : void 0) !== "tag:yaml.org,2002:map") {
         return [];
       }
       return node.value.filter(function(childNode) {
@@ -11867,7 +12032,7 @@ function decode(str) {
     };
 
     Validator.prototype.has_property = function(node, property) {
-      if (node && node.value && typeof node.value === "object") {
+      if ((node != null ? node.tag : void 0) === "tag:yaml.org,2002:map") {
         return node.value.some(function(childNode) {
           return childNode[0].value && typeof childNode[0].value !== "object" && childNode[0].value.match(property);
         });
@@ -11885,10 +12050,33 @@ function decode(str) {
 
     Validator.prototype.get_property = function(node, property) {
       var filteredNodes;
-      filteredNodes = node.value.filter(function(childNode) {
-        return typeof childNode[0].value !== "object" && childNode[0].value.match(property);
-      });
-      return filteredNodes[0][1];
+      if ((node != null ? node.tag : void 0) === "tag:yaml.org,2002:map") {
+        filteredNodes = node.value.filter(function(childNode) {
+          return childNode[0].tag === "tag:yaml.org,2002:str" && childNode[0].value.match(property);
+        });
+        if (filteredNodes.length > 0) {
+          if (filteredNodes[0].length > 0) {
+            return filteredNodes[0][1];
+          }
+        }
+      }
+      return [];
+    };
+
+    Validator.prototype.get_properties = function(node, property) {
+      var properties,
+        _this = this;
+      properties = [];
+      if ((node != null ? node.tag : void 0) === "tag:yaml.org,2002:map") {
+        node.value.forEach(function(prop) {
+          if (prop[0].tag === "tag:yaml.org,2002:str" && prop[0].value.match(property)) {
+            return properties.push(prop);
+          } else {
+            return properties = properties.concat(_this.get_properties(prop[1], property));
+          }
+        });
+      }
+      return properties;
     };
 
     Validator.prototype.check_is_map = function(node) {
@@ -11975,6 +12163,9 @@ function decode(str) {
       }
       this.check_is_map(node);
       response = [];
+      if (!((node != null ? node.tag : void 0) === "tag:yaml.org,2002:map" || (node != null ? node.tag : void 0) === "tag:yaml.org,2002:null")) {
+        throw new exports.ValidationError('while validating resources', null, 'resource is not a mapping', node.start_mark);
+      }
       child_resources = this.child_resources(node);
       child_resources.forEach(function(childResource) {
         var uri;
@@ -12106,7 +12297,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./traits":23,"uritemplate":26}],25:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./traits":23,"uritemplate":27}],26:[function(require,module,exports){
 (function(process,Buffer){/**
  * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
  *
@@ -12672,7 +12863,7 @@ exports.XMLHttpRequest = function() {
 };
 
 })(require("__browserify_process"),require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":14,"__browserify_process":5,"child_process":27,"fs":9,"http":28,"https":29,"url":7}],26:[function(require,module,exports){
+},{"__browserify_buffer":14,"__browserify_process":5,"child_process":28,"fs":9,"http":29,"https":30,"url":7}],27:[function(require,module,exports){
 (function(global){/*global unescape, module, define, window, global*/
 
 /*
@@ -13560,11 +13751,11 @@ var UriTemplate = (function () {
 ));
 
 })(window)
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 exports.spawn = function () {};
 exports.exec = function () {};
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var http = require('http');
 
 var https = module.exports;
@@ -13578,7 +13769,7 @@ https.request = function (params, cb) {
     params.scheme = 'https';
     return http.request.call(this, params, cb);
 }
-},{"http":28}],30:[function(require,module,exports){
+},{"http":29}],31:[function(require,module,exports){
 (function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
 
 var EventEmitter = exports.EventEmitter = process.EventEmitter;
@@ -13775,7 +13966,7 @@ EventEmitter.listenerCount = function(emitter, type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":5}],28:[function(require,module,exports){
+},{"__browserify_process":5}],29:[function(require,module,exports){
 var http = module.exports;
 var EventEmitter = require('events').EventEmitter;
 var Request = require('./lib/request');
@@ -13837,7 +14028,7 @@ var xhrHttp = (function () {
     }
 })();
 
-},{"./lib/request":31,"events":30}],32:[function(require,module,exports){
+},{"./lib/request":32,"events":31}],33:[function(require,module,exports){
 var events = require('events');
 var util = require('util');
 
@@ -13958,7 +14149,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":30,"util":33}],33:[function(require,module,exports){
+},{"events":31,"util":34}],34:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -14305,7 +14496,7 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":30}],34:[function(require,module,exports){
+},{"events":31}],35:[function(require,module,exports){
 (function(){// UTILITY
 var util = require('util');
 var Buffer = require("buffer").Buffer;
@@ -14620,7 +14811,7 @@ assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
 assert.ifError = function(err) { if (err) {throw err;}};
 
 })()
-},{"buffer":35,"util":33}],36:[function(require,module,exports){
+},{"buffer":36,"util":34}],37:[function(require,module,exports){
 var Stream = require('stream');
 
 var Response = module.exports = function (res) {
@@ -14741,7 +14932,7 @@ var isArray = Array.isArray || function (xs) {
     return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{"stream":32}],37:[function(require,module,exports){
+},{"stream":33}],38:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -14827,7 +15018,7 @@ exports.writeIEEE754 = function(buffer, value, offset, isBE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 (function(){var assert = require('assert');
 exports.Buffer = Buffer;
 exports.SlowBuffer = Buffer;
@@ -15911,7 +16102,7 @@ Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
 };
 
 })()
-},{"./buffer_ieee754":37,"assert":34,"base64-js":38}],31:[function(require,module,exports){
+},{"./buffer_ieee754":38,"assert":35,"base64-js":39}],32:[function(require,module,exports){
 (function(){var Stream = require('stream');
 var Response = require('./response');
 var concatStream = require('concat-stream')
@@ -16045,7 +16236,7 @@ var indexOf = function (xs, x) {
 };
 
 })()
-},{"./response":36,"buffer":35,"concat-stream":39,"stream":32}],38:[function(require,module,exports){
+},{"./response":37,"buffer":36,"concat-stream":40,"stream":33}],39:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 
@@ -16131,7 +16322,7 @@ var indexOf = function (xs, x) {
 	module.exports.fromByteArray = uint8ToBase64;
 }());
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 (function(Buffer){var stream = require('stream')
 var util = require('util')
 
@@ -16182,5 +16373,5 @@ module.exports = function(cb) {
 module.exports.ConcatStream = ConcatStream
 
 })(require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":14,"stream":32,"util":33}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,24,19,3,23,4,22,6])
+},{"__browserify_buffer":14,"stream":33,"util":34}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,24,19,25,3,23,4,22,6])
 ;

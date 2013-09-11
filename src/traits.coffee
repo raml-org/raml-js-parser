@@ -25,7 +25,7 @@ class @Traits
 
   has_traits: (node) ->
     if @declaredTraits.length == 0 and @has_property node, /^traits$/i
-      load_traits node
+      @load_traits node
     return Object.keys(@declaredTraits).length > 0
 
   get_trait: (traitName) ->
@@ -96,6 +96,6 @@ class @Traits
     if parameters and parameters[0] and parameters[0][1] and parameters[0][1].value
       parameters[0][1].value.forEach (parameter) ->
         unless parameter[1].tag == 'tag:yaml.org,2002:str'
-          throw new exports.ResourceTypeError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
+          throw new exports.TraitError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
         result[parameter[0].value] = parameter[1].value
     return result

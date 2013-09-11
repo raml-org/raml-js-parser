@@ -20,6 +20,7 @@ module.exports = function(grunt) {
             'lib/util.js': 'src/util.coffee',
             'lib/traits.js': 'src/traits.coffee',
             'lib/resourceTypes.js': 'src/resourceTypes.coffee',
+            'lib/schemas.js': 'src/schemas.coffee',
             'lib/joiner.js': 'src/joiner.coffee',            
             'lib/raml.js': 'src/raml.coffee'
           }
@@ -70,7 +71,7 @@ module.exports = function(grunt) {
     mochacli: {
         options: {
             require: ['chai', 'chai-as-promised'],
-            reporter: 'nyan',
+            reporter: 'list',
             bail: true
         },
         all: ['test/parser.js', 'test/local.js']
@@ -87,7 +88,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('compile', ['coffee']);
   grunt.registerTask('default', ['coffee', 'browserify', 'uglify']);
-  grunt.registerTask('test-ui', ['coffee', 'browserify', 'uglify', 'connect', 'mochacli', 'mocha_phantomjs']);
-  grunt.registerTask('test', ['coffee', 'browserify', 'uglify', 'connect', 'mocha_phantomjs']);
+  grunt.registerTask('test', ['coffee', 'browserify', 'uglify', 'connect', 'mochacli', 'mocha_phantomjs']);
+  grunt.registerTask('test-ui-only', ['coffee', 'browserify', 'uglify', 'connect', 'mocha_phantomjs']);
   grunt.registerTask('server', ['default', 'connect', 'watch']);
 };

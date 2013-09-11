@@ -14,6 +14,13 @@ if (typeof window === 'undefined') {
 
 describe('Parser', function() {
   describe('Reported Bugs', function () {
+    it('should fail unsupported raml version:RT-180', function(done) {
+      var definition = [
+        '#%RAML 0.1'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/empty document/).and.notify(done);
+    });
     it('it should not fail to parse an empty trait', function(done) {
       var definition = [
         'title: MyApi',
@@ -54,6 +61,24 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/missing title/).and.notify(done);
     });
+    it('it should not fail to parse a RAML null uriParameters. RT-178', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: hola',
+        'version: v0.1',
+        'baseUri: http://server/api/{version}',
+        'uriParameters:'
+      ].join('\n');
+      var expected = {
+        title: "hola",
+        version: "v0.1",
+        baseUri: "http://server/api/{version}",
+        uriParameters: null
+      }
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+
   });
   describe('Basic Information', function() {
     it('should fail unsupported yaml version', function(done) {
@@ -1071,6 +1096,48 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
+    it('it should not fail when resource is null', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/:'
+      ].join('\n');
+
+      var expected = {
+        title: "Test",
+        resources : [
+          {
+            relativeUri: "/"
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('is should fail when resource is a scalar', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/: foo'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/resource is not a mapping/).and.notify(done);
+    });
+    it('is should fail when resource is a sequence', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/: foo'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/resource is not a mapping/).and.notify(done);
+    });
   });
   describe('Resource Responses', function() {
     it('should succeed with arrays as keys', function(done) {
@@ -1336,6 +1403,54 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
+    it('should succeed when applying a trait to a null method', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  - rateLimited:',
+        '      displayName: Rate Limited',
+        '      responses:',
+        '        429:',
+        '          description: API Limit Exceeded',
+        '/leagues:',
+        '  is: [ rateLimited ]',
+        '  get:',
+      ].join('\n');
+
+      raml.load(definition).should.become({
+        title: 'Test',
+        traits: [{
+          rateLimited: {
+            displayName: 'Rate Limited',
+            responses: {
+              '429': {
+                description: 'API Limit Exceeded'
+              }
+            }
+          }
+        }
+        ],
+        resources: [
+          {
+            relativeUri: '/leagues',
+            is: [ 'rateLimited', 'queryable' ],
+            methods: [
+              {
+                method: 'get',
+                responses: {
+                  '429': {
+                    description: 'API Limit Exceeded'
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }).and.notify(done);
+    });
     it('should succeed when applying multiple traits in a single array entry', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -1454,24 +1569,6 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
-//    it('should fail if unknown property is used inside a trait', function(done) {
-//      var definition = [
-//        '%YAML 1.2',
-//        '%TAG ! tag:raml.org,0.1:',
-//        '---',
-//        'title: Test',
-//        'traits:',
-//        '  rateLimited:',
-//        '    displayName: Rate Limited',
-//        '    responses:',
-//        '      503:',
-//        '        description: Server Unavailable. Check Your Rate Limits.',
-//        '/:',
-//        '  is: [ rateLimited: { parameter: value } ]'
-//      ].join('\n');
-//
-//      raml.load(definition).should.be.rejected.with(/unknown property what/).and.notify(done);
-//    });
     it('should fail if trait is missing displayName property', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -1833,7 +1930,6 @@ describe('Parser', function() {
         '      200:',
         '        description: Retrieve a list of leagues'
       ].join('\n');
-
       raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
     });
     it('should reject parameters whose value is a mapping', function(done) {
@@ -1884,7 +1980,6 @@ describe('Parser', function() {
           }
         ]
       };
-
       raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
     });
     it('should reject trait with missing provided parameters', function(done) {
@@ -3737,7 +3832,7 @@ describe('Parser', function() {
               "post?":
               {
                 foo: null
-              },
+              }
             }
           }
         ],
@@ -3769,7 +3864,7 @@ describe('Parser', function() {
         'schemas:',
         '  foo: |',
         '       Blah blah',
-        '/:'
+        '/resource:'
       ].join('\n');
 
       var expected = {
@@ -3779,43 +3874,300 @@ describe('Parser', function() {
         },
         resources : [
           {
-            relativeUri: "/"
+            relativeUri: "/resource"
           }
         ]
       };
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
-  });
-  describe('Schema support', function(){
-    it('should not fail when specifying schemas at the root level', function(done) {
+    it('should fail when specifying schemas is scalar', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'schemas: foo',
+        '/:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/schemas property must be a mapping/).and.notify(done);
+    });
+    it('should fail when specifying schemas is sequence', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'schemas: []',
+        '/:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/schemas property must be a mapping/).and.notify(done);
+    });
+    it('should fail when schema is null', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
         '---',
         'title: Test',
         'schemas:',
-        '  foo: |',
-        '      Blah blah',
+        '  foo:',
         '/:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/schema foo must be a scalar/).and.notify(done);
+    });
+    it('should fail when schema is sequence', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'schemas:',
+        '  foo: []',
+        '/:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/schema foo must be a scalar/).and.notify(done);
+    });
+    it('should fail if a schema is a mapping', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.2:',
+        '---',
+        'title: Test',
+        'schemas:',
+        '  foo: |',
+        '       Blah blah',
+        '/foo:',
+        '  displayName: A',
+        '  post:' ,
+        '    description: Blah',
+        '    body:',
+        '      application/json:',
+        '        schema: foo3',
+        '    responses:',
+        '      200:',
+        '        application/json:',
+        '          schema: foo',
+        '      201:',
+        '        application/json:',
+        '          schema: {}',
+        ''
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/schema is not a scalar/).notify(done);
+    });
+    it('should fail if a schema is an array', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.2:',
+        '---',
+        'title: Test',
+        'schemas:',
+        '  foo: |',
+        '       Blah blah',
+        '/foo:',
+        '  displayName: A',
+        '  post:' ,
+        '    description: Blah',
+        '    body:',
+        '      application/json:',
+        '        schema: foo3',
+        '    responses:',
+        '      200:',
+        '        application/json:',
+        '          schema: foo',
+        '      201:',
+        '        application/json:',
+        '          schema: []',
+        ''
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/schema is not a scalar/).notify(done);
+    });
+    it('should apply trait', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.2:',
+        '---',
+        'title: Test',
+        'schemas:',
+        '  foo: |',
+        '       Blah blah',
+        '/foo:',
+        '  displayName: A',
+        '  post:' ,
+        '    description: Blah',
+        '    body:',
+        '      application/json:',
+        '        schema: foo3',
+        '    responses:',
+        '      200:',
+        '        application/json:',
+        '          schema: foo',
+        '      201:',
+        '        application/json:',
+        '          schema: foo2',
+        ''
       ].join('\n');
 
       var expected = {
-        title: "Test",
+        title: 'Test',
         schemas: {
           foo: "Blah blah\n"
         },
-        resources : [
-          {
-            relativeUri: "/"
-          }
-        ]
+        resources: [{
+          displayName: 'A',
+          relativeUri: '/foo',
+          methods:[{
+            description: 'Blah',
+            body: {
+              "application/json": {
+                "schema": "foo3"
+              }
+            },
+            responses: {
+              200: {
+                "application/json": {
+                  schema: "Blah blah\n"
+                }
+              },
+              201: {
+                "application/json": {
+                  schema: "foo2"
+                }
+              }
+            },
+            method: 'post'
+          }]
+        }]
       };
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
-  });
+    it('should apply trait multiple times', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.2:',
+        '---',
+        'title: Test',
+        'schemas:',
+        '  foo: |',
+        '       Blah blah',
+        '/foo:',
+        '  displayName: A',
+        '  post:' ,
+        '    description: Blah',
+        '    body:',
+        '      application/json:',
+        '        schema: foo',
+        '    responses:',
+        '      200:',
+        '        application/json:',
+        '          schema: foo',
+        '      201:',
+        '        application/json:',
+        '          schema: foo2',
+        ''
+      ].join('\n');
 
+      var expected = {
+        title: 'Test',
+        schemas: {
+          foo: "Blah blah\n"
+        },
+        resources: [{
+          displayName: 'A',
+          relativeUri: '/foo',
+          methods:[{
+            description: 'Blah',
+            body: {
+              "application/json": {
+                schema: "Blah blah\n"
+              }
+            },
+            responses: {
+              200: {
+                "application/json": {
+                  schema: "Blah blah\n"
+                }
+              },
+              201: {
+                "application/json": {
+                  schema: "foo2"
+                }
+              }
+            },
+            method: 'post'
+          }]
+        }]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should apply multiple schemas', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.2:',
+        '---',
+        'title: Test',
+        'schemas:',
+        '  foo: |',
+        '       Blah blah',
+        '  foo2: |',
+        '       halb halB',
+        '/foo:',
+        '  displayName: A',
+        '  post:' ,
+        '    description: Blah',
+        '    body:',
+        '      application/json:',
+        '        schema: foo',
+        '    responses:',
+        '      200:',
+        '        application/json:',
+        '          schema: foo',
+        '      201:',
+        '        application/json:',
+        '          schema: foo2',
+        ''
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        schemas: {
+          foo: "Blah blah\n",
+          foo2: "halb halB\n"
+        },
+        resources: [{
+          displayName: 'A',
+          relativeUri: '/foo',
+          methods:[{
+            description: 'Blah',
+            body: {
+              "application/json": {
+                schema: "Blah blah\n"
+              }
+            },
+            responses: {
+              200: {
+                "application/json": {
+                  schema: "Blah blah\n"
+                }
+              },
+              201: {
+                "application/json": {
+                  schema: "halb halB\n"
+                }
+              }
+            },
+            method: 'post'
+          }]
+        }]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+
+  });
   describe('Error reporting', function () {
     it('should report correct line/column for invalid trait error', function(done) {
       var noop = function () {};
