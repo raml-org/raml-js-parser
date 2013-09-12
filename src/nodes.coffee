@@ -90,9 +90,13 @@ class @MappingNode extends @CollectionNode
     temp = new @constructor( @tag, properties, @start_mark, @end_mark, @flow_style)
     return temp
 
-
   combine: (resourceNode) ->
-    if not (resourceNode instanceof MappingNode)
+    # We have a special combination strategy in which if the destination node is null,
+    # we convert it to a mapping
+    if resourceNode.tag is "tag:yaml.org,2002:null"
+      resourceNode = new MappingNode 'tag:yaml.org,2002:map', [], resourceNode.start_mark, resourceNode.end_mark
+
+    unless resourceNode instanceof MappingNode
       throw new exports.ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
 
     resourceNode.value.forEach (resourceProperty) =>

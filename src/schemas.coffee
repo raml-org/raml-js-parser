@@ -33,8 +33,6 @@ class @Schemas
     resources = @child_resources node
     schemas = @get_schemas_used resources
     schemas.forEach (schema) =>
-      unless schema[1].tag is "tag:yaml.org,2002:str"
-        throw new exports.SchemaError 'while aplying schemas', null, 'schema is not a scalar' , schema[1].start_mark
       if schema[1].value of @declaredSchemas
         schema[1].value = @declaredSchemas[schema[1].value][1].value
 
