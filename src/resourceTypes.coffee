@@ -49,8 +49,6 @@ class @ResourceTypes
 
   apply_type: (resource, typeKey) =>
     tempType = @resolve_inheritance_chain typeKey
-    if resource[1].tag is "tag:yaml.org,2002:null"
-      resource[1] = new nodes.MappingNode 'tag:yaml.org,2002:map', [], resource[0].start_mark, resource[1].end_mark
     tempType.combine resource[1]
     resource[1] = tempType
     resource[1].remove_question_mark_properties()
