@@ -23,7 +23,7 @@ The Validator class deals with validating a YAML file according to the spec
 ###
 class @Validator
   constructor: ->
-    @validations = [@is_map, @has_title, @valid_base_uri, @validate_base_uri_parameters, @valid_root_properties, @validate_traits, @validate_resources, @validate_traits, @validate_types, @validate_root_schemas, @valid_absolute_uris, @valid_trait_consumption, @valid_type_consumption]
+    @validations = [@is_map, @has_title, @valid_base_uri, @validate_base_uri_parameters, @valid_root_properties, @validate_traits, @validate_resources, @validate_traits, @validate_types, @validate_root_schemas, @valid_absolute_uris, @valid_trait_consumption]
 
   validate_document: (node) ->
     @validations.forEach (validation) =>
@@ -68,19 +68,24 @@ class @Validator
   validate_types: (node) ->
     @check_is_map node
     if @has_property node, /^resourceTypes$/i
-      types = @property_value node, /^resourceTypes$/i
-      unless typeof types is "object"
-        throw new exports.ValidationError 'while validating trait properties', null, 'invalid resourceTypes definition, it must be an array', types.start_mark
+      typeProperty = @get_property node, /^resourceTypes$/i
+      types = typeProperty.value
+
+      unless typeProperty.tag is "tag:yaml.org,2002:seq"
+        throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceTypes definition, it must be an array', types.start_mark
 
       types.forEach (type_entry) =>
-        unless type_entry.value
-          throw new exports.ValidationError 'while validating trait properties', null, 'invalid resourceTypes definition, it must be an array', types.start_mark
-        unless type_entry.tag is "tag:yaml.org,2002:map" or type_entry.tag is "tag:yaml.org,2002:null"
-          throw new exports.ValidationError 'while validating trait properties', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
+        unless type_entry.tag is "tag:yaml.org,2002:map"
+          throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
+
         type_entry.value.forEach (type) =>
-          resources = @child_resources type[1]
-          if resources.length
-            throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', node.start_mark
+          unless type[1].tag is "tag:yaml.org,2002:map"
+              throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
+          @validate_resource type, true
+
+#          resources = @child_resources type[1]
+#          if resources.length
+#            throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', type.start_mark
 #
 #          # check traits at resourceType level
 #          if @has_property type[1], /^is$/i
@@ -103,20 +108,6 @@ class @Validator
 #              uses.forEach (use) =>
 #                if not @get_trait @key_or_value use
 #                  throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
-
-  valid_type_consumption: (node, types = undefined, check_types = true) ->
-    if not types? and @has_property node, /^resourceTypes$/i
-      types = @property_value node, /^resourceTypes$/i
-
-    # validate inheritance in types
-    if types and check_types
-      types.forEach (type_entry) =>
-        type_entry.value.forEach (type) =>
-          if @has_property type[1], /^type$/i
-            typeProperty = (type[1].value.filter (childNode) -> return !(childNode[0].value is "object") and childNode[0].value.match(/^type$/))[0][1]
-            inheritsFrom = @key_or_value typeProperty
-            unless @get_type inheritsFrom
-              throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + inheritsFrom, typeProperty.start_mark
 
   validate_traits: (node) ->
     @check_is_map node
@@ -224,6 +215,8 @@ class @Validator
         resource[1].value.forEach (property) =>
           unless @validate_common_properties property, allowParameterKeys
             if property[0].value.match(/^\//)
+              if allowParameterKeys
+                throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', property[0].start_mark
               @validate_resource property, allowParameterKeys
             else if property[0].value.match(/^type$/)
               @validate_type_property property, allowParameterKeys
@@ -314,8 +307,11 @@ class @Validator
       if property[0].value.match(/^body$/)
         @validate_body property, allowParameterKeys
       else if property[0].value.match(/^description$/)
-        unless property[0].tag is "tag:yaml.org,2002:null" or property[0].tag is "tag:yaml.org,2002:str"
+        unless property[1].tag is "tag:yaml.org,2002:null" or property[1].tag is "tag:yaml.org,2002:str"
           throw new exports.ValidationError 'while validating responses', null, "property description must be a string", response[0].start_mark
+      else if property[0].value.match(/^summary$/)
+        unless property[1].tag is "tag:yaml.org,2002:str"
+          throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
       else
         throw new exports.ValidationError 'while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
 

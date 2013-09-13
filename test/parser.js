@@ -3182,7 +3182,7 @@ describe('Parser', function() {
         '  -',
         '/:'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/invalid resourceTypes definition, it must be an array/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/invalid resourceType definition, it must be a mapping/).and.notify(done);
     });
     it('should fail if resource type is null', function(done) {
       var definition = [
@@ -3194,7 +3194,7 @@ describe('Parser', function() {
         '  -',
         '/:'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/invalid resourceTypes definition, it must be an array/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/invalid resourceType definition, it must be a mapping/).and.notify(done);
     });
     it('should fail if resource type is not mapping', function(done) {
       var definition = [
@@ -3241,45 +3241,45 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/there is no type named missing/).and.notify(done);
     });
-//    it('should fail if a resource type applies a missing trait', function(done) {
-//      var definition = [
-//        '%YAML 1.2',
-//        '%TAG ! tag:raml.org,0.1:',
-//        '---',
-//        'title: Test',
-//        'traits:',
-//        '  - foo:',
-//        '     displayName: Foo',
-//        'resourceTypes:',
-//        '  - collection:',
-//        '     is: [foo, bar]',
-//        '     displayName: Collection',
-//        '     description: This resourceType should be used for any collection of items',
-//        '/:',
-//        '  type: collection'
-//      ].join('\n');
-//      raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
-//    });
-//    it('should fail if a resource type\'s method applies a missing trait', function(done) {
-//      var definition = [
-//        '%YAML 1.2',
-//        '%TAG ! tag:raml.org,0.1:',
-//        '---',
-//        'title: Test',
-//        'traits:',
-//        '  - foo:',
-//        '     displayName: Foo',
-//        'resourceTypes:',
-//        '  - collection:',
-//        '     displayName: Collection',
-//        '     description: This resourceType should be used for any collection of items',
-//        '     get:',
-//        '       is: [foo, bar]',
-//        '/:',
-//        '  type: collection'
-//      ].join('\n');
-//      raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
-//    });
+    it('should fail if a resource type applies a missing trait', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  - foo:',
+        '     displayName: Foo',
+        'resourceTypes:',
+        '  - collection:',
+        '     is: [foo, bar]',
+        '     displayName: Collection',
+        '     description: This resourceType should be used for any collection of items',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
+    });
+    it('should fail if a resource type\'s method applies a missing trait', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  - foo:',
+        '     displayName: Foo',
+        'resourceTypes:',
+        '  - collection:',
+        '     displayName: Collection',
+        '     description: This resourceType should be used for any collection of items',
+        '     get:',
+        '       is: [foo, bar]',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
+    });
     it('should apply a resource type', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -3291,7 +3291,7 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
-        '       foo:',
+        '       body:',
         '/:',
         '  type: collection'
       ].join('\n');
@@ -3306,7 +3306,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items",
               post:
               {
-                foo: null
+                body: null
               }
             }
           }
@@ -3318,7 +3318,7 @@ describe('Parser', function() {
             methods: [
               {
                 method: "post",
-                foo: null
+                body: null
               }
             ]
           }
@@ -3338,12 +3338,13 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
-        '       foo:',
+        '       body:',
         '  - collection:',
         '      displayName: Collection2',
         '      description: This resourceType should be used for any collection of items2',
         '      post:',
-        '       foo: 2',
+        '       body:',
+        '        application/json:',
         '/:',
         '  type: collection'
       ].join('\n');
@@ -3358,7 +3359,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items",
               post:
               {
-                foo: null
+                body: null
               }
             }
           },
@@ -3369,7 +3370,9 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items2",
               post:
               {
-                foo: 2
+                body: {
+                  "application/json": null
+                }
               }
             }
           }
@@ -3381,7 +3384,9 @@ describe('Parser', function() {
             methods: [
               {
                 method: "post",
-                foo: 2
+                body: {
+                  "application/json": null
+                }
               }
             ]
           }
@@ -3401,7 +3406,7 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
-        '       foo:',
+        '       body:',
         '/:',
         '  type: { collection }'
       ].join('\n');
@@ -3416,7 +3421,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items",
               post:
               {
-                foo: null
+                body: null
               }
             }
           }
@@ -3430,7 +3435,7 @@ describe('Parser', function() {
             methods: [
               {
                 method: "post",
-                foo: null
+                body: null
               }
             ]
           }
@@ -3450,7 +3455,7 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
-        '       foo:',
+        '       body:',
         '/:',
         '  type: { collection: { foo: bar } }'
       ].join('\n');
@@ -3465,7 +3470,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items",
               post:
               {
-                foo: null
+                body: null
               }
             }
           }
@@ -3481,7 +3486,7 @@ describe('Parser', function() {
             methods: [
               {
                 method: "post",
-                foo: null
+                body: null
               }
             ]
           }
@@ -3502,12 +3507,12 @@ describe('Parser', function() {
         '      displayName: Collection post',
         '      description: This resourceType should be used for any collection of items post',
         '      post:',
-        '       foo:',
+        '       body:',
         '  - get:',
         '      displayName: Collection get',
         '      description: This resourceType should be used for any collection of items get',
         '      get:',
-        '       bar:',
+        '       body:',
         '/:',
         '  type: post'
       ].join('\n');
@@ -3523,7 +3528,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items post",
               post:
               {
-                foo: null
+                body: null
               }
             }
           },
@@ -3534,7 +3539,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items get",
               get:
               {
-                bar: null
+                body: null
               }
             }
           }
@@ -3545,11 +3550,11 @@ describe('Parser', function() {
             relativeUri: "/",
             methods: [
               {
-                foo: null,
+                body: null,
                 method: "post"
               },
               {
-                bar: null,
+                body: null,
                 method: "get"
               }
             ]
@@ -3571,18 +3576,18 @@ describe('Parser', function() {
         '      displayName: Collection post',
         '      description: This resourceType should be used for any collection of items post',
         '      post:',
-        '       foo:',
+        '       body:',
         '  - get:',
         '      type: delete',
         '      displayName: Collection get',
         '      description: This resourceType should be used for any collection of items get',
         '      get:',
-        '       bar:',
+        '       body:',
         '  - delete:',
         '      displayName: Collection delete',
         '      description: This resourceType should be used for any collection of items delete',
         '      delete:',
-        '       baz:',
+        '       body:',
         '/:',
         '  type: post'
       ].join('\n');
@@ -3598,7 +3603,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items post",
               post:
               {
-                foo: null
+                body: null
               }
             }
           },
@@ -3610,7 +3615,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items get",
               get:
               {
-                bar: null
+                body: null
               }
             }
           }
@@ -3622,7 +3627,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items delete",
               delete:
               {
-                baz: null
+                body: null
               }
             }
           }
@@ -3633,15 +3638,15 @@ describe('Parser', function() {
             relativeUri: "/",
             methods: [
               {
-                foo: null,
+                body: null,
                 method: "post"
               },
               {
-                bar: null,
+                body: null,
                 method: "get"
               },
               {
-                baz: null,
+                body: null,
                 method: "delete"
               }
             ]
@@ -3662,7 +3667,7 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: <<foo>> resourceType should be used for any collection of items',
         '      post:',
-        '       foo: <<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>',
+        '       description: <<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>',
         '       <<foo>>: <<bar>>',
         '/:',
         '  type: { collection: { foo: bar, bar: foo} }'
@@ -3678,7 +3683,7 @@ describe('Parser', function() {
               description: "<<foo>> resourceType should be used for any collection of items",
               post:
               {
-                foo: "<<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>",
+                description: "<<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>",
                 "<<foo>>": "<<bar>>"
               }
             }
@@ -3696,7 +3701,7 @@ describe('Parser', function() {
             methods: [
               {
                 method: "post",
-                foo: "barbarbar fixed text foofoofoo",
+                description: "barbarbar fixed text foofoofoo",
                 bar: "foo"
               }
             ]
@@ -3717,7 +3722,7 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: <<foo>> resourceType should be used for any collection of items',
         '      post:',
-        '       foo: <<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>',
+        '       description: <<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>',
         '       <<foo>>: <<bar>>',
         '/:',
         '  type: { collection: { foo: bar } }'
@@ -3725,30 +3730,30 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/value was not provided for parameter: bar/).and.notify(done);
     });
-//    it('should fail if resourceType uses a missing trait', function(done) {
-//      var definition = [
-//        '%YAML 1.2',
-//        '%TAG ! tag:raml.org,0.1:',
-//        '---',
-//        'title: Test',
-//        'traits:',
-//        '  - secured:',
-//        '      displayName: OAuth 2.0 security',
-//        '      queryParameters:',
-//        '       access_token:',
-//        '         description: OAuth Access token',
-//        'resourceTypes:',
-//        '  - collection:',
-//        '      is: [ blah ]',
-//        '      displayName: Collection',
-//        '      description: This resourceType should be used for any collection of items',
-//        '      post:',
-//        '       foo:',
-//        '/:',
-//        '  type: collection'
-//      ].join('\n');
-//      raml.load(definition).should.be.rejected.with(/there is no trait named blah/).and.notify(done);
-//    });
+    it('should fail if resourceType uses a missing trait', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  - secured:',
+        '      displayName: OAuth 2.0 security',
+        '      queryParameters:',
+        '       access_token:',
+        '         description: OAuth Access token',
+        'resourceTypes:',
+        '  - collection:',
+        '      is: [ blah ]',
+        '      displayName: Collection',
+        '      description: This resourceType should be used for any collection of items',
+        '      post:',
+        '       foo:',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/there is no trait named blah/).and.notify(done);
+    });
     it('should apply a trait to a resource type', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -3767,7 +3772,7 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
-        '       foo:',
+        '       body:',
         '/:',
         '  type: collection'
       ].join('\n');
@@ -3795,7 +3800,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items",
               post:
               {
-                foo: null
+                body: null
               }
             }
           }
@@ -3806,7 +3811,7 @@ describe('Parser', function() {
             relativeUri: "/",
             methods: [
               {
-                foo: null,
+                body: null,
                 method: "post",
                 queryParameters: {
                   access_token: {
@@ -3832,9 +3837,9 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
-        '       foo:',
+        '       body:',
         '      "get?":',
-        '       foo:',
+        '       body:',
         '/:',
         '  type: collection'
       ].join('\n');
@@ -3849,11 +3854,11 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items",
               post:
               {
-                foo: null
+                body: null
               },
               "get?":
               {
-                foo: null
+                body: null
               }
             }
           }
@@ -3865,7 +3870,7 @@ describe('Parser', function() {
             methods: [
               {
                 method: "post",
-                foo: null
+                body: null
               }
             ]
           }
@@ -3997,58 +4002,62 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/schema foo must be a string/).and.notify(done);
     });
-//    it('should fail if a schema is a mapping', function(done) {
-//      var definition = [
-//        '%YAML 1.2',
-//        '%TAG ! tag:raml.org,0.2:',
-//        '---',
-//        'title: Test',
-//        'schemas:',
-//        '  foo: |',
-//        '       Blah blah',
-//        '/foo:',
-//        '  displayName: A',
-//        '  post:' ,
-//        '    description: Blah',
-//        '    body:',
-//        '      application/json:',
-//        '        schema: foo3',
-//        '    responses:',
-//        '      200:',
-//        '        application/json:',
-//        '          schema: foo',
-//        '      201:',
-//        '        application/json:',
-//        '          schema: {}'
-//      ].join('\n');
-//      raml.load(definition).should.be.rejected.with(/schema must be a string/).notify(done);
-//    });
-//    it('should fail if a schema is an array', function(done) {
-//      var definition = [
-//        '%YAML 1.2',
-//        '%TAG ! tag:raml.org,0.2:',
-//        '---',
-//        'title: Test',
-//        'schemas:',
-//        '  foo: |',
-//        '       Blah blah',
-//        '/foo:',
-//        '  displayName: A',
-//        '  post:' ,
-//        '    description: Blah',
-//        '    body:',
-//        '      application/json:',
-//        '        schema: foo3',
-//        '    responses:',
-//        '      200:',
-//        '        application/json:',
-//        '          schema: foo',
-//        '      201:',
-//        '        application/json:',
-//        '          schema: []'
-//      ].join('\n');
-//      raml.load(definition).should.be.rejected.with(/schema must be a string/).notify(done);
-//    });
+    it('should fail if a schema is a mapping', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.2:',
+        '---',
+        'title: Test',
+        'schemas:',
+        '  foo: |',
+        '       Blah blah',
+        '/foo:',
+        '  displayName: A',
+        '  post:' ,
+        '    description: Blah',
+        '    body:',
+        '      application/json:',
+        '        schema: foo3',
+        '    responses:',
+        '      200:',
+        '       body:',
+        '        application/json:',
+        '          schema: foo',
+        '      201:',
+        '       body:',
+        '        application/json:',
+        '          schema: {}'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/schema must be a string/).notify(done);
+    });
+    it('should fail if a schema is an array', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.2:',
+        '---',
+        'title: Test',
+        'schemas:',
+        '  foo: |',
+        '       Blah blah',
+        '/foo:',
+        '  displayName: A',
+        '  post:' ,
+        '    description: Blah',
+        '    body:',
+        '      application/json:',
+        '        schema: foo3',
+        '    responses:',
+        '      200:',
+        '       body:',
+        '        application/json:',
+        '          schema: foo',
+        '      201:',
+        '       body:',
+        '        application/json:',
+        '          schema: []'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/schema must be a string/).notify(done);
+    });
     it('should apply trait', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -4796,7 +4805,7 @@ describe('Parser', function() {
             "methods": [
               {
                 body:{
-                  formParameters: null,
+                  formParameters: null
                 },
                 "method": "post"
               }
@@ -4892,12 +4901,6 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/each response key must be an integer/).and.notify(done);
     });
-
-
-
-
-
-
   });
   describe('Error reporting', function () {
     it('should report correct line/column for invalid trait error', function(done) {
