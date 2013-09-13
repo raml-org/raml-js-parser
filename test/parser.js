@@ -1275,7 +1275,7 @@ describe('Parser', function() {
         ''
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/found unhashable key/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/each response key must be an integer/).and.notify(done);
     });
   });
   describe('Traits at resource level', function() {
@@ -1661,8 +1661,7 @@ describe('Parser', function() {
         '/:',
         '  is: throttled ]'
       ].join('\n');
-
-      raml.load(definition).should.be.rejected.with(/use property must be an array/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/property 'is' must be a list/).and.notify(done);
     });
     it('should fail on invalid trait name', function(done) {
       var definition = [
@@ -2527,7 +2526,7 @@ describe('Parser', function() {
         '    is: throttled ]'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/use property must be an array/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/property 'is' must be a list/).and.notify(done);
     });
     it('should fail on invalid trait name', function(done) {
       var definition = [
@@ -3115,7 +3114,7 @@ describe('Parser', function() {
         '/:',
         '  type: [ foo ]'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/type property must be a scalar/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/property 'type' must be a string or a mapping/).and.notify(done);
     });
     it('should fail if resource is of a missing type', function(done) {
       var definition = [
@@ -3133,9 +3132,9 @@ describe('Parser', function() {
         '      post:',
         '        summary: Create a new <<resourcePathName | !singularize>>',
         '/:',
-        '  type: foo'
+        '  type: invalidType'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/there is no type named foo/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/there is no type named invalidType/).and.notify(done);
     });
     it('should succeed if resource type is missing displayName', function(done) {
       var definition = [
@@ -3181,8 +3180,7 @@ describe('Parser', function() {
         'resourceTypes:',
         '  - collection: null',
         '  -',
-        '/:',
-        '  type: collection'
+        '/:'
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid resourceTypes definition, it must be an array/).and.notify(done);
     });
@@ -3194,8 +3192,7 @@ describe('Parser', function() {
         'title: Test',
         'resourceTypes:',
         '  -',
-        '/:',
-        '  type: collection'
+        '/:'
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid resourceTypes definition, it must be an array/).and.notify(done);
     });
@@ -3207,8 +3204,7 @@ describe('Parser', function() {
         'title: Test',
         'resourceTypes:',
         '  - string',
-        '/:',
-        '  type: collection'
+        '/:'
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid resourceType definition, it must be a mapping/).and.notify(done);
     });
@@ -3245,45 +3241,45 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/there is no type named missing/).and.notify(done);
     });
-    it('should fail if a resource type applies a missing trait', function(done) {
-      var definition = [
-        '%YAML 1.2',
-        '%TAG ! tag:raml.org,0.1:',
-        '---',
-        'title: Test',
-        'traits:',
-        '  - foo:',
-        '     displayName: Foo',
-        'resourceTypes:',
-        '  - collection:',
-        '     is: [foo, bar]',
-        '     displayName: Collection',
-        '     description: This resourceType should be used for any collection of items',
-        '/:',
-        '  type: collection'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
-    });
-    it('should fail if a resource type\'s method applies a missing trait', function(done) {
-      var definition = [
-        '%YAML 1.2',
-        '%TAG ! tag:raml.org,0.1:',
-        '---',
-        'title: Test',
-        'traits:',
-        '  - foo:',
-        '     displayName: Foo',
-        'resourceTypes:',
-        '  - collection:',
-        '     displayName: Collection',
-        '     description: This resourceType should be used for any collection of items',
-        '     get:',
-        '       is: [foo, bar]',
-        '/:',
-        '  type: collection'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
-    });
+//    it('should fail if a resource type applies a missing trait', function(done) {
+//      var definition = [
+//        '%YAML 1.2',
+//        '%TAG ! tag:raml.org,0.1:',
+//        '---',
+//        'title: Test',
+//        'traits:',
+//        '  - foo:',
+//        '     displayName: Foo',
+//        'resourceTypes:',
+//        '  - collection:',
+//        '     is: [foo, bar]',
+//        '     displayName: Collection',
+//        '     description: This resourceType should be used for any collection of items',
+//        '/:',
+//        '  type: collection'
+//      ].join('\n');
+//      raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
+//    });
+//    it('should fail if a resource type\'s method applies a missing trait', function(done) {
+//      var definition = [
+//        '%YAML 1.2',
+//        '%TAG ! tag:raml.org,0.1:',
+//        '---',
+//        'title: Test',
+//        'traits:',
+//        '  - foo:',
+//        '     displayName: Foo',
+//        'resourceTypes:',
+//        '  - collection:',
+//        '     displayName: Collection',
+//        '     description: This resourceType should be used for any collection of items',
+//        '     get:',
+//        '       is: [foo, bar]',
+//        '/:',
+//        '  type: collection'
+//      ].join('\n');
+//      raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
+//    });
     it('should apply a resource type', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -3729,31 +3725,30 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/value was not provided for parameter: bar/).and.notify(done);
     });
-    it('should fail if resourceType uses a missing trait', function(done) {
-      var definition = [
-        '%YAML 1.2',
-        '%TAG ! tag:raml.org,0.1:',
-        '---',
-        'title: Test',
-        'traits:',
-        '  - secured:',
-        '      displayName: OAuth 2.0 security',
-        '      queryParameters:',
-        '       access_token:',
-        '         description: OAuth Access token',
-        'resourceTypes:',
-        '  - collection:',
-        '      is: [ blah ]',
-        '      displayName: Collection',
-        '      description: This resourceType should be used for any collection of items',
-        '      post:',
-        '       foo:',
-        '/:',
-        '  type: collection'
-      ].join('\n');
-
-      raml.load(definition).should.be.rejected.with(/there is no trait named blah/).and.notify(done);
-    });
+//    it('should fail if resourceType uses a missing trait', function(done) {
+//      var definition = [
+//        '%YAML 1.2',
+//        '%TAG ! tag:raml.org,0.1:',
+//        '---',
+//        'title: Test',
+//        'traits:',
+//        '  - secured:',
+//        '      displayName: OAuth 2.0 security',
+//        '      queryParameters:',
+//        '       access_token:',
+//        '         description: OAuth Access token',
+//        'resourceTypes:',
+//        '  - collection:',
+//        '      is: [ blah ]',
+//        '      displayName: Collection',
+//        '      description: This resourceType should be used for any collection of items',
+//        '      post:',
+//        '       foo:',
+//        '/:',
+//        '  type: collection'
+//      ].join('\n');
+//      raml.load(definition).should.be.rejected.with(/there is no trait named blah/).and.notify(done);
+//    });
     it('should apply a trait to a resource type', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -3988,7 +3983,7 @@ describe('Parser', function() {
         '  foo:',
         '/:'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/schema foo must be a scalar/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/schema foo must be a string/).and.notify(done);
     });
     it('should fail when schema is sequence', function(done) {
       var definition = [
@@ -4000,64 +3995,60 @@ describe('Parser', function() {
         '  foo: []',
         '/:'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/schema foo must be a scalar/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/schema foo must be a string/).and.notify(done);
     });
-    it('should fail if a schema is a mapping', function(done) {
-      var definition = [
-        '%YAML 1.2',
-        '%TAG ! tag:raml.org,0.2:',
-        '---',
-        'title: Test',
-        'schemas:',
-        '  foo: |',
-        '       Blah blah',
-        '/foo:',
-        '  displayName: A',
-        '  post:' ,
-        '    description: Blah',
-        '    body:',
-        '      application/json:',
-        '        schema: foo3',
-        '    responses:',
-        '      200:',
-        '        application/json:',
-        '          schema: foo',
-        '      201:',
-        '        application/json:',
-        '          schema: {}',
-        ''
-      ].join('\n');
-
-      raml.load(definition).should.be.rejected.with(/schema is not a scalar/).notify(done);
-    });
-    it('should fail if a schema is an array', function(done) {
-      var definition = [
-        '%YAML 1.2',
-        '%TAG ! tag:raml.org,0.2:',
-        '---',
-        'title: Test',
-        'schemas:',
-        '  foo: |',
-        '       Blah blah',
-        '/foo:',
-        '  displayName: A',
-        '  post:' ,
-        '    description: Blah',
-        '    body:',
-        '      application/json:',
-        '        schema: foo3',
-        '    responses:',
-        '      200:',
-        '        application/json:',
-        '          schema: foo',
-        '      201:',
-        '        application/json:',
-        '          schema: []',
-        ''
-      ].join('\n');
-
-      raml.load(definition).should.be.rejected.with(/schema is not a scalar/).notify(done);
-    });
+//    it('should fail if a schema is a mapping', function(done) {
+//      var definition = [
+//        '%YAML 1.2',
+//        '%TAG ! tag:raml.org,0.2:',
+//        '---',
+//        'title: Test',
+//        'schemas:',
+//        '  foo: |',
+//        '       Blah blah',
+//        '/foo:',
+//        '  displayName: A',
+//        '  post:' ,
+//        '    description: Blah',
+//        '    body:',
+//        '      application/json:',
+//        '        schema: foo3',
+//        '    responses:',
+//        '      200:',
+//        '        application/json:',
+//        '          schema: foo',
+//        '      201:',
+//        '        application/json:',
+//        '          schema: {}'
+//      ].join('\n');
+//      raml.load(definition).should.be.rejected.with(/schema must be a string/).notify(done);
+//    });
+//    it('should fail if a schema is an array', function(done) {
+//      var definition = [
+//        '%YAML 1.2',
+//        '%TAG ! tag:raml.org,0.2:',
+//        '---',
+//        'title: Test',
+//        'schemas:',
+//        '  foo: |',
+//        '       Blah blah',
+//        '/foo:',
+//        '  displayName: A',
+//        '  post:' ,
+//        '    description: Blah',
+//        '    body:',
+//        '      application/json:',
+//        '        schema: foo3',
+//        '    responses:',
+//        '      200:',
+//        '        application/json:',
+//        '          schema: foo',
+//        '      201:',
+//        '        application/json:',
+//        '          schema: []'
+//      ].join('\n');
+//      raml.load(definition).should.be.rejected.with(/schema must be a string/).notify(done);
+//    });
     it('should apply trait', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -4076,12 +4067,13 @@ describe('Parser', function() {
         '        schema: foo3',
         '    responses:',
         '      200:',
-        '        application/json:',
-        '          schema: foo',
+        '        body:',
+        '          application/json:',
+        '            schema: foo',
         '      201:',
-        '        application/json:',
-        '          schema: foo2',
-        ''
+        '        body:',
+        '          application/json:',
+        '            schema: foo2'
       ].join('\n');
 
       var expected = {
@@ -4101,13 +4093,17 @@ describe('Parser', function() {
             },
             responses: {
               200: {
-                "application/json": {
-                  schema: "Blah blah\n"
+                body: {
+                  "application/json": {
+                    schema: "Blah blah\n"
+                  }
                 }
               },
               201: {
-                "application/json": {
-                  schema: "foo2"
+                body: {
+                  "application/json": {
+                    schema: "foo2"
+                  }
                 }
               }
             },
@@ -4136,12 +4132,13 @@ describe('Parser', function() {
         '        schema: foo',
         '    responses:',
         '      200:',
-        '        application/json:',
-        '          schema: foo',
+        '        body:',
+        '         application/json:',
+        '           schema: foo',
         '      201:',
-        '        application/json:',
-        '          schema: foo2',
-        ''
+        '        body:',
+        '         application/json:',
+        '           schema: foo2'
       ].join('\n');
 
       var expected = {
@@ -4161,13 +4158,17 @@ describe('Parser', function() {
             },
             responses: {
               200: {
-                "application/json": {
-                  schema: "Blah blah\n"
+                body: {
+                  "application/json": {
+                    schema: "Blah blah\n"
+                  }
                 }
               },
               201: {
-                "application/json": {
-                  schema: "foo2"
+                body: {
+                  "application/json": {
+                    schema: "foo2"
+                  }
                 }
               }
             },
@@ -4198,10 +4199,12 @@ describe('Parser', function() {
         '        schema: foo',
         '    responses:',
         '      200:',
-        '        application/json:',
+        '        body:',
+        '         application/json:',
         '          schema: foo',
         '      201:',
-        '        application/json:',
+        '        body:',
+        '         application/json:',
         '          schema: foo2',
         ''
       ].join('\n');
@@ -4224,13 +4227,17 @@ describe('Parser', function() {
             },
             responses: {
               200: {
-                "application/json": {
-                  schema: "Blah blah\n"
+                body: {
+                  "application/json": {
+                    schema: "Blah blah\n"
+                  }
                 }
               },
               201: {
-                "application/json": {
-                  schema: "halb halB\n"
+                body:{
+                  "application/json": {
+                    schema: "halb halB\n"
+                  }
                 }
               }
             },
@@ -4241,6 +4248,655 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
+  });
+  describe('Resource Validations', function() {
+    it('should fail if using parametric property name in a resource', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  displayName: A',
+        '  get:',
+        '  /b:',
+        '    displayName: AB',
+        '    <<property>>:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property '<<property>>' is invalid in a resource/).and.notify(done);
+    });
+    it('should fail if displayName is map', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  displayName: A',
+        '  get:',
+        '  /b:',
+        '    displayName: {}'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property 'displayName' must be a string/).and.notify(done);
+    });
+    it('should fail if displayName is sequence', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  displayName: A',
+        '  get:',
+        '  /b:',
+        '    displayName: []'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property 'displayName' must be a string/).and.notify(done);
+    });
+    it('should fail if summary is map', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  displayName: A',
+        '  get:',
+        '  /b:',
+        '    summary: {}'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property 'summary' must be a string/).and.notify(done);
+    });
+    it('should fail if summary is sequence', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  displayName: A',
+        '  get:',
+        '  /b:',
+        '    summary: []'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property 'summary' must be a string/).and.notify(done);
+    });
+    it('should fail if description is map', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  displayName: A',
+        '  get:',
+        '  /b:',
+        '    description: {}'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property 'description' must be a string/).and.notify(done);
+    });
+    it('should fail if description is sequence', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  displayName: A',
+        '  get:',
+        '  /b:',
+        '    description: []'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property 'description' must be a string/).and.notify(done);
+    });
+    it('should fail if method is sequence', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  displayName: A',
+        '  get: []'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/method must be a mapping/).and.notify(done);
+    });
+    it('should fail if method is scalar', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  displayName: A',
+        '  get: false'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/method must be a mapping/).and.notify(done);
+    });
+    it('should fail if methods displayName is map', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  displayName: A',
+        '  get:',
+        '    displayName: {}'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property 'displayName' must be a string/).and.notify(done);
+    });
+    it('should fail if methods displayName is sequence', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  displayName: A',
+        '  get:',
+        '    displayName: []'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property 'displayName' must be a string/).and.notify(done);
+    });
+    it('should fail if methods summary is map', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  displayName: A',
+        '  get:',
+        '    summary: {}'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property 'summary' must be a string/).and.notify(done);
+    });
+    it('should fail if methods summary is sequence', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  displayName: A',
+        '  get:',
+        '    summary: []'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property 'summary' must be a string/).and.notify(done);
+    });
+    it('should fail if methods description is map', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  displayName: A',
+        '  get:',
+        '    description: {}'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property 'description' must be a string/).and.notify(done);
+    });
+    it('should fail if methods description is sequence', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/a:',
+        '  displayName: A',
+        '  get:',
+        '    description: []'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property 'description' must be a string/).and.notify(done);
+    });
+    it('should fail when declaring a URI parameter in a resource with a wrong property', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    displayName: A',
+        '    description: This is A',
+        '/{hello}:',
+        '  uriParameters:',
+        '    hello:',
+        '      displayName: A',
+        '      blah: This is A'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/unknown property blah/).and.notify(done);
+    });
+    it('should fail when declaring a URI parameter in a nested resource with a wrong property', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    displayName: A',
+        '    description: This is A',
+        '/{hello}:',
+        '  uriParameters:',
+        '    hello:',
+        '      displayName: A',
+        '  /{hello}:',
+        '    uriParameters:',
+        '      hello:',
+        '        displayName: A',
+        '        blah: This is A'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/unknown property blah/).and.notify(done);
+    });
+    it('should fail when not using a declared URI parameter in a nested resource', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    displayName: A',
+        '    description: This is A',
+        '/{hello}:',
+        '  uriParameters:',
+        '    hello:',
+        '      displayName: A',
+        '  /{hello}:',
+        '    uriParameters:',
+        '      not-used:',
+        '        displayName: A'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/not-used uri parameter unused/).and.notify(done);
+    });
+    it('should fail if headers is string', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'uriParameters:',
+        '  a:',
+        '    displayName: A',
+        '    description: This is A',
+        '/{hello}:',
+        '  get:',
+        '    headers: foo'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/property: 'headers' must be a mapping/).and.notify(done);
+    });
+    it('should fail if headers is array', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/foo:',
+        '  get:',
+        '    headers: []'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/property: 'headers' must be a mapping/).and.notify(done);
+    });
+    it('should succeed if headers is null', function(done) {
+      var definition = [
+        'title: Test',
+        '/foo:',
+        '  get:',
+        '    headers:'
+      ].join('\n');
+
+      var expected ={
+        "title": "Test",
+        "resources": [
+          {
+            "relativeUri": "/foo",
+            "methods": [
+              {
+                "headers": null,
+                "method": "get"
+              }
+            ]
+          }
+        ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should fail if header is scalar', function(done) {
+      var definition = [
+        'title: Test',
+        '/foo:',
+        '  get:',
+        '    headers:',
+        '      foo: bar'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/each header must be a mapping/).and.notify(done);
+    });
+    it('should fail if header is sequence', function(done) {
+      var definition = [
+        'title: Test',
+        '/foo:',
+        '  get:',
+        '    headers:',
+        '      foo: []'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/each header must be a mapping/).and.notify(done);
+    });
+    it('should fail if header uses unknown property', function(done) {
+      var definition = [
+        'title: Test',
+        '/foo:',
+        '  get:',
+        '    headers:',
+        '      TemplateHeader:',
+        '       foo:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/unknown property foo/).and.notify(done);
+    });
+    it('should fail if queryParams is string', function(done) {
+      var definition = [
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        '/{hello}:',
+        '  get:',
+        '    queryParameters: foo'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/property: 'queryParameters' must be a mapping/).and.notify(done);
+    });
+    it('should fail if queryParameters is array', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/foo:',
+        '  get:',
+        '    queryParameters: []'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/property: 'queryParameters' must be a mapping/).and.notify(done);
+    });
+    it('should succeed if queryParameters is null', function(done) {
+      var definition = [
+        'title: Test',
+        '/foo:',
+        '  get:',
+        '    queryParameters:'
+      ].join('\n');
+
+      var expected ={
+        "title": "Test",
+        "resources": [
+          {
+            "relativeUri": "/foo",
+            "methods": [
+              {
+                "queryParameters": null,
+                "method": "get"
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should fail if queryParameters use wrong property name', function(done) {
+      var definition = [
+        'title: Test',
+        '/foo:',
+        '  get:',
+        '    queryParameters:',
+        '     FooParam:',
+        '       bar: bar'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/unknown property bar/).and.notify(done);
+    });
+    it('should fail if body is a scalar', function(done) {
+      var definition = [
+        'title: Test',
+        '/foo:',
+        '  get:',
+        '    body: foo'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property: body specification must be a mapping/).and.notify(done);
+    });
+    it('should succeed if body is null', function(done) {
+      var definition = [
+        'title: Test',
+        '/foo:',
+        '  get:',
+        '    body:'
+      ].join('\n');
+      var expected = {
+        title: "Test",
+        resources: [
+          {
+            relativeUri: "/foo",
+            methods: [
+              {
+                body: null,
+                method: "get"
+              }
+            ]
+          }
+        ]
+      }
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should fail if body is using implicit after explicit body', function(done) {
+      var definition = [
+        'title: Test',
+        '/foo:',
+        '  get:',
+        '    body:',
+        '      application/json:',
+        '      schema: foo'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/not compatible with explicit default Media Type/).and.notify(done);
+    });
+    it('should fail if body is using explicit after implicit body', function(done) {
+      var definition = [
+        'title: Test',
+        '/foo:',
+        '  get:',
+        '    body:',
+        '      schema: foo',
+        '      application/json:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/not compatible with implicit default Media Type/).and.notify(done);
+    });
+    it('should fail if formParameters kicks implicit mode on', function(done) {
+      var definition = [
+        'title: Test',
+        '/foo:',
+        '  get:',
+        '    body:',
+        '      formParameters:',
+        '      application/json:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/not compatible with implicit default Media Type/).and.notify(done);
+    });
+    it('should fail if schema kicks implicit mode on', function(done) {
+      var definition = [
+        'title: Test',
+        '/foo:',
+        '  get:',
+        '    body:',
+        '      schema: foo',
+        '      application/json:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/not compatible with implicit default Media Type/).and.notify(done);
+    });
+    it('should fail if example kicks implicit mode on', function(done) {
+      var definition = [
+        'title: Test',
+        '/foo:',
+        '  get:',
+        '    body:',
+        '      example: foo',
+        '      application/json:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/not compatible with implicit default Media Type/).and.notify(done);
+    });
+
+    it('should fail if formParameters is string', function(done) {
+      var definition = [
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        '/{hello}:',
+        '  post:',
+        '    body:',
+        '      formParameters: foo'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/property: 'formParameters' must be a mapping/).and.notify(done);
+    });
+    it('should fail if queryParameters is array', function(done) {
+      var definition = [
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        '/{hello}:',
+        '  post:',
+        '    body:',
+        '      formParameters: []'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/property: 'formParameters' must be a mapping/).and.notify(done);
+    });
+    it('should succeed if queryParameters is null', function(done) {
+      var definition = [
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        '/{hello}:',
+        '  post:',
+        '    body:',
+        '      formParameters:'
+      ].join('\n');
+
+      var expected ={
+        "title": "Test",
+        baseUri: "http://{a}.myapi.org",
+        "resources": [
+          {
+            "relativeUri": "/{hello}",
+            "methods": [
+              {
+                body:{
+                  formParameters: null,
+                },
+                "method": "post"
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should fail if queryParameters use wrong property name', function(done) {
+      var definition = [
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        '/{hello}:',
+        '  post:',
+        '    body:',
+        '      formParameters:',
+        '        Formparam:',
+        '           foo: blah'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/unknown property foo/).and.notify(done);
+    });
+    it('should fail if responses is scalar', function(done) {
+      var definition = [
+        'title: Test',
+        '/root:',
+        '  post:',
+        '    responses: scalar'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property: 'responses' must be a mapping/).and.notify(done);
+    });
+    it('should fail if responses is array', function(done) {
+      var definition = [
+        'title: Test',
+        '/root:',
+        '  post:',
+        '    responses: [ value ]'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property: 'responses' must be a mapping/).and.notify(done);
+    });
+    it('should succeed if responses is null', function(done) {
+      var definition = [
+        'title: Test',
+        '/root:',
+        '  post:',
+        '    responses:'
+      ].join('\n');
+
+      var expected = {
+        "title": "Test",
+        "resources": [
+          {
+            "relativeUri": "/root",
+            "methods": [
+              {
+                "responses": null,
+                "method": "post"
+              }
+            ]
+          }
+        ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should fail if response code is string', function(done) {
+      var definition = [
+        'title: Test',
+        '/root:',
+        '  post:',
+        '    responses:',
+        '     responses:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/each response key must be an integer/).and.notify(done);
+    });
+    it('should fail if response code is null', function(done) {
+      var definition = [
+        'title: Test',
+        '/root:',
+        '  post:',
+        '    responses:',
+        '     ~:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/each response key must be an integer/).and.notify(done);
+    });
+    it('should fail if response code in list is null', function(done) {
+      var definition = [
+        'title: Test',
+        '/root:',
+        '  post:',
+        '    responses:',
+        '     [string]:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/each response key must be an integer/).and.notify(done);
+    });
+
+
+
+
+
 
   });
   describe('Error reporting', function () {

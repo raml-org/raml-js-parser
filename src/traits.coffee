@@ -67,8 +67,6 @@ class @Traits
     temp = trait.cloneForTrait()
     # by aplying the parameter mapping first, we allow users to rename things in the trait,
     # and then merge it with the resource
-    if method[1].tag is "tag:yaml.org,2002:null"
-      method[1] = new nodes.MappingNode 'tag:yaml.org,2002:map', [], method[0].start_mark, method[1].end_mark
     @apply_parameters temp, plainParameters, useKey
     temp.combine method[1]
     method[1] = temp

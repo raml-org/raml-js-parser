@@ -104,8 +104,3 @@ class @ResourceTypes
           throw new exports.ResourceTypeError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
         result[parameter[0].value] = parameter[1].value
     return result
-
-
-
-
-
