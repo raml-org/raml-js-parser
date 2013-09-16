@@ -44,6 +44,7 @@ class @Composer
       @load_schemas document
       @load_traits document
       @load_types document
+      @load_security_schemes document
 
     if validate
       @validate_document document

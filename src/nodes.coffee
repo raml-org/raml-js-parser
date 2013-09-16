@@ -22,7 +22,10 @@ class @ScalarNode extends @Node
     return temp
     
   combine: (node) ->
-    if not (node instanceof ScalarNode)
+    if this.tag is "tag:yaml.org,2002:null" and node.tag is 'tag:yaml.org,2002:map'
+      @value = new exports.MappingNode 'tag:yaml.org,2002:map', [], node.start_mark, node.end_mark
+      return @value.combine node
+    else if not (node instanceof ScalarNode)
       throw new exports.ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
     @value = node.value
     
@@ -85,7 +88,7 @@ class @MappingNode extends @CollectionNode
       value = property[1].clone()
 
       # skip 'is', 'displayName' and 'description' property
-      unless name.value.match(/^(is)$/i)
+      unless name.value.match(/^(is|type)$/i)
         properties.push [ name, value ]
     temp = new @constructor( @tag, properties, @start_mark, @end_mark, @flow_style)
     return temp

@@ -23,12 +23,51 @@ The Validator class deals with validating a YAML file according to the spec
 ###
 class @Validator
   constructor: ->
-    @validations = [@is_map, @has_title, @valid_base_uri, @validate_base_uri_parameters, @valid_root_properties, @validate_traits, @validate_resources, @validate_traits, @validate_types, @validate_root_schemas, @valid_absolute_uris, @valid_trait_consumption]
+    @validations = [@is_map, @has_title, @valid_base_uri, @validate_base_uri_parameters, @valid_root_properties, @validate_security_schemes, @validate_traits, @validate_resources, @validate_traits, @validate_types, @validate_root_schemas, @valid_absolute_uris, @valid_trait_consumption]
 
   validate_document: (node) ->
     @validations.forEach (validation) =>
       validation.call @, node
     return true
+
+  validate_security_schemes: (node) ->
+    @check_is_map node
+    if @has_property node, /^securitySchemes$/i
+      schemesProperty = @get_property node, /^securitySchemes$/i
+      unless schemesProperty.tag is "tag:yaml.org,2002:seq"
+        throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security schemes property, it must be an array', secSchemes.start_mark
+      schemesProperty.value.forEach (scheme_entry) =>
+        unless scheme_entry.tag is "tag:yaml.org,2002:map"
+          throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security scheme property, it must be a map', scheme_entry.start_mark
+        scheme_entry.value.forEach (scheme) =>
+          unless scheme[1].tag is "tag:yaml.org,2002:map"
+            throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security scheme property, it must be a map', scheme.start_mark
+          @validate_security_scheme scheme[1]
+
+  validate_security_scheme: (scheme) ->
+    @check_is_map scheme
+    type = null
+    settings = null
+    scheme.value.forEach (property) =>
+      switch property[0].value
+        when "description"
+          unless property[1].tag is "tag:yaml.org,2002:str"
+            throw new exports.ValidationError 'while validating security scheme', null, 'schemes description must be a string', property[1].start_mark
+        when "type"
+          type = property[1].value
+          unless property[1].tag is "tag:yaml.org,2002:str"
+            throw new exports.ValidationError 'while validating security scheme', null, 'schemes description must be a string', property[1].start_mark
+          unless type.match(/^(OAuth 1.0|OAuth 2.0|Basic Authentication|Digest Authentication|x-\{.+\})$/)
+            throw new exports.ValidationError 'while validating security scheme', null, 'schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-\{.+\}"', property[1].start_mark
+        when "describedBy"
+          @validate_method property, true
+        when "settings"
+          settings = property[1].value
+          unless property[1].tag is "tag:yaml.org,2002:map" or property[1].tag is "tag:yaml.org,2002:null"
+            throw new exports.ValidationError 'while validating security scheme', null, 'schemes settings must be a map', property[1].start_mark
+        else
+            throw new exports.ValidationError 'while validating security scheme', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
+
 
   validate_root_schemas: (node) ->
     if @has_property node, /^schemas$/i
@@ -47,11 +86,11 @@ class @Validator
 
   validate_base_uri_parameters: (node) ->
     @check_is_map node
-    if @has_property node, /^uriParameters$/i
+    if @has_property node, /^baseUriParameters$/i
       if not @has_property node, /^baseUri$/i
         throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', node.start_mark
       baseUri = @property_value node, /^baseUri$/i
-      @validate_uri_parameters baseUri, @get_property node, /^uriParameters$/i
+      @validate_uri_parameters baseUri, @get_property node, /^baseUriParameters$/i
 
   validate_uri_parameters: (uri, uriProperty) ->
     try
@@ -159,10 +198,10 @@ class @Validator
           throw new exports.ValidationError 'while validating parameter properties', null, 'type can either be: string, number, integer or date', childNode[1].start_mark
       else if propertyName.match /^required$/i
         unless propertyValue.match(/^(true|false)$/)
-          throw new exports.ValidationError 'while validating parameter properties', null, '"' + required + '"' + 'required can be any either true or false', childNode[1].start_mark
+          throw new exports.ValidationError 'while validating parameter properties', null, 'required can be any either true or false', childNode[1].start_mark
       else if propertyName.match /^repeat$/i
         unless propertyValue.match(/^(true|false)$/)
-          throw new exports.ValidationError 'while validating parameter properties', null, '"' + repeat + '"' + 'repeat can be any either true or false', childNode[1].start_mark
+          throw new exports.ValidationError 'while validating parameter properties', null, 'repeat can be any either true or false', childNode[1].start_mark
 
   valid_root_properties: (node) ->
     @check_is_map node
@@ -178,6 +217,7 @@ class @Validator
             propertyName.match(/^description$/i) or
             propertyName.match(/^type$/i) or
             propertyName.match(/^enum$/i) or
+            propertyName.match(/^example$/i) or
             propertyName.match(/^pattern$/i) or
             propertyName.match(/^minLength$/i) or
             propertyName.match(/^maxLength$/i) or
@@ -190,11 +230,12 @@ class @Validator
   is_valid_root_property_name: (propertyName) ->
     return (propertyName.value.match(/^title$/i) or
             propertyName.value.match(/^baseUri$/i) or
+            propertyName.value.match(/^securitySchemes$/i) or
             propertyName.value.match(/^schemas$/i) or
             propertyName.value.match(/^version$/i) or
             propertyName.value.match(/^traits$/i) or
             propertyName.value.match(/^documentation$/i) or
-            propertyName.value.match(/^uriParameters$/i) or
+            propertyName.value.match(/^baseUriParameters$/i) or
             propertyName.value.match(/^resourceTypes$/i) or
             propertyName.value.match(/^\//i))
 
@@ -249,6 +290,16 @@ class @Validator
           @validate_body property, allowParameterKeys
         else if property[0].value.match(/^responses$/)
           @validate_responses property, allowParameterKeys
+        else if property[0].value.match(/^securedBy$/)
+          unless property[1].tag is "tag:yaml.org,2002:seq"
+            throw new exports.ValidationError 'while validating resources', null, "property 'securedBy' must be a list", property[0].start_mark
+          property[1].value.forEach (secScheme) =>
+            if secScheme.tag is "tag:yaml.org,2002:seq"
+              throw new exports.ValidationError 'while validating securityScheme consumption', null, 'securityScheme reference cannot be a list', secScheme.start_mark
+            unless secScheme.tag is "tag:yaml.org,2002:null"
+              securitySchemeName = @key_or_value secScheme
+              unless @get_security_scheme securitySchemeName
+                throw new exports.ValidationError 'while validating securityScheme consumption', null, 'there is no securityScheme named ' + securitySchemeName, secScheme.start_mark
         else
           throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a method", property[0].start_mark
 
