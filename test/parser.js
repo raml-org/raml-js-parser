@@ -4385,6 +4385,10 @@ describe('Parser', function() {
         ' - scheme:',
         '     description: This is some text',
         '     type: OAuth 2.0',
+        '     settings:',
+        '       authorizationUrl: https://www.dropbox.com/1/oauth2/authorize',
+        '       accessTokenUrl: https://api.dropbox.com/1/oauth2/token',
+        '       authorizationGrants: [ code, token ]',
         '/resource:'
       ].join('\n');
       var expected = {
@@ -4393,7 +4397,12 @@ describe('Parser', function() {
           {
             "scheme": {
               "description": "This is some text",
-              "type": "OAuth 2.0"
+              "type": "OAuth 2.0",
+              settings: {
+                authorizationUrl: "https://www.dropbox.com/1/oauth2/authorize",
+                accessTokenUrl: "https://api.dropbox.com/1/oauth2/token",
+                authorizationGrants: ["code", "token"]
+              }
             }
           }
         ],
@@ -4415,6 +4424,10 @@ describe('Parser', function() {
         ' - scheme:',
         '     description: This is some text',
         '     type: OAuth 1.0',
+        '     settings:',
+        '       requestTokenUri: https://api.dropbox.com/1/oauth/request_token',
+        '       authorizationUri: https://www.dropbox.com/1/oauth/authorize',
+        '       tokenCredentialsUri: https://api.dropbox.com/1/oauth/access_token',
         '/resource:'
       ].join('\n');
       var expected = {
@@ -4423,7 +4436,12 @@ describe('Parser', function() {
           {
             "scheme": {
               "description": "This is some text",
-              "type": "OAuth 1.0"
+              "type": "OAuth 1.0",
+              settings:{
+                requestTokenUri: "https://api.dropbox.com/1/oauth/request_token",
+                authorizationUri: "https://www.dropbox.com/1/oauth/authorize",
+                tokenCredentialsUri: "https://api.dropbox.com/1/oauth/access_token"
+              }
             }
           }
         ],

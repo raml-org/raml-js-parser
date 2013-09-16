@@ -69,13 +69,64 @@ class @Validator
         when "describedBy"
           @validate_method property, true
         when "settings"
-          settings = property[1].value
+          settings = property
           unless @is_nullable_mapping property[1]
             throw new exports.ValidationError 'while validating security scheme', null, 'schemes settings must be a map', property[1].start_mark
         else
             throw new exports.ValidationError 'while validating security scheme', null, "property: '" + property[0].value + "' is invalid in a security scheme", property[0].start_mark
     unless type
       throw new exports.ValidationError 'while validating security scheme', null, 'schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-\{.+\}"', scheme.start_mark
+    else if type is "OAuth 2.0"
+      unless settings
+        throw new exports.ValidationError 'while validating security scheme', null, 'for OAuth 2.0 settings must be a map', scheme.start_mark
+      @validate_oauth2_settings settings
+      # validate settings
+    else if type is "OAuth 1.0"
+      unless settings
+        throw new exports.ValidationError 'while validating security scheme', null, 'for OAuth 1.0 settings must be a map', scheme.start_mark
+      @validate_oauth1_settings settings
+
+  validate_oauth2_settings: (settings) ->
+    authorizationUrl = false
+    accessTokenUrl = false
+    settings[1].value.forEach (property) =>
+      if property[0].value is "authorizationUrl"
+        unless @is_string property[1]
+          throw new exports.ValidationError 'while validating security scheme', null, 'authorizationUrl must be a URL', property[0].start_mark
+        authorizationUrl = true
+      if property[0].value is "accessTokenUrl"
+        unless @is_string property[1]
+          throw new exports.ValidationError 'while validating security scheme', null, 'accessTokenUrl must be a URL', property[0].start_mark
+        accessTokenUrl = true
+    unless  accessTokenUrl
+      throw new exports.ValidationError 'while validating security scheme', null, 'accessTokenUrl must be a URL', settings.start_mark
+    unless  authorizationUrl
+      throw new exports.ValidationError 'while validating security scheme', null, 'authorizationUrl must be a URL', settings.start_mark
+
+  validate_oauth1_settings: (settings) ->
+    requestTokenUri = false
+    authorizationUri = false
+    tokenCredentialsUri = false
+    settings[1].value.forEach (property) =>
+      if property[0].value is "requestTokenUri"
+        unless @is_string property[1]
+          throw new exports.ValidationError 'while validating security scheme', null, 'requestTokenUri must be a URL', property[0].start_mark
+        requestTokenUri = true
+      if property[0].value is "authorizationUri"
+        unless @is_string property[1]
+          throw new exports.ValidationError 'while validating security scheme', null, 'authorizationUri must be a URL', property[0].start_mark
+        authorizationUri = true
+      if property[0].value is "tokenCredentialsUri"
+        unless @is_string property[1]
+          throw new exports.ValidationError 'while validating security scheme', null, 'tokenCredentialsUri must be a URL', property[0].start_mark
+        tokenCredentialsUri = true
+    unless  requestTokenUri
+      throw new exports.ValidationError 'while validating security scheme', null, 'requestTokenUri must be a URL', settings.start_mark
+    unless  authorizationUri
+      throw new exports.ValidationError 'while validating security scheme', null, 'authorizationUri must be a URL', settings.start_mark
+    unless  tokenCredentialsUri
+      throw new exports.ValidationError 'while validating security scheme', null, 'tokenCredentialsUri must be a URL', settings.start_mark
+
 
   validate_root_schemas: (node) ->
     if @has_property node, /^schemas$/

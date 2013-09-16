@@ -8001,7 +8001,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./resourceTypes":23,"./scanner":19,"./schemas":25,"./securitySchemes":26,"./traits":24,"./util":4,"./validator":22}],13:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./securitySchemes":26,"./traits":23,"./util":4,"./validator":22}],13:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -9163,7 +9163,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./util":4}],23:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4}],24:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10990,7 +10990,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],24:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],23:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11874,7 +11874,7 @@ function decode(str) {
           case "describedBy":
             return _this.validate_method(property, true);
           case "settings":
-            settings = property[1].value;
+            settings = property;
             if (!_this.is_nullable_mapping(property[1])) {
               throw new exports.ValidationError('while validating security scheme', null, 'schemes settings must be a map', property[1].start_mark);
             }
@@ -11885,6 +11885,80 @@ function decode(str) {
       });
       if (!type) {
         throw new exports.ValidationError('while validating security scheme', null, 'schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-\{.+\}"', scheme.start_mark);
+      } else if (type === "OAuth 2.0") {
+        if (!settings) {
+          throw new exports.ValidationError('while validating security scheme', null, 'for OAuth 2.0 settings must be a map', scheme.start_mark);
+        }
+        return this.validate_oauth2_settings(settings);
+      } else if (type === "OAuth 1.0") {
+        if (!settings) {
+          throw new exports.ValidationError('while validating security scheme', null, 'for OAuth 1.0 settings must be a map', scheme.start_mark);
+        }
+        return this.validate_oauth1_settings(settings);
+      }
+    };
+
+    Validator.prototype.validate_oauth2_settings = function(settings) {
+      var accessTokenUrl, authorizationUrl,
+        _this = this;
+      authorizationUrl = false;
+      accessTokenUrl = false;
+      settings[1].value.forEach(function(property) {
+        if (property[0].value === "authorizationUrl") {
+          if (!_this.is_string(property[1])) {
+            throw new exports.ValidationError('while validating security scheme', null, 'authorizationUrl must be a URL', property[0].start_mark);
+          }
+          authorizationUrl = true;
+        }
+        if (property[0].value === "accessTokenUrl") {
+          if (!_this.is_string(property[1])) {
+            throw new exports.ValidationError('while validating security scheme', null, 'accessTokenUrl must be a URL', property[0].start_mark);
+          }
+          return accessTokenUrl = true;
+        }
+      });
+      if (!accessTokenUrl) {
+        throw new exports.ValidationError('while validating security scheme', null, 'accessTokenUrl must be a URL', settings.start_mark);
+      }
+      if (!authorizationUrl) {
+        throw new exports.ValidationError('while validating security scheme', null, 'authorizationUrl must be a URL', settings.start_mark);
+      }
+    };
+
+    Validator.prototype.validate_oauth1_settings = function(settings) {
+      var authorizationUri, requestTokenUri, tokenCredentialsUri,
+        _this = this;
+      requestTokenUri = false;
+      authorizationUri = false;
+      tokenCredentialsUri = false;
+      settings[1].value.forEach(function(property) {
+        if (property[0].value === "requestTokenUri") {
+          if (!_this.is_string(property[1])) {
+            throw new exports.ValidationError('while validating security scheme', null, 'requestTokenUri must be a URL', property[0].start_mark);
+          }
+          requestTokenUri = true;
+        }
+        if (property[0].value === "authorizationUri") {
+          if (!_this.is_string(property[1])) {
+            throw new exports.ValidationError('while validating security scheme', null, 'authorizationUri must be a URL', property[0].start_mark);
+          }
+          authorizationUri = true;
+        }
+        if (property[0].value === "tokenCredentialsUri") {
+          if (!_this.is_string(property[1])) {
+            throw new exports.ValidationError('while validating security scheme', null, 'tokenCredentialsUri must be a URL', property[0].start_mark);
+          }
+          return tokenCredentialsUri = true;
+        }
+      });
+      if (!requestTokenUri) {
+        throw new exports.ValidationError('while validating security scheme', null, 'requestTokenUri must be a URL', settings.start_mark);
+      }
+      if (!authorizationUri) {
+        throw new exports.ValidationError('while validating security scheme', null, 'authorizationUri must be a URL', settings.start_mark);
+      }
+      if (!tokenCredentialsUri) {
+        throw new exports.ValidationError('while validating security scheme', null, 'tokenCredentialsUri must be a URL', settings.start_mark);
       }
     };
 
@@ -12645,7 +12719,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./traits":24,"uritemplate":28}],27:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./traits":23,"uritemplate":28}],27:[function(require,module,exports){
 (function(process,Buffer){/**
  * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
  *
@@ -16721,5 +16795,5 @@ module.exports = function(cb) {
 module.exports.ConcatStream = ConcatStream
 
 })(require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":14,"stream":34,"util":35}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,23,19,25,26,3,24,4,22,6])
+},{"__browserify_buffer":14,"stream":34,"util":35}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,24,19,25,26,3,23,4,22,6])
 ;
