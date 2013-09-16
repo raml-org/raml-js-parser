@@ -4259,6 +4259,320 @@ describe('Parser', function() {
     });
 
   });
+  describe('Security schemes', function(){
+    it('should fail when schemes is mapping', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        '  foo: |',
+        '       Blah blah',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/invalid security schemes property, it must be an array/).and.notify(done);
+    });
+    it('should fail when schemes is scalar', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes: foo',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/invalid security schemes property, it must be an array/).and.notify(done);
+    });
+    it('should fail when schemes is null', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/invalid security schemes property, it must be an array/).and.notify(done);
+    });
+    it('should succeed when schemes is empty', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes: []',
+        '/resource:'
+      ].join('\n');
+      var expected = {
+        "title": "Test",
+        "securitySchemes": [],
+        "resources": [
+          {
+            "relativeUri": "/resource"
+          }
+        ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should fail when schemes has a null scheme', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - ',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/invalid security scheme property, it must be a map/).and.notify(done);
+    });
+    it('should fail when scheme is scalar', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme: scalar',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/invalid security scheme property, it must be a map/).and.notify(done);
+    });
+    it('should fail when scheme is array', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme: []',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/invalid security scheme property, it must be a map/).and.notify(done);
+    });
+    it('should fail when scheme contains a wrong property', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     property: null',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property: 'property' is invalid in a security scheme/).and.notify(done);
+    });
+    it('should fail when scheme does not have type', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-{.+}"/).and.notify(done);
+    });
+    it('should succeed when type is "OAuth 2.0"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: OAuth 2.0',
+        '/resource:'
+      ].join('\n');
+      var expected = {
+        "title": "Test",
+        "securitySchemes": [
+          {
+            "scheme": {
+              "description": "This is some text",
+              "type": "OAuth 2.0"
+            }
+          }
+        ],
+        "resources": [
+          {
+            "relativeUri": "/resource"
+          }
+        ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should succeed when type is "OAuth 1.0"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: OAuth 1.0',
+        '/resource:'
+      ].join('\n');
+      var expected = {
+        "title": "Test",
+        "securitySchemes": [
+          {
+            "scheme": {
+              "description": "This is some text",
+              "type": "OAuth 1.0"
+            }
+          }
+        ],
+        "resources": [
+          {
+            "relativeUri": "/resource"
+          }
+        ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should succeed when type is "Basic Authentication"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: Basic Authentication',
+        '/resource:'
+      ].join('\n');
+      var expected = {
+        "title": "Test",
+        "securitySchemes": [
+          {
+            "scheme": {
+              "description": "This is some text",
+              "type": "Basic Authentication"
+            }
+          }
+        ],
+        "resources": [
+          {
+            "relativeUri": "/resource"
+          }
+        ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should succeed when type is "Digest Authentication"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: Digest Authentication',
+        '/resource:'
+      ].join('\n');
+      var expected = {
+        "title": "Test",
+        "securitySchemes": [
+          {
+            "scheme": {
+              "description": "This is some text",
+              "type": "Digest Authentication"
+            }
+          }
+        ],
+        "resources": [
+          {
+            "relativeUri": "/resource"
+          }
+        ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should succeed when type is "x-other-something"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: x-other-something',
+        '/resource:'
+      ].join('\n');
+      var expected = {
+        "title": "Test",
+        "securitySchemes": [
+          {
+            "scheme": {
+              "description": "This is some text",
+              "type": "x-other-something"
+            }
+          }
+        ],
+        "resources": [
+          {
+            "relativeUri": "/resource"
+          }
+        ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should fail when type is null', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type:',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-{.+}"/).and.notify(done);
+    });
+    it('should fail when type is array', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: []',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-{.+}"/).and.notify(done);
+    });
+    it('should fail when type is map', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: {}',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-{.+}"/).and.notify(done);
+    });
+
+
+
+  });
   describe('Resource Validations', function() {
     it('should fail if using parametric property name in a resource', function(done) {
       var definition = [
