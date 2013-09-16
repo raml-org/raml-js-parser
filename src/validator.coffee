@@ -32,8 +32,8 @@ class @Validator
 
   validate_security_schemes: (node) ->
     @check_is_map node
-    if @has_property node, /^securitySchemes$/i
-      schemesProperty = @get_property node, /^securitySchemes$/i
+    if @has_property node, /^securitySchemes$/
+      schemesProperty = @get_property node, /^securitySchemes$/
       unless @is_sequence schemesProperty
         throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security schemes property, it must be an array', schemesProperty.start_mark
       schemesProperty.value.forEach (scheme_entry) =>
@@ -78,8 +78,8 @@ class @Validator
       throw new exports.ValidationError 'while validating security scheme', null, 'schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-\{.+\}"', scheme.start_mark
 
   validate_root_schemas: (node) ->
-    if @has_property node, /^schemas$/i
-      schemas = @get_property node, /^schemas$/i
+    if @has_property node, /^schemas$/
+      schemas = @get_property node, /^schemas$/
       unless @is_mapping schemas
         throw new exports.ValidationError 'while validating schemas', null, 'schemas property must be a mapping', schemas.start_mark
       schemaList = @get_all_schemas node
@@ -94,11 +94,11 @@ class @Validator
 
   validate_base_uri_parameters: (node) ->
     @check_is_map node
-    if @has_property node, /^baseUriParameters$/i
-      if not @has_property node, /^baseUri$/i
+    if @has_property node, /^baseUriParameters$/
+      if not @has_property node, /^baseUri$/
         throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', node.start_mark
-      baseUri = @property_value node, /^baseUri$/i
-      @validate_uri_parameters baseUri, @get_property node, /^baseUriParameters$/i
+      baseUri = @property_value node, /^baseUri$/
+      @validate_uri_parameters baseUri, @get_property node, /^baseUriParameters$/
 
   validate_uri_parameters: (uri, uriProperty) ->
     try
@@ -114,8 +114,8 @@ class @Validator
 
   validate_types: (node) ->
     @check_is_map node
-    if @has_property node, /^resourceTypes$/i
-      typeProperty = @get_property node, /^resourceTypes$/i
+    if @has_property node, /^resourceTypes$/
+      typeProperty = @get_property node, /^resourceTypes$/
       types = typeProperty.value
 
       unless @is_sequence typeProperty
@@ -158,8 +158,8 @@ class @Validator
 
   validate_traits: (node) ->
     @check_is_map node
-    if @has_property node, /^traits$/i
-      traitsList = @property_value node, /^traits$/i
+    if @has_property node, /^traits$/
+      traitsList = @property_value node, /^traits$/
       unless typeof traitsList is "object"
         throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits definition, it must be an array', traitsList.start_mark
       traitsList.forEach (trait_entry) =>
@@ -171,8 +171,8 @@ class @Validator
     return unless node.value
 
     invalid = node.value.filter (childNode) ->
-      return (  childNode[0].value.match(/^is$/i) or
-                childNode[0].value.match(/^type$/i))
+      return (  childNode[0].value.match(/^is$/) or
+                childNode[0].value.match(/^type$/))
     if invalid.length > 0
       throw new exports.ValidationError 'while validating trait properties', null, "invalid property '" + invalid[0][0].value + "'", invalid[0][0].start_mark
 
@@ -189,25 +189,25 @@ class @Validator
       propertyName = childNode[0].value
       propertyValue = childNode[1].value
 
-      if propertyName.match(/^minLength$/i)
+      if propertyName.match(/^minLength$/)
         if isNaN(propertyValue)
           throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minLength must be a number', childNode[1].start_mark
-      else if propertyName.match(/^maxLength$/i)
+      else if propertyName.match(/^maxLength$/)
         if isNaN(propertyValue)
           throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maxLength must be a number', childNode[1].start_mark
-      else if propertyName.match(/^minimum$/i)
+      else if propertyName.match(/^minimum$/)
         if isNaN(propertyValue)
           throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minimum must be a number', childNode[1].start_mark
-      else if propertyName.match /^maximum$/i
+      else if propertyName.match /^maximum$/
         if isNaN(propertyValue)
           throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maximum must be a number', childNode[1].start_mark
-      else if propertyName.match /^type$/i
+      else if propertyName.match /^type$/
         if propertyValue != 'string' and propertyValue != 'number' and propertyValue != 'integer' and propertyValue != 'date'
           throw new exports.ValidationError 'while validating parameter properties', null, 'type can either be: string, number, integer or date', childNode[1].start_mark
-      else if propertyName.match /^required$/i
+      else if propertyName.match /^required$/
         unless propertyValue.match(/^(true|false)$/)
           throw new exports.ValidationError 'while validating parameter properties', null, 'required can be any either true or false', childNode[1].start_mark
-      else if propertyName.match /^repeat$/i
+      else if propertyName.match /^repeat$/
         unless propertyValue.match(/^(true|false)$/)
           throw new exports.ValidationError 'while validating parameter properties', null, 'repeat can be any either true or false', childNode[1].start_mark
 
@@ -221,35 +221,35 @@ class @Validator
       throw new exports.ValidationError 'while validating root properties', null, 'unknown property ' + invalid[0][0].value, invalid[0][0].start_mark
 
   is_valid_parameter_property_name: (propertyName) ->
-    return propertyName.match(/^displayName$/i) or
-            propertyName.match(/^description$/i) or
-            propertyName.match(/^type$/i) or
-            propertyName.match(/^enum$/i) or
-            propertyName.match(/^example$/i) or
-            propertyName.match(/^pattern$/i) or
-            propertyName.match(/^minLength$/i) or
-            propertyName.match(/^maxLength$/i) or
-            propertyName.match(/^minimum$/i) or
-            propertyName.match(/^maximum$/i) or
-            propertyName.match(/^required$/i) or
-            propertyName.match(/^repeat$/i) or
-            propertyName.match(/^default$/i)
+    return propertyName.match(/^displayName$/) or
+            propertyName.match(/^description$/) or
+            propertyName.match(/^type$/) or
+            propertyName.match(/^enum$/) or
+            propertyName.match(/^example$/) or
+            propertyName.match(/^pattern$/) or
+            propertyName.match(/^minLength$/) or
+            propertyName.match(/^maxLength$/) or
+            propertyName.match(/^minimum$/) or
+            propertyName.match(/^maximum$/) or
+            propertyName.match(/^required$/) or
+            propertyName.match(/^repeat$/) or
+            propertyName.match(/^default$/)
 
   is_valid_root_property_name: (propertyName) ->
-    return (propertyName.value.match(/^title$/i) or
-            propertyName.value.match(/^baseUri$/i) or
-            propertyName.value.match(/^securitySchemes$/i) or
-            propertyName.value.match(/^schemas$/i) or
-            propertyName.value.match(/^version$/i) or
-            propertyName.value.match(/^traits$/i) or
-            propertyName.value.match(/^documentation$/i) or
-            propertyName.value.match(/^baseUriParameters$/i) or
-            propertyName.value.match(/^resourceTypes$/i) or
-            propertyName.value.match(/^\//i))
+    return (propertyName.value.match(/^title$/) or
+            propertyName.value.match(/^baseUri$/) or
+            propertyName.value.match(/^securitySchemes$/) or
+            propertyName.value.match(/^schemas$/) or
+            propertyName.value.match(/^version$/) or
+            propertyName.value.match(/^traits$/) or
+            propertyName.value.match(/^documentation$/) or
+            propertyName.value.match(/^baseUriParameters$/) or
+            propertyName.value.match(/^resourceTypes$/) or
+            propertyName.value.match(/^\//))
 
   child_resources: (node) ->
     if node and @is_mapping node
-      return node.value.filter (childNode) -> return childNode[0].value.match(/^\//i);
+      return node.value.filter (childNode) -> return childNode[0].value.match(/^\//);
     return []
 
   validate_resources: (node) ->
@@ -488,22 +488,22 @@ class @Validator
       else
         resourceResponse.uri = childResource[0].value
       
-      if @has_property childResource[1], /^displayName$/i
-        resourceResponse.displayName = @property_value childResource[1], /^displayName$/i
+      if @has_property childResource[1], /^displayName$/
+        resourceResponse.displayName = @property_value childResource[1], /^displayName$/
 
-      if @has_property childResource[1], /^get$/i
+      if @has_property childResource[1], /^get$/
         resourceResponse.methods.push 'get'
-      if @has_property childResource[1], /^post$/i
+      if @has_property childResource[1], /^post$/
         resourceResponse.methods.push 'post'
-      if @has_property childResource[1], /^put$/i
+      if @has_property childResource[1], /^put$/
         resourceResponse.methods.push 'put'
-      if @has_property childResource[1], /^patch$/i
+      if @has_property childResource[1], /^patch$/
         resourceResponse.methods.push 'patch'
-      if @has_property childResource[1], /^delete$/i
+      if @has_property childResource[1], /^delete$/
         resourceResponse.methods.push 'delete'
-      if @has_property childResource[1], /^head$/i
+      if @has_property childResource[1], /^head$/
         resourceResponse.methods.push 'head'
-      if @has_property childResource[1], /^options$/i
+      if @has_property childResource[1], /^options$/
         resourceResponse.methods.push 'options'
       
       resourceResponse.line = childResource[0].start_mark.line + 1
@@ -553,16 +553,16 @@ class @Validator
     @check_is_map node
     resources = @child_resources node
     resources.forEach (resource) =>
-      if @has_property resource[1], /^is$/i
-        uses = @property_value resource[1], /^is$/i
+      if @has_property resource[1], /^is$/
+        uses = @property_value resource[1], /^is$/
         uses.forEach (use) =>
           if not @get_trait @key_or_value use
             throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
 
       methods = @child_methods resource[1]
       methods.forEach (method) =>
-        if @has_property method[1], /^is$/i
-          uses = @property_value method[1], /^is$/i
+        if @has_property method[1], /^is$/
+          uses = @property_value method[1], /^is$/
           uses.forEach (use) =>
             if not @get_trait @key_or_value use
               throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
@@ -571,7 +571,7 @@ class @Validator
 
   has_title: (node) ->
     @check_is_map node
-    unless @has_property node, /^title$/i
+    unless @has_property node, /^title$/
       throw new exports.ValidationError 'while validating title', null, 'missing title', node.start_mark
     title = @get_property node, "title"
     unless typeof title.value is 'string' or typeof title.value is 'number'
@@ -579,13 +579,13 @@ class @Validator
 
   has_version: (node) ->
     @check_is_map node
-    if not @has_property node, /^version$/i
+    if not @has_property node, /^version$/
       throw new exports.ValidationError 'while validating version', null, 'missing version', node.start_mark
 
   valid_base_uri: (node) ->
-    if @has_property node, /^baseUri$/i
-      baeUriNode = @get_property node, /^baseUri$/i
-      baseUri = @property_value node, /^baseUri$/i
+    if @has_property node, /^baseUri$/
+      baeUriNode = @get_property node, /^baseUri$/
+      baseUri = @property_value node, /^baseUri$/
       try
         template = uritemplate.parse baseUri
       catch err

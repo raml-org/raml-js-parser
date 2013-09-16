@@ -14,12 +14,12 @@ class @Joiner
   join_resources: (node, call = 0) ->
     resources = []
     if node?.value
-      resources = node.value.filter (childNode) -> return childNode[0]?.value.match(/^\//i)
+      resources = node.value.filter (childNode) -> return childNode[0]?.value.match(/^\//)
     resourcesArray = []
     if resources.length > 0
       # Remove resources from root document
       if node?.value
-        node.value = node.value.filter( (childNode) -> return !childNode[0].value.match(/^\//i) )
+        node.value = node.value.filter( (childNode) -> return !childNode[0].value.match(/^\//) )
       resourcesName = new nodes.ScalarNode 'tag:yaml.org,2002:str', 'resources', resources[0][0].start_mark, resources[ resources.length - 1 ][1].end_mark
       resources.forEach (resource) =>
         relativeUriName = new nodes.ScalarNode 'tag:yaml.org,2002:str', 'relativeUri', resource[0].start_mark, resource[1].end_mark
@@ -38,11 +38,11 @@ class @Joiner
     methods = []
     if node and node.value
       methods = node.value.filter (childNode) ->
-        return childNode[0] and childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/i)
+        return childNode[0] and childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/)
     methodsArray = []  
     if methods.length > 0
       node.value = node.value.filter (childNode) -> 
-        return not childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/i)
+        return not childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/)
       methodsName = new nodes.ScalarNode 'tag:yaml.org,2002:str', 'methods', methods[0][0].start_mark, methods[ methods.length - 1 ][1].end_mark
       
       methods.forEach (method) =>

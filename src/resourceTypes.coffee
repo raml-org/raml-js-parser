@@ -15,8 +15,8 @@ class @ResourceTypes
 
   # Loading is extra careful because it is done before validation (so it can be used for validation)
   load_types: (node) =>
-    if @has_property node, /^resourceTypes$/i
-      allTypes = @property_value node, /^resourceTypes$/i
+    if @has_property node, /^resourceTypes$/
+      allTypes = @property_value node, /^resourceTypes$/
       if allTypes and typeof allTypes is "object"
         allTypes.forEach (type_item) =>
           if type_item and typeof type_item is "object" and typeof type_item.value is "object"
@@ -24,7 +24,7 @@ class @ResourceTypes
               @declaredTypes[type[0].value] = type
 
   has_types: (node) =>
-    if Object.keys(@declaredTypes).length == 0 and @has_property node, /^resourceTypes$/i
+    if Object.keys(@declaredTypes).length == 0 and @has_property node, /^resourceTypes$/
       @load_types node
     return Object.keys(@declaredTypes).length > 0
 
@@ -33,8 +33,8 @@ class @ResourceTypes
 
   get_parent_type_name: (typeName) ->
     type = (@get_type typeName)[1]
-    if type and @has_property type, /^type$/i
-      return @property_value type, /^type$/i
+    if type and @has_property type, /^type$/
+      return @property_value type, /^type$/
     return null
 
   apply_types: (node) =>
@@ -42,8 +42,8 @@ class @ResourceTypes
     if @has_types node
       resources = @child_resources node
       resources.forEach (resource) =>
-        if @has_property resource[1], /^type$/i
-          type = @get_property resource[1], /^type$/i
+        if @has_property resource[1], /^type$/
+          type = @get_property resource[1], /^type$/
           @apply_type resource, type
         @apply_types resource[1]
 
@@ -70,7 +70,7 @@ class @ResourceTypes
       if parentTypeName of compiledTypes
         throw new exports.ResourceTypeError 'while aplying resourceTypes', null, 'circular reference detected: ' + parentTypeName + "->" + typesToApply , child_type.start_mark
       # apply parameters
-      child_type_key = @get_property @get_type(child_type)[1], /^type$/i
+      child_type_key = @get_property @get_type(child_type)[1], /^type$/
       parentTypeMapping = @apply_parameters_to_type parentTypeName, child_type_key
       compiledTypes[parentTypeName] = parentTypeMapping
       # apply traits
