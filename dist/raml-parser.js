@@ -2469,9 +2469,6 @@ return Q;
 
 })(require("__browserify_process"))
 },{"__browserify_process":5}],7:[function(require,module,exports){
-// nothing to see here... no file methods for the browser
-
-},{}],8:[function(require,module,exports){
 var punycode = { encode : function (s) { return s } };
 
 exports.parse = urlParse;
@@ -3077,7 +3074,10 @@ function parseHost(host) {
   return out;
 }
 
-},{"querystring":9}],10:[function(require,module,exports){
+},{"querystring":8}],9:[function(require,module,exports){
+// nothing to see here... no file methods for the browser
+
+},{}],10:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, events, nodes, raml, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -3287,7 +3287,11 @@ function parseHost(host) {
 
 }).call(this);
 
-},{"./errors":1,"./events":2,"./nodes":11,"./raml":12,"url":8}],13:[function(require,module,exports){
+},{"./errors":1,"./events":2,"./nodes":11,"./raml":12,"url":7}],13:[function(require,module,exports){
+window.RAML = {}
+
+window.RAML.Parser = require('../lib/raml')
+},{"../lib/raml":12}],14:[function(require,module,exports){
 require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{1:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
@@ -7152,7 +7156,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 },{}]},{},[])
 ;;module.exports=require("buffer-browserify")
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 (function(Buffer){(function() {
   var MarkedYAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -7787,7 +7791,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 }).call(this);
 
 })(require("__browserify_buffer").Buffer)
-},{"./errors":1,"./nodes":11,"./util":4,"__browserify_buffer":13}],15:[function(require,module,exports){
+},{"./errors":1,"./nodes":11,"./util":4,"__browserify_buffer":14}],16:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -7896,108 +7900,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11}],16:[function(require,module,exports){
-(function() {
-  var composer, construct, joiner, parser, reader, resolver, scanner, schemas, securitySchemes, traits, types, util, validator;
-
-  util = require('./util');
-
-  reader = require('./reader');
-
-  scanner = require('./scanner');
-
-  parser = require('./parser');
-
-  composer = require('./composer');
-
-  resolver = require('./resolver');
-
-  construct = require('./construct');
-
-  validator = require('./validator');
-
-  joiner = require('./joiner');
-
-  traits = require('./traits');
-
-  types = require('./resourceTypes');
-
-  schemas = require('./schemas');
-
-  securitySchemes = require('./securitySchemes');
-
-  this.make_loader = function(Reader, Scanner, Parser, Composer, Resolver, Validator, ResourceTypes, Traits, Schemas, Joiner, SecuritySchemes, Constructor) {
-    if (Reader == null) {
-      Reader = reader.Reader;
-    }
-    if (Scanner == null) {
-      Scanner = scanner.Scanner;
-    }
-    if (Parser == null) {
-      Parser = parser.Parser;
-    }
-    if (Composer == null) {
-      Composer = composer.Composer;
-    }
-    if (Resolver == null) {
-      Resolver = resolver.Resolver;
-    }
-    if (Validator == null) {
-      Validator = validator.Validator;
-    }
-    if (ResourceTypes == null) {
-      ResourceTypes = types.ResourceTypes;
-    }
-    if (Traits == null) {
-      Traits = traits.Traits;
-    }
-    if (Schemas == null) {
-      Schemas = schemas.Schemas;
-    }
-    if (Joiner == null) {
-      Joiner = joiner.Joiner;
-    }
-    if (SecuritySchemes == null) {
-      SecuritySchemes = securitySchemes.SecuritySchemes;
-    }
-    if (Constructor == null) {
-      Constructor = construct.Constructor;
-    }
-    return (function() {
-      var component, components;
-
-      components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Schemas, Joiner, Constructor, SecuritySchemes];
-
-      util.extend.apply(util, [_Class.prototype].concat((function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = components.length; _i < _len; _i++) {
-          component = components[_i];
-          _results.push(component.prototype);
-        }
-        return _results;
-      })()));
-
-      function _Class(stream, location) {
-        var _i, _len, _ref;
-        components[0].call(this, stream, location);
-        _ref = components.slice(1);
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          component = _ref[_i];
-          component.call(this);
-        }
-      }
-
-      return _Class;
-
-    })();
-  };
-
-  this.Loader = this.make_loader();
-
-}).call(this);
-
-},{"./composer":10,"./construct":14,"./joiner":15,"./parser":19,"./reader":17,"./resolver":20,"./resourceTypes":23,"./scanner":18,"./schemas":24,"./securitySchemes":25,"./traits":22,"./util":4,"./validator":21}],11:[function(require,module,exports){
+},{"./errors":1,"./nodes":11}],11:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -8235,7 +8138,108 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],19:[function(require,module,exports){
+},{"./errors":1}],17:[function(require,module,exports){
+(function() {
+  var composer, construct, joiner, parser, reader, resolver, scanner, schemas, securitySchemes, traits, types, util, validator;
+
+  util = require('./util');
+
+  reader = require('./reader');
+
+  scanner = require('./scanner');
+
+  parser = require('./parser');
+
+  composer = require('./composer');
+
+  resolver = require('./resolver');
+
+  construct = require('./construct');
+
+  validator = require('./validator');
+
+  joiner = require('./joiner');
+
+  traits = require('./traits');
+
+  types = require('./resourceTypes');
+
+  schemas = require('./schemas');
+
+  securitySchemes = require('./securitySchemes');
+
+  this.make_loader = function(Reader, Scanner, Parser, Composer, Resolver, Validator, ResourceTypes, Traits, Schemas, Joiner, SecuritySchemes, Constructor) {
+    if (Reader == null) {
+      Reader = reader.Reader;
+    }
+    if (Scanner == null) {
+      Scanner = scanner.Scanner;
+    }
+    if (Parser == null) {
+      Parser = parser.Parser;
+    }
+    if (Composer == null) {
+      Composer = composer.Composer;
+    }
+    if (Resolver == null) {
+      Resolver = resolver.Resolver;
+    }
+    if (Validator == null) {
+      Validator = validator.Validator;
+    }
+    if (ResourceTypes == null) {
+      ResourceTypes = types.ResourceTypes;
+    }
+    if (Traits == null) {
+      Traits = traits.Traits;
+    }
+    if (Schemas == null) {
+      Schemas = schemas.Schemas;
+    }
+    if (Joiner == null) {
+      Joiner = joiner.Joiner;
+    }
+    if (SecuritySchemes == null) {
+      SecuritySchemes = securitySchemes.SecuritySchemes;
+    }
+    if (Constructor == null) {
+      Constructor = construct.Constructor;
+    }
+    return (function() {
+      var component, components;
+
+      components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Schemas, Joiner, Constructor, SecuritySchemes];
+
+      util.extend.apply(util, [_Class.prototype].concat((function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = components.length; _i < _len; _i++) {
+          component = components[_i];
+          _results.push(component.prototype);
+        }
+        return _results;
+      })()));
+
+      function _Class(stream, location) {
+        var _i, _len, _ref;
+        components[0].call(this, stream, location);
+        _ref = components.slice(1);
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          component = _ref[_i];
+          component.call(this);
+        }
+      }
+
+      return _Class;
+
+    })();
+  };
+
+  this.Loader = this.make_loader();
+
+}).call(this);
+
+},{"./composer":10,"./construct":15,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./securitySchemes":26,"./traits":23,"./util":4,"./validator":22}],20:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, events, tokens, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -8846,7 +8850,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./events":2,"./tokens":3}],17:[function(require,module,exports){
+},{"./errors":1,"./events":2,"./tokens":3}],18:[function(require,module,exports){
 (function() {
   var Mark, YAMLError, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -8950,174 +8954,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],23:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, nodes, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  /*
-  The ResourceTypes throws these.
-  */
-
-
-  this.ResourceTypeError = (function(_super) {
-    __extends(ResourceTypeError, _super);
-
-    function ResourceTypeError() {
-      _ref = ResourceTypeError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return ResourceTypeError;
-
-  })(MarkedYAMLError);
-
-  /*
-  The ResourceTypes class deals with applying ResourceTypes to resources according to the spec
-  */
-
-
-  this.ResourceTypes = (function() {
-    function ResourceTypes() {
-      this.apply_parameters_to_type = __bind(this.apply_parameters_to_type, this);
-      this.apply_type = __bind(this.apply_type, this);
-      this.apply_types = __bind(this.apply_types, this);
-      this.get_type = __bind(this.get_type, this);
-      this.has_types = __bind(this.has_types, this);
-      this.load_types = __bind(this.load_types, this);
-      this.declaredTypes = {};
-    }
-
-    ResourceTypes.prototype.load_types = function(node) {
-      var allTypes,
-        _this = this;
-      if (this.has_property(node, /^resourceTypes$/i)) {
-        allTypes = this.property_value(node, /^resourceTypes$/i);
-        if (allTypes && typeof allTypes === "object") {
-          return allTypes.forEach(function(type_item) {
-            if (type_item && typeof type_item === "object" && typeof type_item.value === "object") {
-              return type_item.value.forEach(function(type) {
-                return _this.declaredTypes[type[0].value] = type;
-              });
-            }
-          });
-        }
-      }
-    };
-
-    ResourceTypes.prototype.has_types = function(node) {
-      if (Object.keys(this.declaredTypes).length === 0 && this.has_property(node, /^resourceTypes$/i)) {
-        this.load_types(node);
-      }
-      return Object.keys(this.declaredTypes).length > 0;
-    };
-
-    ResourceTypes.prototype.get_type = function(typeName) {
-      return this.declaredTypes[typeName];
-    };
-
-    ResourceTypes.prototype.get_parent_type_name = function(typeName) {
-      var type;
-      type = (this.get_type(typeName))[1];
-      if (type && this.has_property(type, /^type$/i)) {
-        return this.property_value(type, /^type$/i);
-      }
-      return null;
-    };
-
-    ResourceTypes.prototype.apply_types = function(node) {
-      var resources,
-        _this = this;
-      this.check_is_map(node);
-      if (this.has_types(node)) {
-        resources = this.child_resources(node);
-        return resources.forEach(function(resource) {
-          var type;
-          if (_this.has_property(resource[1], /^type$/i)) {
-            type = _this.get_property(resource[1], /^type$/i);
-            _this.apply_type(resource, type);
-          }
-          return _this.apply_types(resource[1]);
-        });
-      }
-    };
-
-    ResourceTypes.prototype.apply_type = function(resource, typeKey) {
-      var tempType;
-      tempType = this.resolve_inheritance_chain(typeKey);
-      tempType.combine(resource[1]);
-      resource[1] = tempType;
-      return resource[1].remove_question_mark_properties();
-    };
-
-    ResourceTypes.prototype.resolve_inheritance_chain = function(typeKey) {
-      var baseType, child_type, child_type_key, compiledTypes, inherits_from, parentTypeMapping, parentTypeName, result, root_type, type, typeName, typesToApply;
-      typeName = this.key_or_value(typeKey);
-      compiledTypes = {};
-      type = this.apply_parameters_to_type(typeName, typeKey);
-      this.apply_traits_to_resource(type, false);
-      compiledTypes[typeName] = type;
-      typesToApply = [typeName];
-      child_type = typeName;
-      parentTypeName = null;
-      while (parentTypeName = this.get_parent_type_name(child_type)) {
-        if (parentTypeName in compiledTypes) {
-          throw new exports.ResourceTypeError('while aplying resourceTypes', null, 'circular reference detected: ' + parentTypeName + "->" + typesToApply, child_type.start_mark);
-        }
-        child_type_key = this.get_property(this.get_type(child_type)[1], /^type$/i);
-        parentTypeMapping = this.apply_parameters_to_type(parentTypeName, child_type_key);
-        compiledTypes[parentTypeName] = parentTypeMapping;
-        this.apply_traits_to_resource(parentTypeMapping[1], false);
-        typesToApply.push(parentTypeName);
-        child_type = parentTypeName;
-      }
-      root_type = typesToApply.pop();
-      baseType = compiledTypes[root_type].cloneRemoveIs();
-      result = baseType;
-      while (inherits_from = typesToApply.pop()) {
-        baseType = compiledTypes[inherits_from].cloneRemoveIs();
-        baseType.combine(result);
-        result = baseType;
-      }
-      return result;
-    };
-
-    ResourceTypes.prototype.apply_parameters_to_type = function(typeName, typeKey) {
-      var parameters, type;
-      type = (this.get_type(typeName))[1].cloneForTrait();
-      parameters = this._get_parameters_from_type_key(typeKey);
-      this.apply_parameters(type, parameters, typeKey);
-      return type;
-    };
-
-    ResourceTypes.prototype._get_parameters_from_type_key = function(typeKey) {
-      var parameters, result;
-      parameters = this.value_or_undefined(typeKey);
-      result = {};
-      if (parameters && parameters[0] && parameters[0][1] && parameters[0][1].value) {
-        parameters[0][1].value.forEach(function(parameter) {
-          if (parameter[1].tag !== 'tag:yaml.org,2002:str') {
-            throw new exports.ResourceTypeError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
-          }
-          return result[parameter[0].value] = parameter[1].value;
-        });
-      }
-      return result;
-    };
-
-    return ResourceTypes;
-
-  })();
-
-}).call(this);
-
-},{"./errors":1,"./nodes":11}],20:[function(require,module,exports){
+},{"./errors":1}],21:[function(require,module,exports){
 (function() {
   var YAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -9326,7 +9163,174 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11,"./util":4}],18:[function(require,module,exports){
+},{"./errors":1,"./nodes":11,"./util":4}],24:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, nodes, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  /*
+  The ResourceTypes throws these.
+  */
+
+
+  this.ResourceTypeError = (function(_super) {
+    __extends(ResourceTypeError, _super);
+
+    function ResourceTypeError() {
+      _ref = ResourceTypeError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return ResourceTypeError;
+
+  })(MarkedYAMLError);
+
+  /*
+  The ResourceTypes class deals with applying ResourceTypes to resources according to the spec
+  */
+
+
+  this.ResourceTypes = (function() {
+    function ResourceTypes() {
+      this.apply_parameters_to_type = __bind(this.apply_parameters_to_type, this);
+      this.apply_type = __bind(this.apply_type, this);
+      this.apply_types = __bind(this.apply_types, this);
+      this.get_type = __bind(this.get_type, this);
+      this.has_types = __bind(this.has_types, this);
+      this.load_types = __bind(this.load_types, this);
+      this.declaredTypes = {};
+    }
+
+    ResourceTypes.prototype.load_types = function(node) {
+      var allTypes,
+        _this = this;
+      if (this.has_property(node, /^resourceTypes$/i)) {
+        allTypes = this.property_value(node, /^resourceTypes$/i);
+        if (allTypes && typeof allTypes === "object") {
+          return allTypes.forEach(function(type_item) {
+            if (type_item && typeof type_item === "object" && typeof type_item.value === "object") {
+              return type_item.value.forEach(function(type) {
+                return _this.declaredTypes[type[0].value] = type;
+              });
+            }
+          });
+        }
+      }
+    };
+
+    ResourceTypes.prototype.has_types = function(node) {
+      if (Object.keys(this.declaredTypes).length === 0 && this.has_property(node, /^resourceTypes$/i)) {
+        this.load_types(node);
+      }
+      return Object.keys(this.declaredTypes).length > 0;
+    };
+
+    ResourceTypes.prototype.get_type = function(typeName) {
+      return this.declaredTypes[typeName];
+    };
+
+    ResourceTypes.prototype.get_parent_type_name = function(typeName) {
+      var type;
+      type = (this.get_type(typeName))[1];
+      if (type && this.has_property(type, /^type$/i)) {
+        return this.property_value(type, /^type$/i);
+      }
+      return null;
+    };
+
+    ResourceTypes.prototype.apply_types = function(node) {
+      var resources,
+        _this = this;
+      this.check_is_map(node);
+      if (this.has_types(node)) {
+        resources = this.child_resources(node);
+        return resources.forEach(function(resource) {
+          var type;
+          if (_this.has_property(resource[1], /^type$/i)) {
+            type = _this.get_property(resource[1], /^type$/i);
+            _this.apply_type(resource, type);
+          }
+          return _this.apply_types(resource[1]);
+        });
+      }
+    };
+
+    ResourceTypes.prototype.apply_type = function(resource, typeKey) {
+      var tempType;
+      tempType = this.resolve_inheritance_chain(typeKey);
+      tempType.combine(resource[1]);
+      resource[1] = tempType;
+      return resource[1].remove_question_mark_properties();
+    };
+
+    ResourceTypes.prototype.resolve_inheritance_chain = function(typeKey) {
+      var baseType, child_type, child_type_key, compiledTypes, inherits_from, parentTypeMapping, parentTypeName, result, root_type, type, typeName, typesToApply;
+      typeName = this.key_or_value(typeKey);
+      compiledTypes = {};
+      type = this.apply_parameters_to_type(typeName, typeKey);
+      this.apply_traits_to_resource(type, false);
+      compiledTypes[typeName] = type;
+      typesToApply = [typeName];
+      child_type = typeName;
+      parentTypeName = null;
+      while (parentTypeName = this.get_parent_type_name(child_type)) {
+        if (parentTypeName in compiledTypes) {
+          throw new exports.ResourceTypeError('while aplying resourceTypes', null, 'circular reference detected: ' + parentTypeName + "->" + typesToApply, child_type.start_mark);
+        }
+        child_type_key = this.get_property(this.get_type(child_type)[1], /^type$/i);
+        parentTypeMapping = this.apply_parameters_to_type(parentTypeName, child_type_key);
+        compiledTypes[parentTypeName] = parentTypeMapping;
+        this.apply_traits_to_resource(parentTypeMapping[1], false);
+        typesToApply.push(parentTypeName);
+        child_type = parentTypeName;
+      }
+      root_type = typesToApply.pop();
+      baseType = compiledTypes[root_type].cloneRemoveIs();
+      result = baseType;
+      while (inherits_from = typesToApply.pop()) {
+        baseType = compiledTypes[inherits_from].cloneRemoveIs();
+        baseType.combine(result);
+        result = baseType;
+      }
+      return result;
+    };
+
+    ResourceTypes.prototype.apply_parameters_to_type = function(typeName, typeKey) {
+      var parameters, type;
+      type = (this.get_type(typeName))[1].cloneForTrait();
+      parameters = this._get_parameters_from_type_key(typeKey);
+      this.apply_parameters(type, parameters, typeKey);
+      return type;
+    };
+
+    ResourceTypes.prototype._get_parameters_from_type_key = function(typeKey) {
+      var parameters, result;
+      parameters = this.value_or_undefined(typeKey);
+      result = {};
+      if (parameters && parameters[0] && parameters[0][1] && parameters[0][1].value) {
+        parameters[0][1].value.forEach(function(parameter) {
+          if (parameter[1].tag !== 'tag:yaml.org,2002:str') {
+            throw new exports.ResourceTypeError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
+          }
+          return result[parameter[0].value] = parameter[1].value;
+        });
+      }
+      return result;
+    };
+
+    return ResourceTypes;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./nodes":11}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10809,11 +10813,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./tokens":3,"./util":4}],26:[function(require,module,exports){
-window.RAML = {}
-
-window.RAML.Parser = require('../lib/raml')
-},{"../lib/raml":12}],24:[function(require,module,exports){
+},{"./errors":1,"./tokens":3,"./util":4}],25:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10910,7 +10910,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11}],25:[function(require,module,exports){
+},{"./errors":1,"./nodes":11}],26:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10990,7 +10990,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11}],22:[function(require,module,exports){
+},{"./errors":1,"./nodes":11}],23:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11164,7 +11164,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11}],9:[function(require,module,exports){
+},{"./errors":1,"./nodes":11}],8:[function(require,module,exports){
 
 /**
  * Object#toString() ref for stringify().
@@ -11725,7 +11725,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./composer":10,"./construct":14,"./errors":1,"./events":2,"./loader":16,"./nodes":11,"./parser":19,"./reader":17,"./resolver":20,"./scanner":18,"./tokens":3,"fs":7,"q":6,"url":8,"xmlhttprequest":27}],21:[function(require,module,exports){
+},{"./composer":10,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":11,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":27}],22:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, traits, uritemplate, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -12605,7 +12605,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11,"./traits":22,"uritemplate":28}],27:[function(require,module,exports){
+},{"./errors":1,"./nodes":11,"./traits":23,"uritemplate":28}],27:[function(require,module,exports){
 (function(process,Buffer){/**
  * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
  *
@@ -13171,7 +13171,7 @@ exports.XMLHttpRequest = function() {
 };
 
 })(require("__browserify_process"),require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":13,"__browserify_process":5,"child_process":29,"fs":7,"http":30,"https":31,"url":8}],28:[function(require,module,exports){
+},{"__browserify_buffer":14,"__browserify_process":5,"child_process":29,"fs":9,"http":30,"https":31,"url":7}],28:[function(require,module,exports){
 (function(global){/*global unescape, module, define, window, global*/
 
 /*
@@ -14059,6 +14059,10 @@ var UriTemplate = (function () {
 ));
 
 })(window)
+},{}],29:[function(require,module,exports){
+exports.spawn = function () {};
+exports.exec = function () {};
+
 },{}],31:[function(require,module,exports){
 var http = require('http');
 
@@ -14073,73 +14077,7 @@ https.request = function (params, cb) {
     params.scheme = 'https';
     return http.request.call(this, params, cb);
 }
-},{"http":30}],29:[function(require,module,exports){
-exports.spawn = function () {};
-exports.exec = function () {};
-
-},{}],30:[function(require,module,exports){
-var http = module.exports;
-var EventEmitter = require('events').EventEmitter;
-var Request = require('./lib/request');
-
-http.request = function (params, cb) {
-    if (!params) params = {};
-    if (!params.host) params.host = window.location.host.split(':')[0];
-    if (!params.port) params.port = window.location.port;
-    if (!params.scheme) params.scheme = window.location.protocol.split(':')[0];
-    
-    var req = new Request(new xhrHttp, params);
-    if (cb) req.on('response', cb);
-    return req;
-};
-
-http.get = function (params, cb) {
-    params.method = 'GET';
-    var req = http.request(params, cb);
-    req.end();
-    return req;
-};
-
-http.Agent = function () {};
-http.Agent.defaultMaxSockets = 4;
-
-var xhrHttp = (function () {
-    if (typeof window === 'undefined') {
-        throw new Error('no window object present');
-    }
-    else if (window.XMLHttpRequest) {
-        return window.XMLHttpRequest;
-    }
-    else if (window.ActiveXObject) {
-        var axs = [
-            'Msxml2.XMLHTTP.6.0',
-            'Msxml2.XMLHTTP.3.0',
-            'Microsoft.XMLHTTP'
-        ];
-        for (var i = 0; i < axs.length; i++) {
-            try {
-                var ax = new(window.ActiveXObject)(axs[i]);
-                return function () {
-                    if (ax) {
-                        var ax_ = ax;
-                        ax = null;
-                        return ax_;
-                    }
-                    else {
-                        return new(window.ActiveXObject)(axs[i]);
-                    }
-                };
-            }
-            catch (e) {}
-        }
-        throw new Error('ajax not supported in this browser')
-    }
-    else {
-        throw new Error('ajax not supported in this browser');
-    }
-})();
-
-},{"./lib/request":33,"events":32}],32:[function(require,module,exports){
+},{"http":30}],32:[function(require,module,exports){
 (function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
 
 var EventEmitter = exports.EventEmitter = process.EventEmitter;
@@ -14336,7 +14274,69 @@ EventEmitter.listenerCount = function(emitter, type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":5}],34:[function(require,module,exports){
+},{"__browserify_process":5}],30:[function(require,module,exports){
+var http = module.exports;
+var EventEmitter = require('events').EventEmitter;
+var Request = require('./lib/request');
+
+http.request = function (params, cb) {
+    if (!params) params = {};
+    if (!params.host) params.host = window.location.host.split(':')[0];
+    if (!params.port) params.port = window.location.port;
+    if (!params.scheme) params.scheme = window.location.protocol.split(':')[0];
+    
+    var req = new Request(new xhrHttp, params);
+    if (cb) req.on('response', cb);
+    return req;
+};
+
+http.get = function (params, cb) {
+    params.method = 'GET';
+    var req = http.request(params, cb);
+    req.end();
+    return req;
+};
+
+http.Agent = function () {};
+http.Agent.defaultMaxSockets = 4;
+
+var xhrHttp = (function () {
+    if (typeof window === 'undefined') {
+        throw new Error('no window object present');
+    }
+    else if (window.XMLHttpRequest) {
+        return window.XMLHttpRequest;
+    }
+    else if (window.ActiveXObject) {
+        var axs = [
+            'Msxml2.XMLHTTP.6.0',
+            'Msxml2.XMLHTTP.3.0',
+            'Microsoft.XMLHTTP'
+        ];
+        for (var i = 0; i < axs.length; i++) {
+            try {
+                var ax = new(window.ActiveXObject)(axs[i]);
+                return function () {
+                    if (ax) {
+                        var ax_ = ax;
+                        ax = null;
+                        return ax_;
+                    }
+                    else {
+                        return new(window.ActiveXObject)(axs[i]);
+                    }
+                };
+            }
+            catch (e) {}
+        }
+        throw new Error('ajax not supported in this browser')
+    }
+    else {
+        throw new Error('ajax not supported in this browser');
+    }
+})();
+
+},{"./lib/request":33,"events":32}],34:[function(require,module,exports){
 var events = require('events');
 var util = require('util');
 
@@ -15326,141 +15326,7 @@ exports.writeIEEE754 = function(buffer, value, offset, isBE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],33:[function(require,module,exports){
-(function(){var Stream = require('stream');
-var Response = require('./response');
-var concatStream = require('concat-stream')
-var Buffer = require('buffer')
-
-var Request = module.exports = function (xhr, params) {
-    var self = this;
-    self.writable = true;
-    self.xhr = xhr;
-    self.body = concatStream()
-    
-    var uri = params.host
-        + (params.port ? ':' + params.port : '')
-        + (params.path || '/')
-    ;
-    
-    xhr.open(
-        params.method || 'GET',
-        (params.scheme || 'http') + '://' + uri,
-        true
-    );
-    
-    if (params.headers) {
-        var keys = objectKeys(params.headers);
-        for (var i = 0; i < keys.length; i++) {
-            var key = keys[i];
-            if (!self.isSafeRequestHeader(key)) continue;
-            var value = params.headers[key];
-            if (isArray(value)) {
-                for (var j = 0; j < value.length; j++) {
-                    xhr.setRequestHeader(key, value[j]);
-                }
-            }
-            else xhr.setRequestHeader(key, value)
-        }
-    }
-    
-    if (params.auth) {
-        //basic auth
-        this.setHeader('Authorization', 'Basic ' + new Buffer(params.auth).toString('base64'));
-    }
-
-    var res = new Response;
-    res.on('close', function () {
-        self.emit('close');
-    });
-    
-    res.on('ready', function () {
-        self.emit('response', res);
-    });
-    
-    xhr.onreadystatechange = function () {
-        res.handle(xhr);
-    };
-};
-
-Request.prototype = new Stream;
-
-Request.prototype.setHeader = function (key, value) {
-    if (isArray(value)) {
-        for (var i = 0; i < value.length; i++) {
-            this.xhr.setRequestHeader(key, value[i]);
-        }
-    }
-    else {
-        this.xhr.setRequestHeader(key, value);
-    }
-};
-
-Request.prototype.write = function (s) {
-    this.body.write(s);
-};
-
-Request.prototype.destroy = function (s) {
-    this.xhr.abort();
-    this.emit('close');
-};
-
-Request.prototype.end = function (s) {
-    if (s !== undefined) this.body.write(s);
-    this.body.end()
-    this.xhr.send(this.body.getBody());
-};
-
-// Taken from http://dxr.mozilla.org/mozilla/mozilla-central/content/base/src/nsXMLHttpRequest.cpp.html
-Request.unsafeHeaders = [
-    "accept-charset",
-    "accept-encoding",
-    "access-control-request-headers",
-    "access-control-request-method",
-    "connection",
-    "content-length",
-    "cookie",
-    "cookie2",
-    "content-transfer-encoding",
-    "date",
-    "expect",
-    "host",
-    "keep-alive",
-    "origin",
-    "referer",
-    "te",
-    "trailer",
-    "transfer-encoding",
-    "upgrade",
-    "user-agent",
-    "via"
-];
-
-Request.prototype.isSafeRequestHeader = function (headerName) {
-    if (!headerName) return false;
-    return indexOf(Request.unsafeHeaders, headerName.toLowerCase()) === -1;
-};
-
-var objectKeys = Object.keys || function (obj) {
-    var keys = [];
-    for (var key in obj) keys.push(key);
-    return keys;
-};
-
-var isArray = Array.isArray || function (xs) {
-    return Object.prototype.toString.call(xs) === '[object Array]';
-};
-
-var indexOf = function (xs, x) {
-    if (xs.indexOf) return xs.indexOf(x);
-    for (var i = 0; i < xs.length; i++) {
-        if (xs[i] === x) return i;
-    }
-    return -1;
-};
-
-})()
-},{"./response":38,"buffer":37,"concat-stream":40,"stream":34}],37:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 (function(){var assert = require('assert');
 exports.Buffer = Buffer;
 exports.SlowBuffer = Buffer;
@@ -16544,7 +16410,141 @@ Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
 };
 
 })()
-},{"./buffer_ieee754":39,"assert":36,"base64-js":41}],41:[function(require,module,exports){
+},{"./buffer_ieee754":39,"assert":36,"base64-js":40}],33:[function(require,module,exports){
+(function(){var Stream = require('stream');
+var Response = require('./response');
+var concatStream = require('concat-stream')
+var Buffer = require('buffer')
+
+var Request = module.exports = function (xhr, params) {
+    var self = this;
+    self.writable = true;
+    self.xhr = xhr;
+    self.body = concatStream()
+    
+    var uri = params.host
+        + (params.port ? ':' + params.port : '')
+        + (params.path || '/')
+    ;
+    
+    xhr.open(
+        params.method || 'GET',
+        (params.scheme || 'http') + '://' + uri,
+        true
+    );
+    
+    if (params.headers) {
+        var keys = objectKeys(params.headers);
+        for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            if (!self.isSafeRequestHeader(key)) continue;
+            var value = params.headers[key];
+            if (isArray(value)) {
+                for (var j = 0; j < value.length; j++) {
+                    xhr.setRequestHeader(key, value[j]);
+                }
+            }
+            else xhr.setRequestHeader(key, value)
+        }
+    }
+    
+    if (params.auth) {
+        //basic auth
+        this.setHeader('Authorization', 'Basic ' + new Buffer(params.auth).toString('base64'));
+    }
+
+    var res = new Response;
+    res.on('close', function () {
+        self.emit('close');
+    });
+    
+    res.on('ready', function () {
+        self.emit('response', res);
+    });
+    
+    xhr.onreadystatechange = function () {
+        res.handle(xhr);
+    };
+};
+
+Request.prototype = new Stream;
+
+Request.prototype.setHeader = function (key, value) {
+    if (isArray(value)) {
+        for (var i = 0; i < value.length; i++) {
+            this.xhr.setRequestHeader(key, value[i]);
+        }
+    }
+    else {
+        this.xhr.setRequestHeader(key, value);
+    }
+};
+
+Request.prototype.write = function (s) {
+    this.body.write(s);
+};
+
+Request.prototype.destroy = function (s) {
+    this.xhr.abort();
+    this.emit('close');
+};
+
+Request.prototype.end = function (s) {
+    if (s !== undefined) this.body.write(s);
+    this.body.end()
+    this.xhr.send(this.body.getBody());
+};
+
+// Taken from http://dxr.mozilla.org/mozilla/mozilla-central/content/base/src/nsXMLHttpRequest.cpp.html
+Request.unsafeHeaders = [
+    "accept-charset",
+    "accept-encoding",
+    "access-control-request-headers",
+    "access-control-request-method",
+    "connection",
+    "content-length",
+    "cookie",
+    "cookie2",
+    "content-transfer-encoding",
+    "date",
+    "expect",
+    "host",
+    "keep-alive",
+    "origin",
+    "referer",
+    "te",
+    "trailer",
+    "transfer-encoding",
+    "upgrade",
+    "user-agent",
+    "via"
+];
+
+Request.prototype.isSafeRequestHeader = function (headerName) {
+    if (!headerName) return false;
+    return indexOf(Request.unsafeHeaders, headerName.toLowerCase()) === -1;
+};
+
+var objectKeys = Object.keys || function (obj) {
+    var keys = [];
+    for (var key in obj) keys.push(key);
+    return keys;
+};
+
+var isArray = Array.isArray || function (xs) {
+    return Object.prototype.toString.call(xs) === '[object Array]';
+};
+
+var indexOf = function (xs, x) {
+    if (xs.indexOf) return xs.indexOf(x);
+    for (var i = 0; i < xs.length; i++) {
+        if (xs[i] === x) return i;
+    }
+    return -1;
+};
+
+})()
+},{"./response":38,"buffer":37,"concat-stream":41,"stream":34}],40:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 
@@ -16630,7 +16630,7 @@ Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
 	module.exports.fromByteArray = uint8ToBase64;
 }());
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 (function(Buffer){var stream = require('stream')
 var util = require('util')
 
@@ -16681,5 +16681,5 @@ module.exports = function(cb) {
 module.exports.ConcatStream = ConcatStream
 
 })(require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":13,"stream":34,"util":35}]},{},[26,10,14,1,2,15,16,11,19,12,17,20,23,18,24,25,3,22,4,21,6])
+},{"__browserify_buffer":14,"stream":34,"util":35}]},{},[13,10,15,1,2,16,11,17,12,20,18,21,24,19,25,26,3,23,4,22,6])
 ;
