@@ -34,15 +34,24 @@ class @Validator
     @check_is_map node
     if @has_property node, /^securitySchemes$/i
       schemesProperty = @get_property node, /^securitySchemes$/i
-      unless schemesProperty.tag is "tag:yaml.org,2002:seq"
-        throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security schemes property, it must be an array', secSchemes.start_mark
+      unless @is_sequence schemesProperty
+        throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security schemes property, it must be an array', schemesProperty.start_mark
       schemesProperty.value.forEach (scheme_entry) =>
-        unless scheme_entry.tag is "tag:yaml.org,2002:map"
+        unless @is_mapping scheme_entry
           throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security scheme property, it must be a map', scheme_entry.start_mark
         scheme_entry.value.forEach (scheme) =>
-          unless scheme[1].tag is "tag:yaml.org,2002:map"
+          unless @is_mapping scheme[1]
             throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security scheme property, it must be a map', scheme.start_mark
           @validate_security_scheme scheme[1]
+
+  is_mapping: (node) -> return node?.tag is "tag:yaml.org,2002:map"
+  is_null: (node) -> return node?.tag is "tag:yaml.org,2002:null"
+  is_sequence: (node) -> return node?.tag is "tag:yaml.org,2002:seq"
+  is_string: (node) -> return node?.tag is "tag:yaml.org,2002:str"
+  is_integer: (node) -> return node?.tag is "tag:yaml.org,2002:int"
+  is_nullable_mapping: (node) -> return @is_mapping(node) or @is_null(node)
+  is_nullable_string: (node) -> return @is_string(node) or @is_null(node)
+  is_nullable_sequence: (node) -> return @is_sequence(node) or @is_null(node)
 
   validate_security_scheme: (scheme) ->
     @check_is_map scheme
@@ -51,32 +60,31 @@ class @Validator
     scheme.value.forEach (property) =>
       switch property[0].value
         when "description"
-          unless property[1].tag is "tag:yaml.org,2002:str"
+          unless @is_string property[1]
             throw new exports.ValidationError 'while validating security scheme', null, 'schemes description must be a string', property[1].start_mark
         when "type"
           type = property[1].value
-          unless property[1].tag is "tag:yaml.org,2002:str"
-            throw new exports.ValidationError 'while validating security scheme', null, 'schemes description must be a string', property[1].start_mark
-          unless type.match(/^(OAuth 1.0|OAuth 2.0|Basic Authentication|Digest Authentication|x-\{.+\})$/)
+          unless @is_string(property[1]) and type.match(/^(OAuth 1.0|OAuth 2.0|Basic Authentication|Digest Authentication|x-.+)$/)
             throw new exports.ValidationError 'while validating security scheme', null, 'schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-\{.+\}"', property[1].start_mark
         when "describedBy"
           @validate_method property, true
         when "settings"
           settings = property[1].value
-          unless property[1].tag is "tag:yaml.org,2002:map" or property[1].tag is "tag:yaml.org,2002:null"
+          unless @is_nullable_mapping property[1]
             throw new exports.ValidationError 'while validating security scheme', null, 'schemes settings must be a map', property[1].start_mark
         else
-            throw new exports.ValidationError 'while validating security scheme', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
-
+            throw new exports.ValidationError 'while validating security scheme', null, "property: '" + property[0].value + "' is invalid in a security scheme", property[0].start_mark
+    unless type
+      throw new exports.ValidationError 'while validating security scheme', null, 'schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-\{.+\}"', scheme.start_mark
 
   validate_root_schemas: (node) ->
     if @has_property node, /^schemas$/i
       schemas = @get_property node, /^schemas$/i
-      if schemas?.tag is "tag:yaml.org,2002:str" or schemas?.tag is "tag:yaml.org,2002:seq"
+      unless @is_mapping schemas
         throw new exports.ValidationError 'while validating schemas', null, 'schemas property must be a mapping', schemas.start_mark
       schemaList = @get_all_schemas node
       for schemaName, schema of schemaList
-        unless schema[1].tag and schema[1].tag is "tag:yaml.org,2002:str"
+        unless schema[1].tag and @is_string schema[1]
           throw new exports.ValidationError 'while validating schemas', null, 'schema ' + schemaName + ' must be a string', schema[0].start_mark
 
   is_map: (node) ->
@@ -110,15 +118,15 @@ class @Validator
       typeProperty = @get_property node, /^resourceTypes$/i
       types = typeProperty.value
 
-      unless typeProperty.tag is "tag:yaml.org,2002:seq"
+      unless @is_sequence typeProperty
         throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceTypes definition, it must be an array', types.start_mark
 
       types.forEach (type_entry) =>
-        unless type_entry.tag is "tag:yaml.org,2002:map"
+        unless @is_mapping type_entry
           throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
 
         type_entry.value.forEach (type) =>
-          unless type[1].tag is "tag:yaml.org,2002:map"
+          unless @is_mapping type[1]
               throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
           @validate_resource type, true
 
@@ -206,7 +214,7 @@ class @Validator
   valid_root_properties: (node) ->
     @check_is_map node
     invalid = node.value.filter (childNode) =>
-      if childNode[0].tag is "tag:yaml.org,2002:seq"
+      if @is_sequence childNode[0]
         return true
       return not @is_valid_root_property_name childNode[0]
     if invalid.length > 0
@@ -240,7 +248,7 @@ class @Validator
             propertyName.value.match(/^\//i))
 
   child_resources: (node) ->
-    if node?.tag is "tag:yaml.org,2002:map"
+    if node and @is_mapping node
       return node.value.filter (childNode) -> return childNode[0].value.match(/^\//i);
     return []
 
@@ -250,35 +258,35 @@ class @Validator
       @validate_resource resource
 
   validate_resource: (resource, allowParameterKeys = false) ->
-      unless resource[1]?.tag is "tag:yaml.org,2002:map" or resource[1]?.tag is "tag:yaml.org,2002:null"
-        throw new exports.ValidationError 'while validating resources', null, 'resource is not a mapping', resource[1].start_mark
-      if resource[1].value
-        resource[1].value.forEach (property) =>
-          unless @validate_common_properties property, allowParameterKeys
-            if property[0].value.match(/^\//)
-              if allowParameterKeys
-                throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', property[0].start_mark
-              @validate_resource property, allowParameterKeys
-            else if property[0].value.match(/^type$/)
-              @validate_type_property property, allowParameterKeys
-            else if property[0].value.match(/^uriParameters$/)
-              @validate_uri_parameters resource[0].value, property[1]
-            else if property[0].value.match(/^(get|post|put|delete|head|patch|options)$/)
-              @validate_method property, allowParameterKeys
-            else
-              throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a resource", property[0].start_mark
+    unless resource[1] and @is_nullable_mapping(resource[1])
+      throw new exports.ValidationError 'while validating resources', null, 'resource is not a mapping', resource[1].start_mark
+    if resource[1].value
+      resource[1].value.forEach (property) =>
+        unless @validate_common_properties property, allowParameterKeys
+          if property[0].value.match(/^\//)
+            if allowParameterKeys
+              throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', property[0].start_mark
+            @validate_resource property, allowParameterKeys
+          else if property[0].value.match(/^type$/)
+            @validate_type_property property, allowParameterKeys
+          else if property[0].value.match(/^uriParameters$/)
+            @validate_uri_parameters resource[0].value, property[1]
+          else if property[0].value.match(/^(get|post|put|delete|head|patch|options)$/)
+            @validate_method property, allowParameterKeys
+          else
+            throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a resource", property[0].start_mark
 
   validate_type_property: (property, allowParameterKeys) ->
     typeName = @key_or_value property[1]
-    unless property[1].tag == "tag:yaml.org,2002:map" or property[1].tag == "tag:yaml.org,2002:str"
+    unless @is_mapping(property[1]) or @is_string(property[1])
       throw new exports.ValidationError 'while validating resources', null, "property 'type' must be a string or a mapping", property[0].start_mark
     unless @get_type typeName
       throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + typeName, property[1].start_mark
 
   validate_method: (method, allowParameterKeys) ->
-    if method[1].tag is "tag:yaml.org,2002:null"
+    if @is_null method[1]
       return
-    unless method[1].tag is "tag:yaml.org,2002:map"
+    unless @is_mapping method[1]
       throw new exports.ValidationError 'while validating methods', null, "method must be a mapping", method[0].start_mark
     method[1].value.forEach (property) =>
       unless @validate_common_properties property, allowParameterKeys
@@ -291,12 +299,12 @@ class @Validator
         else if property[0].value.match(/^responses$/)
           @validate_responses property, allowParameterKeys
         else if property[0].value.match(/^securedBy$/)
-          unless property[1].tag is "tag:yaml.org,2002:seq"
+          unless @is_sequence property[1]
             throw new exports.ValidationError 'while validating resources', null, "property 'securedBy' must be a list", property[0].start_mark
           property[1].value.forEach (secScheme) =>
-            if secScheme.tag is "tag:yaml.org,2002:seq"
+            if @is_sequence secScheme
               throw new exports.ValidationError 'while validating securityScheme consumption', null, 'securityScheme reference cannot be a list', secScheme.start_mark
-            unless secScheme.tag is "tag:yaml.org,2002:null"
+            unless @is_null secScheme
               securitySchemeName = @key_or_value secScheme
               unless @get_security_scheme securitySchemeName
                 throw new exports.ValidationError 'while validating securityScheme consumption', null, 'there is no securityScheme named ' + securitySchemeName, secScheme.start_mark
@@ -304,72 +312,72 @@ class @Validator
           throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a method", property[0].start_mark
 
   validate_responses: (responses, allowParameterKeys) ->
-    if responses[1].tag is "tag:yaml.org,2002:null"
+    if @is_null responses[1]
       return
-    unless responses[1].tag is "tag:yaml.org,2002:map"
+    unless @is_mapping responses[1]
       throw new exports.ValidationError 'while validating query parameters', null, "property: 'responses' must be a mapping", responses[0].start_mark
     responses[1].value.forEach (response) =>
-      unless response[1].tag is "tag:yaml.org,2002:map" or response[1].tag is "tag:yaml.org,2002:null"
+      unless @is_nullable_mapping response[1]
         throw new exports.ValidationError 'while validating query parameters', null, "each response must be a mapping", response[1].start_mark
       @validate_response response, allowParameterKeys
 
   validate_query_params: (property, allowParameterKeys) ->
-    if property[1].tag is "tag:yaml.org,2002:null"
+    if @is_null property[1]
       return
-    unless property[1].tag is "tag:yaml.org,2002:map"
+    unless @is_mapping property[1]
       throw new exports.ValidationError 'while validating query parameters', null, "property: 'queryParameters' must be a mapping", property[0].start_mark
     property[1].value.forEach (param) =>
-      unless param[1].tag is "tag:yaml.org,2002:map" or param[1].tag is "tag:yaml.org,2002:null"
+      unless @is_nullable_mapping param[1]
         throw new exports.ValidationError 'while validating query parameters', null, "each query parameter must be a mapping", param[1].start_mark
       @valid_common_parameter_properties param[1], allowParameterKeys
 
   validate_form_params: (property, allowParameterKeys) ->
-    if property[1].tag is "tag:yaml.org,2002:null"
+    if @is_null property[1]
       return
-    unless property[1].tag is "tag:yaml.org,2002:map"
+    unless @is_mapping property[1]
       throw new exports.ValidationError 'while validating query parameters', null, "property: 'formParameters' must be a mapping", property[0].start_mark
     property[1].value.forEach (param) =>
-      unless param[1].tag is "tag:yaml.org,2002:map" or param[1].tag is "tag:yaml.org,2002:null"
+      unless @is_nullable_mapping param[1]
         throw new exports.ValidationError 'while validating query parameters', null, "each form parameter must be a mapping", param[1].start_mark
       @valid_common_parameter_properties param[1], allowParameterKeys
 
   validate_headers: (property, allowParameterKeys) ->
-    if property[1].tag is "tag:yaml.org,2002:null"
+    if @is_null property[1]
       return
-    unless property[1].tag is "tag:yaml.org,2002:map"
+    unless @is_mapping property[1]
       throw new exports.ValidationError 'while validating headers', null, "property: 'headers' must be a mapping", property[0].start_mark
     property[1].value.forEach (param) =>
-      unless param[1].tag is "tag:yaml.org,2002:map" or param[1].tag is "tag:yaml.org,2002:null"
+      unless @is_nullable_mapping param[1]
         throw new exports.ValidationError 'while validating query parameters', null, "each header must be a mapping", param[1].start_mark
       @valid_common_parameter_properties param[1], allowParameterKeys
 
   validate_response: (response, allowParameterKeys) ->
-    if response[0].tag is "tag:yaml.org,2002:seq"
+    if @is_sequence response[0]
       unless response[0].value.length
         throw new exports.ValidationError 'while validating responses', null, "there must be at least one response code", responseCode.start_mark
       response[0].value.forEach (responseCode) =>
-        unless responseCode.tag is "tag:yaml.org,2002:int"
+        unless @is_integer responseCode
           throw new exports.ValidationError 'while validating responses', null, "each response key must be an integer", responseCode.start_mark
-    else unless response[0].tag is "tag:yaml.org,2002:int"
+    else unless @is_integer response[0]
       throw new exports.ValidationError 'while validating responses', null, "each response key must be an integer", response[0].start_mark
-    unless response[1].tag is "tag:yaml.org,2002:map"
+    unless @is_mapping response[1]
       throw new exports.ValidationError 'while validating responses', null, "each response property must be a mapping", response[0].start_mark
     response[1].value.forEach (property) =>
       if property[0].value.match(/^body$/)
         @validate_body property, allowParameterKeys
       else if property[0].value.match(/^description$/)
-        unless property[1].tag is "tag:yaml.org,2002:null" or property[1].tag is "tag:yaml.org,2002:str"
+        unless @is_nullable_string property[1]
           throw new exports.ValidationError 'while validating responses', null, "property description must be a string", response[0].start_mark
       else if property[0].value.match(/^summary$/)
-        unless property[1].tag is "tag:yaml.org,2002:str"
+        unless @is_string property[1]
           throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
       else
         throw new exports.ValidationError 'while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
 
   validate_body: (property, allowParameterKeys, bodyMode = null) ->
-    if property[1].tag is "tag:yaml.org,2002:null"
+    if @is_null property[1]
       return
-    unless property[1].tag is "tag:yaml.org,2002:map"
+    unless @is_mapping property[1]
       throw new exports.ValidationError 'while validating body', null, "property: body specification must be a mapping", property[0].start_mark
     property[1].value?.forEach (bodyProperty) =>
       if bodyProperty[0].value.match(/<<([^>]+)>>/)
@@ -389,13 +397,13 @@ class @Validator
         if bodyMode and bodyMode != "implicit"
           throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
         bodyMode = "implicit"
-        if bodyProperty[1].tag is "tag:yaml.org,2002:map" or bodyProperty[1].tag is "tag:yaml.org,2002:seq"
+        if @is_mapping (bodyProperty[1]) or @is_sequence(bodyProperty[1])
           throw new exports.ValidationError 'while validating body', null, "example must be a string", bodyProperty[0].start_mark
       else if bodyProperty[0].value.match(/^schema$/)
         if bodyMode and bodyMode != "implicit"
           throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
         bodyMode = "implicit"
-        if bodyProperty[1].tag is "tag:yaml.org,2002:map" or bodyProperty[1].tag is "tag:yaml.org,2002:seq"
+        if @is_mapping(bodyProperty[1]) or @is_sequence(bodyProperty[1])
           throw new exports.ValidationError 'while validating body', null, "schema must be a string", bodyProperty[0].start_mark
       else
         throw new exports.ValidationError 'while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark
@@ -406,19 +414,19 @@ class @Validator
         throw new exports.ValidationError 'while validating resources', null, "property '" + property[0].value + "' is invalid in a resource", property[0].start_mark
       return true
     else if property[0].value.match(/^displayName$/)
-      unless property[1].tag is "tag:yaml.org,2002:str"
+      unless @is_string property[1]
         throw new exports.ValidationError 'while validating resources', null, "property 'displayName' must be a string", property[0].start_mark
       return true
     else if property[0].value.match(/^summary$/)
-      unless property[1].tag is "tag:yaml.org,2002:str"
+      unless @is_string property[1]
         throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
       return true
     else if property[0].value.match(/^description$/)
-      unless property[1].tag is "tag:yaml.org,2002:str"
+      unless @is_string property[1]
         throw new exports.ValidationError 'while validating resources', null, "property 'description' must be a string", property[0].start_mark
       return true
     else if property[0].value.match(/^is$/)
-      unless property[1].tag is "tag:yaml.org,2002:seq"
+      unless @is_sequence property[1]
         throw new exports.ValidationError 'while validating resources', null, "property 'is' must be a list", property[0].start_mark
       if not (property[1].value instanceof Array)
         throw new exports.ValidationError 'while validating trait consumption', null, 'is property must be an array', property[0].start_mark
@@ -430,12 +438,12 @@ class @Validator
     return false
 
   child_methods: (node) ->
-    unless node?.tag is "tag:yaml.org,2002:map"
+    unless node and @is_mapping node
       return []
     return node.value.filter (childNode) -> return childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/);
 
   has_property: (node, property) ->
-    if node?.tag is "tag:yaml.org,2002:map"
+    if node and @is_mapping node
       return node.value.some((childNode) -> return childNode[0].value and typeof childNode[0].value != "object" and childNode[0].value.match(property))
     return false
 
@@ -445,9 +453,9 @@ class @Validator
     return filteredNodes[0][1].value;
 
   get_property: (node, property) ->
-    if node?.tag is "tag:yaml.org,2002:map"
-      filteredNodes = node.value.filter (childNode) ->
-        return childNode[0].tag is "tag:yaml.org,2002:str" and childNode[0].value.match(property)
+    if node and @is_mapping node
+      filteredNodes = node.value.filter (childNode) =>
+        return @is_string(childNode[0]) and childNode[0].value.match(property)
       if filteredNodes.length > 0
         if filteredNodes[0].length > 0
           return filteredNodes[0][1]
@@ -455,9 +463,9 @@ class @Validator
 
   get_properties: (node, property) =>
     properties = []
-    if node?.tag is "tag:yaml.org,2002:map"
+    if node and @is_mapping node
       node.value.forEach (prop) =>
-        if prop[0].tag is "tag:yaml.org,2002:str" and prop[0].value.match(property)
+        if @is_string(prop[0]) and prop[0].value.match(property)
           properties.push prop
         else
           properties = properties.concat @get_properties prop[1], property
@@ -517,7 +525,7 @@ class @Validator
   get_absolute_uris: ( node = @get_single_node(true, true, false), parentPath ) ->
     @check_is_map node
     response = []
-    unless node?.tag is "tag:yaml.org,2002:map" or node?.tag is "tag:yaml.org,2002:null"
+    unless @is_nullable_mapping node
       throw new exports.ValidationError 'while validating resources', null, 'resource is not a mapping', node.start_mark
     child_resources = @child_resources node
     child_resources.forEach (childResource) =>
