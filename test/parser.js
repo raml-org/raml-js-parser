@@ -3876,7 +3876,6 @@ describe('Parser', function() {
           }
         ]
       };
-
       raml.load(definition).should.become(expected).and.notify(done);
     });
     it('should apply a resource type adding optional parameter', function(done) {
@@ -3924,7 +3923,6 @@ describe('Parser', function() {
           }
         ]
       };
-
       raml.load(definition).should.become(expected).and.notify(done);
     });
 

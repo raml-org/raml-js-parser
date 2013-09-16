@@ -8001,7 +8001,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./reader":19,"./resolver":21,"./resourceTypes":24,"./scanner":18,"./schemas":25,"./securitySchemes":26,"./traits":23,"./util":4,"./validator":22}],13:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./resourceTypes":23,"./scanner":19,"./schemas":25,"./securitySchemes":26,"./traits":24,"./util":4,"./validator":22}],13:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -8850,7 +8850,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./events":2,"./tokens":3}],19:[function(require,module,exports){
+},{"./errors":1,"./events":2,"./tokens":3}],18:[function(require,module,exports){
 (function() {
   var Mark, YAMLError, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9163,7 +9163,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./util":4}],24:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4}],23:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9330,7 +9330,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],18:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10990,7 +10990,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],23:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],24:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11725,7 +11725,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":19,"./resolver":21,"./scanner":18,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":27}],22:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":27}],22:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, traits, uritemplate, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -12001,7 +12001,7 @@ function decode(str) {
         return;
       }
       invalid = node.value.filter(function(childNode) {
-        return childNode[0].value.match(/^is$/) || childNode[0].value.match(/^type$/);
+        return childNode[0].value === "is" || childNode[0].value === "type";
       });
       if (invalid.length > 0) {
         throw new exports.ValidationError('while validating trait properties', null, "invalid property '" + invalid[0][0].value + "'", invalid[0][0].start_mark);
@@ -12015,7 +12015,7 @@ function decode(str) {
         return;
       }
       return node.value.forEach(function(childNode) {
-        var propertyName, propertyValue;
+        var booleanValues, propertyName, propertyValue;
         if (typeof childNode[0].value === "object") {
           return true;
         }
@@ -12024,34 +12024,42 @@ function decode(str) {
         }
         propertyName = childNode[0].value;
         propertyValue = childNode[1].value;
-        if (propertyName.match(/^minLength$/)) {
-          if (isNaN(propertyValue)) {
-            throw new exports.ValidationError('while validating parameter properties', null, 'the value of minLength must be a number', childNode[1].start_mark);
-          }
-        } else if (propertyName.match(/^maxLength$/)) {
-          if (isNaN(propertyValue)) {
-            throw new exports.ValidationError('while validating parameter properties', null, 'the value of maxLength must be a number', childNode[1].start_mark);
-          }
-        } else if (propertyName.match(/^minimum$/)) {
-          if (isNaN(propertyValue)) {
-            throw new exports.ValidationError('while validating parameter properties', null, 'the value of minimum must be a number', childNode[1].start_mark);
-          }
-        } else if (propertyName.match(/^maximum$/)) {
-          if (isNaN(propertyValue)) {
-            throw new exports.ValidationError('while validating parameter properties', null, 'the value of maximum must be a number', childNode[1].start_mark);
-          }
-        } else if (propertyName.match(/^type$/)) {
-          if (propertyValue !== 'string' && propertyValue !== 'number' && propertyValue !== 'integer' && propertyValue !== 'date') {
-            throw new exports.ValidationError('while validating parameter properties', null, 'type can either be: string, number, integer or date', childNode[1].start_mark);
-          }
-        } else if (propertyName.match(/^required$/)) {
-          if (!propertyValue.match(/^(true|false)$/)) {
-            throw new exports.ValidationError('while validating parameter properties', null, 'required can be any either true or false', childNode[1].start_mark);
-          }
-        } else if (propertyName.match(/^repeat$/)) {
-          if (!propertyValue.match(/^(true|false)$/)) {
-            throw new exports.ValidationError('while validating parameter properties', null, 'repeat can be any either true or false', childNode[1].start_mark);
-          }
+        booleanValues = ["true", "false"];
+        switch (propertyName) {
+          case "minLength":
+            if (isNaN(propertyValue)) {
+              throw new exports.ValidationError('while validating parameter properties', null, 'the value of minLength must be a number', childNode[1].start_mark);
+            }
+            break;
+          case "maxLength":
+            if (isNaN(propertyValue)) {
+              throw new exports.ValidationError('while validating parameter properties', null, 'the value of maxLength must be a number', childNode[1].start_mark);
+            }
+            break;
+          case "minimum":
+            if (isNaN(propertyValue)) {
+              throw new exports.ValidationError('while validating parameter properties', null, 'the value of minimum must be a number', childNode[1].start_mark);
+            }
+            break;
+          case "maximum":
+            if (isNaN(propertyValue)) {
+              throw new exports.ValidationError('while validating parameter properties', null, 'the value of maximum must be a number', childNode[1].start_mark);
+            }
+            break;
+          case "type":
+            if (propertyValue !== 'string' && propertyValue !== 'number' && propertyValue !== 'integer' && propertyValue !== 'date') {
+              throw new exports.ValidationError('while validating parameter properties', null, 'type can either be: string, number, integer or date', childNode[1].start_mark);
+            }
+            break;
+          case "required":
+            if (__indexOf.call(booleanValues, propertyValue) < 0) {
+              throw new exports.ValidationError('while validating parameter properties', null, 'required can be any either true or false', childNode[1].start_mark);
+            }
+            break;
+          case "repeat":
+            if (__indexOf.call(booleanValues, propertyValue) < 0) {
+              throw new exports.ValidationError('while validating parameter properties', null, 'repeat can be any either true or false', childNode[1].start_mark);
+            }
         }
       });
     };
@@ -12072,11 +12080,11 @@ function decode(str) {
     };
 
     Validator.prototype.is_valid_parameter_property_name = function(propertyName) {
-      return propertyName.match(/^displayName$/) || propertyName.match(/^description$/) || propertyName.match(/^type$/) || propertyName.match(/^enum$/) || propertyName.match(/^example$/) || propertyName.match(/^pattern$/) || propertyName.match(/^minLength$/) || propertyName.match(/^maxLength$/) || propertyName.match(/^minimum$/) || propertyName.match(/^maximum$/) || propertyName.match(/^required$/) || propertyName.match(/^repeat$/) || propertyName.match(/^default$/);
+      return propertyName === "displayName" || propertyName === "description" || propertyName === "type" || propertyName === "enum" || propertyName === "example" || propertyName === "pattern" || propertyName === "minLength" || propertyName === "maxLength" || propertyName === "minimum" || propertyName === "maximum" || propertyName === "required" || propertyName === "repeat" || propertyName === "default";
     };
 
     Validator.prototype.is_valid_root_property_name = function(propertyName) {
-      return propertyName.value.match(/^title$/) || propertyName.value.match(/^baseUri$/) || propertyName.value.match(/^securitySchemes$/) || propertyName.value.match(/^schemas$/) || propertyName.value.match(/^version$/) || propertyName.value.match(/^traits$/) || propertyName.value.match(/^documentation$/) || propertyName.value.match(/^baseUriParameters$/) || propertyName.value.match(/^resourceTypes$/) || propertyName.value.match(/^\//);
+      return propertyName.value === "title" || propertyName.value === "baseUri" || propertyName.value === "securitySchemes" || propertyName.value === "schemas" || propertyName.value === "version" || propertyName.value === "traits" || propertyName.value === "documentation" || propertyName.value === "baseUriParameters" || propertyName.value === "resourceTypes" || propertyName.value.match(/^\//);
     };
 
     Validator.prototype.child_resources = function(node) {
@@ -12113,9 +12121,9 @@ function decode(str) {
                 throw new exports.ValidationError('while validating trait properties', null, 'resource type cannot define child resources', property[0].start_mark);
               }
               return _this.validate_resource(property, allowParameterKeys);
-            } else if (property[0].value.match(/^type$/)) {
+            } else if (property[0].value === "type") {
               return _this.validate_type_property(property, allowParameterKeys);
-            } else if (property[0].value.match(/^uriParameters$/)) {
+            } else if (property[0].value === "uriParameters") {
               return _this.validate_uri_parameters(resource[0].value, property[1]);
             } else if (property[0].value.match(/^(get|post|put|delete|head|patch|options)$/)) {
               return _this.validate_method(property, allowParameterKeys);
@@ -12148,15 +12156,15 @@ function decode(str) {
       }
       return method[1].value.forEach(function(property) {
         if (!_this.validate_common_properties(property, allowParameterKeys)) {
-          if (property[0].value.match(/^headers$/)) {
+          if (property[0].value === "headers") {
             return _this.validate_headers(property, allowParameterKeys);
-          } else if (property[0].value.match(/^queryParameters$/)) {
+          } else if (property[0].value === "queryParameters") {
             return _this.validate_query_params(property, allowParameterKeys);
-          } else if (property[0].value.match(/^body$/)) {
+          } else if (property[0].value === "body") {
             return _this.validate_body(property, allowParameterKeys);
-          } else if (property[0].value.match(/^responses$/)) {
+          } else if (property[0].value === "responses") {
             return _this.validate_responses(property, allowParameterKeys);
-          } else if (property[0].value.match(/^securedBy$/)) {
+          } else if (property[0].value === "securedBy") {
             if (!_this.is_sequence(property[1])) {
               throw new exports.ValidationError('while validating resources', null, "property 'securedBy' must be a list", property[0].start_mark);
             }
@@ -12300,13 +12308,13 @@ function decode(str) {
           }
           bodyMode = "explicit";
           return _this.validate_body(bodyProperty, allowParameterKeys, "implicit");
-        } else if (bodyProperty[0].value.match(/^formParameters$/)) {
+        } else if (bodyProperty[0].value === "formParameters") {
           if (bodyMode && bodyMode !== "implicit") {
             throw new exports.ValidationError('while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark);
           }
           bodyMode = "implicit";
           return _this.validate_form_params(bodyProperty, allowParameterKeys);
-        } else if (bodyProperty[0].value.match(/^example$/)) {
+        } else if (bodyProperty[0].value === "example") {
           if (bodyMode && bodyMode !== "implicit") {
             throw new exports.ValidationError('while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark);
           }
@@ -12314,7 +12322,7 @@ function decode(str) {
           if (_this.is_mapping(bodyProperty[1] || _this.is_sequence(bodyProperty[1]))) {
             throw new exports.ValidationError('while validating body', null, "example must be a string", bodyProperty[0].start_mark);
           }
-        } else if (bodyProperty[0].value.match(/^schema$/)) {
+        } else if (bodyProperty[0].value === "schema") {
           if (bodyMode && bodyMode !== "implicit") {
             throw new exports.ValidationError('while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark);
           }
@@ -12335,22 +12343,22 @@ function decode(str) {
           throw new exports.ValidationError('while validating resources', null, "property '" + property[0].value + "' is invalid in a resource", property[0].start_mark);
         }
         return true;
-      } else if (property[0].value.match(/^displayName$/)) {
+      } else if (property[0].value === "displayName") {
         if (!this.is_string(property[1])) {
           throw new exports.ValidationError('while validating resources', null, "property 'displayName' must be a string", property[0].start_mark);
         }
         return true;
-      } else if (property[0].value.match(/^summary$/)) {
+      } else if (property[0].value === "summary") {
         if (!this.is_string(property[1])) {
           throw new exports.ValidationError('while validating resources', null, "property 'summary' must be a string", property[0].start_mark);
         }
         return true;
-      } else if (property[0].value.match(/^description$/)) {
+      } else if (property[0].value === "description") {
         if (!this.is_string(property[1])) {
           throw new exports.ValidationError('while validating resources', null, "property 'description' must be a string", property[0].start_mark);
         }
         return true;
-      } else if (property[0].value.match(/^is$/)) {
+      } else if (property[0].value === "is") {
         if (!this.is_sequence(property[1])) {
           throw new exports.ValidationError('while validating resources', null, "property 'is' must be a list", property[0].start_mark);
         }
@@ -12637,7 +12645,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./traits":23,"uritemplate":28}],27:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./traits":24,"uritemplate":28}],27:[function(require,module,exports){
 (function(process,Buffer){/**
  * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
  *
@@ -16713,5 +16721,5 @@ module.exports = function(cb) {
 module.exports.ConcatStream = ConcatStream
 
 })(require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":14,"stream":34,"util":35}]},{},[10,12,15,1,2,16,17,13,20,11,19,21,24,18,25,26,3,23,4,22,6])
+},{"__browserify_buffer":14,"stream":34,"util":35}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,23,19,25,26,3,24,4,22,6])
 ;

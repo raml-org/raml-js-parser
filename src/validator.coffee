@@ -171,8 +171,8 @@ class @Validator
     return unless node.value
 
     invalid = node.value.filter (childNode) ->
-      return (  childNode[0].value.match(/^is$/) or
-                childNode[0].value.match(/^type$/))
+      return (  childNode[0].value is "is" or
+                childNode[0].value is "type" )
     if invalid.length > 0
       throw new exports.ValidationError 'while validating trait properties', null, "invalid property '" + invalid[0][0].value + "'", invalid[0][0].start_mark
 
@@ -188,28 +188,30 @@ class @Validator
 
       propertyName = childNode[0].value
       propertyValue = childNode[1].value
+      booleanValues = ["true", "false"]
 
-      if propertyName.match(/^minLength$/)
-        if isNaN(propertyValue)
-          throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minLength must be a number', childNode[1].start_mark
-      else if propertyName.match(/^maxLength$/)
-        if isNaN(propertyValue)
-          throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maxLength must be a number', childNode[1].start_mark
-      else if propertyName.match(/^minimum$/)
-        if isNaN(propertyValue)
-          throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minimum must be a number', childNode[1].start_mark
-      else if propertyName.match /^maximum$/
-        if isNaN(propertyValue)
-          throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maximum must be a number', childNode[1].start_mark
-      else if propertyName.match /^type$/
-        if propertyValue != 'string' and propertyValue != 'number' and propertyValue != 'integer' and propertyValue != 'date'
-          throw new exports.ValidationError 'while validating parameter properties', null, 'type can either be: string, number, integer or date', childNode[1].start_mark
-      else if propertyName.match /^required$/
-        unless propertyValue.match(/^(true|false)$/)
-          throw new exports.ValidationError 'while validating parameter properties', null, 'required can be any either true or false', childNode[1].start_mark
-      else if propertyName.match /^repeat$/
-        unless propertyValue.match(/^(true|false)$/)
-          throw new exports.ValidationError 'while validating parameter properties', null, 'repeat can be any either true or false', childNode[1].start_mark
+      switch propertyName
+        when "minLength"
+          if isNaN(propertyValue)
+            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minLength must be a number', childNode[1].start_mark
+        when "maxLength"
+          if isNaN(propertyValue)
+            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maxLength must be a number', childNode[1].start_mark
+        when "minimum"
+          if isNaN(propertyValue)
+            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minimum must be a number', childNode[1].start_mark
+        when "maximum"
+          if isNaN(propertyValue)
+            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maximum must be a number', childNode[1].start_mark
+        when "type"
+          if propertyValue != 'string' and propertyValue != 'number' and propertyValue != 'integer' and propertyValue != 'date'
+            throw new exports.ValidationError 'while validating parameter properties', null, 'type can either be: string, number, integer or date', childNode[1].start_mark
+        when "required"
+          unless propertyValue in booleanValues
+            throw new exports.ValidationError 'while validating parameter properties', null, 'required can be any either true or false', childNode[1].start_mark
+        when "repeat"
+          unless propertyValue in booleanValues
+            throw new exports.ValidationError 'while validating parameter properties', null, 'repeat can be any either true or false', childNode[1].start_mark
 
   valid_root_properties: (node) ->
     @check_is_map node
@@ -221,30 +223,30 @@ class @Validator
       throw new exports.ValidationError 'while validating root properties', null, 'unknown property ' + invalid[0][0].value, invalid[0][0].start_mark
 
   is_valid_parameter_property_name: (propertyName) ->
-    return propertyName.match(/^displayName$/) or
-            propertyName.match(/^description$/) or
-            propertyName.match(/^type$/) or
-            propertyName.match(/^enum$/) or
-            propertyName.match(/^example$/) or
-            propertyName.match(/^pattern$/) or
-            propertyName.match(/^minLength$/) or
-            propertyName.match(/^maxLength$/) or
-            propertyName.match(/^minimum$/) or
-            propertyName.match(/^maximum$/) or
-            propertyName.match(/^required$/) or
-            propertyName.match(/^repeat$/) or
-            propertyName.match(/^default$/)
+    return propertyName is "displayName" or
+            propertyName is "description" or
+            propertyName is "type" or
+            propertyName is "enum" or
+            propertyName is "example" or
+            propertyName is "pattern" or
+            propertyName is "minLength" or
+            propertyName is "maxLength" or
+            propertyName is "minimum" or
+            propertyName is "maximum" or
+            propertyName is "required" or
+            propertyName is "repeat" or
+            propertyName is "default"
 
   is_valid_root_property_name: (propertyName) ->
-    return (propertyName.value.match(/^title$/) or
-            propertyName.value.match(/^baseUri$/) or
-            propertyName.value.match(/^securitySchemes$/) or
-            propertyName.value.match(/^schemas$/) or
-            propertyName.value.match(/^version$/) or
-            propertyName.value.match(/^traits$/) or
-            propertyName.value.match(/^documentation$/) or
-            propertyName.value.match(/^baseUriParameters$/) or
-            propertyName.value.match(/^resourceTypes$/) or
+    return (propertyName.value is "title" or
+            propertyName.value is "baseUri" or
+            propertyName.value is "securitySchemes" or
+            propertyName.value is "schemas" or
+            propertyName.value is "version" or
+            propertyName.value is "traits" or
+            propertyName.value is "documentation" or
+            propertyName.value is "baseUriParameters" or
+            propertyName.value is "resourceTypes" or
             propertyName.value.match(/^\//))
 
   child_resources: (node) ->
@@ -267,9 +269,9 @@ class @Validator
             if allowParameterKeys
               throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', property[0].start_mark
             @validate_resource property, allowParameterKeys
-          else if property[0].value.match(/^type$/)
+          else if property[0].value is "type"
             @validate_type_property property, allowParameterKeys
-          else if property[0].value.match(/^uriParameters$/)
+          else if property[0].value is "uriParameters"
             @validate_uri_parameters resource[0].value, property[1]
           else if property[0].value.match(/^(get|post|put|delete|head|patch|options)$/)
             @validate_method property, allowParameterKeys
@@ -290,15 +292,15 @@ class @Validator
       throw new exports.ValidationError 'while validating methods', null, "method must be a mapping", method[0].start_mark
     method[1].value.forEach (property) =>
       unless @validate_common_properties property, allowParameterKeys
-        if property[0].value.match(/^headers$/)
+        if property[0].value is "headers"
           @validate_headers property, allowParameterKeys
-        else if property[0].value.match(/^queryParameters$/)
+        else if property[0].value is "queryParameters"
           @validate_query_params property, allowParameterKeys
-        else if property[0].value.match(/^body$/)
+        else if property[0].value is "body"
           @validate_body property, allowParameterKeys
-        else if property[0].value.match(/^responses$/)
+        else if property[0].value is "responses"
           @validate_responses property, allowParameterKeys
-        else if property[0].value.match(/^securedBy$/)
+        else if property[0].value is "securedBy"
           unless @is_sequence property[1]
             throw new exports.ValidationError 'while validating resources', null, "property 'securedBy' must be a list", property[0].start_mark
           property[1].value.forEach (secScheme) =>
@@ -388,18 +390,18 @@ class @Validator
           throw new exports.ValidationError 'while validating body', null, "not compatible with implicit default Media Type", bodyProperty[0].start_mark
         bodyMode = "explicit"
         @validate_body bodyProperty, allowParameterKeys, "implicit"
-      else if bodyProperty[0].value.match(/^formParameters$/)
+      else if bodyProperty[0].value is "formParameters"
         if bodyMode and bodyMode != "implicit"
           throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
         bodyMode = "implicit"
         @validate_form_params bodyProperty, allowParameterKeys
-      else if bodyProperty[0].value.match(/^example$/)
+      else if bodyProperty[0].value is "example"
         if bodyMode and bodyMode != "implicit"
           throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
         bodyMode = "implicit"
         if @is_mapping (bodyProperty[1]) or @is_sequence(bodyProperty[1])
           throw new exports.ValidationError 'while validating body', null, "example must be a string", bodyProperty[0].start_mark
-      else if bodyProperty[0].value.match(/^schema$/)
+      else if bodyProperty[0].value is "schema"
         if bodyMode and bodyMode != "implicit"
           throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
         bodyMode = "implicit"
@@ -413,19 +415,19 @@ class @Validator
       unless allowParameterKeys
         throw new exports.ValidationError 'while validating resources', null, "property '" + property[0].value + "' is invalid in a resource", property[0].start_mark
       return true
-    else if property[0].value.match(/^displayName$/)
+    else if property[0].value is "displayName"
       unless @is_string property[1]
         throw new exports.ValidationError 'while validating resources', null, "property 'displayName' must be a string", property[0].start_mark
       return true
-    else if property[0].value.match(/^summary$/)
+    else if property[0].value is "summary"
       unless @is_string property[1]
         throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
       return true
-    else if property[0].value.match(/^description$/)
+    else if property[0].value is "description"
       unless @is_string property[1]
         throw new exports.ValidationError 'while validating resources', null, "property 'description' must be a string", property[0].start_mark
       return true
-    else if property[0].value.match(/^is$/)
+    else if property[0].value is "is"
       unless @is_sequence property[1]
         throw new exports.ValidationError 'while validating resources', null, "property 'is' must be a list", property[0].start_mark
       if not (property[1].value instanceof Array)
