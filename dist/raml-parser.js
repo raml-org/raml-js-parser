@@ -11991,14 +11991,15 @@ function decode(str) {
     };
 
     Validator.prototype.validate_base_uri_parameters = function(node) {
-      var baseUri;
+      var baseUriProperty;
+      baseUriProperty = this.get_property(node, /^baseUri$/);
+      this.baseUri = baseUriProperty.value;
       this.check_is_map(node);
       if (this.has_property(node, /^baseUriParameters$/)) {
         if (!this.has_property(node, /^baseUri$/)) {
           throw new exports.ValidationError('while validating uri parameters', null, 'uri parameters defined when there is no baseUri', node.start_mark);
         }
-        baseUri = this.property_value(node, /^baseUri$/);
-        return this.validate_uri_parameters(baseUri, this.get_property(node, /^baseUriParameters$/));
+        return this.validate_uri_parameters(this.baseUri, this.get_property(node, /^baseUriParameters$/));
       }
     };
 
@@ -12199,6 +12200,11 @@ function decode(str) {
               return _this.validate_type_property(property, allowParameterKeys);
             } else if (property[0].value === "uriParameters") {
               return _this.validate_uri_parameters(resource[0].value, property[1]);
+            } else if (property[0].value === "baseUriParameters") {
+              if (!_this.baseUri) {
+                throw new exports.ValidationError('while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark);
+              }
+              return _this.validate_uri_parameters(_this.baseUri, property[1]);
             } else if (property[0].value.match(/^(get|post|put|delete|head|patch|options)$/)) {
               return _this.validate_method(property, allowParameterKeys);
             } else {

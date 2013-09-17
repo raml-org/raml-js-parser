@@ -4585,9 +4585,6 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-{.+}"/).and.notify(done);
     });
-
-
-
   });
   describe('Resource Validations', function() {
     it('should fail if using parametric property name in a resource', function(done) {
@@ -5230,6 +5227,104 @@ describe('Parser', function() {
         '     [string]:'
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/each response key must be an integer/).and.notify(done);
+    });
+  });
+  describe('Base Uri Parameters', function(){
+    it('should fail when a resource specified baseUriParams and baseuri is null', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/resource:',
+        '  baseUriParameters:',
+        '   domainName:',
+        '     example: your-bucket'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/base uri parameters defined when there is no baseUri/).and.notify(done);
+    });
+    it('should fail when a resource specified baseUriParams unused in the URI', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'baseUri: https://myapi.com',
+        'title: Test',
+        '/resource:',
+        '  baseUriParameters:',
+        '   domainName:',
+        '     example: your-bucket'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/domainName uri parameter unused/).and.notify(done);
+    });
+    it('should succeed when a overriding baseUriParams in a resource', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'baseUri: https://{domainName}.myapi.com',
+        'title: Test',
+        '/resource:',
+        '  baseUriParameters:',
+        '   domainName:',
+        '     example: your-bucket'
+      ].join('\n');
+      var expected = {
+        "baseUri": "https://{domainName}.myapi.com",
+        "title": "Test",
+        "resources": [
+          {
+            "baseUriParameters": {
+              "domainName": {
+                "example": "your-bucket"
+              }
+            },
+            "relativeUri": "/resource"
+          }
+        ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should succeed when a overriding baseUriParams in a resource 3 levels deep', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'baseUri: https://{domainName}.myapi.com',
+        'title: Test',
+        '/resource:',
+        ' /resource:',
+        '   /resource:',
+        '     baseUriParameters:',
+        '       domainName:',
+        '         example: your-bucket'
+      ].join('\n');
+      var expected = {
+        "baseUri": "https://{domainName}.myapi.com",
+        "title": "Test",
+        "resources": [
+          {
+            "relativeUri": "/resource",
+            "resources": [
+              {
+                "relativeUri": "/resource",
+                "resources": [
+                  {
+                    "baseUriParameters": {
+                      "domainName": {
+                        "example": "your-bucket"
+                      }
+                    },
+                    "relativeUri": "/resource"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
     });
   });
   describe('Error reporting', function () {

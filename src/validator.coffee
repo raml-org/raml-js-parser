@@ -144,12 +144,13 @@ class @Validator
     @check_is_map node
 
   validate_base_uri_parameters: (node) ->
+    baseUriProperty = @get_property node, /^baseUri$/
+    @baseUri = baseUriProperty.value
     @check_is_map node
     if @has_property node, /^baseUriParameters$/
       if not @has_property node, /^baseUri$/
         throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', node.start_mark
-      baseUri = @property_value node, /^baseUri$/
-      @validate_uri_parameters baseUri, @get_property node, /^baseUriParameters$/
+      @validate_uri_parameters @baseUri, @get_property node, /^baseUriParameters$/
 
   validate_uri_parameters: (uri, uriProperty) ->
     try
@@ -324,6 +325,10 @@ class @Validator
             @validate_type_property property, allowParameterKeys
           else if property[0].value is "uriParameters"
             @validate_uri_parameters resource[0].value, property[1]
+          else if property[0].value is "baseUriParameters"
+            unless @baseUri
+              throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
+            @validate_uri_parameters @baseUri, property[1]
           else if property[0].value.match(/^(get|post|put|delete|head|patch|options)$/)
             @validate_method property, allowParameterKeys
           else
