@@ -25,15 +25,15 @@ describe('Parser', function() {
       var definition = [
         'title: MyApi',
         'traits:',
-        '  - pepe:',
-        '    displayName: Pepe'
+        '  - trait:',
+        '    displayName: Foo'
       ].join('\n');
       var expected = {
         title: "MyApi",
         traits: [
           {
-            pepe: null,
-            displayName: "Pepe"
+            trait: null,
+            displayName: "Foo"
           }
         ]
       };
@@ -78,15 +78,27 @@ describe('Parser', function() {
         'title: hola',
         'version: v0.1',
         'baseUri: http://server/api/{version}',
-        'uriParameters:'
+        'baseUriParameters:'
       ].join('\n');
       var expected = {
         title: "hola",
         version: "v0.1",
         baseUri: "http://server/api/{version}",
-        uriParameters: null
+        baseUriParameters: null
       }
       raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('it should fail if baseUriParamters has a version parameter. RT-199', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: hola',
+        'version: v0.1',
+        'baseUri: http://server/api/{version}',
+        'baseUriParameters:',
+        ' version:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/version parameter not allowed here/).and.notify(done);
     });
 
   });
@@ -127,7 +139,7 @@ describe('Parser', function() {
               'baseUri: http://myapi.com'
           ].join('\n');
 
-          raml.load(definition).should.be.rejected.with(/not a scalar/).and.notify(done);
+          raml.load(definition).should.be.rejected.with(/title must be a string/).and.notify(done);
       });
       it('should fail if title is mapping', function(done) {
           var definition = [
@@ -136,7 +148,7 @@ describe('Parser', function() {
               'baseUri: http://myapi.com'
           ].join('\n');
 
-          raml.load(definition).should.be.rejected.with(/not a scalar/).and.notify(done);
+          raml.load(definition).should.be.rejected.with(/title must be a string/).and.notify(done);
       });
       it('should succeed if title is longer than 48 chars', function(done) {
           var definition = [
@@ -166,7 +178,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/unknown property/).and.notify(done);
     });
-    it('should not fail if there is a root property with array', function(done) {
+    it('should fail if there is a root property with array', function(done) {
       var definition = [
         '---',
         'title: MyApi',
@@ -174,7 +186,7 @@ describe('Parser', function() {
         '[1,2]: v1'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/unknown property/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/keys can only be strings/).and.notify(done);
     });
   });
   describe('Include', function() {
@@ -265,7 +277,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -275,7 +287,7 @@ describe('Parser', function() {
       raml.load(definition).should.become({
         title: 'Test',
         baseUri: 'http://{a}.myapi.org',
-        uriParameters: {
+        baseUriParameters: {
           'a': {
             displayName: 'A',
             description: 'This is A'
@@ -291,7 +303,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  b:',
         '    displayName: A',
         '    description: This is A',
@@ -308,7 +320,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -329,7 +341,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -346,7 +358,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -363,7 +375,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -380,7 +392,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -397,7 +409,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -414,7 +426,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -431,7 +443,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -448,7 +460,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -465,7 +477,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -482,7 +494,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -499,7 +511,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -516,7 +528,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -533,7 +545,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -550,7 +562,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -599,7 +611,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -617,7 +629,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -635,7 +647,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -653,7 +665,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -671,7 +683,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -689,7 +701,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -707,7 +719,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -725,7 +737,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -743,7 +755,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -761,7 +773,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -779,7 +791,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -797,7 +809,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -815,7 +827,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -833,7 +845,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -851,7 +863,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -869,7 +881,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -3182,7 +3194,7 @@ describe('Parser', function() {
         '  -',
         '/:'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/invalid resourceTypes definition, it must be an array/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/invalid resourceType definition, it must be a mapping/).and.notify(done);
     });
     it('should fail if resource type is null', function(done) {
       var definition = [
@@ -3194,7 +3206,7 @@ describe('Parser', function() {
         '  -',
         '/:'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/invalid resourceTypes definition, it must be an array/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/invalid resourceType definition, it must be a mapping/).and.notify(done);
     });
     it('should fail if resource type is not mapping', function(done) {
       var definition = [
@@ -3241,45 +3253,45 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/there is no type named missing/).and.notify(done);
     });
-//    it('should fail if a resource type applies a missing trait', function(done) {
-//      var definition = [
-//        '%YAML 1.2',
-//        '%TAG ! tag:raml.org,0.1:',
-//        '---',
-//        'title: Test',
-//        'traits:',
-//        '  - foo:',
-//        '     displayName: Foo',
-//        'resourceTypes:',
-//        '  - collection:',
-//        '     is: [foo, bar]',
-//        '     displayName: Collection',
-//        '     description: This resourceType should be used for any collection of items',
-//        '/:',
-//        '  type: collection'
-//      ].join('\n');
-//      raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
-//    });
-//    it('should fail if a resource type\'s method applies a missing trait', function(done) {
-//      var definition = [
-//        '%YAML 1.2',
-//        '%TAG ! tag:raml.org,0.1:',
-//        '---',
-//        'title: Test',
-//        'traits:',
-//        '  - foo:',
-//        '     displayName: Foo',
-//        'resourceTypes:',
-//        '  - collection:',
-//        '     displayName: Collection',
-//        '     description: This resourceType should be used for any collection of items',
-//        '     get:',
-//        '       is: [foo, bar]',
-//        '/:',
-//        '  type: collection'
-//      ].join('\n');
-//      raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
-//    });
+    it('should fail if a resource type applies a missing trait', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  - foo:',
+        '     displayName: Foo',
+        'resourceTypes:',
+        '  - collection:',
+        '     is: [foo, bar]',
+        '     displayName: Collection',
+        '     description: This resourceType should be used for any collection of items',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
+    });
+    it('should fail if a resource type\'s method applies a missing trait', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  - foo:',
+        '     displayName: Foo',
+        'resourceTypes:',
+        '  - collection:',
+        '     displayName: Collection',
+        '     description: This resourceType should be used for any collection of items',
+        '     get:',
+        '       is: [foo, bar]',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
+    });
     it('should apply a resource type', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -3291,7 +3303,7 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
-        '       foo:',
+        '       body:',
         '/:',
         '  type: collection'
       ].join('\n');
@@ -3306,7 +3318,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items",
               post:
               {
-                foo: null
+                body: null
               }
             }
           }
@@ -3318,7 +3330,7 @@ describe('Parser', function() {
             methods: [
               {
                 method: "post",
-                foo: null
+                body: null
               }
             ]
           }
@@ -3338,12 +3350,13 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
-        '       foo:',
+        '       body:',
         '  - collection:',
         '      displayName: Collection2',
         '      description: This resourceType should be used for any collection of items2',
         '      post:',
-        '       foo: 2',
+        '       body:',
+        '        application/json:',
         '/:',
         '  type: collection'
       ].join('\n');
@@ -3358,7 +3371,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items",
               post:
               {
-                foo: null
+                body: null
               }
             }
           },
@@ -3369,7 +3382,9 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items2",
               post:
               {
-                foo: 2
+                body: {
+                  "application/json": null
+                }
               }
             }
           }
@@ -3381,7 +3396,9 @@ describe('Parser', function() {
             methods: [
               {
                 method: "post",
-                foo: 2
+                body: {
+                  "application/json": null
+                }
               }
             ]
           }
@@ -3401,7 +3418,7 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
-        '       foo:',
+        '       body:',
         '/:',
         '  type: { collection }'
       ].join('\n');
@@ -3416,7 +3433,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items",
               post:
               {
-                foo: null
+                body: null
               }
             }
           }
@@ -3430,7 +3447,7 @@ describe('Parser', function() {
             methods: [
               {
                 method: "post",
-                foo: null
+                body: null
               }
             ]
           }
@@ -3450,7 +3467,7 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
-        '       foo:',
+        '       body:',
         '/:',
         '  type: { collection: { foo: bar } }'
       ].join('\n');
@@ -3465,7 +3482,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items",
               post:
               {
-                foo: null
+                body: null
               }
             }
           }
@@ -3481,7 +3498,7 @@ describe('Parser', function() {
             methods: [
               {
                 method: "post",
-                foo: null
+                body: null
               }
             ]
           }
@@ -3502,12 +3519,12 @@ describe('Parser', function() {
         '      displayName: Collection post',
         '      description: This resourceType should be used for any collection of items post',
         '      post:',
-        '       foo:',
+        '       body:',
         '  - get:',
         '      displayName: Collection get',
         '      description: This resourceType should be used for any collection of items get',
         '      get:',
-        '       bar:',
+        '       body:',
         '/:',
         '  type: post'
       ].join('\n');
@@ -3523,7 +3540,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items post",
               post:
               {
-                foo: null
+                body: null
               }
             }
           },
@@ -3534,7 +3551,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items get",
               get:
               {
-                bar: null
+                body: null
               }
             }
           }
@@ -3545,11 +3562,11 @@ describe('Parser', function() {
             relativeUri: "/",
             methods: [
               {
-                foo: null,
+                body: null,
                 method: "post"
               },
               {
-                bar: null,
+                body: null,
                 method: "get"
               }
             ]
@@ -3571,18 +3588,18 @@ describe('Parser', function() {
         '      displayName: Collection post',
         '      description: This resourceType should be used for any collection of items post',
         '      post:',
-        '       foo:',
+        '       body:',
         '  - get:',
         '      type: delete',
         '      displayName: Collection get',
         '      description: This resourceType should be used for any collection of items get',
         '      get:',
-        '       bar:',
+        '       body:',
         '  - delete:',
         '      displayName: Collection delete',
         '      description: This resourceType should be used for any collection of items delete',
         '      delete:',
-        '       baz:',
+        '       body:',
         '/:',
         '  type: post'
       ].join('\n');
@@ -3598,7 +3615,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items post",
               post:
               {
-                foo: null
+                body: null
               }
             }
           },
@@ -3610,7 +3627,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items get",
               get:
               {
-                bar: null
+                body: null
               }
             }
           }
@@ -3622,7 +3639,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items delete",
               delete:
               {
-                baz: null
+                body: null
               }
             }
           }
@@ -3633,15 +3650,15 @@ describe('Parser', function() {
             relativeUri: "/",
             methods: [
               {
-                foo: null,
+                body: null,
                 method: "post"
               },
               {
-                bar: null,
+                body: null,
                 method: "get"
               },
               {
-                baz: null,
+                body: null,
                 method: "delete"
               }
             ]
@@ -3662,7 +3679,7 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: <<foo>> resourceType should be used for any collection of items',
         '      post:',
-        '       foo: <<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>',
+        '       description: <<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>',
         '       <<foo>>: <<bar>>',
         '/:',
         '  type: { collection: { foo: bar, bar: foo} }'
@@ -3678,7 +3695,7 @@ describe('Parser', function() {
               description: "<<foo>> resourceType should be used for any collection of items",
               post:
               {
-                foo: "<<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>",
+                description: "<<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>",
                 "<<foo>>": "<<bar>>"
               }
             }
@@ -3696,7 +3713,7 @@ describe('Parser', function() {
             methods: [
               {
                 method: "post",
-                foo: "barbarbar fixed text foofoofoo",
+                description: "barbarbar fixed text foofoofoo",
                 bar: "foo"
               }
             ]
@@ -3717,7 +3734,7 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: <<foo>> resourceType should be used for any collection of items',
         '      post:',
-        '       foo: <<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>',
+        '       description: <<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>',
         '       <<foo>>: <<bar>>',
         '/:',
         '  type: { collection: { foo: bar } }'
@@ -3725,30 +3742,30 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/value was not provided for parameter: bar/).and.notify(done);
     });
-//    it('should fail if resourceType uses a missing trait', function(done) {
-//      var definition = [
-//        '%YAML 1.2',
-//        '%TAG ! tag:raml.org,0.1:',
-//        '---',
-//        'title: Test',
-//        'traits:',
-//        '  - secured:',
-//        '      displayName: OAuth 2.0 security',
-//        '      queryParameters:',
-//        '       access_token:',
-//        '         description: OAuth Access token',
-//        'resourceTypes:',
-//        '  - collection:',
-//        '      is: [ blah ]',
-//        '      displayName: Collection',
-//        '      description: This resourceType should be used for any collection of items',
-//        '      post:',
-//        '       foo:',
-//        '/:',
-//        '  type: collection'
-//      ].join('\n');
-//      raml.load(definition).should.be.rejected.with(/there is no trait named blah/).and.notify(done);
-//    });
+    it('should fail if resourceType uses a missing trait', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'traits:',
+        '  - secured:',
+        '      displayName: OAuth 2.0 security',
+        '      queryParameters:',
+        '       access_token:',
+        '         description: OAuth Access token',
+        'resourceTypes:',
+        '  - collection:',
+        '      is: [ blah ]',
+        '      displayName: Collection',
+        '      description: This resourceType should be used for any collection of items',
+        '      post:',
+        '       foo:',
+        '/:',
+        '  type: collection'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/there is no trait named blah/).and.notify(done);
+    });
     it('should apply a trait to a resource type', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -3767,7 +3784,7 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
-        '       foo:',
+        '       body:',
         '/:',
         '  type: collection'
       ].join('\n');
@@ -3795,7 +3812,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items",
               post:
               {
-                foo: null
+                body: null
               }
             }
           }
@@ -3806,7 +3823,7 @@ describe('Parser', function() {
             relativeUri: "/",
             methods: [
               {
-                foo: null,
+                body: null,
                 method: "post",
                 queryParameters: {
                   access_token: {
@@ -3821,7 +3838,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
-    it('should apply a resource type skipping missing optional parameter', function(done) {
+    it.skip('should apply a resource type skipping missing optional parameter', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -3832,9 +3849,9 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
-        '       foo:',
+        '       body:',
         '      "get?":',
-        '       foo:',
+        '       body:',
         '/:',
         '  type: collection'
       ].join('\n');
@@ -3849,11 +3866,11 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items",
               post:
               {
-                foo: null
+                body: null
               },
               "get?":
               {
-                foo: null
+                body: null
               }
             }
           }
@@ -3865,16 +3882,15 @@ describe('Parser', function() {
             methods: [
               {
                 method: "post",
-                foo: null
+                body: null
               }
             ]
           }
         ]
       };
-
       raml.load(definition).should.become(expected).and.notify(done);
     });
-    it('should apply a resource type adding optional parameter', function(done) {
+    it.skip('should apply a resource type adding optional parameter', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -3919,7 +3935,6 @@ describe('Parser', function() {
           }
         ]
       };
-
       raml.load(definition).should.become(expected).and.notify(done);
     });
 
@@ -3997,58 +4012,62 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/schema foo must be a string/).and.notify(done);
     });
-//    it('should fail if a schema is a mapping', function(done) {
-//      var definition = [
-//        '%YAML 1.2',
-//        '%TAG ! tag:raml.org,0.2:',
-//        '---',
-//        'title: Test',
-//        'schemas:',
-//        '  foo: |',
-//        '       Blah blah',
-//        '/foo:',
-//        '  displayName: A',
-//        '  post:' ,
-//        '    description: Blah',
-//        '    body:',
-//        '      application/json:',
-//        '        schema: foo3',
-//        '    responses:',
-//        '      200:',
-//        '        application/json:',
-//        '          schema: foo',
-//        '      201:',
-//        '        application/json:',
-//        '          schema: {}'
-//      ].join('\n');
-//      raml.load(definition).should.be.rejected.with(/schema must be a string/).notify(done);
-//    });
-//    it('should fail if a schema is an array', function(done) {
-//      var definition = [
-//        '%YAML 1.2',
-//        '%TAG ! tag:raml.org,0.2:',
-//        '---',
-//        'title: Test',
-//        'schemas:',
-//        '  foo: |',
-//        '       Blah blah',
-//        '/foo:',
-//        '  displayName: A',
-//        '  post:' ,
-//        '    description: Blah',
-//        '    body:',
-//        '      application/json:',
-//        '        schema: foo3',
-//        '    responses:',
-//        '      200:',
-//        '        application/json:',
-//        '          schema: foo',
-//        '      201:',
-//        '        application/json:',
-//        '          schema: []'
-//      ].join('\n');
-//      raml.load(definition).should.be.rejected.with(/schema must be a string/).notify(done);
-//    });
+    it('should fail if a schema is a mapping', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.2:',
+        '---',
+        'title: Test',
+        'schemas:',
+        '  foo: |',
+        '       Blah blah',
+        '/foo:',
+        '  displayName: A',
+        '  post:' ,
+        '    description: Blah',
+        '    body:',
+        '      application/json:',
+        '        schema: foo3',
+        '    responses:',
+        '      200:',
+        '       body:',
+        '        application/json:',
+        '          schema: foo',
+        '      201:',
+        '       body:',
+        '        application/json:',
+        '          schema: {}'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/schema must be a string/).notify(done);
+    });
+    it('should fail if a schema is an array', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.2:',
+        '---',
+        'title: Test',
+        'schemas:',
+        '  foo: |',
+        '       Blah blah',
+        '/foo:',
+        '  displayName: A',
+        '  post:' ,
+        '    description: Blah',
+        '    body:',
+        '      application/json:',
+        '        schema: foo3',
+        '    responses:',
+        '      200:',
+        '       body:',
+        '        application/json:',
+        '          schema: foo',
+        '      201:',
+        '       body:',
+        '        application/json:',
+        '          schema: []'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/schema must be a string/).notify(done);
+    });
     it('should apply trait', function(done) {
       var definition = [
         '%YAML 1.2',
@@ -4249,6 +4268,335 @@ describe('Parser', function() {
       raml.load(definition).should.become(expected).and.notify(done);
     });
 
+  });
+  describe('Security schemes', function(){
+    it('should fail when schemes is mapping', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        '  foo: |',
+        '       Blah blah',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/invalid security schemes property, it must be an array/).and.notify(done);
+    });
+    it('should fail when schemes is scalar', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes: foo',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/invalid security schemes property, it must be an array/).and.notify(done);
+    });
+    it('should fail when schemes is null', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/invalid security schemes property, it must be an array/).and.notify(done);
+    });
+    it('should succeed when schemes is empty', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes: []',
+        '/resource:'
+      ].join('\n');
+      var expected = {
+        "title": "Test",
+        "securitySchemes": [],
+        "resources": [
+          {
+            "relativeUri": "/resource"
+          }
+        ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should fail when schemes has a null scheme', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - ',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/invalid security scheme property, it must be a map/).and.notify(done);
+    });
+    it('should fail when scheme is scalar', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme: scalar',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/invalid security scheme property, it must be a map/).and.notify(done);
+    });
+    it('should fail when scheme is array', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme: []',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/invalid security scheme property, it must be a map/).and.notify(done);
+    });
+    it('should fail when scheme contains a wrong property', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     property: null',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/property: 'property' is invalid in a security scheme/).and.notify(done);
+    });
+    it('should fail when scheme does not have type', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-{.+}"/).and.notify(done);
+    });
+    it('should succeed when type is "OAuth 2.0"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: OAuth 2.0',
+        '     settings:',
+        '       authorizationUrl: https://www.dropbox.com/1/oauth2/authorize',
+        '       accessTokenUrl: https://api.dropbox.com/1/oauth2/token',
+        '       authorizationGrants: [ code, token ]',
+        '/resource:'
+      ].join('\n');
+      var expected = {
+        "title": "Test",
+        "securitySchemes": [
+          {
+            "scheme": {
+              "description": "This is some text",
+              "type": "OAuth 2.0",
+              settings: {
+                authorizationUrl: "https://www.dropbox.com/1/oauth2/authorize",
+                accessTokenUrl: "https://api.dropbox.com/1/oauth2/token",
+                authorizationGrants: ["code", "token"]
+              }
+            }
+          }
+        ],
+        "resources": [
+          {
+            "relativeUri": "/resource"
+          }
+        ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should succeed when type is "OAuth 1.0"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: OAuth 1.0',
+        '     settings:',
+        '       requestTokenUri: https://api.dropbox.com/1/oauth/request_token',
+        '       authorizationUri: https://www.dropbox.com/1/oauth/authorize',
+        '       tokenCredentialsUri: https://api.dropbox.com/1/oauth/access_token',
+        '/resource:'
+      ].join('\n');
+      var expected = {
+        "title": "Test",
+        "securitySchemes": [
+          {
+            "scheme": {
+              "description": "This is some text",
+              "type": "OAuth 1.0",
+              settings:{
+                requestTokenUri: "https://api.dropbox.com/1/oauth/request_token",
+                authorizationUri: "https://www.dropbox.com/1/oauth/authorize",
+                tokenCredentialsUri: "https://api.dropbox.com/1/oauth/access_token"
+              }
+            }
+          }
+        ],
+        "resources": [
+          {
+            "relativeUri": "/resource"
+          }
+        ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should succeed when type is "Basic Authentication"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: Basic Authentication',
+        '/resource:'
+      ].join('\n');
+      var expected = {
+        "title": "Test",
+        "securitySchemes": [
+          {
+            "scheme": {
+              "description": "This is some text",
+              "type": "Basic Authentication"
+            }
+          }
+        ],
+        "resources": [
+          {
+            "relativeUri": "/resource"
+          }
+        ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should succeed when type is "Digest Authentication"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: Digest Authentication',
+        '/resource:'
+      ].join('\n');
+      var expected = {
+        "title": "Test",
+        "securitySchemes": [
+          {
+            "scheme": {
+              "description": "This is some text",
+              "type": "Digest Authentication"
+            }
+          }
+        ],
+        "resources": [
+          {
+            "relativeUri": "/resource"
+          }
+        ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should succeed when type is "x-other-something"', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: x-other-something',
+        '/resource:'
+      ].join('\n');
+      var expected = {
+        "title": "Test",
+        "securitySchemes": [
+          {
+            "scheme": {
+              "description": "This is some text",
+              "type": "x-other-something"
+            }
+          }
+        ],
+        "resources": [
+          {
+            "relativeUri": "/resource"
+          }
+        ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should fail when type is null', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type:',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-{.+}"/).and.notify(done);
+    });
+    it('should fail when type is array', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: []',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-{.+}"/).and.notify(done);
+    });
+    it('should fail when type is map', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: {}',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-{.+}"/).and.notify(done);
+    });
   });
   describe('Resource Validations', function() {
     it('should fail if using parametric property name in a resource', function(done) {
@@ -4459,7 +4807,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -4479,7 +4827,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -4503,7 +4851,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -4526,7 +4874,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
-        'uriParameters:',
+        'baseUriParameters:',
         '  a:',
         '    displayName: A',
         '    description: This is A',
@@ -4796,7 +5144,7 @@ describe('Parser', function() {
             "methods": [
               {
                 body:{
-                  formParameters: null,
+                  formParameters: null
                 },
                 "method": "post"
               }
@@ -4892,12 +5240,104 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/each response key must be an integer/).and.notify(done);
     });
+  });
+  describe('Base Uri Parameters', function(){
+    it('should fail when a resource specified baseUriParams and baseuri is null', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        '/resource:',
+        '  baseUriParameters:',
+        '   domainName:',
+        '     example: your-bucket'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/base uri parameters defined when there is no baseUri/).and.notify(done);
+    });
+    it('should fail when a resource specified baseUriParams unused in the URI', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'baseUri: https://myapi.com',
+        'title: Test',
+        '/resource:',
+        '  baseUriParameters:',
+        '   domainName:',
+        '     example: your-bucket'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/domainName uri parameter unused/).and.notify(done);
+    });
+    it('should succeed when a overriding baseUriParams in a resource', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'baseUri: https://{domainName}.myapi.com',
+        'title: Test',
+        '/resource:',
+        '  baseUriParameters:',
+        '   domainName:',
+        '     example: your-bucket'
+      ].join('\n');
+      var expected = {
+        "baseUri": "https://{domainName}.myapi.com",
+        "title": "Test",
+        "resources": [
+          {
+            "baseUriParameters": {
+              "domainName": {
+                "example": "your-bucket"
+              }
+            },
+            "relativeUri": "/resource"
+          }
+        ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should succeed when a overriding baseUriParams in a resource 3 levels deep', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'baseUri: https://{domainName}.myapi.com',
+        'title: Test',
+        '/resource:',
+        ' /resource:',
+        '   /resource:',
+        '     baseUriParameters:',
+        '       domainName:',
+        '         example: your-bucket'
+      ].join('\n');
+      var expected = {
+        "baseUri": "https://{domainName}.myapi.com",
+        "title": "Test",
+        "resources": [
+          {
+            "relativeUri": "/resource",
+            "resources": [
+              {
+                "relativeUri": "/resource",
+                "resources": [
+                  {
+                    "baseUriParameters": {
+                      "domainName": {
+                        "example": "your-bucket"
+                      }
+                    },
+                    "relativeUri": "/resource"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      };
 
-
-
-
-
-
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
   });
   describe('Error reporting', function () {
     it('should report correct line/column for invalid trait error', function(done) {
@@ -4933,7 +5373,7 @@ describe('Parser', function() {
         '%YAML 1.2',
         '---',
         '/:',
-        '  is: [ throttled, rateLimited: { parameter: value } ]'
+        '  get:'
       ].join('\n');
       raml.load(definition).then(noop, function (error) {
         setTimeout(function () {

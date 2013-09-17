@@ -21,6 +21,7 @@ module.exports = function(grunt) {
             'lib/traits.js': 'src/traits.coffee',
             'lib/resourceTypes.js': 'src/resourceTypes.coffee',
             'lib/schemas.js': 'src/schemas.coffee',
+            'lib/securitySchemes.js': 'src/securitySchemes.coffee',
             'lib/joiner.js': 'src/joiner.coffee',            
             'lib/raml.js': 'src/raml.coffee'
           }
