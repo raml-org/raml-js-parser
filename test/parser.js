@@ -127,7 +127,7 @@ describe('Parser', function() {
               'baseUri: http://myapi.com'
           ].join('\n');
 
-          raml.load(definition).should.be.rejected.with(/not a scalar/).and.notify(done);
+          raml.load(definition).should.be.rejected.with(/title must be a string/).and.notify(done);
       });
       it('should fail if title is mapping', function(done) {
           var definition = [
@@ -136,7 +136,7 @@ describe('Parser', function() {
               'baseUri: http://myapi.com'
           ].join('\n');
 
-          raml.load(definition).should.be.rejected.with(/not a scalar/).and.notify(done);
+          raml.load(definition).should.be.rejected.with(/title must be a string/).and.notify(done);
       });
       it('should succeed if title is longer than 48 chars', function(done) {
           var definition = [
@@ -166,7 +166,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/unknown property/).and.notify(done);
     });
-    it('should not fail if there is a root property with array', function(done) {
+    it('should fail if there is a root property with array', function(done) {
       var definition = [
         '---',
         'title: MyApi',
@@ -174,7 +174,7 @@ describe('Parser', function() {
         '[1,2]: v1'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/unknown property/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/keys can only be strings/).and.notify(done);
     });
   });
   describe('Include', function() {
@@ -3826,7 +3826,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
-    it('should apply a resource type skipping missing optional parameter', function(done) {
+    it.skip('should apply a resource type skipping missing optional parameter', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -3878,7 +3878,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
-    it('should apply a resource type adding optional parameter', function(done) {
+    it.skip('should apply a resource type adding optional parameter', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
@@ -5361,7 +5361,7 @@ describe('Parser', function() {
         '%YAML 1.2',
         '---',
         '/:',
-        '  is: [ throttled, rateLimited: { parameter: value } ]'
+        '  get:'
       ].join('\n');
       raml.load(definition).then(noop, function (error) {
         setTimeout(function () {
