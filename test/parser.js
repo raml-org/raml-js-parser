@@ -571,6 +571,52 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+    it('should succeed when declaring a URI parameter with a file type', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'baseUriParameters:',
+        '  a:',
+        '    displayName: A',
+        '    description: This is A',
+        '    type: file'
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+    it('should succeed when declaring a URI parameter with a boolean type', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'baseUriParameters:',
+        '  a:',
+        '    displayName: A',
+        '    description: This is A',
+        '    type: boolean'
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+    it('should succeed when declaring a URI parameter with an example', function(done) {
+      var definition = [
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'baseUriParameters:',
+        '  a:',
+        '    displayName: A',
+        '    description: This is A',
+        '    example: This is the example'
+      ].join('\n');
+
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+
 
     it('should fail if baseUri value its not really a URI', function(done) {
       var definition = [
@@ -1195,6 +1241,54 @@ describe('Parser', function() {
       };
 
       raml.load(definition).should.become(expected).and.notify(done);
+    });
+
+    it('should succeed with null response', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.2:',
+        '---',
+        'title: Test',
+        '/foo:',
+        '  displayName: A',
+        '  get:' ,
+        '    description: Blah',
+        '    responses:',
+        '      200:'
+      ].join('\n');
+
+      var expected = {
+        title: 'Test',
+        resources: [{
+          displayName: 'A',
+          relativeUri: '/foo',
+          methods:[{
+            description: 'Blah',
+            responses: {
+              200: null
+            },
+            method: 'get'
+          }]
+        }]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should fail if status code is string', function(done) {
+      var definition = [
+        '%YAML 1.2',
+        '%TAG ! tag:raml.org,0.2:',
+        '---',
+        'title: Test',
+        '/foo:',
+        '  displayName: A',
+        '  get:' ,
+        '    description: Blah',
+        '    responses:',
+        '      fail-here:'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/each response key must be an integer/).and.notify(done);
     });
 
     it('should overwrite existing node with arrays as keys', function(done) {
@@ -3947,16 +4041,18 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'schemas:',
-        '  foo: |',
+        '  - foo: |',
         '       Blah blah',
         '/resource:'
       ].join('\n');
 
       var expected = {
         title: "Test",
-        schemas: {
-          foo: "Blah blah\n"
-        },
+        schemas: [
+            {
+            foo: "Blah blah\n"
+            }
+          ],
         resources : [
           {
             relativeUri: "/resource"
@@ -3975,18 +4071,18 @@ describe('Parser', function() {
         'schemas: foo',
         '/:'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/schemas property must be a mapping/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/schemas property must be an array/).and.notify(done);
     });
-    it('should fail when specifying schemas is sequence', function(done) {
+    it('should fail when specifying schemas is scalar', function(done) {
       var definition = [
         '%YAML 1.2',
         '%TAG ! tag:raml.org,0.1:',
         '---',
         'title: Test',
-        'schemas: []',
+        'schemas: {}',
         '/:'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/schemas property must be a mapping/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/schemas property must be an array/).and.notify(done);
     });
     it('should fail when schema is null', function(done) {
       var definition = [
@@ -3995,7 +4091,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'schemas:',
-        '  foo:',
+        '  - foo:',
         '/:'
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/schema foo must be a string/).and.notify(done);
@@ -4007,7 +4103,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'schemas:',
-        '  foo: []',
+        '  - foo: []',
         '/:'
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/schema foo must be a string/).and.notify(done);
@@ -4019,7 +4115,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'schemas:',
-        '  foo: |',
+        '  - foo: |',
         '       Blah blah',
         '/foo:',
         '  displayName: A',
@@ -4047,7 +4143,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'schemas:',
-        '  foo: |',
+        '  - foo: |',
         '       Blah blah',
         '/foo:',
         '  displayName: A',
@@ -4075,7 +4171,9 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'schemas:',
-        '  foo: |',
+        '  - foo: |',
+        '       Blah blah',
+        '    faa: |',
         '       Blah blah',
         '/foo:',
         '  displayName: A',
@@ -4097,9 +4195,10 @@ describe('Parser', function() {
 
       var expected = {
         title: 'Test',
-        schemas: {
-          foo: "Blah blah\n"
-        },
+        schemas: [{
+          foo: "Blah blah\n",
+          faa: "Blah blah\n"
+        }],
         resources: [{
           displayName: 'A',
           relativeUri: '/foo',
@@ -4140,7 +4239,7 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'schemas:',
-        '  foo: |',
+        '  - foo: |',
         '       Blah blah',
         '/foo:',
         '  displayName: A',
@@ -4162,9 +4261,9 @@ describe('Parser', function() {
 
       var expected = {
         title: 'Test',
-        schemas: {
+        schemas: [{
           foo: "Blah blah\n"
-        },
+        }],
         resources: [{
           displayName: 'A',
           relativeUri: '/foo',
@@ -4205,9 +4304,9 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'schemas:',
-        '  foo: |',
+        '  - foo: |',
         '       Blah blah',
-        '  foo2: |',
+        '  - foo2: |',
         '       halb halB',
         '/foo:',
         '  displayName: A',
@@ -4230,10 +4329,14 @@ describe('Parser', function() {
 
       var expected = {
         title: 'Test',
-        schemas: {
-          foo: "Blah blah\n",
-          foo2: "halb halB\n"
-        },
+        schemas: [
+          {
+            foo: "Blah blah\n"
+          },
+          {
+            foo2: "halb halB\n"
+          }
+        ],
         resources: [{
           displayName: 'A',
           relativeUri: '/foo',
