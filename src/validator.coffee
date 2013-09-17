@@ -87,14 +87,15 @@ class @Validator
     authorizationUrl = false
     accessTokenUrl = false
     settings[1].value.forEach (property) =>
-      if property[0].value is "authorizationUrl"
-        unless @isString property[1]
-          throw new exports.ValidationError 'while validating security scheme', null, 'authorizationUrl must be a URL', property[0].start_mark
-        authorizationUrl = true
-      if property[0].value is "accessTokenUrl"
-        unless @isString property[1]
-          throw new exports.ValidationError 'while validating security scheme', null, 'accessTokenUrl must be a URL', property[0].start_mark
-        accessTokenUrl = true
+      switch property[0].value
+        when "authorizationUrl"
+          unless @isString property[1]
+            throw new exports.ValidationError 'while validating security scheme', null, 'authorizationUrl must be a URL', property[0].start_mark
+          authorizationUrl = true
+        when  "accessTokenUrl"
+          unless @isString property[1]
+            throw new exports.ValidationError 'while validating security scheme', null, 'accessTokenUrl must be a URL', property[0].start_mark
+          accessTokenUrl = true
     unless  accessTokenUrl
       throw new exports.ValidationError 'while validating security scheme', null, 'accessTokenUrl must be a URL', settings.start_mark
     unless  authorizationUrl
@@ -105,18 +106,19 @@ class @Validator
     authorizationUri = false
     tokenCredentialsUri = false
     settings[1].value.forEach (property) =>
-      if property[0].value is "requestTokenUri"
-        unless @isString property[1]
-          throw new exports.ValidationError 'while validating security scheme', null, 'requestTokenUri must be a URL', property[0].start_mark
-        requestTokenUri = true
-      if property[0].value is "authorizationUri"
-        unless @isString property[1]
-          throw new exports.ValidationError 'while validating security scheme', null, 'authorizationUri must be a URL', property[0].start_mark
-        authorizationUri = true
-      if property[0].value is "tokenCredentialsUri"
-        unless @isString property[1]
-          throw new exports.ValidationError 'while validating security scheme', null, 'tokenCredentialsUri must be a URL', property[0].start_mark
-        tokenCredentialsUri = true
+      switch property[0].value
+        when "requestTokenUri"
+          unless @isString property[1]
+            throw new exports.ValidationError 'while validating security scheme', null, 'requestTokenUri must be a URL', property[0].start_mark
+          requestTokenUri = true
+        when "authorizationUri"
+          unless @isString property[1]
+            throw new exports.ValidationError 'while validating security scheme', null, 'authorizationUri must be a URL', property[0].start_mark
+          authorizationUri = true
+        when "tokenCredentialsUri"
+          unless @isString property[1]
+            throw new exports.ValidationError 'while validating security scheme', null, 'tokenCredentialsUri must be a URL', property[0].start_mark
+          tokenCredentialsUri = true
     unless  requestTokenUri
       throw new exports.ValidationError 'while validating security scheme', null, 'requestTokenUri must be a URL', settings.start_mark
     unless  authorizationUri
@@ -197,15 +199,29 @@ class @Validator
     return unless node.value
 
     node.value.forEach (childNode) =>
-      return true if typeof childNode[0].value is "object"
-      unless @is_valid_parameter_property_name childNode[0].value
-        throw new exports.ValidationError 'while validating parameter properties', null, 'unknown property ' + childNode[0].value, childNode[0].start_mark
-
       propertyName = childNode[0].value
       propertyValue = childNode[1].value
       booleanValues = ["true", "false"]
 
       switch propertyName
+        when "displayName"
+          if @isSequence(childNode[1]) or @isMapping(childNode[0])
+            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of displayName must be a scalar', childNode[1].start_mark
+        when "pattern"
+          if @isSequence(childNode[1]) or @isMapping(childNode[0])
+            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of pattern must be a scalar', childNode[1].start_mark
+        when "default"
+          if @isSequence(childNode[1]) or @isMapping(childNode[0])
+            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of default must be a scalar', childNode[1].start_mark
+        when "enum"
+          unless @isSequence(childNode[1])
+            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of displayName must be a scalar', childNode[1].start_mark
+        when "description"
+          if @isSequence(childNode[1]) or @isMapping(childNode[0])
+            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of description must be a scalar', childNode[1].start_mark
+        when "example"
+          if @isSequence(childNode[1]) or @isMapping(childNode[0])
+            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of example must be a scalar', childNode[1].start_mark
         when "minLength"
           if isNaN(propertyValue)
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minLength must be a number', childNode[1].start_mark
@@ -219,7 +235,8 @@ class @Validator
           if isNaN(propertyValue)
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maximum must be a number', childNode[1].start_mark
         when "type"
-          if propertyValue != 'string' and propertyValue != 'number' and propertyValue != 'integer' and propertyValue != 'date'
+          validTypes = ['string', 'number', 'integer', 'date', 'boolean', 'file']
+          unless  propertyValue in validTypes
             throw new exports.ValidationError 'while validating parameter properties', null, 'type can either be: string, number, integer or date', childNode[1].start_mark
         when "required"
           unless propertyValue in booleanValues
@@ -227,6 +244,8 @@ class @Validator
         when "repeat"
           unless propertyValue in booleanValues
             throw new exports.ValidationError 'while validating parameter properties', null, 'repeat can be any either true or false', childNode[1].start_mark
+        else
+          throw new exports.ValidationError 'while validating parameter properties', null, 'unknown property ' + propertyName, childNode[0].start_mark
 
   valid_root_properties: (node) ->
     @check_is_map node
@@ -292,21 +311,6 @@ class @Validator
           unless @isNullableString property[1]
             throw new exports.ValidationError 'while validating dcoumentation section', null, 'content must be a string', property[0].start_mark
 
-  is_valid_parameter_property_name: (propertyName) ->
-    return propertyName is "displayName" or
-            propertyName is "description" or
-            propertyName is "type" or
-            propertyName is "enum" or
-            propertyName is "example" or
-            propertyName is "pattern" or
-            propertyName is "minLength" or
-            propertyName is "maxLength" or
-            propertyName is "minimum" or
-            propertyName is "maximum" or
-            propertyName is "required" or
-            propertyName is "repeat" or
-            propertyName is "default"
-
   child_resources: (node) ->
     if node and @isMapping node
       return node.value.filter (childNode) -> return childNode[0].value.match(/^\//);
@@ -322,18 +326,20 @@ class @Validator
             if allowParameterKeys
               throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', property[0].start_mark
             @validate_resource property, allowParameterKeys
-          else if property[0].value is "type"
-            @validate_type_property property, allowParameterKeys
-          else if property[0].value is "uriParameters"
-            @validate_uri_parameters resource[0].value, property[1]
-          else if property[0].value is "baseUriParameters"
-            unless @baseUri
-              throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
-            @validate_uri_parameters @baseUri, property[1]
           else if property[0].value.match(/^(get|post|put|delete|head|patch|options)$/)
             @validate_method property, allowParameterKeys
           else
-            throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a resource", property[0].start_mark
+            switch property[0].value
+              when "type"
+                @validate_type_property property, allowParameterKeys
+              when  "uriParameters"
+                @validate_uri_parameters resource[0].value, property[1]
+              when "baseUriParameters"
+                unless @baseUri
+                  throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
+                @validate_uri_parameters @baseUri, property[1]
+              else
+                throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a resource", property[0].start_mark
 
   validate_type_property: (property, allowParameterKeys) ->
     typeName = @key_or_value property[1]
@@ -349,26 +355,27 @@ class @Validator
       throw new exports.ValidationError 'while validating methods', null, "method must be a mapping", method[0].start_mark
     method[1].value.forEach (property) =>
       unless @validate_common_properties property, allowParameterKeys
-        if property[0].value is "headers"
-          @validate_headers property, allowParameterKeys
-        else if property[0].value is "queryParameters"
-          @validate_query_params property, allowParameterKeys
-        else if property[0].value is "body"
-          @validate_body property, allowParameterKeys
-        else if property[0].value is "responses"
-          @validate_responses property, allowParameterKeys
-        else if property[0].value is "securedBy"
-          unless @isSequence property[1]
-            throw new exports.ValidationError 'while validating resources', null, "property 'securedBy' must be a list", property[0].start_mark
-          property[1].value.forEach (secScheme) =>
-            if @isSequence secScheme
-              throw new exports.ValidationError 'while validating securityScheme consumption', null, 'securityScheme reference cannot be a list', secScheme.start_mark
-            unless @isNull secScheme
-              securitySchemeName = @key_or_value secScheme
-              unless @get_security_scheme securitySchemeName
-                throw new exports.ValidationError 'while validating securityScheme consumption', null, 'there is no securityScheme named ' + securitySchemeName, secScheme.start_mark
-        else
-          throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a method", property[0].start_mark
+        switch property[0].value
+          when "headers"
+            @validate_headers property, allowParameterKeys
+          when "queryParameters"
+            @validate_query_params property, allowParameterKeys
+          when "body"
+            @validate_body property, allowParameterKeys
+          when "responses"
+            @validate_responses property, allowParameterKeys
+          when "securedBy"
+            unless @isSequence property[1]
+              throw new exports.ValidationError 'while validating resources', null, "property 'securedBy' must be a list", property[0].start_mark
+            property[1].value.forEach (secScheme) =>
+              if @isSequence secScheme
+                throw new exports.ValidationError 'while validating securityScheme consumption', null, 'securityScheme reference cannot be a list', secScheme.start_mark
+              unless @isNull secScheme
+                securitySchemeName = @key_or_value secScheme
+                unless @get_security_scheme securitySchemeName
+                  throw new exports.ValidationError 'while validating securityScheme consumption', null, 'there is no securityScheme named ' + securitySchemeName, secScheme.start_mark
+          else
+            throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a method", property[0].start_mark
 
   validate_responses: (responses, allowParameterKeys) ->
     if @isNull responses[1]
@@ -422,16 +429,17 @@ class @Validator
     unless @isMapping response[1]
       throw new exports.ValidationError 'while validating responses', null, "each response property must be a mapping", response[0].start_mark
     response[1].value.forEach (property) =>
-      if property[0].value.match("body")
-        @validate_body property, allowParameterKeys
-      else if property[0].value.match("description")
-        unless @isNullableString property[1]
-          throw new exports.ValidationError 'while validating responses', null, "property description must be a string", response[0].start_mark
-      else if property[0].value.match("summary")
-        unless @isString property[1]
-          throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
-      else
-        throw new exports.ValidationError 'while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
+      switch property[0].value
+        when "body"
+          @validate_body property, allowParameterKeys
+        when "description"
+          unless @isNullableString property[1]
+            throw new exports.ValidationError 'while validating responses', null, "property description must be a string", response[0].start_mark
+        when "summary"
+          unless @isString property[1]
+            throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
+        else
+          throw new exports.ValidationError 'while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
 
   validate_body: (property, allowParameterKeys, bodyMode = null) ->
     if @isNull property[1]
@@ -447,53 +455,57 @@ class @Validator
           throw new exports.ValidationError 'while validating body', null, "not compatible with implicit default Media Type", bodyProperty[0].start_mark
         bodyMode = "explicit"
         @validate_body bodyProperty, allowParameterKeys, "implicit"
-      else if bodyProperty[0].value is "formParameters"
-        if bodyMode and bodyMode != "implicit"
-          throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
-        bodyMode = "implicit"
-        @validate_form_params bodyProperty, allowParameterKeys
-      else if bodyProperty[0].value is "example"
-        if bodyMode and bodyMode != "implicit"
-          throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
-        bodyMode = "implicit"
-        if @isMapping (bodyProperty[1]) or @isSequence(bodyProperty[1])
-          throw new exports.ValidationError 'while validating body', null, "example must be a string", bodyProperty[0].start_mark
-      else if bodyProperty[0].value is "schema"
-        if bodyMode and bodyMode != "implicit"
-          throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
-        bodyMode = "implicit"
-        if @isMapping(bodyProperty[1]) or @isSequence(bodyProperty[1])
-          throw new exports.ValidationError 'while validating body', null, "schema must be a string", bodyProperty[0].start_mark
       else
-        throw new exports.ValidationError 'while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark
+        switch bodyProperty[0].value
+          when "formParameters"
+            if bodyMode and bodyMode != "implicit"
+              throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
+            bodyMode = "implicit"
+            @validate_form_params bodyProperty, allowParameterKeys
+          when "example"
+            if bodyMode and bodyMode != "implicit"
+              throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
+            bodyMode = "implicit"
+            if @isMapping (bodyProperty[1]) or @isSequence(bodyProperty[1])
+              throw new exports.ValidationError 'while validating body', null, "example must be a string", bodyProperty[0].start_mark
+          when "schema"
+            if bodyMode and bodyMode != "implicit"
+              throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
+            bodyMode = "implicit"
+            if @isMapping(bodyProperty[1]) or @isSequence(bodyProperty[1])
+              throw new exports.ValidationError 'while validating body', null, "schema must be a string", bodyProperty[0].start_mark
+          else
+            throw new exports.ValidationError 'while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark
 
   validate_common_properties: (property, allowParameterKeys) ->
     if property[0].value.match(/<<([^>]+)>>/)
       unless allowParameterKeys
         throw new exports.ValidationError 'while validating resources', null, "property '" + property[0].value + "' is invalid in a resource", property[0].start_mark
       return true
-    else if property[0].value is "displayName"
-      unless @isString property[1]
-        throw new exports.ValidationError 'while validating resources', null, "property 'displayName' must be a string", property[0].start_mark
-      return true
-    else if property[0].value is "summary"
-      unless @isString property[1]
-        throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
-      return true
-    else if property[0].value is "description"
-      unless @isString property[1]
-        throw new exports.ValidationError 'while validating resources', null, "property 'description' must be a string", property[0].start_mark
-      return true
-    else if property[0].value is "is"
-      unless @isSequence property[1]
-        throw new exports.ValidationError 'while validating resources', null, "property 'is' must be a list", property[0].start_mark
-      if not (property[1].value instanceof Array)
-        throw new exports.ValidationError 'while validating trait consumption', null, 'is property must be an array', property[0].start_mark
-      property[1].value.forEach (use) =>
-        traitName = @key_or_value use
-        unless @get_trait traitName
-          throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + traitName, use.start_mark
-      return true
+    else
+      switch property[0].value
+        when "displayName"
+          unless @isString property[1]
+            throw new exports.ValidationError 'while validating resources', null, "property 'displayName' must be a string", property[0].start_mark
+          return true
+        when "summary"
+          unless @isString property[1]
+            throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
+          return true
+        when "description"
+          unless @isString property[1]
+            throw new exports.ValidationError 'while validating resources', null, "property 'description' must be a string", property[0].start_mark
+          return true
+        when "is"
+          unless @isSequence property[1]
+            throw new exports.ValidationError 'while validating resources', null, "property 'is' must be a list", property[0].start_mark
+          if not (property[1].value instanceof Array)
+            throw new exports.ValidationError 'while validating trait consumption', null, 'is property must be an array', property[0].start_mark
+          property[1].value.forEach (use) =>
+            traitName = @key_or_value use
+            unless @get_trait traitName
+              throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + traitName, use.start_mark
+          return true
     return false
 
   child_methods: (node) ->

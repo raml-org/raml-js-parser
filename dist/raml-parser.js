@@ -8001,7 +8001,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./resourceTypes":25,"./scanner":19,"./schemas":24,"./securitySchemes":26,"./traits":23,"./util":4,"./validator":22}],13:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./securitySchemes":26,"./traits":23,"./util":4,"./validator":22}],13:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -8236,110 +8236,6 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
     return MappingNode;
 
   })(this.CollectionNode);
-
-}).call(this);
-
-},{"./errors":1}],18:[function(require,module,exports){
-(function() {
-  var Mark, YAMLError, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-  _ref = require('./errors'), Mark = _ref.Mark, YAMLError = _ref.YAMLError;
-
-  this.ReaderError = (function(_super) {
-    __extends(ReaderError, _super);
-
-    function ReaderError(name, position, character, reason) {
-      this.name = name;
-      this.position = position;
-      this.character = character;
-      this.reason = reason;
-      ReaderError.__super__.constructor.call(this);
-    }
-
-    ReaderError.prototype.toString = function() {
-      return "unacceptable character " + (this.character.charCodeAt()) + ": " + this.reason + "\n  in \"" + this.name + "\", position " + this.position;
-    };
-
-    return ReaderError;
-
-  })(YAMLError);
-
-  /*
-  Reader:
-    checks if characters are within the allowed range
-    add '\x00' to the end
-  */
-
-
-  this.Reader = (function() {
-    var NON_PRINTABLE;
-
-    NON_PRINTABLE = /[^\x09\x0A\x0D\x20-\x7E\x85\xA0-\uD7FF\uE000-\uFFFD]/;
-
-    function Reader(string, src) {
-      this.string = string;
-      this.src = src;
-      this.line = 0;
-      this.column = 0;
-      this.index = 0;
-      this.check_printable();
-      this.string += '\x00';
-    }
-
-    Reader.prototype.peek = function(index) {
-      if (index == null) {
-        index = 0;
-      }
-      return this.string[this.index + index];
-    };
-
-    Reader.prototype.prefix = function(length) {
-      if (length == null) {
-        length = 1;
-      }
-      return this.string.slice(this.index, this.index + length);
-    };
-
-    Reader.prototype.forward = function(length) {
-      var char, _results;
-      if (length == null) {
-        length = 1;
-      }
-      _results = [];
-      while (length) {
-        char = this.string[this.index];
-        this.index++;
-        if (__indexOf.call('\n\x85\u2082\u2029', char) >= 0 || (char === '\r' && this.string[this.index] !== '\n')) {
-          this.line++;
-          this.column = 0;
-        } else {
-          this.column++;
-        }
-        _results.push(length--);
-      }
-      return _results;
-    };
-
-    Reader.prototype.get_mark = function() {
-      return new Mark(this.src, this.line, this.column, this.string, this.index);
-    };
-
-    Reader.prototype.check_printable = function() {
-      var character, match, position;
-      match = NON_PRINTABLE.exec(this.string);
-      if (match) {
-        character = match[0];
-        position = (this.string.length - this.index) + match.index;
-        throw new exports.ReaderError(this.name, position, character.charCodeAt(), 'special characters are not allowed');
-      }
-    };
-
-    return Reader;
-
-  })();
 
 }).call(this);
 
@@ -8954,7 +8850,111 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./events":2,"./tokens":3}],21:[function(require,module,exports){
+},{"./errors":1,"./events":2,"./tokens":3}],18:[function(require,module,exports){
+(function() {
+  var Mark, YAMLError, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+  _ref = require('./errors'), Mark = _ref.Mark, YAMLError = _ref.YAMLError;
+
+  this.ReaderError = (function(_super) {
+    __extends(ReaderError, _super);
+
+    function ReaderError(name, position, character, reason) {
+      this.name = name;
+      this.position = position;
+      this.character = character;
+      this.reason = reason;
+      ReaderError.__super__.constructor.call(this);
+    }
+
+    ReaderError.prototype.toString = function() {
+      return "unacceptable character " + (this.character.charCodeAt()) + ": " + this.reason + "\n  in \"" + this.name + "\", position " + this.position;
+    };
+
+    return ReaderError;
+
+  })(YAMLError);
+
+  /*
+  Reader:
+    checks if characters are within the allowed range
+    add '\x00' to the end
+  */
+
+
+  this.Reader = (function() {
+    var NON_PRINTABLE;
+
+    NON_PRINTABLE = /[^\x09\x0A\x0D\x20-\x7E\x85\xA0-\uD7FF\uE000-\uFFFD]/;
+
+    function Reader(string, src) {
+      this.string = string;
+      this.src = src;
+      this.line = 0;
+      this.column = 0;
+      this.index = 0;
+      this.check_printable();
+      this.string += '\x00';
+    }
+
+    Reader.prototype.peek = function(index) {
+      if (index == null) {
+        index = 0;
+      }
+      return this.string[this.index + index];
+    };
+
+    Reader.prototype.prefix = function(length) {
+      if (length == null) {
+        length = 1;
+      }
+      return this.string.slice(this.index, this.index + length);
+    };
+
+    Reader.prototype.forward = function(length) {
+      var char, _results;
+      if (length == null) {
+        length = 1;
+      }
+      _results = [];
+      while (length) {
+        char = this.string[this.index];
+        this.index++;
+        if (__indexOf.call('\n\x85\u2082\u2029', char) >= 0 || (char === '\r' && this.string[this.index] !== '\n')) {
+          this.line++;
+          this.column = 0;
+        } else {
+          this.column++;
+        }
+        _results.push(length--);
+      }
+      return _results;
+    };
+
+    Reader.prototype.get_mark = function() {
+      return new Mark(this.src, this.line, this.column, this.string, this.index);
+    };
+
+    Reader.prototype.check_printable = function() {
+      var character, match, position;
+      match = NON_PRINTABLE.exec(this.string);
+      if (match) {
+        character = match[0];
+        position = (this.string.length - this.index) + match.index;
+        throw new exports.ReaderError(this.name, position, character.charCodeAt(), 'special characters are not allowed');
+      }
+    };
+
+    return Reader;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1}],21:[function(require,module,exports){
 (function() {
   var YAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -9163,7 +9163,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./util":4}],25:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4}],24:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10813,7 +10813,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./tokens":3,"./util":4}],24:[function(require,module,exports){
+},{"./errors":1,"./tokens":3,"./util":4}],25:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11899,17 +11899,17 @@ function decode(str) {
       authorizationUrl = false;
       accessTokenUrl = false;
       settings[1].value.forEach(function(property) {
-        if (property[0].value === "authorizationUrl") {
-          if (!_this.isString(property[1])) {
-            throw new exports.ValidationError('while validating security scheme', null, 'authorizationUrl must be a URL', property[0].start_mark);
-          }
-          authorizationUrl = true;
-        }
-        if (property[0].value === "accessTokenUrl") {
-          if (!_this.isString(property[1])) {
-            throw new exports.ValidationError('while validating security scheme', null, 'accessTokenUrl must be a URL', property[0].start_mark);
-          }
-          return accessTokenUrl = true;
+        switch (property[0].value) {
+          case "authorizationUrl":
+            if (!_this.isString(property[1])) {
+              throw new exports.ValidationError('while validating security scheme', null, 'authorizationUrl must be a URL', property[0].start_mark);
+            }
+            return authorizationUrl = true;
+          case "accessTokenUrl":
+            if (!_this.isString(property[1])) {
+              throw new exports.ValidationError('while validating security scheme', null, 'accessTokenUrl must be a URL', property[0].start_mark);
+            }
+            return accessTokenUrl = true;
         }
       });
       if (!accessTokenUrl) {
@@ -11927,23 +11927,22 @@ function decode(str) {
       authorizationUri = false;
       tokenCredentialsUri = false;
       settings[1].value.forEach(function(property) {
-        if (property[0].value === "requestTokenUri") {
-          if (!_this.isString(property[1])) {
-            throw new exports.ValidationError('while validating security scheme', null, 'requestTokenUri must be a URL', property[0].start_mark);
-          }
-          requestTokenUri = true;
-        }
-        if (property[0].value === "authorizationUri") {
-          if (!_this.isString(property[1])) {
-            throw new exports.ValidationError('while validating security scheme', null, 'authorizationUri must be a URL', property[0].start_mark);
-          }
-          authorizationUri = true;
-        }
-        if (property[0].value === "tokenCredentialsUri") {
-          if (!_this.isString(property[1])) {
-            throw new exports.ValidationError('while validating security scheme', null, 'tokenCredentialsUri must be a URL', property[0].start_mark);
-          }
-          return tokenCredentialsUri = true;
+        switch (property[0].value) {
+          case "requestTokenUri":
+            if (!_this.isString(property[1])) {
+              throw new exports.ValidationError('while validating security scheme', null, 'requestTokenUri must be a URL', property[0].start_mark);
+            }
+            return requestTokenUri = true;
+          case "authorizationUri":
+            if (!_this.isString(property[1])) {
+              throw new exports.ValidationError('while validating security scheme', null, 'authorizationUri must be a URL', property[0].start_mark);
+            }
+            return authorizationUri = true;
+          case "tokenCredentialsUri":
+            if (!_this.isString(property[1])) {
+              throw new exports.ValidationError('while validating security scheme', null, 'tokenCredentialsUri must be a URL', property[0].start_mark);
+            }
+            return tokenCredentialsUri = true;
         }
       });
       if (!requestTokenUri) {
@@ -12075,17 +12074,41 @@ function decode(str) {
         return;
       }
       return node.value.forEach(function(childNode) {
-        var booleanValues, propertyName, propertyValue;
-        if (typeof childNode[0].value === "object") {
-          return true;
-        }
-        if (!_this.is_valid_parameter_property_name(childNode[0].value)) {
-          throw new exports.ValidationError('while validating parameter properties', null, 'unknown property ' + childNode[0].value, childNode[0].start_mark);
-        }
+        var booleanValues, propertyName, propertyValue, validTypes;
         propertyName = childNode[0].value;
         propertyValue = childNode[1].value;
         booleanValues = ["true", "false"];
         switch (propertyName) {
+          case "displayName":
+            if (_this.isSequence(childNode[1]) || _this.isMapping(childNode[0])) {
+              throw new exports.ValidationError('while validating parameter properties', null, 'the value of displayName must be a scalar', childNode[1].start_mark);
+            }
+            break;
+          case "pattern":
+            if (_this.isSequence(childNode[1]) || _this.isMapping(childNode[0])) {
+              throw new exports.ValidationError('while validating parameter properties', null, 'the value of pattern must be a scalar', childNode[1].start_mark);
+            }
+            break;
+          case "default":
+            if (_this.isSequence(childNode[1]) || _this.isMapping(childNode[0])) {
+              throw new exports.ValidationError('while validating parameter properties', null, 'the value of default must be a scalar', childNode[1].start_mark);
+            }
+            break;
+          case "enum":
+            if (!_this.isSequence(childNode[1])) {
+              throw new exports.ValidationError('while validating parameter properties', null, 'the value of displayName must be a scalar', childNode[1].start_mark);
+            }
+            break;
+          case "description":
+            if (_this.isSequence(childNode[1]) || _this.isMapping(childNode[0])) {
+              throw new exports.ValidationError('while validating parameter properties', null, 'the value of description must be a scalar', childNode[1].start_mark);
+            }
+            break;
+          case "example":
+            if (_this.isSequence(childNode[1]) || _this.isMapping(childNode[0])) {
+              throw new exports.ValidationError('while validating parameter properties', null, 'the value of example must be a scalar', childNode[1].start_mark);
+            }
+            break;
           case "minLength":
             if (isNaN(propertyValue)) {
               throw new exports.ValidationError('while validating parameter properties', null, 'the value of minLength must be a number', childNode[1].start_mark);
@@ -12107,7 +12130,8 @@ function decode(str) {
             }
             break;
           case "type":
-            if (propertyValue !== 'string' && propertyValue !== 'number' && propertyValue !== 'integer' && propertyValue !== 'date') {
+            validTypes = ['string', 'number', 'integer', 'date', 'boolean', 'file'];
+            if (__indexOf.call(validTypes, propertyValue) < 0) {
               throw new exports.ValidationError('while validating parameter properties', null, 'type can either be: string, number, integer or date', childNode[1].start_mark);
             }
             break;
@@ -12120,6 +12144,9 @@ function decode(str) {
             if (__indexOf.call(booleanValues, propertyValue) < 0) {
               throw new exports.ValidationError('while validating parameter properties', null, 'repeat can be any either true or false', childNode[1].start_mark);
             }
+            break;
+          default:
+            throw new exports.ValidationError('while validating parameter properties', null, 'unknown property ' + propertyName, childNode[0].start_mark);
         }
       });
     };
@@ -12216,10 +12243,6 @@ function decode(str) {
       });
     };
 
-    Validator.prototype.is_valid_parameter_property_name = function(propertyName) {
-      return propertyName === "displayName" || propertyName === "description" || propertyName === "type" || propertyName === "enum" || propertyName === "example" || propertyName === "pattern" || propertyName === "minLength" || propertyName === "maxLength" || propertyName === "minimum" || propertyName === "maximum" || propertyName === "required" || propertyName === "repeat" || propertyName === "default";
-    };
-
     Validator.prototype.child_resources = function(node) {
       if (node && this.isMapping(node)) {
         return node.value.filter(function(childNode) {
@@ -12245,19 +12268,22 @@ function decode(str) {
                 throw new exports.ValidationError('while validating trait properties', null, 'resource type cannot define child resources', property[0].start_mark);
               }
               return _this.validate_resource(property, allowParameterKeys);
-            } else if (property[0].value === "type") {
-              return _this.validate_type_property(property, allowParameterKeys);
-            } else if (property[0].value === "uriParameters") {
-              return _this.validate_uri_parameters(resource[0].value, property[1]);
-            } else if (property[0].value === "baseUriParameters") {
-              if (!_this.baseUri) {
-                throw new exports.ValidationError('while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark);
-              }
-              return _this.validate_uri_parameters(_this.baseUri, property[1]);
             } else if (property[0].value.match(/^(get|post|put|delete|head|patch|options)$/)) {
               return _this.validate_method(property, allowParameterKeys);
             } else {
-              throw new exports.ValidationError('while validating resources', null, "property: '" + property[0].value + "' is invalid in a resource", property[0].start_mark);
+              switch (property[0].value) {
+                case "type":
+                  return _this.validate_type_property(property, allowParameterKeys);
+                case "uriParameters":
+                  return _this.validate_uri_parameters(resource[0].value, property[1]);
+                case "baseUriParameters":
+                  if (!_this.baseUri) {
+                    throw new exports.ValidationError('while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark);
+                  }
+                  return _this.validate_uri_parameters(_this.baseUri, property[1]);
+                default:
+                  throw new exports.ValidationError('while validating resources', null, "property: '" + property[0].value + "' is invalid in a resource", property[0].start_mark);
+              }
             }
           }
         });
@@ -12285,32 +12311,33 @@ function decode(str) {
       }
       return method[1].value.forEach(function(property) {
         if (!_this.validate_common_properties(property, allowParameterKeys)) {
-          if (property[0].value === "headers") {
-            return _this.validate_headers(property, allowParameterKeys);
-          } else if (property[0].value === "queryParameters") {
-            return _this.validate_query_params(property, allowParameterKeys);
-          } else if (property[0].value === "body") {
-            return _this.validate_body(property, allowParameterKeys);
-          } else if (property[0].value === "responses") {
-            return _this.validate_responses(property, allowParameterKeys);
-          } else if (property[0].value === "securedBy") {
-            if (!_this.isSequence(property[1])) {
-              throw new exports.ValidationError('while validating resources', null, "property 'securedBy' must be a list", property[0].start_mark);
-            }
-            return property[1].value.forEach(function(secScheme) {
-              var securitySchemeName;
-              if (_this.isSequence(secScheme)) {
-                throw new exports.ValidationError('while validating securityScheme consumption', null, 'securityScheme reference cannot be a list', secScheme.start_mark);
+          switch (property[0].value) {
+            case "headers":
+              return _this.validate_headers(property, allowParameterKeys);
+            case "queryParameters":
+              return _this.validate_query_params(property, allowParameterKeys);
+            case "body":
+              return _this.validate_body(property, allowParameterKeys);
+            case "responses":
+              return _this.validate_responses(property, allowParameterKeys);
+            case "securedBy":
+              if (!_this.isSequence(property[1])) {
+                throw new exports.ValidationError('while validating resources', null, "property 'securedBy' must be a list", property[0].start_mark);
               }
-              if (!_this.isNull(secScheme)) {
-                securitySchemeName = _this.key_or_value(secScheme);
-                if (!_this.get_security_scheme(securitySchemeName)) {
-                  throw new exports.ValidationError('while validating securityScheme consumption', null, 'there is no securityScheme named ' + securitySchemeName, secScheme.start_mark);
+              return property[1].value.forEach(function(secScheme) {
+                var securitySchemeName;
+                if (_this.isSequence(secScheme)) {
+                  throw new exports.ValidationError('while validating securityScheme consumption', null, 'securityScheme reference cannot be a list', secScheme.start_mark);
                 }
-              }
-            });
-          } else {
-            throw new exports.ValidationError('while validating resources', null, "property: '" + property[0].value + "' is invalid in a method", property[0].start_mark);
+                if (!_this.isNull(secScheme)) {
+                  securitySchemeName = _this.key_or_value(secScheme);
+                  if (!_this.get_security_scheme(securitySchemeName)) {
+                    throw new exports.ValidationError('while validating securityScheme consumption', null, 'there is no securityScheme named ' + securitySchemeName, secScheme.start_mark);
+                  }
+                }
+              });
+            default:
+              throw new exports.ValidationError('while validating resources', null, "property: '" + property[0].value + "' is invalid in a method", property[0].start_mark);
           }
         }
       });
@@ -12398,18 +12425,21 @@ function decode(str) {
         throw new exports.ValidationError('while validating responses', null, "each response property must be a mapping", response[0].start_mark);
       }
       return response[1].value.forEach(function(property) {
-        if (property[0].value.match("body")) {
-          return _this.validate_body(property, allowParameterKeys);
-        } else if (property[0].value.match("description")) {
-          if (!_this.isNullableString(property[1])) {
-            throw new exports.ValidationError('while validating responses', null, "property description must be a string", response[0].start_mark);
-          }
-        } else if (property[0].value.match("summary")) {
-          if (!_this.isString(property[1])) {
-            throw new exports.ValidationError('while validating resources', null, "property 'summary' must be a string", property[0].start_mark);
-          }
-        } else {
-          throw new exports.ValidationError('while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark);
+        switch (property[0].value) {
+          case "body":
+            return _this.validate_body(property, allowParameterKeys);
+          case "description":
+            if (!_this.isNullableString(property[1])) {
+              throw new exports.ValidationError('while validating responses', null, "property description must be a string", response[0].start_mark);
+            }
+            break;
+          case "summary":
+            if (!_this.isString(property[1])) {
+              throw new exports.ValidationError('while validating resources', null, "property 'summary' must be a string", property[0].start_mark);
+            }
+            break;
+          default:
+            throw new exports.ValidationError('while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark);
         }
       });
     };
@@ -12437,30 +12467,35 @@ function decode(str) {
           }
           bodyMode = "explicit";
           return _this.validate_body(bodyProperty, allowParameterKeys, "implicit");
-        } else if (bodyProperty[0].value === "formParameters") {
-          if (bodyMode && bodyMode !== "implicit") {
-            throw new exports.ValidationError('while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark);
-          }
-          bodyMode = "implicit";
-          return _this.validate_form_params(bodyProperty, allowParameterKeys);
-        } else if (bodyProperty[0].value === "example") {
-          if (bodyMode && bodyMode !== "implicit") {
-            throw new exports.ValidationError('while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark);
-          }
-          bodyMode = "implicit";
-          if (_this.isMapping(bodyProperty[1] || _this.isSequence(bodyProperty[1]))) {
-            throw new exports.ValidationError('while validating body', null, "example must be a string", bodyProperty[0].start_mark);
-          }
-        } else if (bodyProperty[0].value === "schema") {
-          if (bodyMode && bodyMode !== "implicit") {
-            throw new exports.ValidationError('while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark);
-          }
-          bodyMode = "implicit";
-          if (_this.isMapping(bodyProperty[1]) || _this.isSequence(bodyProperty[1])) {
-            throw new exports.ValidationError('while validating body', null, "schema must be a string", bodyProperty[0].start_mark);
-          }
         } else {
-          throw new exports.ValidationError('while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark);
+          switch (bodyProperty[0].value) {
+            case "formParameters":
+              if (bodyMode && bodyMode !== "implicit") {
+                throw new exports.ValidationError('while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark);
+              }
+              bodyMode = "implicit";
+              return _this.validate_form_params(bodyProperty, allowParameterKeys);
+            case "example":
+              if (bodyMode && bodyMode !== "implicit") {
+                throw new exports.ValidationError('while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark);
+              }
+              bodyMode = "implicit";
+              if (_this.isMapping(bodyProperty[1] || _this.isSequence(bodyProperty[1]))) {
+                throw new exports.ValidationError('while validating body', null, "example must be a string", bodyProperty[0].start_mark);
+              }
+              break;
+            case "schema":
+              if (bodyMode && bodyMode !== "implicit") {
+                throw new exports.ValidationError('while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark);
+              }
+              bodyMode = "implicit";
+              if (_this.isMapping(bodyProperty[1]) || _this.isSequence(bodyProperty[1])) {
+                throw new exports.ValidationError('while validating body', null, "schema must be a string", bodyProperty[0].start_mark);
+              }
+              break;
+            default:
+              throw new exports.ValidationError('while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark);
+          }
         }
       }) : void 0;
     };
@@ -12472,36 +12507,39 @@ function decode(str) {
           throw new exports.ValidationError('while validating resources', null, "property '" + property[0].value + "' is invalid in a resource", property[0].start_mark);
         }
         return true;
-      } else if (property[0].value === "displayName") {
-        if (!this.isString(property[1])) {
-          throw new exports.ValidationError('while validating resources', null, "property 'displayName' must be a string", property[0].start_mark);
+      } else {
+        switch (property[0].value) {
+          case "displayName":
+            if (!this.isString(property[1])) {
+              throw new exports.ValidationError('while validating resources', null, "property 'displayName' must be a string", property[0].start_mark);
+            }
+            return true;
+          case "summary":
+            if (!this.isString(property[1])) {
+              throw new exports.ValidationError('while validating resources', null, "property 'summary' must be a string", property[0].start_mark);
+            }
+            return true;
+          case "description":
+            if (!this.isString(property[1])) {
+              throw new exports.ValidationError('while validating resources', null, "property 'description' must be a string", property[0].start_mark);
+            }
+            return true;
+          case "is":
+            if (!this.isSequence(property[1])) {
+              throw new exports.ValidationError('while validating resources', null, "property 'is' must be a list", property[0].start_mark);
+            }
+            if (!(property[1].value instanceof Array)) {
+              throw new exports.ValidationError('while validating trait consumption', null, 'is property must be an array', property[0].start_mark);
+            }
+            property[1].value.forEach(function(use) {
+              var traitName;
+              traitName = _this.key_or_value(use);
+              if (!_this.get_trait(traitName)) {
+                throw new exports.ValidationError('while validating trait consumption', null, 'there is no trait named ' + traitName, use.start_mark);
+              }
+            });
+            return true;
         }
-        return true;
-      } else if (property[0].value === "summary") {
-        if (!this.isString(property[1])) {
-          throw new exports.ValidationError('while validating resources', null, "property 'summary' must be a string", property[0].start_mark);
-        }
-        return true;
-      } else if (property[0].value === "description") {
-        if (!this.isString(property[1])) {
-          throw new exports.ValidationError('while validating resources', null, "property 'description' must be a string", property[0].start_mark);
-        }
-        return true;
-      } else if (property[0].value === "is") {
-        if (!this.isSequence(property[1])) {
-          throw new exports.ValidationError('while validating resources', null, "property 'is' must be a list", property[0].start_mark);
-        }
-        if (!(property[1].value instanceof Array)) {
-          throw new exports.ValidationError('while validating trait consumption', null, 'is property must be an array', property[0].start_mark);
-        }
-        property[1].value.forEach(function(use) {
-          var traitName;
-          traitName = _this.key_or_value(use);
-          if (!_this.get_trait(traitName)) {
-            throw new exports.ValidationError('while validating trait consumption', null, 'there is no trait named ' + traitName, use.start_mark);
-          }
-        });
-        return true;
       }
       return false;
     };
@@ -16519,7 +16557,93 @@ Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
 };
 
 })()
-},{"./buffer_ieee754":39,"assert":36,"base64-js":40}],33:[function(require,module,exports){
+},{"./buffer_ieee754":39,"assert":36,"base64-js":40}],40:[function(require,module,exports){
+(function (exports) {
+	'use strict';
+
+	var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+	function b64ToByteArray(b64) {
+		var i, j, l, tmp, placeHolders, arr;
+	
+		if (b64.length % 4 > 0) {
+			throw 'Invalid string. Length must be a multiple of 4';
+		}
+
+		// the number of equal signs (place holders)
+		// if there are two placeholders, than the two characters before it
+		// represent one byte
+		// if there is only one, then the three characters before it represent 2 bytes
+		// this is just a cheap hack to not do indexOf twice
+		placeHolders = b64.indexOf('=');
+		placeHolders = placeHolders > 0 ? b64.length - placeHolders : 0;
+
+		// base64 is 4/3 + up to two characters of the original data
+		arr = [];//new Uint8Array(b64.length * 3 / 4 - placeHolders);
+
+		// if there are placeholders, only get up to the last complete 4 chars
+		l = placeHolders > 0 ? b64.length - 4 : b64.length;
+
+		for (i = 0, j = 0; i < l; i += 4, j += 3) {
+			tmp = (lookup.indexOf(b64[i]) << 18) | (lookup.indexOf(b64[i + 1]) << 12) | (lookup.indexOf(b64[i + 2]) << 6) | lookup.indexOf(b64[i + 3]);
+			arr.push((tmp & 0xFF0000) >> 16);
+			arr.push((tmp & 0xFF00) >> 8);
+			arr.push(tmp & 0xFF);
+		}
+
+		if (placeHolders === 2) {
+			tmp = (lookup.indexOf(b64[i]) << 2) | (lookup.indexOf(b64[i + 1]) >> 4);
+			arr.push(tmp & 0xFF);
+		} else if (placeHolders === 1) {
+			tmp = (lookup.indexOf(b64[i]) << 10) | (lookup.indexOf(b64[i + 1]) << 4) | (lookup.indexOf(b64[i + 2]) >> 2);
+			arr.push((tmp >> 8) & 0xFF);
+			arr.push(tmp & 0xFF);
+		}
+
+		return arr;
+	}
+
+	function uint8ToBase64(uint8) {
+		var i,
+			extraBytes = uint8.length % 3, // if we have 1 byte left, pad 2 bytes
+			output = "",
+			temp, length;
+
+		function tripletToBase64 (num) {
+			return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F];
+		};
+
+		// go through the array every three bytes, we'll deal with trailing stuff later
+		for (i = 0, length = uint8.length - extraBytes; i < length; i += 3) {
+			temp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2]);
+			output += tripletToBase64(temp);
+		}
+
+		// pad the end with zeros, but make sure to not forget the extra bytes
+		switch (extraBytes) {
+			case 1:
+				temp = uint8[uint8.length - 1];
+				output += lookup[temp >> 2];
+				output += lookup[(temp << 4) & 0x3F];
+				output += '==';
+				break;
+			case 2:
+				temp = (uint8[uint8.length - 2] << 8) + (uint8[uint8.length - 1]);
+				output += lookup[temp >> 10];
+				output += lookup[(temp >> 4) & 0x3F];
+				output += lookup[(temp << 2) & 0x3F];
+				output += '=';
+				break;
+		}
+
+		return output;
+	}
+
+	module.exports.toByteArray = b64ToByteArray;
+	module.exports.fromByteArray = uint8ToBase64;
+}());
+
+},{}],33:[function(require,module,exports){
 (function(){var Stream = require('stream');
 var Response = require('./response');
 var concatStream = require('concat-stream')
@@ -16653,93 +16777,7 @@ var indexOf = function (xs, x) {
 };
 
 })()
-},{"./response":38,"buffer":37,"concat-stream":41,"stream":34}],40:[function(require,module,exports){
-(function (exports) {
-	'use strict';
-
-	var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-
-	function b64ToByteArray(b64) {
-		var i, j, l, tmp, placeHolders, arr;
-	
-		if (b64.length % 4 > 0) {
-			throw 'Invalid string. Length must be a multiple of 4';
-		}
-
-		// the number of equal signs (place holders)
-		// if there are two placeholders, than the two characters before it
-		// represent one byte
-		// if there is only one, then the three characters before it represent 2 bytes
-		// this is just a cheap hack to not do indexOf twice
-		placeHolders = b64.indexOf('=');
-		placeHolders = placeHolders > 0 ? b64.length - placeHolders : 0;
-
-		// base64 is 4/3 + up to two characters of the original data
-		arr = [];//new Uint8Array(b64.length * 3 / 4 - placeHolders);
-
-		// if there are placeholders, only get up to the last complete 4 chars
-		l = placeHolders > 0 ? b64.length - 4 : b64.length;
-
-		for (i = 0, j = 0; i < l; i += 4, j += 3) {
-			tmp = (lookup.indexOf(b64[i]) << 18) | (lookup.indexOf(b64[i + 1]) << 12) | (lookup.indexOf(b64[i + 2]) << 6) | lookup.indexOf(b64[i + 3]);
-			arr.push((tmp & 0xFF0000) >> 16);
-			arr.push((tmp & 0xFF00) >> 8);
-			arr.push(tmp & 0xFF);
-		}
-
-		if (placeHolders === 2) {
-			tmp = (lookup.indexOf(b64[i]) << 2) | (lookup.indexOf(b64[i + 1]) >> 4);
-			arr.push(tmp & 0xFF);
-		} else if (placeHolders === 1) {
-			tmp = (lookup.indexOf(b64[i]) << 10) | (lookup.indexOf(b64[i + 1]) << 4) | (lookup.indexOf(b64[i + 2]) >> 2);
-			arr.push((tmp >> 8) & 0xFF);
-			arr.push(tmp & 0xFF);
-		}
-
-		return arr;
-	}
-
-	function uint8ToBase64(uint8) {
-		var i,
-			extraBytes = uint8.length % 3, // if we have 1 byte left, pad 2 bytes
-			output = "",
-			temp, length;
-
-		function tripletToBase64 (num) {
-			return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F];
-		};
-
-		// go through the array every three bytes, we'll deal with trailing stuff later
-		for (i = 0, length = uint8.length - extraBytes; i < length; i += 3) {
-			temp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2]);
-			output += tripletToBase64(temp);
-		}
-
-		// pad the end with zeros, but make sure to not forget the extra bytes
-		switch (extraBytes) {
-			case 1:
-				temp = uint8[uint8.length - 1];
-				output += lookup[temp >> 2];
-				output += lookup[(temp << 4) & 0x3F];
-				output += '==';
-				break;
-			case 2:
-				temp = (uint8[uint8.length - 2] << 8) + (uint8[uint8.length - 1]);
-				output += lookup[temp >> 10];
-				output += lookup[(temp >> 4) & 0x3F];
-				output += lookup[(temp << 2) & 0x3F];
-				output += '=';
-				break;
-		}
-
-		return output;
-	}
-
-	module.exports.toByteArray = b64ToByteArray;
-	module.exports.fromByteArray = uint8ToBase64;
-}());
-
-},{}],41:[function(require,module,exports){
+},{"./response":38,"buffer":37,"concat-stream":41,"stream":34}],41:[function(require,module,exports){
 (function(Buffer){var stream = require('stream')
 var util = require('util')
 
@@ -16790,5 +16828,5 @@ module.exports = function(cb) {
 module.exports.ConcatStream = ConcatStream
 
 })(require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":14,"stream":34,"util":35}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,25,19,24,26,3,23,4,22,6])
+},{"__browserify_buffer":14,"stream":34,"util":35}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,24,19,25,26,3,23,4,22,6])
 ;
