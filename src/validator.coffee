@@ -138,13 +138,13 @@ class @Validator
     @check_is_map node
 
   validate_base_uri_parameters: (node) ->
-    baseUriProperty = @get_property node, /^baseUri$/
+    baseUriProperty = @get_property node, "baseUri"
     @baseUri = baseUriProperty.value
     @check_is_map node
-    if @has_property node, /^baseUriParameters$/
-      if not @has_property node, /^baseUri$/
+    if @has_property node, "baseUriParameters"
+      if not @has_property node, "baseUri"
         throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', node.start_mark
-      @validate_uri_parameters @baseUri, @get_property node, /^baseUriParameters$/
+      @validate_uri_parameters @baseUri, @get_property node, "baseUriParameters"
 
   validate_uri_parameters: (uri, uriProperty) ->
     try
@@ -172,32 +172,6 @@ class @Validator
         unless @isMapping type[1]
             throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
         @validate_resource type, true
-
-#          resources = @child_resources type[1]
-#          if resources.length
-#            throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', type.start_mark
-#
-#          # check traits at resourceType level
-#          if @has_property type[1], /^is$/i
-#            useProperty = @get_property type[1], /^is$/i
-#            uses = @property_value type[1], /^is$/i
-#            if not (uses instanceof Array)
-#              throw new exports.ValidationError 'while validating trait consumption', null, 'is property must be an array', useProperty.start_mark
-#            uses.forEach (use) =>
-#              if not @get_trait @key_or_value use
-#                throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
-#
-#          # check traits at method level within the resourceType
-#          methods = @child_methods type[1]
-#          methods.forEach (method) =>
-#            if @has_property method[1], /^is$/i
-#              useProperty = @get_property method[1], /^is$/i
-#              uses = @property_value method[1], /^is$/i
-#              if not (uses instanceof Array)
-#                throw new exports.ValidationError 'while validating trait consumption', null, 'is property must be an array', useProperty.start_mark
-#              uses.forEach (use) =>
-#                if not @get_trait @key_or_value use
-#                  throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + @key_or_value(use), use.start_mark
 
   validate_traits: (node) ->
     traitsList = node[1].value
@@ -448,12 +422,12 @@ class @Validator
     unless @isMapping response[1]
       throw new exports.ValidationError 'while validating responses', null, "each response property must be a mapping", response[0].start_mark
     response[1].value.forEach (property) =>
-      if property[0].value.match(/^body$/)
+      if property[0].value.match("body")
         @validate_body property, allowParameterKeys
-      else if property[0].value.match(/^description$/)
+      else if property[0].value.match("description")
         unless @isNullableString property[1]
           throw new exports.ValidationError 'while validating responses', null, "property description must be a string", response[0].start_mark
-      else if property[0].value.match(/^summary$/)
+      else if property[0].value.match("summary")
         unless @isString property[1]
           throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
       else
@@ -573,22 +547,22 @@ class @Validator
       else
         resourceResponse.uri = childResource[0].value
       
-      if @has_property childResource[1], /^displayName$/
-        resourceResponse.displayName = @property_value childResource[1], /^displayName$/
+      if @has_property childResource[1], "displayName"
+        resourceResponse.displayName = @property_value childResource[1], "displayName"
 
-      if @has_property childResource[1], /^get$/
+      if @has_property childResource[1], "get"
         resourceResponse.methods.push 'get'
-      if @has_property childResource[1], /^post$/
+      if @has_property childResource[1], "post"
         resourceResponse.methods.push 'post'
-      if @has_property childResource[1], /^put$/
+      if @has_property childResource[1], "put"
         resourceResponse.methods.push 'put'
-      if @has_property childResource[1], /^patch$/
+      if @has_property childResource[1], "patch"
         resourceResponse.methods.push 'patch'
-      if @has_property childResource[1], /^delete$/
+      if @has_property childResource[1], "delete"
         resourceResponse.methods.push 'delete'
-      if @has_property childResource[1], /^head$/
+      if @has_property childResource[1], "head"
         resourceResponse.methods.push 'head'
-      if @has_property childResource[1], /^options$/
+      if @has_property childResource[1], "options"
         resourceResponse.methods.push 'options'
       
       resourceResponse.line = childResource[0].start_mark.line + 1
