@@ -175,7 +175,7 @@ class @Validator
       type_entry.value.forEach (type) =>
         unless @isMapping type[1]
             throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
-        @validate_resource type, true
+        #@validate_resource type, true
 
   validate_traits: (node) ->
     traitsList = node[1].value
