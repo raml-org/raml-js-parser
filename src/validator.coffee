@@ -285,6 +285,8 @@ class @Validator
             @is_map node
           when "resourceTypes"
             @validate_types property[1]
+          when "securedBy"
+            @validate_secured_by property
           else
             if property[0].value.match(/^\//)
               @validate_resource property
@@ -340,8 +342,22 @@ class @Validator
                 unless @baseUri
                   throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
                 @validate_uri_parameters @baseUri, property[1]
+              when "securedBy"
+                @validate_secured_by property
               else
                 throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a resource", property[0].start_mark
+
+  validate_secured_by: (property) ->
+    unless @isSequence property[1]
+      throw new exports.ValidationError 'while validating securityScheme', null, "property 'securedBy' must be a list", property[0].start_mark
+    property[1].value.forEach (secScheme) =>
+      if @isSequence secScheme
+        throw new exports.ValidationError 'while validating securityScheme consumption', null, 'securityScheme reference cannot be a list', secScheme.start_mark
+      unless @isNull secScheme
+        securitySchemeName = @key_or_value secScheme
+        unless @get_security_scheme securitySchemeName
+          throw new exports.ValidationError 'while validating securityScheme consumption', null, 'there is no securityScheme named ' + securitySchemeName, secScheme.start_mark
+
 
   validate_type_property: (property, allowParameterKeys) ->
     typeName = @key_or_value property[1]
@@ -367,15 +383,7 @@ class @Validator
           when "responses"
             @validate_responses property, allowParameterKeys
           when "securedBy"
-            unless @isSequence property[1]
-              throw new exports.ValidationError 'while validating resources', null, "property 'securedBy' must be a list", property[0].start_mark
-            property[1].value.forEach (secScheme) =>
-              if @isSequence secScheme
-                throw new exports.ValidationError 'while validating securityScheme consumption', null, 'securityScheme reference cannot be a list', secScheme.start_mark
-              unless @isNull secScheme
-                securitySchemeName = @key_or_value secScheme
-                unless @get_security_scheme securitySchemeName
-                  throw new exports.ValidationError 'while validating securityScheme consumption', null, 'there is no securityScheme named ' + securitySchemeName, secScheme.start_mark
+            @validate_secured_by property
           else
             throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a method", property[0].start_mark
 
