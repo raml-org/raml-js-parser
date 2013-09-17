@@ -88,6 +88,18 @@ describe('Parser', function() {
       }
       raml.load(definition).should.become(expected).and.notify(done);
     });
+    it('it should fail if baseUriParamters has a version parameter. RT-199', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: hola',
+        'version: v0.1',
+        'baseUri: http://server/api/{version}',
+        'baseUriParameters:',
+        ' version:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/version parameter not allowed here/).and.notify(done);
+    });
 
   });
   describe('Basic Information', function() {

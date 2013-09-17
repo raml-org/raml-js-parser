@@ -146,9 +146,9 @@ class @Validator
     if @has_property node, "baseUriParameters"
       if not @has_property node, "baseUri"
         throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', node.start_mark
-      @validate_uri_parameters @baseUri, @get_property node, "baseUriParameters"
+      @validate_uri_parameters @baseUri, @get_property(node, "baseUriParameters"), [ "version" ]
 
-  validate_uri_parameters: (uri, uriProperty) ->
+  validate_uri_parameters: (uri, uriProperty, reservedNames = []) ->
     try
       template = uritemplate.parse uri
     catch err
@@ -156,6 +156,8 @@ class @Validator
     expressions = template.expressions.filter((expr) -> return "templateText" of expr ).map (expression) -> expression.templateText
     if typeof uriProperty.value is "object"
       uriProperty.value.forEach (uriParameter) =>
+        if uriParameter[0].value in reservedNames
+          throw new exports.ValidationError 'while validating baseUri', null, 'version parameter not allowed here', uriParameter[0].start_mark
         @valid_common_parameter_properties uriParameter[1]
         unless uriParameter[0].value in expressions
           throw new exports.ValidationError 'while validating baseUri', null, uriParameter[0].value + ' uri parameter unused', uriParameter[0].start_mark
