@@ -3901,7 +3901,7 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post?:',
-        '       foo:',
+        '       description: Some description',
         '/:',
         '  type: collection',
         '  post: {}'
@@ -3917,7 +3917,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items",
               "post?":
               {
-                foo: null
+                description: "Some description"
               }
             }
           }
@@ -3929,7 +3929,7 @@ describe('Parser', function() {
             methods: [
               {
                 method: "post",
-                foo: null
+                description: "Some description"
               }
             ]
           }
