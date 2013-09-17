@@ -34,21 +34,21 @@ class @Validator
     unless @is_sequence schemesProperty
       throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security schemes property, it must be an array', schemesProperty.start_mark
     schemesProperty.value.forEach (scheme_entry) =>
-      unless @is_mapping scheme_entry
+      unless @isMapping scheme_entry
         throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security scheme property, it must be a map', scheme_entry.start_mark
       scheme_entry.value.forEach (scheme) =>
-        unless @is_mapping scheme[1]
+        unless @isMapping scheme[1]
           throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security scheme property, it must be a map', scheme.start_mark
         @validate_security_scheme scheme[1]
 
-  is_mapping: (node) -> return node?.tag is "tag:yaml.org,2002:map"
+  isMapping: (node) -> return node?.tag is "tag:yaml.org,2002:map"
   is_null: (node) -> return node?.tag is "tag:yaml.org,2002:null"
   is_sequence: (node) -> return node?.tag is "tag:yaml.org,2002:seq"
   is_string: (node) -> return node?.tag is "tag:yaml.org,2002:str"
   is_integer: (node) -> return node?.tag is "tag:yaml.org,2002:int"
-  is_nullable_mapping: (node) -> return @is_mapping(node) or @is_null(node)
-  is_nullable_string: (node) -> return @is_string(node) or @is_null(node)
-  is_nullable_sequence: (node) -> return @is_sequence(node) or @is_null(node)
+  isNullableMapping: (node) -> return @isMapping(node) or @is_null(node)
+  isNullableString: (node) -> return @is_string(node) or @is_null(node)
+  isNullableSequence: (node) -> return @is_sequence(node) or @is_null(node)
 
   validate_security_scheme: (scheme) ->
     @check_is_map scheme
@@ -67,7 +67,7 @@ class @Validator
           @validate_method property, true
         when "settings"
           settings = property
-          unless @is_nullable_mapping property[1]
+          unless @isNullableMapping property[1]
             throw new exports.ValidationError 'while validating security scheme', null, 'schemes settings must be a map', property[1].start_mark
         else
             throw new exports.ValidationError 'while validating security scheme', null, "property: '" + property[0].value + "' is invalid in a security scheme", property[0].start_mark
@@ -125,7 +125,7 @@ class @Validator
       throw new exports.ValidationError 'while validating security scheme', null, 'tokenCredentialsUri must be a URL', settings.start_mark
 
   validate_root_schemas: (schemas) ->
-    unless @is_mapping schemas
+    unless @isMapping schemas
       throw new exports.ValidationError 'while validating schemas', null, 'schemas property must be a mapping', schemas.start_mark
     schemaList = @get_all_schemas()
     for schemaName, schema of schemaList
@@ -165,11 +165,11 @@ class @Validator
       throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceTypes definition, it must be an array', typeProperty.start_mark
 
     types.forEach (type_entry) =>
-      unless @is_mapping type_entry
+      unless @isMapping type_entry
         throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
 
       type_entry.value.forEach (type) =>
-        unless @is_mapping type[1]
+        unless @isMapping type[1]
             throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
         @validate_resource type, true
 
@@ -266,10 +266,10 @@ class @Validator
         switch property[0].value
           when "title"
             hasTitle = true
-            if @is_sequence(property[1]) or @is_mapping(property[1])
+            if @is_sequence(property[1]) or @isMapping(property[1])
               throw new exports.ValidationError 'while validating root properties', null, 'title must be a string', property[0].start_mark
           when "baseUri"
-            unless @is_nullable_string property[1]
+            unless @isNullableString property[1]
               throw new exports.ValidationError 'while validating root properties', null, 'baseUri must be a string', property[0].start_mark
             checkVersion = @validate_base_uri property[1]
           when "securitySchemes"
@@ -278,7 +278,7 @@ class @Validator
             @validate_root_schemas property[1]
           when "version"
             hasVersion = true
-            unless @is_nullable_string property[1]
+            unless @isNullableString property[1]
               throw new exports.ValidationError 'while validating root properties', null, 'version must be a string', property[0].start_mark
           when "traits"
             @validate_traits property
@@ -305,17 +305,17 @@ class @Validator
       @validate_doc_section docSection
 
   validate_doc_section: (docSection) ->
-    unless @is_mapping docSection
+    unless @isMapping docSection
       throw new exports.ValidationError 'while validating dcoumentation section', null, 'each documentation section must be a mapping', docSection.start_mark
     docSection.value.forEach (property) =>
-      if @is_mapping([0]) or @is_sequence(property[0])
+      if @isMapping([0]) or @is_sequence(property[0])
         throw new exports.ValidationError 'while validating dcoumentation section', null, 'keys can only be strings', property[0].start_mark
       switch property[0].value
         when "title"
-          unless @is_nullable_string property[1]
+          unless @isNullableString property[1]
             throw new exports.ValidationError 'while validating dcoumentation section', null, 'title must be a string', property[0].start_mark
         when "content"
-          unless @is_nullable_string property[1]
+          unless @isNullableString property[1]
             throw new exports.ValidationError 'while validating dcoumentation section', null, 'content must be a string', property[0].start_mark
 
   is_valid_parameter_property_name: (propertyName) ->
@@ -334,12 +334,12 @@ class @Validator
             propertyName is "default"
 
   child_resources: (node) ->
-    if node and @is_mapping node
+    if node and @isMapping node
       return node.value.filter (childNode) -> return childNode[0].value.match(/^\//);
     return []
 
   validate_resource: (resource, allowParameterKeys = false) ->
-    unless resource[1] and @is_nullable_mapping(resource[1])
+    unless resource[1] and @isNullableMapping(resource[1])
       throw new exports.ValidationError 'while validating resources', null, 'resource is not a mapping', resource[1].start_mark
     if resource[1].value
       resource[1].value.forEach (property) =>
@@ -363,7 +363,7 @@ class @Validator
 
   validate_type_property: (property, allowParameterKeys) ->
     typeName = @key_or_value property[1]
-    unless @is_mapping(property[1]) or @is_string(property[1])
+    unless @isMapping(property[1]) or @is_string(property[1])
       throw new exports.ValidationError 'while validating resources', null, "property 'type' must be a string or a mapping", property[0].start_mark
     unless @get_type typeName
       throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + typeName, property[1].start_mark
@@ -371,7 +371,7 @@ class @Validator
   validate_method: (method, allowParameterKeys) ->
     if @is_null method[1]
       return
-    unless @is_mapping method[1]
+    unless @isMapping method[1]
       throw new exports.ValidationError 'while validating methods', null, "method must be a mapping", method[0].start_mark
     method[1].value.forEach (property) =>
       unless @validate_common_properties property, allowParameterKeys
@@ -399,40 +399,40 @@ class @Validator
   validate_responses: (responses, allowParameterKeys) ->
     if @is_null responses[1]
       return
-    unless @is_mapping responses[1]
+    unless @isMapping responses[1]
       throw new exports.ValidationError 'while validating query parameters', null, "property: 'responses' must be a mapping", responses[0].start_mark
     responses[1].value.forEach (response) =>
-      unless @is_nullable_mapping response[1]
+      unless @isNullableMapping response[1]
         throw new exports.ValidationError 'while validating query parameters', null, "each response must be a mapping", response[1].start_mark
       @validate_response response, allowParameterKeys
 
   validate_query_params: (property, allowParameterKeys) ->
     if @is_null property[1]
       return
-    unless @is_mapping property[1]
+    unless @isMapping property[1]
       throw new exports.ValidationError 'while validating query parameters', null, "property: 'queryParameters' must be a mapping", property[0].start_mark
     property[1].value.forEach (param) =>
-      unless @is_nullable_mapping param[1]
+      unless @isNullableMapping param[1]
         throw new exports.ValidationError 'while validating query parameters', null, "each query parameter must be a mapping", param[1].start_mark
       @valid_common_parameter_properties param[1], allowParameterKeys
 
   validate_form_params: (property, allowParameterKeys) ->
     if @is_null property[1]
       return
-    unless @is_mapping property[1]
+    unless @isMapping property[1]
       throw new exports.ValidationError 'while validating query parameters', null, "property: 'formParameters' must be a mapping", property[0].start_mark
     property[1].value.forEach (param) =>
-      unless @is_nullable_mapping param[1]
+      unless @isNullableMapping param[1]
         throw new exports.ValidationError 'while validating query parameters', null, "each form parameter must be a mapping", param[1].start_mark
       @valid_common_parameter_properties param[1], allowParameterKeys
 
   validate_headers: (property, allowParameterKeys) ->
     if @is_null property[1]
       return
-    unless @is_mapping property[1]
+    unless @isMapping property[1]
       throw new exports.ValidationError 'while validating headers', null, "property: 'headers' must be a mapping", property[0].start_mark
     property[1].value.forEach (param) =>
-      unless @is_nullable_mapping param[1]
+      unless @isNullableMapping param[1]
         throw new exports.ValidationError 'while validating query parameters', null, "each header must be a mapping", param[1].start_mark
       @valid_common_parameter_properties param[1], allowParameterKeys
 
@@ -445,13 +445,13 @@ class @Validator
           throw new exports.ValidationError 'while validating responses', null, "each response key must be an integer", responseCode.start_mark
     else unless @is_integer response[0]
       throw new exports.ValidationError 'while validating responses', null, "each response key must be an integer", response[0].start_mark
-    unless @is_mapping response[1]
+    unless @isMapping response[1]
       throw new exports.ValidationError 'while validating responses', null, "each response property must be a mapping", response[0].start_mark
     response[1].value.forEach (property) =>
       if property[0].value.match(/^body$/)
         @validate_body property, allowParameterKeys
       else if property[0].value.match(/^description$/)
-        unless @is_nullable_string property[1]
+        unless @isNullableString property[1]
           throw new exports.ValidationError 'while validating responses', null, "property description must be a string", response[0].start_mark
       else if property[0].value.match(/^summary$/)
         unless @is_string property[1]
@@ -462,7 +462,7 @@ class @Validator
   validate_body: (property, allowParameterKeys, bodyMode = null) ->
     if @is_null property[1]
       return
-    unless @is_mapping property[1]
+    unless @isMapping property[1]
       throw new exports.ValidationError 'while validating body', null, "property: body specification must be a mapping", property[0].start_mark
     property[1].value?.forEach (bodyProperty) =>
       if bodyProperty[0].value.match(/<<([^>]+)>>/)
@@ -482,13 +482,13 @@ class @Validator
         if bodyMode and bodyMode != "implicit"
           throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
         bodyMode = "implicit"
-        if @is_mapping (bodyProperty[1]) or @is_sequence(bodyProperty[1])
+        if @isMapping (bodyProperty[1]) or @is_sequence(bodyProperty[1])
           throw new exports.ValidationError 'while validating body', null, "example must be a string", bodyProperty[0].start_mark
       else if bodyProperty[0].value is "schema"
         if bodyMode and bodyMode != "implicit"
           throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
         bodyMode = "implicit"
-        if @is_mapping(bodyProperty[1]) or @is_sequence(bodyProperty[1])
+        if @isMapping(bodyProperty[1]) or @is_sequence(bodyProperty[1])
           throw new exports.ValidationError 'while validating body', null, "schema must be a string", bodyProperty[0].start_mark
       else
         throw new exports.ValidationError 'while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark
@@ -523,12 +523,12 @@ class @Validator
     return false
 
   child_methods: (node) ->
-    unless node and @is_mapping node
+    unless node and @isMapping node
       return []
     return node.value.filter (childNode) -> return childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/);
 
   has_property: (node, property) ->
-    if node and @is_mapping node
+    if node and @isMapping node
       return node.value.some((childNode) -> return childNode[0].value and typeof childNode[0].value != "object" and childNode[0].value.match(property))
     return false
 
@@ -538,7 +538,7 @@ class @Validator
     return filteredNodes[0][1].value;
 
   get_property: (node, property) ->
-    if node and @is_mapping node
+    if node and @isMapping node
       filteredNodes = node.value.filter (childNode) =>
         return @is_string(childNode[0]) and childNode[0].value.match(property)
       if filteredNodes.length > 0
@@ -548,7 +548,7 @@ class @Validator
 
   get_properties: (node, property) =>
     properties = []
-    if node and @is_mapping node
+    if node and @isMapping node
       node.value.forEach (prop) =>
         if @is_string(prop[0]) and prop[0].value.match(property)
           properties.push prop
@@ -610,7 +610,7 @@ class @Validator
   get_absolute_uris: ( node = @get_single_node(true, true, false), parentPath ) ->
     @check_is_map node
     response = []
-    unless @is_nullable_mapping node
+    unless @isNullableMapping node
       throw new exports.ValidationError 'while validating resources', null, 'resource is not a mapping', node.start_mark
     child_resources = @child_resources node
     child_resources.forEach (childResource) =>
