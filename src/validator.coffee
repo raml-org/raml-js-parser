@@ -127,8 +127,8 @@ class @Validator
       throw new exports.ValidationError 'while validating security scheme', null, 'tokenCredentialsUri must be a URL', settings.start_mark
 
   validate_root_schemas: (schemas) ->
-    unless @isMapping schemas
-      throw new exports.ValidationError 'while validating schemas', null, 'schemas property must be a mapping', schemas.start_mark
+    unless @isSequence schemas
+      throw new exports.ValidationError 'while validating schemas', null, 'schemas property must be an array', schemas.start_mark
     schemaList = @get_all_schemas()
     for schemaName, schema of schemaList
       unless schema[1].tag and @isString schema[1]
@@ -432,24 +432,26 @@ class @Validator
       unless response[0].value.length
         throw new exports.ValidationError 'while validating responses', null, "there must be at least one response code", responseCode.start_mark
       response[0].value.forEach (responseCode) =>
-        unless @isInteger responseCode
+        unless @isInteger(responseCode)
           throw new exports.ValidationError 'while validating responses', null, "each response key must be an integer", responseCode.start_mark
     else unless @isInteger response[0]
       throw new exports.ValidationError 'while validating responses', null, "each response key must be an integer", response[0].start_mark
-    unless @isMapping response[1]
+    unless @isNullableMapping response[1]
       throw new exports.ValidationError 'while validating responses', null, "each response property must be a mapping", response[0].start_mark
-    response[1].value.forEach (property) =>
-      switch property[0].value
-        when "body"
-          @validate_body property, allowParameterKeys
-        when "description"
-          unless @isNullableString property[1]
-            throw new exports.ValidationError 'while validating responses', null, "property description must be a string", response[0].start_mark
-        when "summary"
-          unless @isString property[1]
-            throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
-        else
-          throw new exports.ValidationError 'while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
+
+    if @isMapping response[1]
+      response[1].value.forEach (property) =>
+        switch property[0].value
+          when "body"
+            @validate_body property, allowParameterKeys
+          when "description"
+            unless @isNullableString property[1]
+              throw new exports.ValidationError 'while validating responses', null, "property description must be a string", response[0].start_mark
+          when "summary"
+            unless @isString property[1]
+              throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
+          else
+            throw new exports.ValidationError 'while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
 
   validate_body: (property, allowParameterKeys, bodyMode = null) ->
     if @isNull property[1]
