@@ -195,7 +195,7 @@ class @Validator
     if invalid.length > 0
       throw new exports.ValidationError 'while validating trait properties', null, "invalid property '" + invalid[0][0].value + "'", invalid[0][0].start_mark
 
-  valid_common_parameter_properties: (node) ->
+  valid_common_parameter_properties: (node, allowParameterKeys) ->
     @check_is_map node
 
     return unless node.value
@@ -205,49 +205,50 @@ class @Validator
       propertyValue = childNode[1].value
       booleanValues = ["true", "false"]
 
-      switch propertyName
-        when "displayName"
+      return if @handleOptionals(allowParameterKeys, propertyName,
+        "displayName": =>
           if @isSequence(childNode[1]) or @isMapping(childNode[0])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of displayName must be a scalar', childNode[1].start_mark
-        when "pattern"
+        "pattern": =>
           if @isSequence(childNode[1]) or @isMapping(childNode[0])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of pattern must be a scalar', childNode[1].start_mark
-        when "default"
+        "default": =>
           if @isSequence(childNode[1]) or @isMapping(childNode[0])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of default must be a scalar', childNode[1].start_mark
-        when "enum"
+        "enum": =>
           unless @isSequence(childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of displayName must be a scalar', childNode[1].start_mark
-        when "description"
+        "description": =>
           if @isSequence(childNode[1]) or @isMapping(childNode[0])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of description must be a scalar', childNode[1].start_mark
-        when "example"
+        "example": =>
           if @isSequence(childNode[1]) or @isMapping(childNode[0])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of example must be a scalar', childNode[1].start_mark
-        when "minLength"
+        "minLength": =>
           if isNaN(propertyValue)
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minLength must be a number', childNode[1].start_mark
-        when "maxLength"
+        "maxLength": =>
           if isNaN(propertyValue)
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maxLength must be a number', childNode[1].start_mark
-        when "minimum"
+        "minimum": =>
           if isNaN(propertyValue)
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minimum must be a number', childNode[1].start_mark
-        when "maximum"
+        "maximum": =>
           if isNaN(propertyValue)
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maximum must be a number', childNode[1].start_mark
-        when "type"
+        "type": =>
           validTypes = ['string', 'number', 'integer', 'date', 'boolean', 'file']
           unless  propertyValue in validTypes
             throw new exports.ValidationError 'while validating parameter properties', null, 'type can either be: string, number, integer or date', childNode[1].start_mark
-        when "required"
+        "required": =>
           unless propertyValue in booleanValues
             throw new exports.ValidationError 'while validating parameter properties', null, 'required can be any either true or false', childNode[1].start_mark
-        when "repeat"
+        "repeat": =>
           unless propertyValue in booleanValues
             throw new exports.ValidationError 'while validating parameter properties', null, 'repeat can be any either true or false', childNode[1].start_mark
-        else
-          throw new exports.ValidationError 'while validating parameter properties', null, 'unknown property ' + propertyName, childNode[0].start_mark
+      )
+
+      throw new exports.ValidationError 'while validating parameter properties', null, 'unknown property ' + propertyName, childNode[0].start_mark
 
   valid_root_properties: (node) ->
     @check_is_map node
@@ -357,34 +358,47 @@ class @Validator
     unless @get_type typeName
       throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + typeName, property[1].start_mark
 
+  handleOptionals: (allowParameterKeys, key, handlers) ->
+    for handlerKey, handler of handlers
+      if allowParameterKeys && key.slice(-1) == "?"
+        key = key.slice(0,-1)
+      if key.match(handlerKey)
+        handler()
+        return true
+    return false
+
   validate_method: (method, allowParameterKeys) ->
     if @isNull method[1]
       return
     unless @isMapping method[1]
       throw new exports.ValidationError 'while validating methods', null, "method must be a mapping", method[0].start_mark
     method[1].value.forEach (property) =>
-      unless @validate_common_properties property, allowParameterKeys
-        switch property[0].value
-          when "headers"
-            @validate_headers property, allowParameterKeys
-          when "queryParameters"
-            @validate_query_params property, allowParameterKeys
-          when "body"
-            @validate_body property, allowParameterKeys
-          when "responses"
-            @validate_responses property, allowParameterKeys
-          when "securedBy"
-            unless @isSequence property[1]
-              throw new exports.ValidationError 'while validating resources', null, "property 'securedBy' must be a list", property[0].start_mark
-            property[1].value.forEach (secScheme) =>
-              if @isSequence secScheme
-                throw new exports.ValidationError 'while validating securityScheme consumption', null, 'securityScheme reference cannot be a list', secScheme.start_mark
-              unless @isNull secScheme
-                securitySchemeName = @key_or_value secScheme
-                unless @get_security_scheme securitySchemeName
-                  throw new exports.ValidationError 'while validating securityScheme consumption', null, 'there is no securityScheme named ' + securitySchemeName, secScheme.start_mark
-          else
-            throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a method", property[0].start_mark
+      return if @validate_common_properties property, allowParameterKeys
+
+      return if @handleOptionals(allowParameterKeys, property[0].value,
+        'headers': =>
+          @validate_headers property, allowParameterKeys
+        'queryParameters': =>
+          @validate_query_params property, allowParameterKeys
+        'body': =>
+          @validate_body property, allowParameterKeys
+      )
+
+      switch property[0].value
+        when "responses"
+          @validate_responses property, allowParameterKeys
+        when "securedBy"
+          unless @isSequence property[1]
+            throw new exports.ValidationError 'while validating resources', null, "property 'securedBy' must be a list", property[0].start_mark
+          property[1].value.forEach (secScheme) =>
+            if @isSequence secScheme
+              throw new exports.ValidationError 'while validating securityScheme consumption', null, 'securityScheme reference cannot be a list', secScheme.start_mark
+            unless @isNull secScheme
+              securitySchemeName = @key_or_value secScheme
+              unless @get_security_scheme securitySchemeName
+                throw new exports.ValidationError 'while validating securityScheme consumption', null, 'there is no securityScheme named ' + securitySchemeName, secScheme.start_mark
+        else
+          throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a method", property[0].start_mark
 
   validate_responses: (responses, allowParameterKeys) ->
     if @isNull responses[1]
@@ -492,18 +506,21 @@ class @Validator
         throw new exports.ValidationError 'while validating resources', null, "property '" + property[0].value + "' is invalid in a resource", property[0].start_mark
       return true
     else
-      switch property[0].value
-        when "displayName"
+      return true if @handleOptionals(allowParameterKeys, property[0].value,
+        "displayName": =>
           unless @isString property[1]
             throw new exports.ValidationError 'while validating resources', null, "property 'displayName' must be a string", property[0].start_mark
           return true
+        "description": =>
+          unless @isString property[1]
+            throw new exports.ValidationError 'while validating resources', null, "property 'description' must be a string", property[0].start_mark
+          return true
+      )
+
+      switch property[0].value
         when "summary"
           unless @isString property[1]
             throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
-          return true
-        when "description"
-          unless @isString property[1]
-            throw new exports.ValidationError 'while validating resources', null, "property 'description' must be a string", property[0].start_mark
           return true
         when "is"
           unless @isSequence property[1]
@@ -515,17 +532,6 @@ class @Validator
             unless @get_trait traitName
               throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + traitName, use.start_mark
           return true
-
-      if allowParameterKeys
-        switch property[0].value
-          when "displayName?"
-            unless @isString property[1]
-              throw new exports.ValidationError 'while validating resource types', null, "property 'displayName?' must be a string", property[0].start_mark
-            return true
-          when "description?"
-            unless @isString property[1]
-              throw new exports.ValidationError 'while validating resource types', null, "property 'description?' must be a string", property[0].start_mark
-            return true
     return false
 
   child_methods: (node) ->
