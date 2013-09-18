@@ -5578,6 +5578,16 @@ describe('Parser', function() {
     });
   });
   describe('Documentation section', function() {
+    it('should fail if docsection is empty array', function(done) {
+      var definition = [
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: MyApi',
+        'documentation: []'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/there must be at least one document in the documentation section/).and.notify(done);
+    });
     it('should fail if docsection is missing title', function(done) {
       var definition = [
         '%TAG ! tag:raml.org,0.1:',
@@ -5652,6 +5662,30 @@ describe('Parser', function() {
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/unknown property wrongPropertyName/).and.notify(done);
+    });
+    it('should fail if has null title', function(done) {
+      var definition = [
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: MyApi',
+        'documentation:',
+        '  - title:',
+        '    content: Getting Started'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/title must be a string/).and.notify(done);
+    });
+    it('should fail if has null content', function(done) {
+      var definition = [
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: MyApi',
+        'documentation:',
+        '  - title: some title',
+        '    content:'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/content must be a string/).and.notify(done);
     });
   });
   describe('Error reporting', function () {
