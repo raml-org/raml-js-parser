@@ -49,6 +49,20 @@ class @Validator
   isNullableMapping: (node) -> return @isMapping(node) or @isNull(node)
   isNullableString: (node) -> return @isString(node) or @isNull(node)
   isNullableSequence: (node) -> return @isSequence(node) or @isNull(node)
+  isScalar: (node) -> return node?.tag is 'tag:yaml.org,2002:null' or
+                             node?.tag is 'tag:yaml.org,2002:bool' or
+                             node?.tag is 'tag:yaml.org,2002:int' or
+                             node?.tag is 'tag:yaml.org,2002:float' or
+                             node?.tag is 'tag:yaml.org,2002:binary' or
+                             node?.tag is 'tag:yaml.org,2002:timestamp' or
+                             node?.tag is 'tag:yaml.org,2002:str'
+  isCollection: (node) -> node?.tag is 'tag:yaml.org,2002:omap' or
+                          node?.tag is 'tag:yaml.org,2002:pairs' or
+                          node?.tag is 'tag:yaml.org,2002:set' or
+                          node?.tag is 'tag:yaml.org,2002:seq' or
+                          node?.tag is 'tag:yaml.org,2002:map'
+
+
 
   validate_security_scheme: (scheme) ->
     type = null
@@ -56,7 +70,7 @@ class @Validator
     scheme.value.forEach (property) =>
       switch property[0].value
         when "description"
-          unless @isString property[1]
+          unless @isScalar property[1]
             throw new exports.ValidationError 'while validating security scheme', null, 'schemes description must be a string', property[1].start_mark
         when "type"
           type = property[1].value
@@ -206,22 +220,22 @@ class @Validator
 
       switch propertyName
         when "displayName"
-          if @isSequence(childNode[1]) or @isMapping(childNode[0])
+          unless @isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of displayName must be a scalar', childNode[1].start_mark
         when "pattern"
-          if @isSequence(childNode[1]) or @isMapping(childNode[0])
+          unless @isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of pattern must be a scalar', childNode[1].start_mark
         when "default"
-          if @isSequence(childNode[1]) or @isMapping(childNode[0])
+          unless @isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of default must be a scalar', childNode[1].start_mark
         when "enum"
           unless @isSequence(childNode[1])
-            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of displayName must be a scalar', childNode[1].start_mark
+            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of displayName must be an array', childNode[1].start_mark
         when "description"
-          if @isSequence(childNode[1]) or @isMapping(childNode[0])
+          unless @isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of description must be a scalar', childNode[1].start_mark
         when "example"
-          if @isSequence(childNode[1]) or @isMapping(childNode[0])
+          unless @isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of example must be a scalar', childNode[1].start_mark
         when "minLength"
           if isNaN(propertyValue)
@@ -259,10 +273,10 @@ class @Validator
         switch property[0].value
           when "title"
             hasTitle = true
-            if @isSequence(property[1]) or @isMapping(property[1])
+            unless @isScalar(property[1])
               throw new exports.ValidationError 'while validating root properties', null, 'title must be a string', property[0].start_mark
           when "baseUri"
-            unless @isNullableString property[1]
+            unless @isScalar(property[1])
               throw new exports.ValidationError 'while validating root properties', null, 'baseUri must be a string', property[0].start_mark
             checkVersion = @validate_base_uri property[1]
           when "securitySchemes"
@@ -271,7 +285,7 @@ class @Validator
             @validate_root_schemas property[1]
           when "version"
             hasVersion = true
-            if @isSequence(property[1]) or @isMapping(property[1])
+            unless @isScalar(property[1])
               throw new exports.ValidationError 'while validating root properties', null, 'version must be a string', property[0].start_mark
           when "traits"
             @validate_traits property
@@ -306,11 +320,11 @@ class @Validator
     hasTitle = false
     hasContent = false
     docSection.value.forEach (property) =>
-      if @isMapping([0]) or @isSequence(property[0])
+      unless @isScalar(property[0])
         throw new exports.ValidationError 'while validating documentation section', null, 'keys can only be strings', property[0].start_mark
       switch property[0].value
         when "title"
-          unless @isNullableString property[1]
+          unless @isScalar property[1]
             throw new exports.ValidationError 'while validating documentation section', null, 'title must be a string', property[0].start_mark
           hasTitle = true
         when "content"
@@ -454,10 +468,10 @@ class @Validator
           when "body"
             @validate_body property, allowParameterKeys
           when "description"
-            unless @isNullableString property[1]
+            unless @isScalar(property[1])
               throw new exports.ValidationError 'while validating responses', null, "property description must be a string", response[0].start_mark
           when "summary"
-            unless @isString property[1]
+            unless @isScalar(property[1])
               throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
           else
             throw new exports.ValidationError 'while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
@@ -487,13 +501,13 @@ class @Validator
             if bodyMode and bodyMode != "implicit"
               throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
             bodyMode = "implicit"
-            if @isMapping (bodyProperty[1]) or @isSequence(bodyProperty[1])
+            unless @isScalar(bodyProperty[1])
               throw new exports.ValidationError 'while validating body', null, "example must be a string", bodyProperty[0].start_mark
           when "schema"
             if bodyMode and bodyMode != "implicit"
               throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
             bodyMode = "implicit"
-            if @isMapping(bodyProperty[1]) or @isSequence(bodyProperty[1])
+            unless @isScalar(bodyProperty[1])
               throw new exports.ValidationError 'while validating body', null, "schema must be a string", bodyProperty[0].start_mark
           else
             throw new exports.ValidationError 'while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark
@@ -506,15 +520,15 @@ class @Validator
     else
       switch property[0].value
         when "displayName"
-          unless @isString property[1]
+          unless @isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'displayName' must be a string", property[0].start_mark
           return true
         when "summary"
-          unless @isString property[1]
+          unless @isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
           return true
         when "description"
-          unless @isString property[1]
+          unless @isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'description' must be a string", property[0].start_mark
           return true
         when "is"
