@@ -51,7 +51,6 @@ class @Validator
   isNullableSequence: (node) -> return @isSequence(node) or @isNull(node)
 
   validate_security_scheme: (scheme) ->
-    @check_is_map scheme
     type = null
     settings = null
     scheme.value.forEach (property) =>
@@ -135,16 +134,16 @@ class @Validator
         throw new exports.ValidationError 'while validating schemas', null, 'schema ' + schemaName + ' must be a string', schema[0].start_mark
 
   is_map: (node) ->
-    unless node
+    unless node or @isNull node
       throw new exports.ValidationError 'while validating root', null, 'empty document', 0
-    @check_is_map node
+    unless @isMapping node
+      throw new exports.ValidationError 'while validating root', null, 'document must be a mapping', 0
 
   validate_base_uri_parameters: (node) ->
     baseUriProperty = @get_property node, "baseUri"
     @baseUri = baseUriProperty.value
-    @check_is_map node
     if @has_property node, "baseUriParameters"
-      if not @has_property node, "baseUri"
+      unless @has_property node, "baseUri"
         throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', node.start_mark
       @validate_uri_parameters @baseUri, @get_property(node, "baseUriParameters"), [ "version" ]
 
@@ -158,7 +157,10 @@ class @Validator
       uriProperty.value.forEach (uriParameter) =>
         if uriParameter[0].value in reservedNames
           throw new exports.ValidationError 'while validating baseUri', null, 'version parameter not allowed here', uriParameter[0].start_mark
-        @valid_common_parameter_properties uriParameter[1]
+        unless @isNullableMapping(uriParameter[1])
+          throw new exports.ValidationError 'while validating baseUri', null, 'parameter must be a mapping', uriParameter[0].start_mark
+        unless @isNull(uriParameter[1])
+          @valid_common_parameter_properties uriParameter[1]
         unless uriParameter[0].value in expressions
           throw new exports.ValidationError 'while validating baseUri', null, uriParameter[0].value + ' uri parameter unused', uriParameter[0].start_mark
 
@@ -186,7 +188,6 @@ class @Validator
         throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits definition, it must be an array', trait_entry.start_mark
 
   valid_traits_properties: (node) ->  
-    @check_is_map node
     return unless node.value
 
     invalid = node.value.filter (childNode) ->
@@ -196,8 +197,6 @@ class @Validator
       throw new exports.ValidationError 'while validating trait properties', null, "invalid property '" + invalid[0][0].value + "'", invalid[0][0].start_mark
 
   valid_common_parameter_properties: (node) ->
-    @check_is_map node
-
     return unless node.value
 
     node.value.forEach (childNode) =>
@@ -250,7 +249,6 @@ class @Validator
           throw new exports.ValidationError 'while validating parameter properties', null, 'unknown property ' + propertyName, childNode[0].start_mark
 
   valid_root_properties: (node) ->
-    @check_is_map node
     hasTitle = false
     checkVersion = false
     hasVersion = false
@@ -273,7 +271,7 @@ class @Validator
             @validate_root_schemas property[1]
           when "version"
             hasVersion = true
-            unless @isNullableString property[1]
+            if @isSequence(property[1]) or @isMapping(property[1])
               throw new exports.ValidationError 'while validating root properties', null, 'version must be a string', property[0].start_mark
           when "traits"
             @validate_traits property
@@ -303,17 +301,28 @@ class @Validator
 
   validate_doc_section: (docSection) ->
     unless @isMapping docSection
-      throw new exports.ValidationError 'while validating dcoumentation section', null, 'each documentation section must be a mapping', docSection.start_mark
+      throw new exports.ValidationError 'while validating documentation section', null, 'each documentation section must be a mapping', docSection.start_mark
+
+    hasTitle = false
+    hasContent = false
     docSection.value.forEach (property) =>
       if @isMapping([0]) or @isSequence(property[0])
-        throw new exports.ValidationError 'while validating dcoumentation section', null, 'keys can only be strings', property[0].start_mark
+        throw new exports.ValidationError 'while validating documentation section', null, 'keys can only be strings', property[0].start_mark
       switch property[0].value
         when "title"
           unless @isNullableString property[1]
-            throw new exports.ValidationError 'while validating dcoumentation section', null, 'title must be a string', property[0].start_mark
+            throw new exports.ValidationError 'while validating documentation section', null, 'title must be a string', property[0].start_mark
+          hasTitle = true
         when "content"
           unless @isNullableString property[1]
-            throw new exports.ValidationError 'while validating dcoumentation section', null, 'content must be a string', property[0].start_mark
+            throw new exports.ValidationError 'while validating documentation section', null, 'content must be a string', property[0].start_mark
+          hasContent = true
+        else
+          throw new exports.ValidationError 'while validating root properties', null, 'unknown property ' + property[0].value, property[0].start_mark
+    unless hasContent
+      throw new exports.ValidationError 'while validating documentation section', null, 'a documentation entry must have content property', docSection.start_mark
+    unless hasTitle
+      throw new exports.ValidationError 'while validating documentation section', null, 'a documentation entry must have title property', docSection.start_mark
 
   child_resources: (node) ->
     if node and @isMapping node
@@ -430,7 +439,7 @@ class @Validator
   validate_response: (response, allowParameterKeys) ->
     if @isSequence response[0]
       unless response[0].value.length
-        throw new exports.ValidationError 'while validating responses', null, "there must be at least one response code", responseCode.start_mark
+        throw new exports.ValidationError 'while validating responses', null, "there must be at least one response code", response[0].start_mark
       response[0].value.forEach (responseCode) =>
         unless @isInteger(responseCode)
           throw new exports.ValidationError 'while validating responses', null, "each response key must be an integer", responseCode.start_mark
@@ -511,7 +520,7 @@ class @Validator
         when "is"
           unless @isSequence property[1]
             throw new exports.ValidationError 'while validating resources', null, "property 'is' must be a list", property[0].start_mark
-          if not (property[1].value instanceof Array)
+          unless (property[1].value instanceof Array)
             throw new exports.ValidationError 'while validating trait consumption', null, 'is property must be an array', property[0].start_mark
           property[1].value.forEach (use) =>
             traitName = @key_or_value use
@@ -554,12 +563,7 @@ class @Validator
           properties = properties.concat @get_properties prop[1], property
     return properties
 
-  check_is_map: (node) ->
-    if not node instanceof nodes.MappingNode
-      throw new exports.ValidationError 'while validating node', null, 'must be a map', node.start_mark
-
   resources: ( node = @get_single_node(true, true, false), parentPath ) ->
-    @check_is_map node
     response = []
     child_resources = @child_resources node
     child_resources.forEach (childResource) =>
@@ -606,7 +610,6 @@ class @Validator
           throw new exports.ValidationError 'while validating trait consumption', null, 'two resources share same URI ' + sorted_uris[i], null
     
   get_absolute_uris: ( node = @get_single_node(true, true, false), parentPath ) ->
-    @check_is_map node
     response = []
     unless @isNullableMapping node
       throw new exports.ValidationError 'while validating resources', null, 'resource is not a mapping', node.start_mark
