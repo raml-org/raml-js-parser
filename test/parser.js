@@ -21,6 +21,19 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/empty document/).and.notify(done);
     });
+    it('should fail if baseUriParameter is not a mapping', function(done) {
+      var definition = [
+        'title: Test',
+        'baseUri: http://www.api.com/{version}/{company}',
+        'version: v1.1',
+        '/jobs:',
+        '  baseUriParameters:',
+        '    company:',
+        '      description'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/parameter must be a mapping/).and.notify(done);
+    });
     it('it should not fail to parse an empty trait', function(done) {
       var definition = [
         'title: MyApi',
@@ -69,7 +82,7 @@ describe('Parser', function() {
         '%RAML 0.2',
         '---'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/missing title/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/document must be a mapping/).and.notify(done);
     });
     it('it should not fail to parse a RAML null uriParameters. RT-178', function(done) {
       var definition = [
@@ -199,18 +212,6 @@ describe('Parser', function() {
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/error 404|cannot find relative.md/).and.notify(done);
-    });
-    it('should succeed on including Markdown', function(done) {
-      var definition = [
-        '%TAG ! tag:raml.org,0.1:',
-        '---',
-        'title: MyApi',
-        'documentation:',
-        '  - title: Getting Started',
-        '    content: !include http://localhost:9001/test/gettingstarted.md'
-      ].join('\n');
-
-      raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
     });
     it('should succeed on including another YAML file with .yml extension', function(done) {
       var definition = [
@@ -5576,6 +5577,83 @@ describe('Parser', function() {
       raml.load(definition).should.become(expected).and.notify(done);
     });
   });
+  describe('Documentation section', function() {
+    it('should fail if docsection is missing title', function(done) {
+      var definition = [
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: MyApi',
+        'documentation:',
+        '  - content: Content'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/a documentation entry must have title property/).and.notify(done);
+    });
+    it('should fail if docsection is missing content', function(done) {
+      var definition = [
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: MyApi',
+        'documentation:',
+        '  - title: Getting Started'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/a documentation entry must have content property/).and.notify(done);
+    });
+    it('should fail if docsection is mapping', function(done) {
+      var definition = [
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: MyApi',
+        'documentation: {}'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/documentation must be an array/).and.notify(done);
+    });
+    it('should fail if docsection is scalar', function(done) {
+      var definition = [
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: MyApi',
+        'documentation: scalar'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/documentation must be an array/).and.notify(done);
+    });
+    it('should fail if docentry is scalar', function(done) {
+      var definition = [
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: MyApi',
+        'documentation: [scalar]'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/each documentation section must be a mapping/).and.notify(done);
+    });
+    it('should fail if docentry is array', function(done) {
+      var definition = [
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: MyApi',
+        'documentation: [[scalar]]'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/each documentation section must be a mapping/).and.notify(done);
+    });
+    it('should fail if docentry uses wrong property name', function(done) {
+      var definition = [
+        '%TAG ! tag:raml.org,0.1:',
+        '---',
+        'title: MyApi',
+        'documentation:',
+        '  - title: Getting Started',
+        '    content: Getting Started',
+        '    wrongPropertyName: Getting Started'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/unknown property wrongPropertyName/).and.notify(done);
+    });
+  });
   describe('Error reporting', function () {
     it('should report correct line/column for invalid trait error', function(done) {
       var noop = function () {};
@@ -5627,14 +5705,7 @@ describe('Parser', function() {
         '#%YAML 1.2',
         '---'
       ].join('\n');
-      raml.load(definition).then(noop, function (error) {
-        setTimeout(function () {
-          expect(error.problem_mark).to.exist;
-          error.problem_mark.column.should.be.equal(3);
-          error.problem_mark.line.should.be.equal(1);
-          done();
-        }, 0);
-      });
+      raml.load(definition).should.be.rejected.with(/document must be a mapping/).and.notify(done);
     });
   });
 });

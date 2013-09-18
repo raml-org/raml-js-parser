@@ -47,7 +47,7 @@ class @SequenceNode extends @CollectionNode
     return temp
     
   combine: (node) ->
-    if not (node instanceof SequenceNode)
+    unless node instanceof SequenceNode
       throw new exports.ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
     node.value.forEach (property) =>
       value = property.clone()

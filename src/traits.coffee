@@ -34,7 +34,7 @@ class @Traits
     return null
 
   apply_traits: (node, removeQs = true) ->
-    @check_is_map node
+    return unless @isMapping(node)
     if @has_traits node
       resources = @child_resources node
       resources.forEach (resource) =>
