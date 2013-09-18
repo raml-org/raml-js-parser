@@ -62,8 +62,6 @@ class @Validator
                           node?.tag is 'tag:yaml.org,2002:seq' or
                           node?.tag is 'tag:yaml.org,2002:map'
 
-
-
   validate_security_scheme: (scheme) ->
     type = null
     settings = null
@@ -310,6 +308,8 @@ class @Validator
       throw new exports.ValidationError 'while validating version', null, 'missing version', node.start_mark
 
   validate_documentation: (documentation_property) ->
+    unless documentation_property.value.length
+      throw new exports.ValidationError 'while validating documentation section', null, 'there must be at least one document in the documentation section', documentation_property.start_mark
     documentation_property.value.forEach (docSection) =>
       @validate_doc_section docSection
 
