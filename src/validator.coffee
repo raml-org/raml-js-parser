@@ -155,7 +155,7 @@ class @Validator
     baseUriProperty = @get_property node, "baseUri"
     @baseUri = baseUriProperty.value
     if @has_property node, "baseUriParameters"
-      unless @has_property node, "baseUri"
+      unless @isScalar baseUriProperty
         throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', node.start_mark
       @validate_uri_parameters @baseUri, @get_property(node, "baseUriParameters"), [ "version" ]
 
@@ -163,8 +163,9 @@ class @Validator
     try
       template = uritemplate.parse uri
     catch err
-      throw new exports.ValidationError 'while validating uri parameters', null, err.options.message, uriProperty.start_mark
+      throw new exports.ValidationError 'while validating uri parameters', null, err?.options?.message, uriProperty.start_mark
     expressions = template.expressions.filter((expr) -> return "templateText" of expr ).map (expression) -> expression.templateText
+
     if typeof uriProperty.value is "object"
       uriProperty.value.forEach (uriParameter) =>
         if uriParameter[0].value in reservedNames
@@ -654,7 +655,7 @@ class @Validator
     try
       template = uritemplate.parse baseUri
     catch err
-      throw new exports.ValidationError 'while validating baseUri', null, err.options.message, baseUriNode.start_mark
+      throw new exports.ValidationError 'while validating baseUri', null, err?.options?.message, baseUriNode.start_mark
     expressions = template.expressions.filter((expr) -> return 'templateText' of expr).map (expression) -> expression.templateText
     if 'version' in expressions
       return true
