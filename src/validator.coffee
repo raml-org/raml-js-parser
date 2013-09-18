@@ -324,11 +324,11 @@ class @Validator
         throw new exports.ValidationError 'while validating documentation section', null, 'keys can only be strings', property[0].start_mark
       switch property[0].value
         when "title"
-          unless @isScalar property[1]
+          unless @isScalar(property[1]) and not @isNull(property[1])
             throw new exports.ValidationError 'while validating documentation section', null, 'title must be a string', property[0].start_mark
           hasTitle = true
         when "content"
-          unless @isNullableString property[1]
+          unless @isScalar(property[1]) and not @isNull(property[1])
             throw new exports.ValidationError 'while validating documentation section', null, 'content must be a string', property[0].start_mark
           hasContent = true
         else
