@@ -512,7 +512,9 @@ class @Validator
         bodyMode = "explicit"
         @validate_body bodyProperty, allowParameterKeys, "implicit"
       else
-        switch bodyProperty[0].value
+        key = bodyProperty[0].value
+        key = key.slice(0,-1) if allowParameterKeys && key in ['formParameters?']
+        switch key
           when "formParameters"
             if bodyMode and bodyMode != "implicit"
               throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark

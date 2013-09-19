@@ -383,6 +383,42 @@ describe('Resource Types Validations', function() {
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
+
+        describe('body form parameters', function(done) {
+          it('should succeed when given a "formParameters?" property', function(done) {
+            var definition = resourceTypeSnippet([
+              'get:',
+              '  body:',
+              '    application/x-www-form-urlencoded:',
+              '      formParameters?:',
+              '        someFormParameter:',
+              '          displayName: Some form parameter',
+            ]);
+            raml.load(definition).should.be.fulfilled.and.notify(done);
+          });
+
+          it('should succeed when given a form parameter with a ?', function(done) {
+            var definition = resourceTypeSnippet([
+              'get:',
+              '  body:',
+              '    application/x-www-form-urlencoded:',
+              '      formParameters:',
+              '        someFormParameter?:',
+              '          displayName: Some form parameter',
+            ]);
+            raml.load(definition).should.be.fulfilled.and.notify(done);
+          });
+
+          itShouldBehaveLikeAnOptionalStructureNamedParameter(
+            resourceTypeSnippet([
+              'get:',
+              '  body:',
+              '    application/x-www-form-urlencoded:',
+              '      formParameters:',
+              '        someFormParameter?:',
+            ])
+          );
+        });
       });
     });
 
@@ -655,6 +691,39 @@ describe('Trait Validations', function() {
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
+
+      describe('body form parameters', function(done) {
+          it('should succeed when given a "formParameters?" property', function(done) {
+            var definition = traitSnippet([
+              'body:',
+              '  application/x-www-form-urlencoded:',
+              '    formParameters?:',
+              '      someFormParameter:',
+              '        displayName: Some form parameter',
+            ]);
+            raml.load(definition).should.be.fulfilled.and.notify(done);
+          });
+
+          it('should succeed when given a form parameter with a ?', function(done) {
+            var definition = traitSnippet([
+              'body:',
+              '  application/x-www-form-urlencoded:',
+              '    formParameters:',
+              '      someFormParameter?:',
+              '        displayName: Some form parameter',
+            ]);
+            raml.load(definition).should.be.fulfilled.and.notify(done);
+          });
+
+          itShouldBehaveLikeAnOptionalStructureNamedParameter(
+            traitSnippet([
+              'body:',
+              '  application/x-www-form-urlencoded:',
+              '    formParameters:',
+              '      someFormParameter?:',
+            ])
+          );
+        });
     });
   });
 
