@@ -94,7 +94,7 @@ Read file either locally or from the network
   url = require('url').parse(file)
 
   if url.protocol?
-    if not url.protocol.match(/^https?/i)
+    unless url.protocol.match(/^https?/i)
       throw new exports.FileError 'while reading ' + file, null, 'unknown protocol ' + url.protocol, @start_mark
     else
       return @fetchFile file

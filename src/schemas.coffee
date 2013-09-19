@@ -18,8 +18,10 @@ class @Schemas
     if @has_property node, /^schemas$/
       allSchemas = @property_value node, /^schemas$/
       if allSchemas and typeof allSchemas is "object"
-        allSchemas.forEach (schema) =>
-          @declaredSchemas[schema[0].value] = schema
+        allSchemas.forEach (schema_entry) =>
+          if schema_entry and typeof schema_entry is "object" and typeof schema_entry.value is "object"
+            schema_entry.value.forEach (schema) =>
+              @declaredSchemas[schema[0].value] = schema
 
   has_schemas: (node) =>
     if @declaredSchemas.length == 0 and @has_property node, /^schemas$/

@@ -38,7 +38,7 @@ class @ResourceTypes
     return null
 
   apply_types: (node) =>
-    @check_is_map node
+    return unless @isMapping(node)
     if @has_types node
       resources = @child_resources node
       resources.forEach (resource) =>
