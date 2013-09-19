@@ -118,7 +118,16 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/version parameter not allowed here/).and.notify(done);
     });
-
+    it('it should fail if resource URI is invalid', function(done){
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: hola',
+        'version: v0.1',
+        '/resourceName{}:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/Resource name is invalid:/).and.notify(done);
+    });
   });
   describe('Basic Information', function() {
     it('should fail unsupported yaml version', function(done) {

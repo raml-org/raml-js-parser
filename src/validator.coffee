@@ -366,6 +366,12 @@ class @Validator
   validate_resource: (resource, allowParameterKeys = false, context = "resource") ->
     unless resource[1] and @isNullableMapping(resource[1])
       throw new exports.ValidationError 'while validating resources', null, 'resource is not a mapping', resource[1].start_mark
+    if resource[0].value
+      try
+        template = uritemplate.parse resource[0].value
+      catch err
+        throw new exports.ValidationError 'while validating resource', null, "Resource name is invalid: " + err?.options?.message, resource[0].start_mark
+
     if resource[1].value
       resource[1].value.forEach (property) =>
         unless @validate_common_properties property, allowParameterKeys
