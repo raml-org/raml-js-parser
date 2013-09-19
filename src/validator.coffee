@@ -198,11 +198,11 @@ class @Validator
     traits = traitProperty.value
 
     unless Array.isArray traits
-      throw new exports.ValidationError 'while validating traits', null, 'invalid traits definition, it must be an array', traits.start_mark
+      throw new exports.ValidationError 'while validating traits', null, 'invalid traits definition, it must be an array', traitProperty.start_mark
 
     traits.forEach (trait_entry) =>
       unless Array.isArray trait_entry.value
-        throw new exports.ValidationError 'while validating traits', null, 'invalid traits definition, it must be an array', trait_entry.start_mark
+        throw new exports.ValidationError 'while validating traits', null, 'invalid traits definition, it must be an array', traitProperty.start_mark
 
       trait_entry.value.forEach (trait) =>
         @valid_traits_properties trait
