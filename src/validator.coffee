@@ -225,50 +225,50 @@ class @Validator
 
       return if allowParameterKeys && @isParameterKey(childNode)
 
-      return if @handleOptionals(allowParameterKeys, propertyName,
-        "displayName": =>
+      propertyName = propertyName.slice(0,-1) if allowParameterKeys && propertyName.slice(-1) == '?'
+      switch propertyName
+        when "displayName"
           unless @isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of displayName must be a scalar', childNode[1].start_mark
-        "pattern": =>
+        when "pattern"
           unless @isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of pattern must be a scalar', childNode[1].start_mark
-        "default": =>
+        when "default"
           unless @isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of default must be a scalar', childNode[1].start_mark
-        "enum": =>
+        when "enum"
           unless @isSequence(childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of displayName must be an array', childNode[1].start_mark
-        "description": =>
+        when "description"
           unless @isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of description must be a scalar', childNode[1].start_mark
-        "example": =>
+        when "example"
           unless @isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of example must be a scalar', childNode[1].start_mark
-        "minLength": =>
+        when "minLength"
           if isNaN(propertyValue)
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minLength must be a number', childNode[1].start_mark
-        "maxLength": =>
+        when "maxLength"
           if isNaN(propertyValue)
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maxLength must be a number', childNode[1].start_mark
-        "minimum": =>
+        when "minimum"
           if isNaN(propertyValue)
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of minimum must be a number', childNode[1].start_mark
-        "maximum": =>
+        when "maximum"
           if isNaN(propertyValue)
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maximum must be a number', childNode[1].start_mark
-        "type": =>
+        when "type"
           validTypes = ['string', 'number', 'integer', 'date', 'boolean', 'file']
           unless  propertyValue in validTypes
             throw new exports.ValidationError 'while validating parameter properties', null, 'type can either be: string, number, integer or date', childNode[1].start_mark
-        "required": =>
+        when "required"
           unless propertyValue in booleanValues
             throw new exports.ValidationError 'while validating parameter properties', null, 'required can be any either true or false', childNode[1].start_mark
-        "repeat": =>
+        when "repeat"
           unless propertyValue in booleanValues
             throw new exports.ValidationError 'while validating parameter properties', null, 'repeat can be any either true or false', childNode[1].start_mark
-      )
-
-      throw new exports.ValidationError 'while validating parameter properties', null, 'unknown property ' + propertyName, childNode[0].start_mark
+        else
+          throw new exports.ValidationError 'while validating parameter properties', null, 'unknown property ' + propertyName, childNode[0].start_mark
 
   valid_root_properties: (node) ->
     hasTitle = false
@@ -406,14 +406,6 @@ class @Validator
     unless @get_type typeName
       throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + typeName, property[1].start_mark
 
-  handleOptionals: (allowParameterKeys, key, handlers) ->
-    if allowParameterKeys && key.slice(-1) == "?"
-      key = key.slice(0,-1)
-    if handlers[key]
-      handlers[key]()
-      return true
-    return false
-
   validate_method: (method, allowParameterKeys, context = 'method') ->
     if @isNull method[1]
       return
@@ -422,16 +414,15 @@ class @Validator
     method[1].value.forEach (property) =>
       return if @validate_common_properties property, allowParameterKeys
 
-      return if @handleOptionals(allowParameterKeys, property[0].value,
-        'headers': =>
+      key = property[0].value
+      key = key.slice(0,-1) if allowParameterKeys && key in ['headers?', 'queryParameters?', 'body?']
+      switch key
+        when "headers"
           @validate_headers property, allowParameterKeys
-        'queryParameters': =>
+        when "queryParameters"
           @validate_query_params property, allowParameterKeys
-        'body': =>
+        when "body"
           @validate_body property, allowParameterKeys
-      )
-
-      switch property[0].value
         when "responses"
           @validate_responses property, allowParameterKeys
         when "securedBy"
@@ -550,18 +541,17 @@ class @Validator
         throw new exports.ValidationError 'while validating resources', null, "property '" + property[0].value + "' is invalid in a resource", property[0].start_mark
       return true
     else
-      return true if @handleOptionals(allowParameterKeys, property[0].value,
-        "displayName": =>
+      key = property[0].value
+      key = key.slice(0,-1) if allowParameterKeys && key in ['displayName?', 'description?']
+      switch key
+        when "displayName"
           unless @isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'displayName' must be a string", property[0].start_mark
           return true
-        "description": =>
+        when "description"
           unless @isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'description' must be a string", property[0].start_mark
           return true
-      )
-
-      switch property[0].value
         when "summary"
           unless @isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
