@@ -38,15 +38,18 @@ describe('Parser', function() {
       var definition = [
         'title: MyApi',
         'traits:',
-        '  - trait:',
-        '    displayName: Foo'
+        '  - emptyTrait:',
+        '    otherTrait:',
+        '      description: Some description',
       ].join('\n');
       var expected = {
         title: "MyApi",
         traits: [
           {
-            trait: null,
-            displayName: "Foo"
+            emptyTrait: null,
+            otherTrait: {
+              description: 'Some description'
+            }
           }
         ]
       };
@@ -1651,7 +1654,8 @@ describe('Parser', function() {
         '  - rateLimited:',
         '      displayName: Rate Limited',
         '      headers?:',
-        '        x-header-extra: API Limit Exceeded',
+        '        x-header-extra:',
+        '          displayName: API Limit Exceeded',
         '/leagues:',
         '  is: [ rateLimited ]',
         '  get:',
@@ -1666,7 +1670,9 @@ describe('Parser', function() {
           rateLimited: {
             displayName: 'Rate Limited',
             "headers?": {
-              "x-header-extra": "API Limit Exceeded"
+              "x-header-extra": {
+                displayName: "API Limit Exceeded"
+              }
             }
           }
         }],
@@ -1911,19 +1917,18 @@ describe('Parser', function() {
         'traits:',
         '  - rateLimited:',
         '      displayName: Rate Limited',
-        '      get?:',
-        '        headers?:',
-        '          If-None-Match?:',
-        '            description: |',
-        '              If-None-Match headers ensure that you don’t retrieve unnecessary data',
-        '              if you already have the most current version on-hand.',
-        '            type: string',
-        '          On-Behalf-Of?:',
-        '            description: |',
-        '              Used for enterprise administrators to make API calls on behalf of their',
-        '              managed users. To enable this functionality, please contact us with your',
-        '              API key.',
-        '            type: string',
+        '      headers?:',
+        '        If-None-Match?:',
+        '          description: |',
+        '            If-None-Match headers ensure that you don’t retrieve unnecessary data',
+        '            if you already have the most current version on-hand.',
+        '          type: string',
+        '        On-Behalf-Of?:',
+        '          description: |',
+        '            Used for enterprise administrators to make API calls on behalf of their',
+        '            managed users. To enable this functionality, please contact us with your',
+        '            API key.',
+        '          type: string',
         '/leagues:',
         '  is: [ rateLimited: {} ]',
         '  get:',
@@ -1937,16 +1942,14 @@ describe('Parser', function() {
         traits: [{
           rateLimited: {
             displayName: 'Rate Limited',
-            'get?': {
-              'headers?': {
-                'If-None-Match?': {
-                  description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
-                  type: 'string'
-                },
-                'On-Behalf-Of?' : {
-                  description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
-                  type: 'string'
-                }
+            'headers?': {
+              'If-None-Match?': {
+                description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
+                type: 'string'
+              },
+              'On-Behalf-Of?' : {
+                description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
+                type: 'string'
               }
             }
           }
@@ -1980,19 +1983,18 @@ describe('Parser', function() {
         'traits:',
         '  - rateLimited:',
         '      displayName: Rate Limited',
-        '      get?:',
-        '        headers?:',
-        '          If-None-Match?:',
-        '            description: |',
-        '              If-None-Match headers ensure that you don’t retrieve unnecessary data',
-        '              if you already have the most current version on-hand.',
-        '            type: string',
-        '          On-Behalf-Of?:',
-        '            description: |',
-        '              Used for enterprise administrators to make API calls on behalf of their',
-        '              managed users. To enable this functionality, please contact us with your',
-        '              API key.',
-        '            type: string',
+        '      headers?:',
+        '        If-None-Match?:',
+        '          description: |',
+        '            If-None-Match headers ensure that you don’t retrieve unnecessary data',
+        '            if you already have the most current version on-hand.',
+        '          type: string',
+        '        On-Behalf-Of?:',
+        '          description: |',
+        '            Used for enterprise administrators to make API calls on behalf of their',
+        '            managed users. To enable this functionality, please contact us with your',
+        '            API key.',
+        '          type: string',
         '/leagues:',
         '  is: [ rateLimited: { param1: value, param2: value} ]',
         '  get:',
@@ -2006,16 +2008,14 @@ describe('Parser', function() {
         traits: [{
           rateLimited: {
             displayName: 'Rate Limited',
-            'get?': {
-              'headers?': {
-                'If-None-Match?': {
-                  description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
-                  type: 'string'
-                },
-                'On-Behalf-Of?' : {
-                  description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
-                  type: 'string'
-                }
+            'headers?': {
+              'If-None-Match?': {
+                description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
+                type: 'string'
+              },
+              'On-Behalf-Of?' : {
+                description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
+                type: 'string'
               }
             }
           }
@@ -2056,19 +2056,18 @@ describe('Parser', function() {
         'traits:',
         '  - rateLimited:',
         '      displayName: Rate Limited',
-        '      get?:',
-        '        headers?:',
-        '          If-None-Match?:',
-        '            description: |',
-        '              If-None-Match headers ensure that you don’t retrieve unnecessary data',
-        '              if you already have the most current version on-hand.',
-        '            type: string',
-        '          On-Behalf-Of?:',
-        '            description: |',
-        '              Used for enterprise administrators to make API calls on behalf of their',
-        '              managed users. To enable this functionality, please contact us with your',
-        '              API key.',
-        '            type: string',
+        '      headers?:',
+        '        If-None-Match?:',
+        '          description: |',
+        '            If-None-Match headers ensure that you don’t retrieve unnecessary data',
+        '            if you already have the most current version on-hand.',
+        '          type: string',
+        '        On-Behalf-Of?:',
+        '          description: |',
+        '            Used for enterprise administrators to make API calls on behalf of their',
+        '            managed users. To enable this functionality, please contact us with your',
+        '            API key.',
+        '          type: string',
         '/leagues:',
         '  is: [ rateLimited: { param1: ["string"], param2: value} ]',
         '  get:',
@@ -2137,9 +2136,9 @@ describe('Parser', function() {
         'traits:',
         '  - rateLimited:',
         '      displayName: Rate Limited',
-        '      get:',
+        '      headers:',
         '        Authorization:',
-        '        description: <<lalalalala>> <<pepepepepepep>>',
+        '          description: <<lalalalala>> <<pepepepepepep>>',
         '/leagues:',
         '  is: [ rateLimited: { param1: value1, param2: value2} ]',
         '  get:',
@@ -2555,7 +2554,8 @@ describe('Parser', function() {
         '  - rateLimited:',
         '      displayName: Rate Limited',
         '      headers?:',
-        '        x-header-extra: API Limit Exceeded',
+        '        x-header-extra:',
+        '          displayName: API Limit Exceeded',
         '/leagues:',
         '  get:',
         '    is: [ rateLimited ]',
@@ -2570,7 +2570,9 @@ describe('Parser', function() {
           rateLimited: {
             displayName: 'Rate Limited',
             "headers?": {
-              "x-header-extra": "API Limit Exceeded"
+              "x-header-extra": {
+                displayName: "API Limit Exceeded"
+              }
             }
           }
         }],
@@ -2730,19 +2732,18 @@ describe('Parser', function() {
         'traits:',
         '  - rateLimited:',
         '      displayName: Rate Limited',
-        '      get?:',
-        '        headers?:',
-        '          If-None-Match?:',
-        '            description: |',
-        '              If-None-Match headers ensure that you don’t retrieve unnecessary data',
-        '              if you already have the most current version on-hand.',
-        '            type: string',
-        '          On-Behalf-Of?:',
-        '            description: |',
-        '              Used for enterprise administrators to make API calls on behalf of their',
-        '              managed users. To enable this functionality, please contact us with your',
-        '              API key.',
-        '            type: string',
+        '      headers?:',
+        '        If-None-Match?:',
+        '          description: |',
+        '            If-None-Match headers ensure that you don’t retrieve unnecessary data',
+        '            if you already have the most current version on-hand.',
+        '          type: string',
+        '        On-Behalf-Of?:',
+        '          description: |',
+        '            Used for enterprise administrators to make API calls on behalf of their',
+        '            managed users. To enable this functionality, please contact us with your',
+        '            API key.',
+        '          type: string',
         '/leagues:',
         '  get:',
         '    is: [ rateLimited: {} ]',
@@ -2756,16 +2757,14 @@ describe('Parser', function() {
         traits: [{
           rateLimited: {
             displayName: 'Rate Limited',
-            'get?': {
-              'headers?': {
-                'If-None-Match?': {
-                  description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
-                  type: 'string'
-                },
-                'On-Behalf-Of?' : {
-                  description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
-                  type: 'string'
-                }
+            'headers?': {
+              'If-None-Match?': {
+                description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
+                type: 'string'
+              },
+              'On-Behalf-Of?' : {
+                description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
+                type: 'string'
               }
             }
           }
@@ -2799,19 +2798,18 @@ describe('Parser', function() {
         'traits:',
         '  - rateLimited:',
         '      displayName: Rate Limited',
-        '      get?:',
-        '        headers?:',
-        '          If-None-Match?:',
-        '            description: |',
-        '              If-None-Match headers ensure that you don’t retrieve unnecessary data',
-        '              if you already have the most current version on-hand.',
-        '            type: string',
-        '          On-Behalf-Of?:',
-        '            description: |',
-        '              Used for enterprise administrators to make API calls on behalf of their',
-        '              managed users. To enable this functionality, please contact us with your',
-        '              API key.',
-        '            type: string',
+        '      headers?:',
+        '        If-None-Match?:',
+        '          description: |',
+        '            If-None-Match headers ensure that you don’t retrieve unnecessary data',
+        '            if you already have the most current version on-hand.',
+        '          type: string',
+        '        On-Behalf-Of?:',
+        '          description: |',
+        '            Used for enterprise administrators to make API calls on behalf of their',
+        '            managed users. To enable this functionality, please contact us with your',
+        '            API key.',
+        '          type: string',
         '/leagues:',
         '  get:',
         '    is: [ rateLimited: { param1: value, param2: value} ]',
@@ -2825,16 +2823,14 @@ describe('Parser', function() {
         traits: [{
           rateLimited: {
             displayName: 'Rate Limited',
-            'get?': {
-              'headers?': {
-                'If-None-Match?': {
-                  description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
-                  type: 'string'
-                },
-                'On-Behalf-Of?' : {
-                  description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
-                  type: 'string'
-                }
+            'headers?': {
+              'If-None-Match?': {
+                description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
+                type: 'string'
+              },
+              'On-Behalf-Of?' : {
+                description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
+                type: 'string'
               }
             }
           }
@@ -2875,19 +2871,18 @@ describe('Parser', function() {
         'traits:',
         '  - rateLimited:',
         '      displayName: Rate Limited',
-        '      get?:',
-        '        headers?:',
-        '          If-None-Match?:',
-        '            description: |',
-        '              If-None-Match headers ensure that you don’t retrieve unnecessary data',
-        '              if you already have the most current version on-hand.',
-        '            type: string',
-        '          On-Behalf-Of?:',
-        '            description: |',
-        '              Used for enterprise administrators to make API calls on behalf of their',
-        '              managed users. To enable this functionality, please contact us with your',
-        '              API key.',
-        '            type: string',
+        '      headers?:',
+        '        If-None-Match?:',
+        '          description: |',
+        '            If-None-Match headers ensure that you don’t retrieve unnecessary data',
+        '            if you already have the most current version on-hand.',
+        '          type: string',
+        '        On-Behalf-Of?:',
+        '          description: |',
+        '            Used for enterprise administrators to make API calls on behalf of their',
+        '            managed users. To enable this functionality, please contact us with your',
+        '            API key.',
+        '          type: string',
         '/leagues:',
         '  get:',
         '    is: [ rateLimited: { param1: ["string"], param2: value} ]',
@@ -2926,7 +2921,7 @@ describe('Parser', function() {
         'traits:',
         '  - rateLimited:',
         '      displayName: Rate Limited',
-        '      get:',
+        '      headers:',
         '        Authorization:',
         '          description: <<lalalalala>> <<pepepepepepep>>',
         '/leagues:',
@@ -3996,7 +3991,7 @@ describe('Parser', function() {
         '      displayName: Collection',
         '      description: This resourceType should be used for any collection of items',
         '      post?:',
-        '       foo:',
+        '       description: Some description',
         '/:',
         '  type: collection',
         '  post: {}'
@@ -4012,7 +4007,7 @@ describe('Parser', function() {
               description: "This resourceType should be used for any collection of items",
               "post?":
               {
-                foo: null
+                description: "Some description"
               }
             }
           }
@@ -4024,7 +4019,7 @@ describe('Parser', function() {
             methods: [
               {
                 method: "post",
-                foo: null
+                description: "Some description"
               }
             ]
           }
@@ -5699,10 +5694,9 @@ describe('Parser', function() {
         'traits:',
         '  - wrongKey:',
         '      displayName: Rate Limited',
-        '      get?:',
-        '        responses:',
-        '          503:',
-        '            description: Server Unavailable. Check Your Rate Limits.',
+        '      responses:',
+        '        503:',
+        '          description: Server Unavailable. Check Your Rate Limits.',
         '/:',
         '  is: [ throttled, rateLimited: { parameter: value } ]'
       ].join('\n');
@@ -5711,7 +5705,7 @@ describe('Parser', function() {
         setTimeout(function () {
           expect(error.problem_mark).to.exist;
           error.problem_mark.column.should.be.equal(8);
-          error.problem_mark.line.should.be.equal(12);
+          error.problem_mark.line.should.be.equal(11);
           done();
         }, 0);
       });
