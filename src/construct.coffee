@@ -425,42 +425,6 @@ class @Constructor extends @BaseConstructor
 @Constructor.add_constructor 'tag:yaml.org,2002:map',
   @Constructor::construct_yaml_map
 
-@Constructor.add_constructor 'tag:raml.org,0.1:null',
-  @Constructor::construct_yaml_null
-
-@Constructor.add_constructor 'tag:raml.org,0.1:bool',
-  @Constructor::construct_yaml_bool
-
-@Constructor.add_constructor 'tag:raml.org,0.1:int',
-  @Constructor::construct_yaml_int
-
-@Constructor.add_constructor 'tag:raml.org,0.1:float',
-  @Constructor::construct_yaml_float
-
-@Constructor.add_constructor 'tag:raml.org,0.1:binary',
-  @Constructor::construct_yaml_binary
-
-@Constructor.add_constructor 'tag:raml.org,0.1:timestamp',
-  @Constructor::construct_yaml_timestamp
-
-@Constructor.add_constructor 'tag:raml.org,0.1:omap',
-  @Constructor::construct_yaml_omap
-
-@Constructor.add_constructor 'tag:raml.org,0.1:pairs',
-  @Constructor::construct_yaml_pairs
-
-@Constructor.add_constructor 'tag:raml.org,0.1:set',
-  @Constructor::construct_yaml_set
-
-@Constructor.add_constructor 'tag:raml.org,0.1:str',
-  @Constructor::construct_yaml_str
-
-@Constructor.add_constructor 'tag:raml.org,0.1:seq',
-  @Constructor::construct_yaml_seq
-
-@Constructor.add_constructor 'tag:raml.org,0.1:map',
-  @Constructor::construct_yaml_map
-
 @Constructor.add_constructor null,
   @Constructor::construct_undefined
   

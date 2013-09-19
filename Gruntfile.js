@@ -65,17 +65,18 @@ module.exports = function(grunt) {
         options: {
           urls: [
             'http://localhost:9001/test/parser.html'
-          ]
+          ],
+        reporter: 'dot',
         }
       }
     },
     mochacli: {
         options: {
             require: ['chai', 'chai-as-promised'],
-            reporter: 'list',
-            bail: true
+            reporter: 'dot',
+            bail: false
         },
-        all: ['test/parser.js', 'test/local.js']
+        all: ['test/parser.js', 'test/local.js', 'test/resourceTypesValidations.js']
     }        
   });
   

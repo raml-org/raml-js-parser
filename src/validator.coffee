@@ -155,25 +155,28 @@ class @Validator
     baseUriProperty = @get_property node, "baseUri"
     @baseUri = baseUriProperty.value
     if @has_property node, "baseUriParameters"
-      unless @has_property node, "baseUri"
+      unless @isScalar baseUriProperty
         throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', node.start_mark
-      @validate_uri_parameters @baseUri, @get_property(node, "baseUriParameters"), false, [ "version" ]
+      @validate_uri_parameters @baseUri, @get_property(node, "baseUriParameters"), false, false, [ "version" ]
 
-  validate_uri_parameters: (uri, uriProperty, allowParameterKeys, reservedNames = []) ->
+  validate_uri_parameters: (uri, uriProperty, allowParameterKeys, skipParameterUseCheck, reservedNames = []) ->
     try
       template = uritemplate.parse uri
     catch err
-      throw new exports.ValidationError 'while validating uri parameters', null, err.options.message, uriProperty.start_mark
+      throw new exports.ValidationError 'while validating uri parameters', null, err?.options?.message, uriProperty.start_mark
     expressions = template.expressions.filter((expr) -> return "templateText" of expr ).map (expression) -> expression.templateText
+
     if typeof uriProperty.value is "object"
       uriProperty.value.forEach (uriParameter) =>
-        if uriParameter[0].value in reservedNames
-          throw new exports.ValidationError 'while validating baseUri', null, 'version parameter not allowed here', uriParameter[0].start_mark
+        parameterName = @canonicalizePropertyName(uriParameter[0].value, allowParameterKeys)
+
+        if parameterName in reservedNames
+          throw new exports.ValidationError 'while validating baseUri', null, uriParameter[0].value + ' parameter not allowed here', uriParameter[0].start_mark
         unless @isNullableMapping(uriParameter[1])
           throw new exports.ValidationError 'while validating baseUri', null, 'parameter must be a mapping', uriParameter[0].start_mark
         unless @isNull(uriParameter[1])
           @valid_common_parameter_properties uriParameter[1], allowParameterKeys
-        unless allowParameterKeys || uriParameter[0].value in expressions
+        unless skipParameterUseCheck or @isParameterKey(uriParameter) or parameterName in expressions
           throw new exports.ValidationError 'while validating baseUri', null, uriParameter[0].value + ' uri parameter unused', uriParameter[0].start_mark
 
   validate_types: (typeProperty) ->
@@ -195,11 +198,11 @@ class @Validator
     traits = traitProperty.value
 
     unless Array.isArray traits
-      throw new exports.ValidationError 'while validating traits', null, 'invalid traits definition, it must be an array', traits.start_mark
+      throw new exports.ValidationError 'while validating traits', null, 'invalid traits definition, it must be an array', traitProperty.start_mark
 
     traits.forEach (trait_entry) =>
       unless Array.isArray trait_entry.value
-        throw new exports.ValidationError 'while validating traits', null, 'invalid traits definition, it must be an array', trait_entry.start_mark
+        throw new exports.ValidationError 'while validating traits', null, 'invalid traits definition, it must be an array', traitProperty.start_mark
 
       trait_entry.value.forEach (trait) =>
         @valid_traits_properties trait
@@ -215,6 +218,12 @@ class @Validator
 
     @validate_method node, true, 'trait'
 
+  canonicalizePropertyName: (propertyName, mustRemoveQuestionMark)   ->
+    if mustRemoveQuestionMark and propertyName.slice(-1) == '?'
+      return propertyName.slice(0,-1)
+    return propertyName
+
+
   valid_common_parameter_properties: (node, allowParameterKeys) ->
     return unless node.value
 
@@ -225,8 +234,9 @@ class @Validator
 
       return if allowParameterKeys && @isParameterKey(childNode)
 
-      propertyName = propertyName.slice(0,-1) if allowParameterKeys && propertyName.slice(-1) == '?'
-      switch propertyName
+      canonicalPropertyName = @canonicalizePropertyName propertyName, allowParameterKeys
+
+      switch canonicalPropertyName
         when "displayName"
           unless @isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of displayName must be a scalar', childNode[1].start_mark
@@ -238,7 +248,7 @@ class @Validator
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of default must be a scalar', childNode[1].start_mark
         when "enum"
           unless @isSequence(childNode[1])
-            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of displayName must be an array', childNode[1].start_mark
+            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of enum must be an array', childNode[1].start_mark
         when "description"
           unless @isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of description must be a scalar', childNode[1].start_mark
@@ -356,6 +366,12 @@ class @Validator
   validate_resource: (resource, allowParameterKeys = false, context = "resource") ->
     unless resource[1] and @isNullableMapping(resource[1])
       throw new exports.ValidationError 'while validating resources', null, 'resource is not a mapping', resource[1].start_mark
+    if resource[0].value
+      try
+        template = uritemplate.parse resource[0].value
+      catch err
+        throw new exports.ValidationError 'while validating resource', null, "Resource name is invalid: " + err?.options?.message, resource[0].start_mark
+
     if resource[1].value
       resource[1].value.forEach (property) =>
         unless @validate_common_properties property, allowParameterKeys
@@ -367,14 +383,22 @@ class @Validator
             @validate_method property, allowParameterKeys
           else
             key = property[0].value
-            key = key.slice(0,-1) if allowParameterKeys && key in ['uriParameters?', 'baseUriParameters?']
-            switch key
+            canonicalKey = @canonicalizePropertyName(key, allowParameterKeys)
+            valid = true
+
+            # these properties are allowed to be parametrized in resource types
+            switch canonicalKey
               when "uriParameters"
-                @validate_uri_parameters resource[0].value, property[1], allowParameterKeys
+                @validate_uri_parameters resource[0].value, property[1], allowParameterKeys, allowParameterKeys
               when "baseUriParameters"
                 unless @baseUri
                   throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
                 @validate_uri_parameters @baseUri, property[1], allowParameterKeys
+              else
+                valid = false
+
+            # these properties belong to the resource/resource type and cannot be optional
+            switch key
               when "type"
                 @validate_type_property property, allowParameterKeys
               when "usage"
@@ -383,7 +407,8 @@ class @Validator
               when "securedBy"
                 @validate_secured_by property
               else
-                throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a #{context}", property[0].start_mark
+                unless valid
+                  throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a #{context}", property[0].start_mark
 
   validate_secured_by: (property) ->
     unless @isSequence property[1]
@@ -413,8 +438,11 @@ class @Validator
       return if @validate_common_properties property, allowParameterKeys
 
       key = property[0].value
-      key = key.slice(0,-1) if allowParameterKeys && key in ['headers?', 'queryParameters?', 'body?']
-      switch key
+      canonicalKey = @canonicalizePropertyName(key, allowParameterKeys)
+      valid = true
+
+      # these properties are allowed in resources and traits
+      switch canonicalKey
         when "headers"
           @validate_headers property, allowParameterKeys
         when "queryParameters"
@@ -423,10 +451,16 @@ class @Validator
           @validate_body property, allowParameterKeys
         when "responses"
           @validate_responses property, allowParameterKeys
+        else
+          valid = false
+
+      # property securedBy in a trait/type does not get passed to the resource
+      switch key
         when "securedBy"
           @validate_secured_by property
         else
-          throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a #{context}", property[0].start_mark
+          unless valid
+            throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a #{context}", property[0].start_mark
 
   validate_responses: (responses, allowParameterKeys) ->
     if @isNull responses[1]
@@ -482,7 +516,8 @@ class @Validator
 
     if @isMapping response[1]
       response[1].value.forEach (property) =>
-        switch property[0].value
+        canonicalKey = @canonicalizePropertyName(property[0].value, allowParameterKeys)
+        switch canonicalKey
           when "body"
             @validate_body property, allowParameterKeys
           when "description"
@@ -495,7 +530,7 @@ class @Validator
             throw new exports.ValidationError 'while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
 
   isParameterKey: (property) ->
-    property[0].value.match(/<<([^>]+)>>/)
+    property[0].value.match(/<<\s*([\w-_]+)\s*>>/)
 
   validate_body: (property, allowParameterKeys, bodyMode = null) ->
     if @isNull property[1]
@@ -513,8 +548,8 @@ class @Validator
         @validate_body bodyProperty, allowParameterKeys, "implicit"
       else
         key = bodyProperty[0].value
-        key = key.slice(0,-1) if allowParameterKeys && key in ['formParameters?']
-        switch key
+        canonicalProperty = @canonicalizePropertyName( key, allowParameterKeys)
+        switch canonicalProperty
           when "formParameters"
             if bodyMode and bodyMode != "implicit"
               throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
@@ -542,8 +577,8 @@ class @Validator
       return true
     else
       key = property[0].value
-      key = key.slice(0,-1) if allowParameterKeys && key in ['displayName?', 'description?']
-      switch key
+      canonicalProperty = @canonicalizePropertyName( key, allowParameterKeys)
+      switch canonicalProperty
         when "displayName"
           unless @isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'displayName' must be a string", property[0].start_mark
@@ -556,6 +591,8 @@ class @Validator
           unless @isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
           return true
+
+      switch key
         when "is"
           unless @isSequence property[1]
             throw new exports.ValidationError 'while validating resources', null, "property 'is' must be a list", property[0].start_mark
@@ -679,7 +716,7 @@ class @Validator
     try
       template = uritemplate.parse baseUri
     catch err
-      throw new exports.ValidationError 'while validating baseUri', null, err.options.message, baseUriNode.start_mark
+      throw new exports.ValidationError 'while validating baseUri', null, err?.options?.message, baseUriNode.start_mark
     expressions = template.expressions.filter((expr) -> return 'templateText' of expr).map (expression) -> expression.templateText
     if 'version' in expressions
       return true

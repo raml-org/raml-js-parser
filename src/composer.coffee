@@ -109,9 +109,11 @@ class @Composer
   compose_scalar_node: (anchor) ->
     event = @get_event()
     tag = event.tag
+
     if tag is null or tag is '!'
       tag = @resolve nodes.ScalarNode, event.value, event.implicit
-    if event.tag == 'tag:raml.org,0.1:include'
+
+    if event.tag is '!include'
       # Compose include
       extension = event.value.split(".").pop()
 

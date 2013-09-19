@@ -1,5 +1,17 @@
 "use strict";
 
+if (typeof window === 'undefined') {
+  var raml = require('../lib/raml.js')
+  var chai = require('chai')
+    , expect = chai.expect
+    , should = chai.should();
+  var chaiAsPromised = require("chai-as-promised");
+  chai.use(chaiAsPromised);
+} else {
+  var raml = RAML.Parser;
+  chai.should();
+}
+
 function itShouldBehaveLikeAnOptionalStructureNamedParameter(initialRaml) {
   function generateRaml(snippetRaml) {
     var indentation = '  ' + initialRaml.split("\n").slice(-1)[0].match(/^(\s*)/)[1]
@@ -84,15 +96,15 @@ describe('Resource Types Validations', function() {
     });
 
     return [
-      '%YAML 1.2',
-      '%TAG ! tag:raml.org,0.2:',
+      '#%RAML 0.2',
       '---',
       'title: Test',
+      'baseUri: http://{apiSubdomain}.api.com/{someUriParameter}'
     ]
     .concat(topLevelRaml)
     .concat([
       'resourceTypes:',
-      '  - collection:',
+      '  - collection:'
     ])
     .concat(resourceTypeRaml)
     .join('\n');
@@ -120,18 +132,18 @@ describe('Resource Types Validations', function() {
         'uriParameters:',
         '  someUriParameter:',
         '    displayName: User ID',
-        '    type: integer',
+        '    type: integer'
       ]);
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
 
     it('should succeed when given a "baseUriParameters" property', function(done) {
       var definition = topLevelSnippetAndResourceTypeSnippet([
-        'baseUri: https://{apiSubdomain}.example.com/',
+        'baseUri: https://{apiSubdomain}.example.com/'
       ], [
         'baseUriParameters:',
-        '  apiSubdomain:',
-        '    enum: [ "api-content" ]',
+        '  someUriParameter:',
+        '    enum: [ "api-content" ]'
       ]);
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
@@ -141,7 +153,7 @@ describe('Resource Types Validations', function() {
         it('should succeed when given a "' + method + '" method property', function(done) {
           var definition = resourceTypeSnippet([
             method + ':',
-            '  summary: Summary of what a call to method does',
+            '  summary: Summary of what a call to method does'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
@@ -151,7 +163,7 @@ describe('Resource Types Validations', function() {
         it('should succeed when given a "description" property', function(done) {
           var definition = resourceTypeSnippet([
             'get:',
-            '  description: A description of the get, if it exists',
+            '  description: A description of the get, if it exists'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
@@ -159,7 +171,7 @@ describe('Resource Types Validations', function() {
         it('should succeed when given a "headers" property', function(done) {
           var definition = resourceTypeSnippet([
             'get:',
-            '  headers: !!null',
+            '  headers:'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
@@ -167,7 +179,7 @@ describe('Resource Types Validations', function() {
         it.skip('should succeed when given a "protocols" property', function(done) {
           var definition = resourceTypeSnippet([
             'get:',
-            '  protocols: [HTTPS]',
+            '  protocols: [HTTPS]'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
@@ -175,7 +187,7 @@ describe('Resource Types Validations', function() {
         it('should succeed when given a "queryParameters" property', function(done) {
           var definition = resourceTypeSnippet([
             'get:',
-            '  queryParameters: !!null',
+            '  queryParameters:'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
@@ -183,7 +195,7 @@ describe('Resource Types Validations', function() {
         it('should succeed when given a "body" property', function(done) {
           var definition = resourceTypeSnippet([
             'get:',
-            '  body: !!null',
+            '  body:'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
@@ -199,9 +211,9 @@ describe('Resource Types Validations', function() {
       var definition = topLevelSnippetAndResourceTypeSnippet([
         'traits:',
         '  - secured:',
-        '      description: Some description',
+        '      description: Some description'
       ], [
-        'is: [secured]',
+        'is: [secured]'
       ]);
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
@@ -211,14 +223,14 @@ describe('Resource Types Validations', function() {
     var definition = resourceTypeSnippet([
       '/resource:',
       '  get:',
-      '    summary: Get',
+      '    summary: Get'
     ]);
     raml.load(definition).should.be.rejected.with(/resource type cannot define child resources/).and.notify(done);
   });
 
   it('should succeed when given a usage property', function(done) {
     var definition = resourceTypeSnippet([
-      'usage: This resourceType should be used for any collection of items',
+      'usage: This resourceType should be used for any collection of items'
     ]);
     raml.load(definition).should.be.fulfilled.and.notify(done);
   });
@@ -240,7 +252,7 @@ describe('Resource Types Validations', function() {
           'uriParameters?:',
           '  someUriParameter:',
           '    displayName: User ID',
-          '    type: integer',
+          '    type: integer'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
@@ -251,7 +263,7 @@ describe('Resource Types Validations', function() {
             'uriParameters:',
             '  someUriParameter?:',
             '    displayName: User ID',
-            '    type: integer',
+            '    type: integer'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
@@ -259,52 +271,52 @@ describe('Resource Types Validations', function() {
         itShouldBehaveLikeAnOptionalStructureNamedParameter(
           resourceTypeSnippet([
             'uriParameters:',
-            '  someUriParameter:',
+            '  someUriParameter:'
           ])
         );
       });
     });
 
     describe('baseUriParameters', function() {
-      it.skip('should fail when given a base uri parameter that is not defined', function(done) {
+      it('should fail when given a base uri parameter that is not defined', function(done) {
         var definition = topLevelSnippetAndResourceTypeSnippet([
-          'baseUri: https://api.example.com/',
+          'baseUri: https://api.example.com/'
         ], [
           'baseUriParameters?:',
-          '  apiSubdomain:',
-          '    enum: [ "api-content" ]',
+          '  nonExistingParameter:',
+          '    enum: [ "api-content" ]'
         ]);
         raml.load(definition).should.be.rejected.with(/uri parameter unused/).and.notify(done);
       });
 
       it('should succeed when given a "baseUriParameters?" property', function(done) {
         var definition = topLevelSnippetAndResourceTypeSnippet([
-          'baseUri: https://{apiSubdomain}.example.com/',
+          'baseUri: https://{apiSubdomain}.example.com/'
         ], [
           'baseUriParameters?:',
           '  apiSubdomain:',
-          '    enum: [ "api-content" ]',
+          '    enum: [ "api-content" ]'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
 
       it('should succeed when given a base uri parameter ending with ?', function(done) {
           var definition = topLevelSnippetAndResourceTypeSnippet([
-            'baseUri: https://{apiSubdomain}.example.com/',
+            'baseUri: https://{apiSubdomain}.example.com/'
           ], [
             'baseUriParameters:',
             '  apiSubdomain?:',
-            '    enum: [ "api-content" ]',
+            '    enum: [ "api-content" ]'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
 
         itShouldBehaveLikeAnOptionalStructureNamedParameter(
           topLevelSnippetAndResourceTypeSnippet([
-            'baseUri: https://{apiSubdomain}.example.com/',
+            'baseUri: https://{apiSubdomain}.example.com/'
           ], [
             'baseUriParameters:',
-            '  apiSubdomain:',
+            '  apiSubdomain:'
           ])
         );
     });
@@ -315,7 +327,7 @@ describe('Resource Types Validations', function() {
         it('should succeed when given a "' + method + '" method property', function(done) {
           var definition = resourceTypeSnippet([
             method + ':',
-            '  summary: Summary of what a call to method does',
+            '  summary: Summary of what a call to method does'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
@@ -325,7 +337,7 @@ describe('Resource Types Validations', function() {
         it('should succeed when given a "description?" property', function(done) {
           var definition = resourceTypeSnippet([
             'get:',
-            '  description?: A description of the get, if it exists',
+            '  description?: A description of the get, if it exists'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
@@ -333,7 +345,7 @@ describe('Resource Types Validations', function() {
         it('should succeed when given a "headers?" property', function(done) {
           var definition = resourceTypeSnippet([
             'get:',
-            '  headers?: !!null',
+            '  headers?:'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
@@ -345,7 +357,7 @@ describe('Resource Types Validations', function() {
             resourceTypeSnippet([
               'get:',
               '  headers:',
-              '    some-header:',
+              '    some-header:'
             ])
           );
         });
@@ -353,7 +365,7 @@ describe('Resource Types Validations', function() {
         it.skip('should succeed when given a "protocols?" property', function(done) {
           var definition = resourceTypeSnippet([
             'get:',
-            '  protocols?: [HTTPS]',
+            '  protocols?: [HTTPS]'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
@@ -361,7 +373,7 @@ describe('Resource Types Validations', function() {
         it('should succeed when given a "queryParameters?" property', function(done) {
           var definition = resourceTypeSnippet([
             'get:',
-            '  queryParameters?: !!null',
+            '  queryParameters?:'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
@@ -371,7 +383,7 @@ describe('Resource Types Validations', function() {
             resourceTypeSnippet([
               'get:',
               '  queryParameters:',
-              '    page:',
+              '    page:'
             ])
           );
         });
@@ -379,7 +391,7 @@ describe('Resource Types Validations', function() {
         it('should succeed when given a "body?" property', function(done) {
           var definition = resourceTypeSnippet([
             'get:',
-            '  body?: !!null',
+            '  body?:'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
@@ -392,7 +404,7 @@ describe('Resource Types Validations', function() {
               '    application/x-www-form-urlencoded:',
               '      formParameters?:',
               '        someFormParameter:',
-              '          displayName: Some form parameter',
+              '          displayName: Some form parameter'
             ]);
             raml.load(definition).should.be.fulfilled.and.notify(done);
           });
@@ -404,7 +416,7 @@ describe('Resource Types Validations', function() {
               '    application/x-www-form-urlencoded:',
               '      formParameters:',
               '        someFormParameter?:',
-              '          displayName: Some form parameter',
+              '          displayName: Some form parameter'
             ]);
             raml.load(definition).should.be.fulfilled.and.notify(done);
           });
@@ -415,7 +427,7 @@ describe('Resource Types Validations', function() {
               '  body:',
               '    application/x-www-form-urlencoded:',
               '      formParameters:',
-              '        someFormParameter?:',
+              '        someFormParameter?:'
             ])
           );
         });
@@ -434,7 +446,7 @@ describe('Resource Types Validations', function() {
 
     it('should fail when given a "usage?" property', function(done) {
       var definition = resourceTypeSnippet([
-        'usage?: This resourceType should be used for any collection of items',
+        'usage?: This resourceType should be used for any collection of items'
       ]);
       raml.load(definition).should.be.rejected.with(/property: 'usage\?' is invalid in a resource type/).and.notify(done);
     });
@@ -443,16 +455,16 @@ describe('Resource Types Validations', function() {
       var definition = resourceTypeSnippet([
         '/resource?:',
         '  get:',
-        '    summary: Get',
+        '    summary: Get'
       ]);
       raml.load(definition).should.be.rejected.with(/resource type cannot define child resources/).and.notify(done);
     });
   });
 
   describe('Parameters', function() {
-    it.skip('should fail unless a parameter name includes at least one non-white-space character', function(done) {
+    it('should fail unless a parameter name includes at least one non-white-space character', function(done) {
       var definition = resourceTypeSnippet([
-        '<< >>: !!null',
+        '<< >>:'
       ]);
       // TODO Add error message
       raml.load(definition).should.be.rejected.and.notify(done);
@@ -460,7 +472,7 @@ describe('Resource Types Validations', function() {
 
     it('should allow a parameter as a top-level key', function(done) {
       var definition = resourceTypeSnippet([
-        '<<some-parameter>>: !!null',
+        '<<some-parameter>>:'
       ]);
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
@@ -469,7 +481,7 @@ describe('Resource Types Validations', function() {
       it('should allow a parameter as a key', function(done) {
         var definition = resourceTypeSnippet([
           'uriParameters:',
-          '  <<some-parameter>>: !!null',
+          '  <<some-parameter>>:'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
@@ -478,7 +490,7 @@ describe('Resource Types Validations', function() {
         var definition = resourceTypeSnippet([
           'uriParameters:',
           '  someUriParameter:',
-          '    <<some-parameter>>: !!null',
+          '    <<some-parameter>>:'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
@@ -487,21 +499,21 @@ describe('Resource Types Validations', function() {
     describe('baseUriParameters', function() {
       it('should allow a parameter as a key', function(done) {
         var definition = topLevelSnippetAndResourceTypeSnippet([
-          'baseUri: https://{apiSubdomain}.example.com/',
+          'baseUri: https://{apiSubdomain}.example.com/'
         ], [
           'baseUriParameters:',
-          '  <<some-parameter>>: !!null',
+          '  <<some-parameter>>:'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
 
       it('should allow a parameter as a key beneath a base uri parameter', function(done) {
         var definition = topLevelSnippetAndResourceTypeSnippet([
-          'baseUri: https://{apiSubdomain}.example.com/',
+          'baseUri: https://{apiSubdomain}.example.com/'
         ], [
           'baseUriParameters:',
           '  someUriParameter:',
-          '    <<some-parameter>>: !!null',
+          '    <<some-parameter>>:'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
@@ -512,7 +524,7 @@ describe('Resource Types Validations', function() {
         it('should allow a parameter as a key beneath ' + method, function(done) {
           var definition = resourceTypeSnippet([
             method + ':',
-            '  <<some-parameter>>: !!null',
+            '  <<some-parameter>>:'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
@@ -522,7 +534,7 @@ describe('Resource Types Validations', function() {
         var definition = resourceTypeSnippet([
           'get:',
           '  headers:',
-          '    <<some-parameter>>: !!null',
+          '    <<some-parameter>>:'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
@@ -532,7 +544,7 @@ describe('Resource Types Validations', function() {
           'get:',
           '  headers:',
           '    some-header:',
-          '      <<some-parameter>>: !!null',
+          '      <<some-parameter>>:'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
@@ -541,7 +553,7 @@ describe('Resource Types Validations', function() {
         var definition = resourceTypeSnippet([
           'get:',
           '  queryParameters:',
-          '    <<some-parameter>>: !!null',
+          '    <<some-parameter>>:'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
@@ -551,7 +563,7 @@ describe('Resource Types Validations', function() {
           'get:',
           '  queryParameters:',
           '    some-query-parameter:',
-          '      <<some-parameter>>: !!null',
+          '      <<some-parameter>>:'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
@@ -560,20 +572,13 @@ describe('Resource Types Validations', function() {
         var definition = resourceTypeSnippet([
           'get:',
           '  body:',
-          '    <<some-parameter>>: !!null',
+          '    <<some-parameter>>:'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
     });
   });
 });
-
-
-
-
-
-
-
 
 describe('Trait Validations', function() {
   var topLevelSnippetAndTraitSnippet = function(topLevelRaml, traitRaml) {
@@ -583,15 +588,14 @@ describe('Trait Validations', function() {
     });
 
     return [
-      '%YAML 1.2',
-      '%TAG ! tag:raml.org,0.2:',
+      '#%RAML 0.2',
       '---',
-      'title: Test',
+      'title: Test'
     ]
     .concat(topLevelRaml)
     .concat([
       'traits:',
-      '  - secured:',
+      '  - secured:'
     ])
     .concat(traitRaml)
     .join('\n');
@@ -608,20 +612,18 @@ describe('Trait Validations', function() {
 
   it('should fail when given an "is" property', function(done) {
     var definition = traitSnippet([ 'is: [someTrait]']);
-    console.log(definition)
     raml.load(definition).should.be.rejected.with(/property: 'is' is invalid in a trait/).and.notify(done);
   });
 
   it('should fail when given a "type" property', function(done) {
     var definition = traitSnippet([ 'type: [someType]']);
-    console.log(definition)
     raml.load(definition).should.be.rejected.with(/property: 'type' is invalid in a trait/).and.notify(done);
   });
 
   describe('Optional Properties', function() {
     it('should fail when given a "usage?" property', function(done) {
       var definition = traitSnippet([
-        'usage?: This trait should be used for ...',
+        'usage?: This trait should be used for ...'
       ]);
       raml.load(definition).should.be.rejected.with(/property: 'usage\?' is invalid in a trait/).and.notify(done);
     });
@@ -639,14 +641,14 @@ describe('Trait Validations', function() {
     describe('method properties', function() {
       it('should succeed when given a "description?" property', function(done) {
         var definition = traitSnippet([
-          'description?: A description of the get, if it exists',
+          'description?: A description of the get, if it exists'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
 
       it('should succeed when given a "headers?" property', function(done) {
         var definition = traitSnippet([
-          'headers?: !!null',
+          'headers?:'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
@@ -657,21 +659,21 @@ describe('Trait Validations', function() {
         itShouldBehaveLikeAnOptionalStructureNamedParameter(
           traitSnippet([
             'headers:',
-            '  some-header:',
+            '  some-header:'
           ])
         );
       });
 
       it.skip('should succeed when given a "protocols?" property', function(done) {
         var definition = traitSnippet([
-          'protocols?: [HTTPS]',
+          'protocols?: [HTTPS]'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
 
       it('should succeed when given a "queryParameters?" property', function(done) {
         var definition = traitSnippet([
-          'queryParameters?: !!null',
+          'queryParameters?:'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
@@ -680,14 +682,14 @@ describe('Trait Validations', function() {
         itShouldBehaveLikeAnOptionalStructureNamedParameter(
           traitSnippet([
             'queryParameters:',
-            '  page:',
+            '  page:'
           ])
         );
       });
 
       it('should succeed when given a "body?" property', function(done) {
         var definition = traitSnippet([
-          'body?: !!null',
+          'body?:'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
       });
@@ -699,7 +701,7 @@ describe('Trait Validations', function() {
               '  application/x-www-form-urlencoded:',
               '    formParameters?:',
               '      someFormParameter:',
-              '        displayName: Some form parameter',
+              '        displayName: Some form parameter'
             ]);
             raml.load(definition).should.be.fulfilled.and.notify(done);
           });
@@ -710,7 +712,7 @@ describe('Trait Validations', function() {
               '  application/x-www-form-urlencoded:',
               '    formParameters:',
               '      someFormParameter?:',
-              '        displayName: Some form parameter',
+              '        displayName: Some form parameter'
             ]);
             raml.load(definition).should.be.fulfilled.and.notify(done);
           });
@@ -720,7 +722,7 @@ describe('Trait Validations', function() {
               'body:',
               '  application/x-www-form-urlencoded:',
               '    formParameters:',
-              '      someFormParameter?:',
+              '      someFormParameter?:'
             ])
           );
         });
@@ -730,7 +732,7 @@ describe('Trait Validations', function() {
   describe('Parameters', function() {
     it('should allow a parameter as a top-level key', function(done) {
       var definition = traitSnippet([
-        '<<some-parameter>>: !!null',
+        '<<some-parameter>>:'
       ]);
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
@@ -738,7 +740,7 @@ describe('Trait Validations', function() {
     it('should allow a parameter as a key beneath "headers"', function(done) {
       var definition = traitSnippet([
         'headers:',
-        '  <<some-parameter>>: !!null',
+        '  <<some-parameter>>:'
       ]);
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
@@ -747,7 +749,7 @@ describe('Trait Validations', function() {
       var definition = traitSnippet([
         'headers:',
         '  some-header:',
-        '    <<some-parameter>>: !!null',
+        '    <<some-parameter>>:'
       ]);
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
@@ -755,7 +757,7 @@ describe('Trait Validations', function() {
     it('should allow a parameter as a key beneath "queryParameters"', function(done) {
       var definition = traitSnippet([
         'queryParameters:',
-        '  <<some-parameter>>: !!null',
+        '  <<some-parameter>>:'
       ]);
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
@@ -764,7 +766,7 @@ describe('Trait Validations', function() {
       var definition = traitSnippet([
         'queryParameters:',
         '  some-query-parameter:',
-        '    <<some-parameter>>: !!null',
+        '    <<some-parameter>>:'
       ]);
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
@@ -772,7 +774,7 @@ describe('Trait Validations', function() {
     it('should allow a parameter as a key beneath "body"', function(done) {
       var definition = traitSnippet([
         'body:',
-        '  <<some-parameter>>: !!null',
+        '  <<some-parameter>>:'
       ]);
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
