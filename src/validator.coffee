@@ -157,9 +157,9 @@ class @Validator
     if @has_property node, "baseUriParameters"
       unless @isScalar baseUriProperty
         throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', node.start_mark
-      @validate_uri_parameters @baseUri, @get_property(node, "baseUriParameters"), false, [ "version" ]
+      @validate_uri_parameters @baseUri, @get_property(node, "baseUriParameters"), false, false, [ "version" ]
 
-  validate_uri_parameters: (uri, uriProperty, allowParameterKeys, reservedNames = []) ->
+  validate_uri_parameters: (uri, uriProperty, allowParameterKeys, skipParameterUseCheck, reservedNames = []) ->
     try
       template = uritemplate.parse uri
     catch err
@@ -168,13 +168,15 @@ class @Validator
 
     if typeof uriProperty.value is "object"
       uriProperty.value.forEach (uriParameter) =>
-        if uriParameter[0].value in reservedNames
-          throw new exports.ValidationError 'while validating baseUri', null, 'version parameter not allowed here', uriParameter[0].start_mark
+        parameterName = @canonicalizePropertyName(uriParameter[0].value, allowParameterKeys)
+
+        if parameterName in reservedNames
+          throw new exports.ValidationError 'while validating baseUri', null, uriParameter[0].value + ' parameter not allowed here', uriParameter[0].start_mark
         unless @isNullableMapping(uriParameter[1])
           throw new exports.ValidationError 'while validating baseUri', null, 'parameter must be a mapping', uriParameter[0].start_mark
         unless @isNull(uriParameter[1])
           @valid_common_parameter_properties uriParameter[1], allowParameterKeys
-        unless allowParameterKeys || uriParameter[0].value in expressions
+        unless skipParameterUseCheck or @isParameterKey(uriParameter) or parameterName in expressions
           throw new exports.ValidationError 'while validating baseUri', null, uriParameter[0].value + ' uri parameter unused', uriParameter[0].start_mark
 
   validate_types: (typeProperty) ->
@@ -381,7 +383,7 @@ class @Validator
             # these properties are allowed to be parametrized in resource types
             switch canonicalKey
               when "uriParameters"
-                @validate_uri_parameters resource[0].value, property[1], allowParameterKeys
+                @validate_uri_parameters resource[0].value, property[1], allowParameterKeys, allowParameterKeys
               when "baseUriParameters"
                 unless @baseUri
                   throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
@@ -522,7 +524,7 @@ class @Validator
             throw new exports.ValidationError 'while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
 
   isParameterKey: (property) ->
-    property[0].value.match(/<<([^>]+)>>/)
+    property[0].value.match(/<<\s*([\w-_]+)\s*>>/)
 
   validate_body: (property, allowParameterKeys, bodyMode = null) ->
     if @isNull property[1]

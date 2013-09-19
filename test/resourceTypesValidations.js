@@ -87,7 +87,8 @@ describe('Resource Types Validations', function() {
       '%YAML 1.2',
       '%TAG ! tag:raml.org,0.2:',
       '---',
-      'title: Test'
+      'title: Test',
+      'baseUri: http://{apiSubdomain}.api.com/{someUriParameter}'
     ]
     .concat(topLevelRaml)
     .concat([
@@ -130,7 +131,7 @@ describe('Resource Types Validations', function() {
         'baseUri: https://{apiSubdomain}.example.com/'
       ], [
         'baseUriParameters:',
-        '  apiSubdomain:',
+        '  someUriParameter:',
         '    enum: [ "api-content" ]'
       ]);
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -271,7 +272,7 @@ describe('Resource Types Validations', function() {
           'baseUri: https://api.example.com/'
         ], [
           'baseUriParameters?:',
-          '  apiSubdomain:',
+          '  nonExistingParameter:',
           '    enum: [ "api-content" ]'
         ]);
         raml.load(definition).should.be.rejected.with(/uri parameter unused/).and.notify(done);
