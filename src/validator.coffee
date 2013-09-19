@@ -310,7 +310,7 @@ class @Validator
               throw new exports.ValidationError 'while validating root properties', null, 'documentation must be an array', property[0].start_mark
             @validate_documentation property[1]
           when "baseUriParameters"
-            @is_map node
+            @is_mapping node
           when "resourceTypes"
             @validate_types property[1]
           when "securedBy"
@@ -385,6 +385,7 @@ class @Validator
               when "baseUriParameters"
                 unless @baseUri
                   throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
+                console.log "PAPAPAPAPAPAPAPAPA"
                 @validate_uri_parameters @baseUri, property[1], allowParameterKeys
               else
                 valid = false
