@@ -146,9 +146,9 @@ class @Validator
     if @has_property node, "baseUriParameters"
       if not @has_property node, "baseUri"
         throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', node.start_mark
-      @validate_uri_parameters @baseUri, @get_property(node, "baseUriParameters"), [ "version" ]
+      @validate_uri_parameters @baseUri, @get_property(node, "baseUriParameters"), false, [ "version" ]
 
-  validate_uri_parameters: (uri, uriProperty, reservedNames = []) ->
+  validate_uri_parameters: (uri, uriProperty, allowParameterKeys, reservedNames = []) ->
     try
       template = uritemplate.parse uri
     catch err
@@ -158,8 +158,8 @@ class @Validator
       uriProperty.value.forEach (uriParameter) =>
         if uriParameter[0].value in reservedNames
           throw new exports.ValidationError 'while validating baseUri', null, 'version parameter not allowed here', uriParameter[0].start_mark
-        @valid_common_parameter_properties uriParameter[1]
-        unless uriParameter[0].value in expressions
+        @valid_common_parameter_properties uriParameter[1], allowParameterKeys
+        unless allowParameterKeys || uriParameter[0].value in expressions
           throw new exports.ValidationError 'while validating baseUri', null, uriParameter[0].value + ' uri parameter unused', uriParameter[0].start_mark
 
   validate_types: (typeProperty) ->
@@ -175,25 +175,32 @@ class @Validator
       type_entry.value.forEach (type) =>
         unless @isMapping type[1]
             throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
-        @validate_resource type, true
+        @validate_resource type, true, 'resource type'
 
-  validate_traits: (node) ->
-    traitsList = node[1].value
-    unless typeof traitsList is "object"
-      throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits definition, it must be an array', traitsList.start_mark
-    traitsList.forEach (trait_entry) =>
-      unless trait_entry and trait_entry.value
-        throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits definition, it must be an array', trait_entry.start_mark
+  validate_traits: (traitProperty) ->
+    traits = traitProperty.value
 
-  valid_traits_properties: (node) ->  
-    @check_is_map node
-    return unless node.value
+    unless Array.isArray traits
+      throw new exports.ValidationError 'while validating traits', null, 'invalid traits definition, it must be an array', traits.start_mark
 
-    invalid = node.value.filter (childNode) ->
+    traits.forEach (trait_entry) =>
+      unless Array.isArray trait_entry.value
+        throw new exports.ValidationError 'while validating traits', null, 'invalid traits definition, it must be an array', trait_entry.start_mark
+
+      trait_entry.value.forEach (trait) =>
+        @valid_traits_properties trait
+
+  valid_traits_properties: (node) ->
+    @check_is_map node[1]
+    return unless node[1].value
+
+    invalid = node[1].value.filter (childNode) ->
       return (  childNode[0].value is "is" or
                 childNode[0].value is "type" )
     if invalid.length > 0
-      throw new exports.ValidationError 'while validating trait properties', null, "invalid property '" + invalid[0][0].value + "'", invalid[0][0].start_mark
+      throw new exports.ValidationError 'while validating trait properties', null, "property: '" + invalid[0][0].value + "' is invalid in a trait", invalid[0][0].start_mark
+
+    @validate_method node, true, 'trait'
 
   valid_common_parameter_properties: (node, allowParameterKeys) ->
     @check_is_map node
@@ -204,6 +211,8 @@ class @Validator
       propertyName = childNode[0].value
       propertyValue = childNode[1].value
       booleanValues = ["true", "false"]
+
+      return if allowParameterKeys && @isParameterKey(childNode)
 
       return if @handleOptionals(allowParameterKeys, propertyName,
         "displayName": =>
@@ -277,7 +286,7 @@ class @Validator
             unless @isNullableString property[1]
               throw new exports.ValidationError 'while validating root properties', null, 'version must be a string', property[0].start_mark
           when "traits"
-            @validate_traits property
+            @validate_traits property[1]
           when "documentation"
             unless @isSequence property[1]
               throw new exports.ValidationError 'while validating root properties', null, 'documentation must be an array', property[0].start_mark
@@ -323,7 +332,7 @@ class @Validator
     string = string.replace('$', '\\??$') if allowParameterKeys
     return new RegExp(string)
 
-  validate_resource: (resource, allowParameterKeys = false) ->
+  validate_resource: (resource, allowParameterKeys = false, context = "resource") ->
     unless resource[1] and @isNullableMapping(resource[1])
       throw new exports.ValidationError 'while validating resources', null, 'resource is not a mapping', resource[1].start_mark
     if resource[1].value
@@ -335,21 +344,21 @@ class @Validator
             @validate_resource property, allowParameterKeys
           else if property[0].value.match(@resourceTypeAwareRegExp('^(get|post|put|delete|head|patch|options)$', allowParameterKeys))
             @validate_method property, allowParameterKeys
+          else if property[0].value.match(@resourceTypeAwareRegExp('^uriParameters$', allowParameterKeys))
+            @validate_uri_parameters resource[0].value, property[1], allowParameterKeys
+          else if property[0].value.match(@resourceTypeAwareRegExp('^baseUriParameters$', allowParameterKeys))
+            unless @baseUri
+              throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
+            @validate_uri_parameters @baseUri, property[1], allowParameterKeys
           else
             switch property[0].value
               when "type"
                 @validate_type_property property, allowParameterKeys
-              when  "uriParameters"
-                @validate_uri_parameters resource[0].value, property[1]
-              when "baseUriParameters"
-                unless @baseUri
-                  throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
-                @validate_uri_parameters @baseUri, property[1]
               when "usage"
                 unless allowParameterKeys
                   throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a resource", property[0].start_mark
               else
-                throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a resource#{if allowParameterKeys then ' type' else ''}", property[0].start_mark
+                throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a #{context}", property[0].start_mark
 
   validate_type_property: (property, allowParameterKeys) ->
     typeName = @key_or_value property[1]
@@ -359,15 +368,14 @@ class @Validator
       throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + typeName, property[1].start_mark
 
   handleOptionals: (allowParameterKeys, key, handlers) ->
-    for handlerKey, handler of handlers
-      if allowParameterKeys && key.slice(-1) == "?"
-        key = key.slice(0,-1)
-      if key.match(handlerKey)
-        handler()
-        return true
+    if allowParameterKeys && key.slice(-1) == "?"
+      key = key.slice(0,-1)
+    if handlers[key]
+      handlers[key]()
+      return true
     return false
 
-  validate_method: (method, allowParameterKeys) ->
+  validate_method: (method, allowParameterKeys, context = 'method') ->
     if @isNull method[1]
       return
     unless @isMapping method[1]
@@ -398,7 +406,7 @@ class @Validator
               unless @get_security_scheme securitySchemeName
                 throw new exports.ValidationError 'while validating securityScheme consumption', null, 'there is no securityScheme named ' + securitySchemeName, secScheme.start_mark
         else
-          throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a method", property[0].start_mark
+          throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a #{context}", property[0].start_mark
 
   validate_responses: (responses, allowParameterKeys) ->
     if @isNull responses[1]
@@ -464,13 +472,16 @@ class @Validator
         else
           throw new exports.ValidationError 'while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
 
+  isParameterKey: (property) ->
+    property[0].value.match(/<<([^>]+)>>/)
+
   validate_body: (property, allowParameterKeys, bodyMode = null) ->
     if @isNull property[1]
       return
     unless @isMapping property[1]
       throw new exports.ValidationError 'while validating body', null, "property: body specification must be a mapping", property[0].start_mark
     property[1].value?.forEach (bodyProperty) =>
-      if bodyProperty[0].value.match(/<<([^>]+)>>/)
+      if @isParameterKey(bodyProperty)
         unless allowParameterKeys
           throw new exports.ValidationError 'while validating body', null, "property '" + bodyProperty[0].value + "' is invalid in a resource", bodyProperty[0].start_mark
       else if bodyProperty[0].value.match(/^[^\/]+\/[^\/]+$/)
@@ -501,7 +512,7 @@ class @Validator
             throw new exports.ValidationError 'while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark
 
   validate_common_properties: (property, allowParameterKeys) ->
-    if property[0].value.match(/<<([^>]+)>>/)
+    if @isParameterKey(property)
       unless allowParameterKeys
         throw new exports.ValidationError 'while validating resources', null, "property '" + property[0].value + "' is invalid in a resource", property[0].start_mark
       return true
