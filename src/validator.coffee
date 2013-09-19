@@ -248,7 +248,7 @@ class @Validator
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of default must be a scalar', childNode[1].start_mark
         when "enum"
           unless @isSequence(childNode[1])
-            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of displayName must be an array', childNode[1].start_mark
+            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of enum must be an array', childNode[1].start_mark
         when "description"
           unless @isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of description must be a scalar', childNode[1].start_mark
