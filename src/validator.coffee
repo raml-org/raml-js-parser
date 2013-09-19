@@ -219,7 +219,7 @@ class @Validator
     @validate_method node, true, 'trait'
 
   canonicalizePropertyName: (propertyName, mustRemoveQuestionMark)   ->
-    if mustRemoveQuestionMark && propertyName.slice(-1) == '?'
+    if mustRemoveQuestionMark and propertyName.slice(-1) == '?'
       return propertyName.slice(0,-1)
     return propertyName
 
