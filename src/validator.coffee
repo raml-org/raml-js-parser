@@ -197,7 +197,7 @@ class @Validator
       throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits definition, it must be an array', traitsList.start_mark
     traitsList.forEach (trait_entry) =>
       unless trait_entry and trait_entry.value
-        throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits definition, it must be an array', trait_entry.start_mark
+        throw new exports.ValidationError 'while validating trait properties', null, 'invalid traits definition, it must be an array', traitsList.start_mark
 
   valid_traits_properties: (node) ->  
     return unless node.value
