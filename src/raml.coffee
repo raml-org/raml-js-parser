@@ -17,14 +17,14 @@ class @FileError extends @errors.MarkedYAMLError
 Scan a RAML stream and produce scanning tokens.
 ###
 @scan = (stream, location) ->
-  loader = new exports.loader.Loader stream, location
+  loader = new exports.loader.Loader stream, location, false
   loader.get_token() while loader.check_token()
 
 ###
 Parse a RAML stream and produce parsing events.
 ###
 @parse = (stream, location) ->
-  loader = new exports.loader.Loader stream, location
+  loader = new exports.loader.Loader stream, location, false
   loader.get_event() while loader.check_event()
 
 ###
@@ -32,7 +32,7 @@ Parse the first RAML document in a stream and produce the corresponding
 representation tree.
 ###
 @compose = (stream, validate = true, apply = true, join = true, location) ->
-  loader = new exports.loader.Loader stream, location
+  loader = new exports.loader.Loader stream, location, validate
   return loader.get_single_node(validate, apply, join)
 
 ###
@@ -40,7 +40,7 @@ Parse the first RAML document in a stream and produce the corresponding
 Javascript object.
 ###
 @load = (stream, validate = true, location) ->
-  loader = new exports.loader.Loader stream, location
+  loader = new exports.loader.Loader stream, location, validate
   deferred = new @q.defer
   try
     result = loader.get_single_data()
@@ -54,7 +54,7 @@ Parse the first RAML document in a stream and produce a list of
   all the absolute URIs for all resources
 ###
 @resources = (stream, validate = true, location) ->
-  loader = new exports.loader.Loader stream, location
+  loader = new exports.loader.Loader stream, location, validate
   deferred = new @q.defer
   try
     result = loader.resources()

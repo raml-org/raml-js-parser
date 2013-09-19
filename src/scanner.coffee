@@ -45,12 +45,17 @@ class @Scanner
     'u': 4
     'U': 8
 
+  RAML_VERSION = '#%RAML 0.2'
+
   ###
   Initialise the Scanner
   ###
-  constructor: ->
+  constructor: (validateHeader = false) ->
     # Have we reached the end of the stream?
     @done = no
+
+    # Has the RAML header been found?
+    @ramlHeaderFound = !validateHeader
 
     # How many unclosed '{' or '[' have been seen. '0' implies block context.
     @flow_level = 0
@@ -683,8 +688,27 @@ class @Scanner
     while not found
       @forward() while @peek() == ' '
 
+      comment = ""
+
       if @peek() == '#'
-        @forward() while @peek() not in C_LB + '\x00'
+#        @forward() while @peek() not in C_LB + '\x00'
+        while @peek() not in C_LB + '\x00'
+          unless @ramlHeaderFound
+            comment += @peek()
+          @forward()
+
+      # thefirst bytes in a RAML file MUST be the RAML version
+      unless @ramlHeaderFound
+        if comment
+          if @index - comment.length == 0
+            if comment is RAML_VERSION
+              @ramlHeaderFound = true
+            else
+              throw new exports.ScannerError 'version validation ', null, "Unsupported RAML version: '" + comment + "'", @get_mark()
+          else
+            throw new exports.ScannerError 'version validation ', null, "the first line must be: '" + RAML_VERSION + "'", @get_mark()
+        else if @index > 0
+          throw new exports.ScannerError 'version validation', null, "the first line must be: '" + RAML_VERSION + "'", @get_mark()
 
       if @scan_line_break()
         @allow_simple_key = yes if @flow_level is 0

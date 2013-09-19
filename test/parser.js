@@ -244,7 +244,7 @@ describe('Parser', function() {
     });
     it('should succeed on including another YAML file mid-document', function(done) {
       var definition = [
-//        '#%RAML 0.2',
+        '#%RAML 0.2',
         '---',
         'title: Test',
         'traits:',
@@ -1354,6 +1354,7 @@ describe('Parser', function() {
   describe('Traits at resource level', function() {
     it('should succeed when applying traits across !include boundaries', function(done) {
       var definition = [
+          '#%RAML 0.2',
           '---',
           'title: Test',
           'traits:',
@@ -2361,6 +2362,7 @@ describe('Parser', function() {
   describe('Traits at method level', function() {
     it('should succeed when applying traits across !include boundaries', function(done) {
       var definition = [
+        '#%RAML 0.2',
         '---',
         'title: Test',
         'traits:',

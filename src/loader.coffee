@@ -16,8 +16,9 @@ securitySchemes = require './securitySchemes'
   components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Schemas, Joiner, Constructor, SecuritySchemes]
   util.extend.apply util, [@::].concat (component.prototype for component in components)
 
-  constructor: (stream, location) ->
+  constructor: (stream, location, validate) ->
     components[0].call @, stream, location
-    component.call @ for component in components[1..]
+    components[1].call @, validate
+    component.call @ for component in components[2..]
 
 @Loader = @make_loader()

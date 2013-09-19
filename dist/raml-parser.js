@@ -3082,6 +3082,216 @@ window.RAML = {}
 
 window.RAML.Parser = require('../lib/raml')
 },{"../lib/raml":11}],12:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, events, nodes, raml, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  events = require('./events');
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  raml = require('./raml');
+
+  this.ComposerError = (function(_super) {
+    __extends(ComposerError, _super);
+
+    function ComposerError() {
+      _ref = ComposerError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return ComposerError;
+
+  })(MarkedYAMLError);
+
+  this.Composer = (function() {
+    function Composer() {
+      this.anchors = {};
+    }
+
+    Composer.prototype.check_node = function() {
+      if (this.check_event(events.StreamStartEvent)) {
+        this.get_event();
+      }
+      return !this.check_event(events.StreamEndEvent);
+    };
+
+    /*
+    Get the root node of the next document.
+    */
+
+
+    Composer.prototype.get_node = function() {
+      if (!this.check_event(events.StreamEndEvent)) {
+        return this.compose_document();
+      }
+    };
+
+    Composer.prototype.get_single_node = function(validate, apply, join) {
+      var document, event;
+      if (validate == null) {
+        validate = true;
+      }
+      if (apply == null) {
+        apply = true;
+      }
+      if (join == null) {
+        join = true;
+      }
+      this.get_event();
+      document = null;
+      if (!this.check_event(events.StreamEndEvent)) {
+        document = this.compose_document();
+      }
+      if (!this.check_event(events.StreamEndEvent)) {
+        event = this.get_event();
+        throw new exports.ComposerError('expected a single document in the stream', document.start_mark, 'but found another document', event.start_mark);
+      }
+      this.get_event();
+      if (validate || apply) {
+        this.load_schemas(document);
+        this.load_traits(document);
+        this.load_types(document);
+        this.load_security_schemes(document);
+      }
+      if (validate) {
+        this.validate_document(document);
+      }
+      if (apply) {
+        this.apply_types(document);
+        this.apply_traits(document);
+        this.apply_schemas(document);
+      }
+      if (join) {
+        this.join_resources(document);
+      }
+      return document;
+    };
+
+    Composer.prototype.compose_document = function() {
+      var node;
+      this.get_event();
+      node = this.compose_node();
+      this.get_event();
+      this.anchors = {};
+      return node;
+    };
+
+    Composer.prototype.compose_node = function(parent, index) {
+      var anchor, event, node;
+      if (this.check_event(events.AliasEvent)) {
+        event = this.get_event();
+        anchor = event.anchor;
+        if (!(anchor in this.anchors)) {
+          throw new exports.ComposerError(null, null, "found undefined alias " + anchor, event.start_mark);
+        }
+        return this.anchors[anchor];
+      }
+      event = this.peek_event();
+      anchor = event.anchor;
+      if (anchor !== null && anchor in this.anchors) {
+        throw new exports.ComposerError("found duplicate anchor " + anchor + "; first occurence", this.anchors[anchor].start_mark, 'second occurrence', event.start_mark);
+      }
+      this.descend_resolver(parent, index);
+      if (this.check_event(events.ScalarEvent)) {
+        node = this.compose_scalar_node(anchor);
+      } else if (this.check_event(events.SequenceStartEvent)) {
+        node = this.compose_sequence_node(anchor);
+      } else if (this.check_event(events.MappingStartEvent)) {
+        node = this.compose_mapping_node(anchor);
+      }
+      this.ascend_resolver();
+      return node;
+    };
+
+    Composer.prototype.compose_fixed_scalar_node = function(anchor, value) {
+      var event, node;
+      event = this.get_event();
+      node = new nodes.ScalarNode('tag:yaml.org,2002:str', value, event.start_mark, event.end_mark, event.style);
+      if (anchor !== null) {
+        this.anchors[anchor] = node;
+      }
+      return node;
+    };
+
+    Composer.prototype.compose_scalar_node = function(anchor) {
+      var event, extension, node, tag;
+      event = this.get_event();
+      tag = event.tag;
+      if (tag === null || tag === '!') {
+        tag = this.resolve(nodes.ScalarNode, event.value, event.implicit);
+      }
+      if (event.tag === '!include') {
+        extension = event.value.split(".").pop();
+        if (this.src != null) {
+          event.value = require('url').resolve(this.src, event.value);
+        }
+        if (extension === 'yaml' || extension === 'yml' || extension === 'raml') {
+          return raml.composeFile(event.value, false, false, false);
+        } else {
+          node = new nodes.ScalarNode('tag:yaml.org,2002:str', raml.readFile(event.value), event.start_mark, event.end_mark, event.style);
+        }
+      } else {
+        node = new nodes.ScalarNode(tag, event.value, event.start_mark, event.end_mark, event.style);
+      }
+      if (anchor !== null) {
+        this.anchors[anchor] = node;
+      }
+      return node;
+    };
+
+    Composer.prototype.compose_sequence_node = function(anchor) {
+      var end_event, index, node, start_event, tag;
+      start_event = this.get_event();
+      tag = start_event.tag;
+      if (tag === null || tag === '!') {
+        tag = this.resolve(nodes.SequenceNode, null, start_event.implicit);
+      }
+      node = new nodes.SequenceNode(tag, [], start_event.start_mark, null, start_event.flow_style);
+      if (anchor !== null) {
+        this.anchors[anchor] = node;
+      }
+      index = 0;
+      while (!this.check_event(events.SequenceEndEvent)) {
+        node.value.push(this.compose_node(node, index));
+        index++;
+      }
+      end_event = this.get_event();
+      node.end_mark = end_event.end_mark;
+      return node;
+    };
+
+    Composer.prototype.compose_mapping_node = function(anchor) {
+      var end_event, item_key, item_value, node, start_event, tag;
+      start_event = this.get_event();
+      tag = start_event.tag;
+      if (tag === null || tag === '!') {
+        tag = this.resolve(nodes.MappingNode, null, start_event.implicit);
+      }
+      node = new nodes.MappingNode(tag, [], start_event.start_mark, null, start_event.flow_style);
+      if (anchor !== null) {
+        this.anchors[anchor] = node;
+      }
+      while (!this.check_event(events.MappingEndEvent)) {
+        item_key = this.compose_node(node);
+        item_value = this.compose_node(node, item_key);
+        node.value.push([item_key, item_value]);
+      }
+      end_event = this.get_event();
+      node.end_mark = end_event.end_mark;
+      return node;
+    };
+
+    return Composer;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./events":2,"./nodes":13,"./raml":11,"url":7}],14:[function(require,module,exports){
 require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{1:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
@@ -6946,7 +7156,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 },{}]},{},[])
 ;;module.exports=require("buffer-browserify")
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 (function(Buffer){(function() {
   var MarkedYAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -7074,30 +7284,18 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
           }
         }
         if (constructor == null) {
-          console.log("antes");
-          console.log(node.tag);
-          console.log("despues");
-          if (node.tag === "tag:raml.org,0.1:include") {
-            throw new exports.ConstructorError(null, null, "LALALALALALA", null);
-          }
           if (null in this.yaml_multi_constructors) {
-            console.log("1");
             tag_suffix = node.tag;
             constructor = this.yaml_multi_constructors[null];
           } else if (null in this.yaml_constructors) {
-            console.log("2");
             constructor = this.yaml_constructors[null];
           } else if (node instanceof nodes.ScalarNode) {
-            console.log("3");
             constructor = this.construct_scalar;
           } else if (node instanceof nodes.SequenceNode) {
-            console.log("4");
             constructor = this.construct_sequence;
           } else if (node instanceof nodes.MappingNode) {
-            console.log("5");
             constructor = this.construct_mapping;
           }
-          console.log("6");
         }
       }
       object = constructor.call(this, tag_suffix != null ? tag_suffix : node, node);
@@ -7569,7 +7767,109 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 }).call(this);
 
 })(require("__browserify_buffer").Buffer)
-},{"./errors":1,"./nodes":14,"./util":4,"__browserify_buffer":12}],15:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4,"__browserify_buffer":14}],16:[function(require,module,exports){
+(function() {
+  var composer, construct, joiner, parser, reader, resolver, scanner, schemas, securitySchemes, traits, types, util, validator;
+
+  util = require('./util');
+
+  reader = require('./reader');
+
+  scanner = require('./scanner');
+
+  parser = require('./parser');
+
+  composer = require('./composer');
+
+  resolver = require('./resolver');
+
+  construct = require('./construct');
+
+  validator = require('./validator');
+
+  joiner = require('./joiner');
+
+  traits = require('./traits');
+
+  types = require('./resourceTypes');
+
+  schemas = require('./schemas');
+
+  securitySchemes = require('./securitySchemes');
+
+  this.make_loader = function(Reader, Scanner, Parser, Composer, Resolver, Validator, ResourceTypes, Traits, Schemas, Joiner, SecuritySchemes, Constructor) {
+    if (Reader == null) {
+      Reader = reader.Reader;
+    }
+    if (Scanner == null) {
+      Scanner = scanner.Scanner;
+    }
+    if (Parser == null) {
+      Parser = parser.Parser;
+    }
+    if (Composer == null) {
+      Composer = composer.Composer;
+    }
+    if (Resolver == null) {
+      Resolver = resolver.Resolver;
+    }
+    if (Validator == null) {
+      Validator = validator.Validator;
+    }
+    if (ResourceTypes == null) {
+      ResourceTypes = types.ResourceTypes;
+    }
+    if (Traits == null) {
+      Traits = traits.Traits;
+    }
+    if (Schemas == null) {
+      Schemas = schemas.Schemas;
+    }
+    if (Joiner == null) {
+      Joiner = joiner.Joiner;
+    }
+    if (SecuritySchemes == null) {
+      SecuritySchemes = securitySchemes.SecuritySchemes;
+    }
+    if (Constructor == null) {
+      Constructor = construct.Constructor;
+    }
+    return (function() {
+      var component, components;
+
+      components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Schemas, Joiner, Constructor, SecuritySchemes];
+
+      util.extend.apply(util, [_Class.prototype].concat((function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = components.length; _i < _len; _i++) {
+          component = components[_i];
+          _results.push(component.prototype);
+        }
+        return _results;
+      })()));
+
+      function _Class(stream, location, validate) {
+        var _i, _len, _ref;
+        components[0].call(this, stream, location);
+        components[1].call(this, validate);
+        _ref = components.slice(2);
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          component = _ref[_i];
+          component.call(this);
+        }
+      }
+
+      return _Class;
+
+    })();
+  };
+
+  this.Loader = this.make_loader();
+
+}).call(this);
+
+},{"./composer":12,"./construct":15,"./joiner":22,"./parser":19,"./reader":17,"./resolver":20,"./resourceTypes":24,"./scanner":18,"./schemas":25,"./securitySchemes":26,"./traits":23,"./util":4,"./validator":21}],22:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -7678,108 +7978,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":14}],16:[function(require,module,exports){
-(function() {
-  var composer, construct, joiner, parser, reader, resolver, scanner, schemas, securitySchemes, traits, types, util, validator;
-
-  util = require('./util');
-
-  reader = require('./reader');
-
-  scanner = require('./scanner');
-
-  parser = require('./parser');
-
-  composer = require('./composer');
-
-  resolver = require('./resolver');
-
-  construct = require('./construct');
-
-  validator = require('./validator');
-
-  joiner = require('./joiner');
-
-  traits = require('./traits');
-
-  types = require('./resourceTypes');
-
-  schemas = require('./schemas');
-
-  securitySchemes = require('./securitySchemes');
-
-  this.make_loader = function(Reader, Scanner, Parser, Composer, Resolver, Validator, ResourceTypes, Traits, Schemas, Joiner, SecuritySchemes, Constructor) {
-    if (Reader == null) {
-      Reader = reader.Reader;
-    }
-    if (Scanner == null) {
-      Scanner = scanner.Scanner;
-    }
-    if (Parser == null) {
-      Parser = parser.Parser;
-    }
-    if (Composer == null) {
-      Composer = composer.Composer;
-    }
-    if (Resolver == null) {
-      Resolver = resolver.Resolver;
-    }
-    if (Validator == null) {
-      Validator = validator.Validator;
-    }
-    if (ResourceTypes == null) {
-      ResourceTypes = types.ResourceTypes;
-    }
-    if (Traits == null) {
-      Traits = traits.Traits;
-    }
-    if (Schemas == null) {
-      Schemas = schemas.Schemas;
-    }
-    if (Joiner == null) {
-      Joiner = joiner.Joiner;
-    }
-    if (SecuritySchemes == null) {
-      SecuritySchemes = securitySchemes.SecuritySchemes;
-    }
-    if (Constructor == null) {
-      Constructor = construct.Constructor;
-    }
-    return (function() {
-      var component, components;
-
-      components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Schemas, Joiner, Constructor, SecuritySchemes];
-
-      util.extend.apply(util, [_Class.prototype].concat((function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = components.length; _i < _len; _i++) {
-          component = components[_i];
-          _results.push(component.prototype);
-        }
-        return _results;
-      })()));
-
-      function _Class(stream, location) {
-        var _i, _len, _ref;
-        components[0].call(this, stream, location);
-        _ref = components.slice(1);
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          component = _ref[_i];
-          component.call(this);
-        }
-      }
-
-      return _Class;
-
-    })();
-  };
-
-  this.Loader = this.make_loader();
-
-}).call(this);
-
-},{"./composer":20,"./construct":13,"./joiner":15,"./parser":19,"./reader":17,"./resolver":21,"./resourceTypes":24,"./scanner":18,"./schemas":25,"./securitySchemes":26,"./traits":23,"./util":4,"./validator":22}],14:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],13:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -8732,7 +8931,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],21:[function(require,module,exports){
+},{"./errors":1}],20:[function(require,module,exports){
 (function() {
   var YAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -8941,217 +9140,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":14,"./util":4}],20:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, events, nodes, raml, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  events = require('./events');
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  raml = require('./raml');
-
-  this.ComposerError = (function(_super) {
-    __extends(ComposerError, _super);
-
-    function ComposerError() {
-      _ref = ComposerError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return ComposerError;
-
-  })(MarkedYAMLError);
-
-  this.Composer = (function() {
-    function Composer() {
-      this.anchors = {};
-    }
-
-    Composer.prototype.check_node = function() {
-      if (this.check_event(events.StreamStartEvent)) {
-        this.get_event();
-      }
-      return !this.check_event(events.StreamEndEvent);
-    };
-
-    /*
-    Get the root node of the next document.
-    */
-
-
-    Composer.prototype.get_node = function() {
-      if (!this.check_event(events.StreamEndEvent)) {
-        return this.compose_document();
-      }
-    };
-
-    Composer.prototype.get_single_node = function(validate, apply, join) {
-      var document, event;
-      if (validate == null) {
-        validate = true;
-      }
-      if (apply == null) {
-        apply = true;
-      }
-      if (join == null) {
-        join = true;
-      }
-      this.get_event();
-      document = null;
-      if (!this.check_event(events.StreamEndEvent)) {
-        document = this.compose_document();
-      }
-      if (!this.check_event(events.StreamEndEvent)) {
-        event = this.get_event();
-        throw new exports.ComposerError('expected a single document in the stream', document.start_mark, 'but found another document', event.start_mark);
-      }
-      this.get_event();
-      if (validate || apply) {
-        this.load_schemas(document);
-        this.load_traits(document);
-        this.load_types(document);
-        this.load_security_schemes(document);
-      }
-      if (validate) {
-        this.validate_document(document);
-      }
-      if (apply) {
-        this.apply_types(document);
-        this.apply_traits(document);
-        this.apply_schemas(document);
-      }
-      if (join) {
-        this.join_resources(document);
-      }
-      return document;
-    };
-
-    Composer.prototype.compose_document = function() {
-      var node;
-      this.get_event();
-      node = this.compose_node();
-      this.get_event();
-      this.anchors = {};
-      return node;
-    };
-
-    Composer.prototype.compose_node = function(parent, index) {
-      var anchor, event, node;
-      if (this.check_event(events.AliasEvent)) {
-        event = this.get_event();
-        anchor = event.anchor;
-        if (!(anchor in this.anchors)) {
-          throw new exports.ComposerError(null, null, "found undefined alias " + anchor, event.start_mark);
-        }
-        return this.anchors[anchor];
-      }
-      event = this.peek_event();
-      anchor = event.anchor;
-      if (anchor !== null && anchor in this.anchors) {
-        throw new exports.ComposerError("found duplicate anchor " + anchor + "; first occurence", this.anchors[anchor].start_mark, 'second occurrence', event.start_mark);
-      }
-      this.descend_resolver(parent, index);
-      if (this.check_event(events.ScalarEvent)) {
-        node = this.compose_scalar_node(anchor);
-      } else if (this.check_event(events.SequenceStartEvent)) {
-        node = this.compose_sequence_node(anchor);
-      } else if (this.check_event(events.MappingStartEvent)) {
-        node = this.compose_mapping_node(anchor);
-      }
-      this.ascend_resolver();
-      return node;
-    };
-
-    Composer.prototype.compose_fixed_scalar_node = function(anchor, value) {
-      var event, node;
-      event = this.get_event();
-      node = new nodes.ScalarNode('tag:yaml.org,2002:str', value, event.start_mark, event.end_mark, event.style);
-      if (anchor !== null) {
-        this.anchors[anchor] = node;
-      }
-      return node;
-    };
-
-    Composer.prototype.compose_scalar_node = function(anchor) {
-      var event, extension, node, tag;
-      event = this.get_event();
-      tag = event.tag;
-      if (tag === null || tag === '!') {
-        tag = this.resolve(nodes.ScalarNode, event.value, event.implicit);
-      }
-      if (event.tag === '!include') {
-        extension = event.value.split(".").pop();
-        if (this.src != null) {
-          event.value = require('url').resolve(this.src, event.value);
-        }
-        if (extension === 'yaml' || extension === 'yml' || extension === 'raml') {
-          return raml.composeFile(event.value, false, false, false);
-        } else {
-          node = new nodes.ScalarNode('tag:yaml.org,2002:str', raml.readFile(event.value), event.start_mark, event.end_mark, event.style);
-        }
-      } else {
-        node = new nodes.ScalarNode(tag, event.value, event.start_mark, event.end_mark, event.style);
-      }
-      if (anchor !== null) {
-        this.anchors[anchor] = node;
-      }
-      return node;
-    };
-
-    Composer.prototype.compose_sequence_node = function(anchor) {
-      var end_event, index, node, start_event, tag;
-      start_event = this.get_event();
-      tag = start_event.tag;
-      if (tag === null || tag === '!') {
-        tag = this.resolve(nodes.SequenceNode, null, start_event.implicit);
-      }
-      node = new nodes.SequenceNode(tag, [], start_event.start_mark, null, start_event.flow_style);
-      if (anchor !== null) {
-        this.anchors[anchor] = node;
-      }
-      index = 0;
-      while (!this.check_event(events.SequenceEndEvent)) {
-        node.value.push(this.compose_node(node, index));
-        index++;
-      }
-      end_event = this.get_event();
-      node.end_mark = end_event.end_mark;
-      return node;
-    };
-
-    Composer.prototype.compose_mapping_node = function(anchor) {
-      var end_event, item_key, item_value, node, start_event, tag;
-      start_event = this.get_event();
-      tag = start_event.tag;
-      if (tag === null || tag === '!') {
-        tag = this.resolve(nodes.MappingNode, null, start_event.implicit);
-      }
-      node = new nodes.MappingNode(tag, [], start_event.start_mark, null, start_event.flow_style);
-      if (anchor !== null) {
-        this.anchors[anchor] = node;
-      }
-      while (!this.check_event(events.MappingEndEvent)) {
-        item_key = this.compose_node(node);
-        item_value = this.compose_node(node, item_key);
-        node.value.push([item_key, item_value]);
-      }
-      end_event = this.get_event();
-      node.end_mark = end_event.end_mark;
-      return node;
-    };
-
-    return Composer;
-
-  })();
-
-}).call(this);
-
-},{"./errors":1,"./events":2,"./nodes":14,"./raml":11,"url":7}],24:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4}],24:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9320,7 +9309,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":14}],18:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],18:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9376,7 +9365,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 
   this.Scanner = (function() {
-    var C_LB, C_NUMBERS, C_WS, ESCAPE_CODES, ESCAPE_REPLACEMENTS;
+    var C_LB, C_NUMBERS, C_WS, ESCAPE_CODES, ESCAPE_REPLACEMENTS, RAML_VERSION;
 
     C_LB = '\r\n\x85\u2028\u2029';
 
@@ -9410,13 +9399,19 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       'U': 8
     };
 
+    RAML_VERSION = '#%RAML 0.2';
+
     /*
     Initialise the Scanner
     */
 
 
-    function Scanner() {
+    function Scanner(validateHeader) {
+      if (validateHeader == null) {
+        validateHeader = false;
+      }
       this.done = false;
+      this.ramlHeaderFound = !validateHeader;
       this.flow_level = 0;
       this.tokens = [];
       this.fetch_stream_start();
@@ -10009,7 +10004,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 
     Scanner.prototype.scan_to_next_token = function() {
-      var found, _ref1, _results;
+      var comment, found, _ref1, _results;
       if (this.index === 0 && this.peek() === '\uFEFF') {
         this.forward();
       }
@@ -10019,9 +10014,28 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
         while (this.peek() === ' ') {
           this.forward();
         }
+        comment = "";
         if (this.peek() === '#') {
           while (_ref1 = this.peek(), __indexOf.call(C_LB + '\x00', _ref1) < 0) {
+            if (!this.ramlHeaderFound) {
+              comment += this.peek();
+            }
             this.forward();
+          }
+        }
+        if (!this.ramlHeaderFound) {
+          if (comment) {
+            if (this.index - comment.length === 0) {
+              if (comment === RAML_VERSION) {
+                this.ramlHeaderFound = true;
+              } else {
+                throw new exports.ScannerError('version validation ', null, "Unsupported RAML version: '" + comment + "'", this.get_mark());
+              }
+            } else {
+              throw new exports.ScannerError('version validation ', null, "the first line must be: '" + RAML_VERSION + "'", this.get_mark());
+            }
+          } else if (this.index > 0) {
+            throw new exports.ScannerError('version validation', null, "the first line must be: '" + RAML_VERSION + "'", this.get_mark());
           }
         }
         if (this.scan_line_break()) {
@@ -10904,7 +10918,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":14}],26:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],26:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10984,7 +10998,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":14}],23:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],23:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11160,7 +11174,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":14}],8:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],8:[function(require,module,exports){
 
 /**
  * Object#toString() ref for stringify().
@@ -11528,7 +11542,7 @@ function decode(str) {
 
   this.scan = function(stream, location) {
     var loader, _results;
-    loader = new exports.loader.Loader(stream, location);
+    loader = new exports.loader.Loader(stream, location, false);
     _results = [];
     while (loader.check_token()) {
       _results.push(loader.get_token());
@@ -11543,7 +11557,7 @@ function decode(str) {
 
   this.parse = function(stream, location) {
     var loader, _results;
-    loader = new exports.loader.Loader(stream, location);
+    loader = new exports.loader.Loader(stream, location, false);
     _results = [];
     while (loader.check_event()) {
       _results.push(loader.get_event());
@@ -11568,7 +11582,7 @@ function decode(str) {
     if (join == null) {
       join = true;
     }
-    loader = new exports.loader.Loader(stream, location);
+    loader = new exports.loader.Loader(stream, location, validate);
     return loader.get_single_node(validate, apply, join);
   };
 
@@ -11583,7 +11597,7 @@ function decode(str) {
     if (validate == null) {
       validate = true;
     }
-    loader = new exports.loader.Loader(stream, location);
+    loader = new exports.loader.Loader(stream, location, validate);
     deferred = new this.q.defer;
     try {
       result = loader.get_single_data();
@@ -11606,7 +11620,7 @@ function decode(str) {
     if (validate == null) {
       validate = true;
     }
-    loader = new exports.loader.Loader(stream, location);
+    loader = new exports.loader.Loader(stream, location, validate);
     deferred = new this.q.defer;
     try {
       result = loader.resources();
@@ -11721,7 +11735,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./composer":20,"./construct":13,"./errors":1,"./events":2,"./loader":16,"./nodes":14,"./parser":19,"./reader":17,"./resolver":21,"./scanner":18,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":27}],22:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":16,"./nodes":13,"./parser":19,"./reader":17,"./resolver":20,"./scanner":18,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":27}],21:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, traits, uritemplate, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -12781,7 +12795,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":14,"./traits":23,"uritemplate":28}],27:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./traits":23,"uritemplate":28}],27:[function(require,module,exports){
 (function(process,Buffer){/**
  * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
  *
@@ -13347,7 +13361,7 @@ exports.XMLHttpRequest = function() {
 };
 
 })(require("__browserify_process"),require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":12,"__browserify_process":5,"child_process":29,"fs":9,"http":30,"https":31,"url":7}],28:[function(require,module,exports){
+},{"__browserify_buffer":14,"__browserify_process":5,"child_process":29,"fs":9,"http":30,"https":31,"url":7}],28:[function(require,module,exports){
 (function(global){/*global unescape, module, define, window, global*/
 
 /*
@@ -16857,5 +16871,5 @@ module.exports = function(cb) {
 module.exports.ConcatStream = ConcatStream
 
 })(require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":12,"stream":34,"util":35}]},{},[10,13,1,2,15,16,14,11,19,17,21,20,24,18,25,26,3,23,4,22,6])
+},{"__browserify_buffer":14,"stream":34,"util":35}]},{},[10,12,15,1,2,16,22,13,19,11,17,20,24,18,25,26,3,21,6,4,23])
 ;
