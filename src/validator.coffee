@@ -216,6 +216,12 @@ class @Validator
 
     @validate_method node, true, 'trait'
 
+  canonicalizePropertyName: (propertyName, mustRemoveQuestionMark)   ->
+    if mustRemoveQuestionMark && propertyName.slice(-1) == '?'
+      return propertyName.slice(0,-1)
+    return propertyName
+
+
   valid_common_parameter_properties: (node, allowParameterKeys) ->
     return unless node.value
 
@@ -226,8 +232,9 @@ class @Validator
 
       return if allowParameterKeys && @isParameterKey(childNode)
 
-      propertyName = propertyName.slice(0,-1) if allowParameterKeys && propertyName.slice(-1) == '?'
-      switch propertyName
+      canonicalPropertyName = @canonicalizePropertyName propertyName, allowParameterKeys
+
+      switch canonicalPropertyName
         when "displayName"
           unless @isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of displayName must be a scalar', childNode[1].start_mark
@@ -368,14 +375,22 @@ class @Validator
             @validate_method property, allowParameterKeys
           else
             key = property[0].value
-            key = key.slice(0,-1) if allowParameterKeys && key in ['uriParameters?', 'baseUriParameters?']
-            switch key
+            canonicalKey = @canonicalizePropertyName(key, allowParameterKeys)
+            valid = true
+
+            # these properties are allowed to be parametrized in resource types
+            switch canonicalKey
               when "uriParameters"
                 @validate_uri_parameters resource[0].value, property[1], allowParameterKeys
               when "baseUriParameters"
                 unless @baseUri
                   throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
                 @validate_uri_parameters @baseUri, property[1], allowParameterKeys
+              else
+                valid = false
+
+            # these properties belong to the resource/resource type and cannot be optional
+            switch key
               when "type"
                 @validate_type_property property, allowParameterKeys
               when "usage"
@@ -384,7 +399,8 @@ class @Validator
               when "securedBy"
                 @validate_secured_by property
               else
-                throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a #{context}", property[0].start_mark
+                unless valid
+                  throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a #{context}", property[0].start_mark
 
   validate_secured_by: (property) ->
     unless @isSequence property[1]
@@ -414,8 +430,11 @@ class @Validator
       return if @validate_common_properties property, allowParameterKeys
 
       key = property[0].value
-      key = key.slice(0,-1) if allowParameterKeys && key in ['headers?', 'queryParameters?', 'body?']
-      switch key
+      canonicalKey = @canonicalizePropertyName(key, allowParameterKeys)
+      valid = true
+
+      # these properties are allowed in resources and traits
+      switch canonicalKey
         when "headers"
           @validate_headers property, allowParameterKeys
         when "queryParameters"
@@ -424,10 +443,16 @@ class @Validator
           @validate_body property, allowParameterKeys
         when "responses"
           @validate_responses property, allowParameterKeys
+        else
+          valid = false
+
+      # property securedBy in a trait/type does not get passed to the resource
+      switch key
         when "securedBy"
           @validate_secured_by property
         else
-          throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a #{context}", property[0].start_mark
+          unless valid
+            throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a #{context}", property[0].start_mark
 
   validate_responses: (responses, allowParameterKeys) ->
     if @isNull responses[1]
@@ -483,7 +508,8 @@ class @Validator
 
     if @isMapping response[1]
       response[1].value.forEach (property) =>
-        switch property[0].value
+        canonicalKey = @canonicalizePropertyName(property[0].value, allowParameterKeys)
+        switch canonicalKey
           when "body"
             @validate_body property, allowParameterKeys
           when "description"
@@ -514,8 +540,8 @@ class @Validator
         @validate_body bodyProperty, allowParameterKeys, "implicit"
       else
         key = bodyProperty[0].value
-        key = key.slice(0,-1) if allowParameterKeys && key in ['formParameters?']
-        switch key
+        canonicalProperty = @canonicalizePropertyName( key, allowParameterKeys)
+        switch canonicalProperty
           when "formParameters"
             if bodyMode and bodyMode != "implicit"
               throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
@@ -543,8 +569,8 @@ class @Validator
       return true
     else
       key = property[0].value
-      key = key.slice(0,-1) if allowParameterKeys && key in ['displayName?', 'description?']
-      switch key
+      canonicalProperty = @canonicalizePropertyName( key, allowParameterKeys)
+      switch canonicalProperty
         when "displayName"
           unless @isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'displayName' must be a string", property[0].start_mark
@@ -557,6 +583,8 @@ class @Validator
           unless @isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
           return true
+
+      switch key
         when "is"
           unless @isSequence property[1]
             throw new exports.ValidationError 'while validating resources', null, "property 'is' must be a list", property[0].start_mark
