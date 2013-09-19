@@ -1,4 +1,4 @@
-%TAG ! tag:raml.org,0.1:
+#%RAML 0.2
 ---
 title: MyApi
 documentation:

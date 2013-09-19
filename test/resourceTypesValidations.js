@@ -84,8 +84,7 @@ describe('Resource Types Validations', function() {
     });
 
     return [
-      '%YAML 1.2',
-      '%TAG ! tag:raml.org,0.2:',
+      '#%RAML 0.2',
       '---',
       'title: Test',
       'baseUri: http://{apiSubdomain}.api.com/{someUriParameter}'
@@ -584,8 +583,7 @@ describe('Trait Validations', function() {
     });
 
     return [
-      '%YAML 1.2',
-      '%TAG ! tag:raml.org,0.2:',
+      '#%RAML 0.2',
       '---',
       'title: Test'
     ]
