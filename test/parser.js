@@ -5580,7 +5580,7 @@ describe('Parser', function() {
         setTimeout(function () {
           expect(error.problem_mark).to.exist;
           error.problem_mark.column.should.be.equal(8);
-          error.problem_mark.line.should.be.equal(11);
+          error.problem_mark.line.should.be.equal(10);
           done();
         }, 0);
       });
