@@ -353,10 +353,6 @@ class @Validator
       return node.value.filter (childNode) -> return childNode[0].value.match(/^\//);
     return []
 
-  resourceTypeAwareRegExp: (string, allowParameterKeys) ->
-    string = string.replace('$', '\\??$') if allowParameterKeys
-    return new RegExp(string)
-
   validate_resource: (resource, allowParameterKeys = false, context = "resource") ->
     unless resource[1] and @isNullableMapping(resource[1])
       throw new exports.ValidationError 'while validating resources', null, 'resource is not a mapping', resource[1].start_mark
@@ -367,16 +363,18 @@ class @Validator
             if allowParameterKeys
               throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', property[0].start_mark
             @validate_resource property, allowParameterKeys
-          else if property[0].value.match(@resourceTypeAwareRegExp('^(get|post|put|delete|head|patch|options)$', allowParameterKeys))
+          else if property[0].value.match(new RegExp("^(get|post|put|delete|head|patch|options)#{ if allowParameterKeys then '\\??' else '' }$"))
             @validate_method property, allowParameterKeys
-          else if property[0].value.match(@resourceTypeAwareRegExp('^uriParameters$', allowParameterKeys))
-            @validate_uri_parameters resource[0].value, property[1], allowParameterKeys
-          else if property[0].value.match(@resourceTypeAwareRegExp('^baseUriParameters$', allowParameterKeys))
-            unless @baseUri
-              throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
-            @validate_uri_parameters @baseUri, property[1], allowParameterKeys
           else
-            switch property[0].value
+            key = property[0].value
+            key = key.slice(0,-1) if allowParameterKeys && key in ['uriParameters?', 'baseUriParameters?']
+            switch key
+              when "uriParameters"
+                @validate_uri_parameters resource[0].value, property[1], allowParameterKeys
+              when "baseUriParameters"
+                unless @baseUri
+                  throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
+                @validate_uri_parameters @baseUri, property[1], allowParameterKeys
               when "type"
                 @validate_type_property property, allowParameterKeys
               when "usage"
