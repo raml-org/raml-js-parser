@@ -1,5 +1,17 @@
 "use strict";
 
+if (typeof window === 'undefined') {
+  var raml = require('../lib/raml.js')
+  var chai = require('chai')
+    , expect = chai.expect
+    , should = chai.should();
+  var chaiAsPromised = require("chai-as-promised");
+  chai.use(chaiAsPromised);
+} else {
+  var raml = RAML.Parser;
+  chai.should();
+}
+
 function itShouldBehaveLikeAnOptionalStructureNamedParameter(initialRaml) {
   function generateRaml(snippetRaml) {
     var indentation = '  ' + initialRaml.split("\n").slice(-1)[0].match(/^(\s*)/)[1]
@@ -567,13 +579,6 @@ describe('Resource Types Validations', function() {
     });
   });
 });
-
-
-
-
-
-
-
 
 describe('Trait Validations', function() {
   var topLevelSnippetAndTraitSnippet = function(topLevelRaml, traitRaml) {

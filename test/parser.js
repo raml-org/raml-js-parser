@@ -69,7 +69,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid traits definition, it must be an array/).and.notify(done);
     });
-    it.skip('it should fail to parse a RAML header ', function(done) {
+    it('it should fail to parse a RAML header ', function(done) {
       var noop = function () {};
       var definition = [
         '#%RAML 0.2'
@@ -77,7 +77,7 @@ describe('Parser', function() {
 
       raml.load(definition).then(noop, function (error) {
         setTimeout(function () {
-          error.context.should.match(/expected '<document start>', but found <stream end>/);
+          error.message.should.match(/empty document/);
           done();
         }, 0);
       });

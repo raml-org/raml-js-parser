@@ -72,10 +72,10 @@ module.exports = function(grunt) {
     mochacli: {
         options: {
             require: ['chai', 'chai-as-promised'],
-            reporter: 'list',
-            bail: true
+            reporter: 'nyan',
+            bail: false
         },
-        all: ['test/parser.js', 'test/local.js']
+        all: ['test/parser.js', 'test/local.js', 'test/resourceTypesValidations.js']
     }        
   });
   
