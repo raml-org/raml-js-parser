@@ -102,7 +102,14 @@ describe('Parser', function() {
         title: "hola",
         version: "v0.1",
         baseUri: "http://server/api/{version}",
-        baseUriParameters: null
+        baseUriParameters: {
+          version: {
+            type: "string",
+            required: true,
+            displayName: "version",
+            enum: [ "v0.1" ]
+          }
+        }
       }
       raml.load(definition).should.become(expected).and.notify(done);
     });
@@ -656,7 +663,20 @@ describe('Parser', function() {
       ].join('\n');
 
       var promise = raml.load(definition);
-      promise.should.eventually.deep.equal({ title: 'MyApi', version: 'v1', baseUri: 'http://myapi.com/{version}' }).and.notify(done);
+      var expected = {
+        title: 'MyApi',
+        version: 'v1',
+        baseUri: 'http://myapi.com/{version}',
+        baseUriParameters: {
+          version: {
+            type: "string",
+            required: true,
+            displayName: "version",
+            enum: [ "v1" ]
+          }
+        }
+      };
+      promise.should.eventually.deep.equal(expected).and.notify(done);
     });
 
     it('should fail when a URI parameter has required "y"', function(done) {
@@ -1781,6 +1801,19 @@ describe('Parser', function() {
         title: 'Test',
         baseUri: 'http://www.api.com/{version}/{company}',
         version: 'v1.1',
+        baseUriParameters: {
+          company: {
+            type: "string",
+            required: true,
+            displayName: "company"
+          },
+          version: {
+            type: "string",
+            required: true,
+            displayName: "version",
+            enum: [ "v1.1" ]
+          }
+        },
         resources: [
           {
             displayName: 'Tags',
@@ -1799,7 +1832,14 @@ describe('Parser', function() {
             ],
             resources: [{
               displayName: 'Search',
-              relativeUri: '/{userid}'
+              relativeUri: '/{userid}',
+              uriParameters: {
+                userid: {
+                  type: "string",
+                  required: true,
+                  displayName: "userid"
+                }
+              }
             }]
           }
         ]
@@ -5251,21 +5291,35 @@ describe('Parser', function() {
       ].join('\n');
 
       var expected ={
-        "title": "Test",
+        title: "Test",
         baseUri: "http://{a}.myapi.org",
-        "resources": [
+        resources: [
           {
-            "relativeUri": "/{hello}",
-            "methods": [
+            relativeUri: "/{hello}",
+            methods: [
               {
                 body:{
                   formParameters: null
                 },
-                "method": "post"
+                method: "post"
               }
-            ]
+            ],
+            uriParameters: {
+              hello: {
+                type: "string",
+                required: true,
+                displayName: "hello"
+              }
+            }
           }
-        ]
+        ],
+        baseUriParameters: {
+          a: {
+            type: "string",
+            required: true,
+            displayName: "a"
+          }
+        }
       };
 
       raml.load(definition).should.become(expected).and.notify(done);
@@ -5403,6 +5457,13 @@ describe('Parser', function() {
       var expected = {
         "baseUri": "https://{domainName}.myapi.com",
         "title": "Test",
+        baseUriParameters: {
+          domainName: {
+            type: "string",
+            required: true,
+            displayName: "domainName"
+          }
+        },
         "resources": [
           {
             "baseUriParameters": {
@@ -5432,6 +5493,13 @@ describe('Parser', function() {
       var expected = {
         "baseUri": "https://{domainName}.myapi.com",
         "title": "Test",
+        baseUriParameters: {
+          domainName: {
+            type: "string",
+            required: true,
+            displayName: "domainName"
+          }
+        },
         "resources": [
           {
             "relativeUri": "/resource",

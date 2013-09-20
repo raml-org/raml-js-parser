@@ -47,6 +47,10 @@ class @BaseConstructor
     data = @construct_object node
     while not util.is_empty @deferred_constructors
       @deferred_constructors.pop()()
+
+    @findAndInsertMissingBaseUriParameters data
+    resources = data.resources
+    @findAndInsertMissinngBaseUriParameters resources
     return data
 
   defer: (f) -> @deferred_constructors.push f
