@@ -96,7 +96,7 @@ class @Composer
     else if @check_event events.MappingStartEvent
       node = @compose_mapping_node anchor
     @ascend_resolver()
-    
+
     return node
 
   compose_fixed_scalar_node: (anchor, value) ->

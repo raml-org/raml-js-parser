@@ -270,7 +270,7 @@ class @Validator
         when "type"
           validTypes = ['string', 'number', 'integer', 'date', 'boolean', 'file']
           unless  propertyValue in validTypes
-            throw new exports.ValidationError 'while validating parameter properties', null, 'type can either be: string, number, integer or date', childNode[1].start_mark
+            throw new exports.ValidationError 'while validating parameter properties', null, 'type can be either of: string, number, integer, file, date or boolean ', childNode[1].start_mark
         when "required"
           unless propertyValue in booleanValues
             throw new exports.ValidationError 'while validating parameter properties', null, 'required can be any either true or false', childNode[1].start_mark
@@ -424,13 +424,16 @@ class @Validator
         unless @get_security_scheme securitySchemeName
           throw new exports.ValidationError 'while validating securityScheme consumption', null, 'there is no securityScheme named ' + securitySchemeName, secScheme.start_mark
 
-
   validate_type_property: (property, allowParameterKeys) ->
     typeName = @key_or_value property[1]
     unless @isMapping(property[1]) or @isString(property[1])
       throw new exports.ValidationError 'while validating resources', null, "property 'type' must be a string or a mapping", property[0].start_mark
     unless @get_type typeName
       throw new exports.ValidationError 'while validating resource consumption', null, 'there is no type named ' + typeName, property[1].start_mark
+    if @isMapping property[1]
+      property[1].value.forEach (parameter) =>
+        unless @isNull(parameter[1]) or @isMapping(parameter[1])
+          throw new exports.ValidationError 'while validating resource consumption', null, 'type parameters must be in a mapping', parameter[1].start_mark
 
   validate_method: (method, allowParameterKeys, context = 'method') ->
     if @isNull method[1]
@@ -540,6 +543,7 @@ class @Validator
       return
     unless @isMapping property[1]
       throw new exports.ValidationError 'while validating body', null, "property: body specification must be a mapping", property[0].start_mark
+    implicitMode = ["implicit", "forcedImplicit"]
     property[1].value?.forEach (bodyProperty) =>
       if @isParameterKey(bodyProperty)
         unless allowParameterKeys
@@ -548,30 +552,33 @@ class @Validator
         if bodyMode and bodyMode != "explicit"
           throw new exports.ValidationError 'while validating body', null, "not compatible with implicit default Media Type", bodyProperty[0].start_mark
         bodyMode = "explicit"
-        @validate_body bodyProperty, allowParameterKeys, "implicit"
+        @validate_body bodyProperty, allowParameterKeys, "forcedImplicit"
       else
         key = bodyProperty[0].value
         canonicalProperty = @canonicalizePropertyName( key, allowParameterKeys)
         switch canonicalProperty
           when "formParameters"
-            if bodyMode and bodyMode != "implicit"
+            if bodyMode and bodyMode not in implicitMode
               throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
-            bodyMode = "implicit"
+            bodyMode ?= "implicit"
             @validate_form_params bodyProperty, allowParameterKeys
           when "example"
-            if bodyMode and bodyMode != "implicit"
+            if bodyMode and bodyMode not in implicitMode
               throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
-            bodyMode = "implicit"
+            bodyMode ?= "implicit"
             unless @isScalar(bodyProperty[1])
               throw new exports.ValidationError 'while validating body', null, "example must be a string", bodyProperty[0].start_mark
           when "schema"
-            if bodyMode and bodyMode != "implicit"
+            if bodyMode and bodyMode not in implicitMode
               throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
-            bodyMode = "implicit"
+            bodyMode ?= "implicit"
             unless @isScalar(bodyProperty[1])
               throw new exports.ValidationError 'while validating body', null, "schema must be a string", bodyProperty[0].start_mark
           else
             throw new exports.ValidationError 'while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark
+    if bodyMode is "implicit"
+      unless @get_media_type()
+        throw new exports.ValidationError 'while validating body', null, "body tries to use default Media Type, but mediaType is null", property.start_mark
 
   validate_common_properties: (property, allowParameterKeys) ->
     if @isParameterKey(property)
@@ -605,6 +612,10 @@ class @Validator
             traitName = @key_or_value use
             unless @get_trait traitName
               throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + traitName, use.start_mark
+            if @isMapping use[1]
+              property[1].value.forEach (parameter) =>
+                unless @isNull(parameter[1]) or @isMapping(parameter[1])
+                  throw new exports.ValidationError 'while validating resource consumption', null, 'type parameters must be in a mapping', parameter[1].start_mark
           return true
     return false
 
@@ -730,44 +741,3 @@ class @Validator
         
   is_valid: ->
     return @validation_errors.length == 0
-
-  findAndInsertMissingBaseUriParameters: (rootObject) ->
-    if rootObject.baseUri
-
-      template = uritemplate.parse rootObject.baseUri
-      expressions = template.expressions.filter((expr) -> return 'templateText' of expr).map (expression) -> expression.templateText
-
-      if expressions.length
-        rootObject.baseUriParameters = {} unless rootObject.baseUriParameters
-
-      expressions.forEach (parameterName) ->
-        unless parameterName of rootObject.baseUriParameters
-          rootObject.baseUriParameters[parameterName] =
-          {
-            type: "string",
-            required: true,
-            displayName: parameterName
-          }
-
-          if parameterName is "version"
-            rootObject.baseUriParameters[parameterName].enum = [ rootObject.version ]
-
-
-  findAndInsertMissinngBaseUriParameters: (resources) ->
-    if resources?.length
-      resources.forEach (resource) =>
-        template = uritemplate.parse resource.relativeUri
-        expressions = template.expressions.filter((expr) -> return 'templateText' of expr).map (expression) -> expression.templateText
-
-        if expressions.length
-          resource.uriParameters = {} unless resource.uriParameters
-
-        expressions.forEach (parameterName) ->
-          unless parameterName of resource.uriParameters
-            resource.uriParameters[parameterName] =
-            {
-              type: "string",
-              required: true,
-              displayName: parameterName
-            }
-        @findAndInsertMissinngBaseUriParameters resource.resources
