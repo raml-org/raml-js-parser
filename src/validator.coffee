@@ -741,13 +741,17 @@ class @Validator
         rootObject.baseUriParameters = {} unless rootObject.baseUriParameters
 
       expressions.forEach (parameterName) ->
-        unless parameterName is "version" or parameterName of rootObject.baseUriParameters
+        unless parameterName of rootObject.baseUriParameters
           rootObject.baseUriParameters[parameterName] =
           {
             type: "string",
             required: true,
             displayName: parameterName
           }
+
+          if parameterName is "version"
+            rootObject.baseUriParameters[parameterName].enum = [ rootObject.version ]
+
 
   findAndInsertMissinngBaseUriParameters: (resources) ->
     if resources?.length
