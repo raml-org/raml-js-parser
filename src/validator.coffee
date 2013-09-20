@@ -311,6 +311,9 @@ class @Validator
             unless @isSequence property[1]
               throw new exports.ValidationError 'while validating root properties', null, 'documentation must be an array', property[0].start_mark
             @validate_documentation property[1]
+          when "mediaType"
+            unless @isString property[1]
+              throw new exports.ValidationError 'while validating root properties', null, 'mediaType must be a scalar', property[0].start_mark
           when "baseUriParameters"
             @is_map node
           when "resourceTypes"
@@ -427,7 +430,7 @@ class @Validator
     unless @isMapping(property[1]) or @isString(property[1])
       throw new exports.ValidationError 'while validating resources', null, "property 'type' must be a string or a mapping", property[0].start_mark
     unless @get_type typeName
-      throw new exports.ValidationError 'while validating trait consumption', null, 'there is no type named ' + typeName, property[1].start_mark
+      throw new exports.ValidationError 'while validating resource consumption', null, 'there is no type named ' + typeName, property[1].start_mark
 
   validate_method: (method, allowParameterKeys, context = 'method') ->
     if @isNull method[1]
@@ -618,7 +621,8 @@ class @Validator
   property_value: (node, property) ->
     filteredNodes = node.value.filter (childNode) ->
       return typeof childNode[0].value != "object" and childNode[0].value.match(property)
-    return filteredNodes[0][1].value;
+    if (filteredNodes.length)
+      return filteredNodes[0][1].value;
 
   get_property: (node, property) ->
     if node and @isMapping node
@@ -633,7 +637,7 @@ class @Validator
     properties = []
     if node and @isMapping node
       node.value.forEach (prop) =>
-        if @isString(prop[0]) and prop[0].value.match(property)
+        if @isString(prop[0]) and prop[0].value?.match(property)
           properties.push prop
         else
           properties = properties.concat @get_properties prop[1], property
@@ -726,3 +730,44 @@ class @Validator
         
   is_valid: ->
     return @validation_errors.length == 0
+
+  findAndInsertMissingBaseUriParameters: (rootObject) ->
+    if rootObject.baseUri
+
+      template = uritemplate.parse rootObject.baseUri
+      expressions = template.expressions.filter((expr) -> return 'templateText' of expr).map (expression) -> expression.templateText
+
+      if expressions.length
+        rootObject.baseUriParameters = {} unless rootObject.baseUriParameters
+
+      expressions.forEach (parameterName) ->
+        unless parameterName of rootObject.baseUriParameters
+          rootObject.baseUriParameters[parameterName] =
+          {
+            type: "string",
+            required: true,
+            displayName: parameterName
+          }
+
+          if parameterName is "version"
+            rootObject.baseUriParameters[parameterName].enum = [ rootObject.version ]
+
+
+  findAndInsertMissinngBaseUriParameters: (resources) ->
+    if resources?.length
+      resources.forEach (resource) =>
+        template = uritemplate.parse resource.relativeUri
+        expressions = template.expressions.filter((expr) -> return 'templateText' of expr).map (expression) -> expression.templateText
+
+        if expressions.length
+          resource.uriParameters = {} unless resource.uriParameters
+
+        expressions.forEach (parameterName) ->
+          unless parameterName of resource.uriParameters
+            resource.uriParameters[parameterName] =
+            {
+              type: "string",
+              required: true,
+              displayName: parameterName
+            }
+        @findAndInsertMissinngBaseUriParameters resource.resources
