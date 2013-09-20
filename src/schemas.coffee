@@ -44,3 +44,4 @@ class @Schemas
       properties = @get_properties resource[1], /^schema$/
       schemas = schemas.concat properties
     return schemas
+

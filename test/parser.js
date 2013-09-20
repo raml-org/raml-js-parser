@@ -160,66 +160,66 @@ describe('Parser', function() {
 
       raml.load(definition).should.become({ title: 'MyApi', baseUri: 'http://myapi.com', resources: [ { relativeUri: '/', displayName: 'Root' } ] }).and.notify(done);
     });
-    it('should fail if no title', function(done) {
-    var definition = [
-      '#%RAML 0.2',
-      '---',
-      'baseUri: http://myapi.com'
-    ].join('\n');
-
-    raml.load(definition).should.be.rejected.with(/missing title/).and.notify(done);
-  });
-    it('should fail if title is array', function(done) {
-        var definition = [
-            '#%RAML 0.2',
-            '---',
-            'title: ["title", "title line 2", "title line 3"]',
-            'baseUri: http://myapi.com'
-        ].join('\n');
-
-        raml.load(definition).should.be.rejected.with(/title must be a string/).and.notify(done);
-    });
-    it('should fail if title is mapping', function(done) {
-        var definition = [
-            '#%RAML 0.2',
-            '---',
-            'title: { line 1: line 1, line 2: line 2 }',
-            'baseUri: http://myapi.com'
-        ].join('\n');
-
-        raml.load(definition).should.be.rejected.with(/title must be a string/).and.notify(done);
-    });
-    it('should succeed if title is longer than 48 chars', function(done) {
-        var definition = [
-            '#%RAML 0.2',
-            '---',
-            'title: this is a very long title, it should fail the length validation for titles with an exception clearly marking it so',
-            'baseUri: http://myapi.com'
-        ].join('\n');
-
-        raml.load(definition).should.become({title:"this is a very long title, it should fail the length validation for titles with an exception clearly marking it so", baseUri: "http://myapi.com"}).and.notify(done);
-    });
-    it('should allow number title', function(done) {
-      var definition = [
-          '#%RAML 0.2',
-          '---',
-          'title: 54',
-          'baseUri: http://myapi.com'
-      ].join('\n');
-
-      raml.load(definition).should.become({ title: 54, baseUri: 'http://myapi.com' }).and.notify(done);
-    });
-    it('should fail if there is a root property with wrong displayName', function(done) {
+      it('should fail if no title', function(done) {
       var definition = [
         '#%RAML 0.2',
         '---',
-        'title: MyApi',
-        'version: v1',
-        'wrongPropertyName: http://myapi.com/{version}'
+        'baseUri: http://myapi.com'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/unknown property/).and.notify(done);
-  });
+      raml.load(definition).should.be.rejected.with(/missing title/).and.notify(done);
+    });
+      it('should fail if title is array', function(done) {
+          var definition = [
+              '#%RAML 0.2',
+              '---',
+              'title: ["title", "title line 2", "title line 3"]',
+              'baseUri: http://myapi.com'
+          ].join('\n');
+
+          raml.load(definition).should.be.rejected.with(/title must be a string/).and.notify(done);
+      });
+      it('should fail if title is mapping', function(done) {
+          var definition = [
+              '#%RAML 0.2',
+              '---',
+              'title: { line 1: line 1, line 2: line 2 }',
+              'baseUri: http://myapi.com'
+          ].join('\n');
+
+          raml.load(definition).should.be.rejected.with(/title must be a string/).and.notify(done);
+      });
+      it('should succeed if title is longer than 48 chars', function(done) {
+          var definition = [
+              '#%RAML 0.2',
+              '---',
+              'title: this is a very long title, it should fail the length validation for titles with an exception clearly marking it so',
+              'baseUri: http://myapi.com'
+          ].join('\n');
+
+          raml.load(definition).should.become({title:"this is a very long title, it should fail the length validation for titles with an exception clearly marking it so", baseUri: "http://myapi.com"}).and.notify(done);
+      });
+      it('should allow number title', function(done) {
+        var definition = [
+            '#%RAML 0.2',
+            '---',
+            'title: 54',
+            'baseUri: http://myapi.com'
+        ].join('\n');
+
+        raml.load(definition).should.become({ title: 54, baseUri: 'http://myapi.com' }).and.notify(done);
+      });
+      it('should fail if there is a root property with wrong displayName', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: MyApi',
+          'version: v1',
+          'wrongPropertyName: http://myapi.com/{version}'
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/unknown property/).and.notify(done);
+    });
     it('should fail if there is a root property with array', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -325,6 +325,7 @@ describe('Parser', function() {
         }
       }).and.notify(done);
     });
+
     it('should fail when declaring a URI parameter not on the baseUri', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -340,6 +341,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/uri parameter unused/).and.notify(done);
     });
+
     it('should fail when declaring a URI parameter not on the resource URI', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -359,6 +361,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/uri parameter unused/).and.notify(done);
     });
+
     it('should fail when declaring a property inside a URI parameter that is not valid', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -374,6 +377,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/unknown property wrongPropertyName/).and.notify(done);
     });
+
     it('should succeed when declaring a minLength validation as a number', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -389,6 +393,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should succeed when declaring a maxLength validation as a number', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -404,6 +409,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should succeed when declaring a minimum validation as a number', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -419,6 +425,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should succeed when declaring a maximum validation as a number', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -434,6 +441,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should fail when declaring a minLength validation as anything other than a number', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -449,6 +457,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/the value of minLength must be a number/).and.notify(done);
     });
+
     it('should fail when declaring a maxLength validation as anything other than a number', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -464,6 +473,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/the value of maxLength must be a number/).and.notify(done);
     });
+
     it('should fail when declaring a minimum validation as anything other than a number', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -479,6 +489,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/the value of minimum must be a number/).and.notify(done);
     });
+
     it('should fail when declaring a maximum validation as anything other than a number', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -494,6 +505,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/the value of maximum must be a number/).and.notify(done);
     });
+
     it('should fail when declaring a URI parameter with an invalid type', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -507,8 +519,9 @@ describe('Parser', function() {
         '    type: X'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/type can be either of: string, number, integer, file, date or boolean/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/type can either be: string, number, integer or date/).and.notify(done);
     });
+
     it('should succeed when declaring a URI parameter with a string type', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -524,6 +537,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should succeed when declaring a URI parameter with a number type', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -539,6 +553,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should succeed when declaring a URI parameter with a integer type', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -554,6 +569,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should succeed when declaring a URI parameter with a date type', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -613,6 +629,8 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
+
     it('should fail if baseUri value its not really a URI', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -623,6 +641,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/unclosed brace/).and.notify(done);
     });
+
     it('should fail if baseUri uses version but there is no version defined', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -633,6 +652,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/missing version/).and.notify(done);
     });
+
     it('should succeed if baseUri uses version and there is a version defined', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -658,6 +678,7 @@ describe('Parser', function() {
       };
       promise.should.eventually.deep.equal(expected).and.notify(done);
     });
+
     it('should fail when a URI parameter has required "y"', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -674,6 +695,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.and.notify(done);
     });
+
     it('should fail when a URI parameter has required "yes"', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -5261,7 +5283,6 @@ describe('Parser', function() {
       var definition = [
         '#%RAML 0.2',
         'title: Test',
-        'mediaType: application/json',
         'baseUri: http://{a}.myapi.org',
         '/{hello}:',
         '  post:',
@@ -5271,7 +5292,6 @@ describe('Parser', function() {
 
       var expected ={
         title: "Test",
-        mediaType: "application/json",
         baseUri: "http://{a}.myapi.org",
         resources: [
           {
@@ -5279,9 +5299,7 @@ describe('Parser', function() {
             methods: [
               {
                 body:{
-                  "application/json": {
-                    formParameters: null
-                  }
+                  formParameters: null
                 },
                 method: "post"
               }
@@ -5616,661 +5634,6 @@ describe('Parser', function() {
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/content must be a string/).and.notify(done);
-    });
-  });
-  describe('Default Media Type', function() {
-    it('should fail if mediaType property is null', function(done) {
-      var definition = [
-        '#%RAML 0.2',
-        '---',
-        'title: MyApi',
-        'mediaType:'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/mediaType must be a scalar/).and.notify(done);
-    });
-    it('should fail if mediaType property is array', function(done) {
-      var definition = [
-        '#%RAML 0.2',
-        '---',
-        'title: MyApi',
-        'mediaType: []'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/mediaType must be a scalar/).and.notify(done);
-    });
-    it('should fail if mediaType property is mapping', function(done) {
-      var definition = [
-        '#%RAML 0.2',
-        '---',
-        'title: MyApi',
-        'mediaType: {}'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/mediaType must be a scalar/).and.notify(done);
-    });
-    it('should not fail if mediaType property is used in root', function(done) {
-      var definition = [
-        '#%RAML 0.2',
-        '---',
-        'title: MyApi',
-        'mediaType: application/json'
-      ].join('\n');
-      var expected = {
-        title: "MyApi",
-        mediaType: "application/json"
-      };
-      raml.load(definition).should.become(expected).and.notify(done);
-    });
-    it('should fail if mediaType property is not present and implicit mode is detected in a resource', function(done) {
-      var definition = [
-        '#%RAML 0.2',
-        '---',
-        'title: MyApi',
-        '/resource:',
-        '  post:',
-        '    body:',
-        '     example: example of a post',
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/body tries to use default Media Type, but mediaType is null/).and.notify(done);
-    });
-    it('should fail if mediaType property is not present and implicit mode is detected in a trait', function(done) {
-      var definition = [
-        '#%RAML 0.2',
-        '---',
-        'title: MyApi',
-        'traits:',
-        '  - traitName:',
-        '      body:',
-        '        example: example of a post',
-        '/resource:',
-        '  is: [traitName]'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/body tries to use default Media Type, but mediaType is null/).and.notify(done);
-    });
-    it('should fail if mediaType property is not present and implicit mode is detected in a resourceType', function(done) {
-      var definition = [
-        '#%RAML 0.2',
-        '---',
-        'title: MyApi',
-        'resourceTypes:',
-        '  - typeName:',
-        '      post:',
-        '        body:',
-        '          example: example of a post',
-        '/resource:',
-        '  type: typeName'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/body tries to use default Media Type, but mediaType is null/).and.notify(done);
-    });
-    describe('Default Media Type in request body', function(){
-      it('should apply mediaType property in a resource', function(done) {
-        var definition = [
-          '#%RAML 0.2',
-          '---',
-          'title: MyApi',
-          'mediaType: application/json',
-          '/resource:',
-          '  post:',
-          '    body:',
-          '     example: example of a post',
-        ].join('\n');
-        var expected = {
-          title: "MyApi",
-          mediaType: "application/json",
-          resources:[
-            {
-              relativeUri: "/resource",
-              methods: [
-                {
-                  body: {
-                    "application/json": {
-                      example: "example of a post"
-                    }
-                  },
-                  method: "post"
-                }
-              ]
-            }
-          ]
-        };
-        raml.load(definition).should.become(expected).and.notify(done);
-      });
-      it('should apply mediaType property in a resourceType', function(done) {
-        var definition = [
-          '#%RAML 0.2',
-          '---',
-          'title: MyApi',
-          'mediaType: application/json',
-          'resourceTypes:',
-          '  - gettable:',
-          '      get:',
-          '        body:',
-          '          example: example of a response',
-          '/resource:',
-          '  type: gettable'
-        ].join('\n');
-        var expected = {
-          title: "MyApi",
-          mediaType: "application/json",
-          resourceTypes: [
-            {
-              gettable: {
-                get: {
-                  body:{
-                    example: "example of a response"
-                  }
-                }
-              }
-            }
-          ],
-          resources:[
-            {
-              type: "gettable",
-              relativeUri: "/resource",
-              methods: [
-                {
-                  body: {
-                    "application/json": {
-                      example: "example of a response"
-                    }
-                  },
-                  method: "get"
-                }
-              ]
-            }
-          ]
-        };
-        raml.load(definition).should.become(expected).and.notify(done);
-      });
-      it('should apply mediaType property in a trait composed with a resourceType', function(done) {
-        var definition = [
-          '#%RAML 0.2',
-          '---',
-          'title: MyApi',
-          'mediaType: application/json',
-          'resourceTypes:',
-          '  - gettable:',
-          '      get:',
-          '        is: [bodiable]',
-          'traits:',
-          '  - bodiable:',
-          '      body:',
-          '        example: example of a response',
-          '/resource:',
-          '  type: gettable'
-        ].join('\n');
-        var expected = {
-          title: "MyApi",
-          mediaType: "application/json",
-          resourceTypes: [
-            {
-              gettable: {
-                get: {
-                  is: ["bodiable"]
-                }
-              }
-            }
-          ],
-          traits: [{
-            bodiable: {
-              body:{
-                example: "example of a response"
-              }
-            }
-          }],
-          resources:[
-            {
-              type: "gettable",
-              relativeUri: "/resource",
-              methods: [
-                {
-                  body: {
-                    "application/json": {
-                      example: "example of a response"
-                    }
-                  },
-                  method: "get"
-                }
-              ]
-            }
-          ]
-        };
-        raml.load(definition).should.become(expected).and.notify(done);
-      });
-      it('should apply mediaType property in a trait composed resource', function(done) {
-        var definition = [
-          '#%RAML 0.2',
-          '---',
-          'title: MyApi',
-          'mediaType: application/json',
-          'resourceTypes:',
-          '  - gettable:',
-          '      get:',
-          '        is: [bodiable]',
-          'traits:',
-          '  - bodiable:',
-          '          body:',
-          '            example: example of a response',
-          '/resource:',
-          '  is: [bodiable]',
-          '  get:'
-        ].join('\n');
-        var expected = {
-          title: "MyApi",
-          mediaType: "application/json",
-          resourceTypes: [
-            {
-              gettable: {
-                get: {
-                  is: ["bodiable"]
-                }
-              }
-            }
-          ],
-          traits: [{
-            bodiable: {
-              body:{
-                example: "example of a response"
-              }
-            }
-          }],
-          resources:[
-            {
-              is: ["bodiable"],
-              relativeUri: "/resource",
-              methods: [
-                {
-                  body: {
-                    "application/json": {
-                      example: "example of a response"
-                    }
-                  },
-                  method: "get"
-                }
-              ]
-            }
-          ]
-        };
-        raml.load(definition).should.become(expected).and.notify(done);
-      });
-      it('should apply mediaType property in a trait composed with a resourceType which inherits from another RT and applies a trait', function(done) {
-        var definition = [
-          '#%RAML 0.2',
-          '---',
-          'title: MyApi',
-          'mediaType: application/json',
-          'resourceTypes:',
-          '  - gettable:',
-          '      type: secondLevel',
-          '  - secondLevel:',
-          '      is: [bodiable]',
-          '      get:',
-          '            body:',
-          '              schema: composable schema',
-          'traits:',
-          '  - bodiable:',
-          '          body:',
-          '            example: example of a response',
-          '/resource:',
-          '  type: gettable'
-        ].join('\n');
-        var expected = {
-          title: "MyApi",
-          mediaType: "application/json",
-          resourceTypes: [
-            {
-              gettable: {
-                type: "secondLevel"
-              }
-            },
-            {
-              secondLevel: {
-                is: [ "bodiable" ],
-                get: {
-                  body: {
-                    schema: "composable schema"
-                  }
-                }
-              }
-            }
-          ],
-          traits: [{
-            bodiable: {
-              body:{
-                example: "example of a response"
-              }
-            }
-          }],
-          resources:[
-            {
-              type: "gettable",
-              relativeUri: "/resource",
-              methods: [
-                {
-                  body: {
-                    "application/json": {
-                      schema: "composable schema",
-                      example: "example of a response"
-                    }
-                  },
-                  method: "get"
-                }
-              ]
-            }
-          ]
-        };
-        raml.load(definition).should.become(expected).and.notify(done);
-      });
-    });
-    describe('Default Media Type in response body', function(){
-      it('should apply mediaType property in a resource', function(done) {
-        var definition = [
-          '#%RAML 0.2',
-          '---',
-          'title: MyApi',
-          'mediaType: application/json',
-          '/resource:',
-          '  post:',
-          '    responses:',
-          '      200:',
-          '        body:',
-          '          example: example of a post'
-        ].join('\n');
-        var expected = {
-          title: "MyApi",
-          mediaType: "application/json",
-          resources:[
-            {
-              relativeUri: "/resource",
-              methods: [
-                {
-                  responses: {
-                    200:{
-                      body: {
-                        "application/json": {
-                          example: "example of a post"
-                        }
-                      }
-                    }
-                  },
-                  method: "post"
-                }
-              ]
-            }
-          ]
-        };
-        raml.load(definition).should.become(expected).and.notify(done);
-      });
-      it('should apply mediaType property in a resourceType', function(done) {
-        var definition = [
-          '#%RAML 0.2',
-          '---',
-          'title: MyApi',
-          'mediaType: application/json',
-          'resourceTypes:',
-          '  - gettable:',
-          '      get:',
-          '        responses:',
-          '          200:',
-          '            body:',
-          '              example: example of a response',
-          '/resource:',
-          '  type: gettable'
-        ].join('\n');
-        var expected = {
-          title: "MyApi",
-          mediaType: "application/json",
-          resourceTypes: [
-            {
-              gettable: {
-                get: {
-                  responses: {
-                    200: {
-                      body:{
-                        example: "example of a response"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          ],
-          resources:[
-            {
-              type: "gettable",
-              relativeUri: "/resource",
-              methods: [
-                {
-                  responses: {
-                    200: {
-                      body: {
-                        "application/json": {
-                          example: "example of a response"
-                        }
-                      },
-                    }
-                  },
-                  method: "get"
-                }
-              ]
-            }
-          ]
-        };
-        raml.load(definition).should.become(expected).and.notify(done);
-      });
-      it('should apply mediaType property in a trait composed with a resourceType', function(done) {
-        var definition = [
-          '#%RAML 0.2',
-          '---',
-          'title: MyApi',
-          'mediaType: application/json',
-          'resourceTypes:',
-          '  - gettable:',
-          '      get:',
-          '        is: [bodiable]',
-          'traits:',
-          '  - bodiable:',
-          '      responses:',
-          '        200:',
-          '          body:',
-          '            example: example of a response',
-          '/resource:',
-          '  type: gettable'
-        ].join('\n');
-        var expected = {
-          title: "MyApi",
-          mediaType: "application/json",
-          resourceTypes: [
-            {
-              gettable: {
-                get: {
-                  is: ["bodiable"]
-                }
-              }
-            }
-          ],
-          traits: [{
-            bodiable: {
-              responses: {
-                200: {
-                  body:{
-                    example: "example of a response"
-                  }
-                }
-              }
-            }
-          }],
-          resources:[
-            {
-              type: "gettable",
-              relativeUri: "/resource",
-              methods: [
-                {
-                  responses: {
-                    200: {
-                      body: {
-                        "application/json": {
-                          example: "example of a response"
-                        }
-                      },
-                    }
-                  },
-                  method: "get"
-                }
-              ]
-            }
-          ]
-        };
-        raml.load(definition).should.become(expected).and.notify(done);
-      });
-      it('should apply mediaType property in a trait composed resource', function(done) {
-        var definition = [
-          '#%RAML 0.2',
-          '---',
-          'title: MyApi',
-          'mediaType: application/json',
-          'resourceTypes:',
-          '  - gettable:',
-          '      get:',
-          '        is: [bodiable]',
-          'traits:',
-          '  - bodiable:',
-          '      responses:',
-          '        200:',
-          '          body:',
-          '            example: example of a response',
-          '/resource:',
-          '  is: [bodiable]',
-          '  get:'
-        ].join('\n');
-        var expected = {
-          title: "MyApi",
-          mediaType: "application/json",
-          resourceTypes: [
-            {
-              gettable: {
-                get: {
-                  is: ["bodiable"]
-                }
-              }
-            }
-          ],
-          traits: [{
-            bodiable: {
-              responses: {
-                200: {
-                  body:{
-                    example: "example of a response"
-                  }
-                }
-              }
-            }
-          }],
-          resources:[
-            {
-              is: ["bodiable"],
-              relativeUri: "/resource",
-              methods: [
-                {
-                  responses: {
-                    200: {
-                      body: {
-                        "application/json": {
-                          example: "example of a response"
-                        }
-                      },
-                    }
-                  },
-                  method: "get"
-                }
-              ]
-            }
-          ]
-        };
-        raml.load(definition).should.become(expected).and.notify(done);
-      });
-      it('should apply mediaType property in a trait composed with a resourceType which inherits from another RT and applies a trait', function(done) {
-        var definition = [
-          '#%RAML 0.2',
-          '---',
-          'title: MyApi',
-          'mediaType: application/json',
-          'resourceTypes:',
-          '  - gettable:',
-          '      type: secondLevel',
-          '  - secondLevel:',
-          '      is: [bodiable]',
-          '      get:',
-          '        responses:',
-          '          200:',
-          '            body:',
-          '              schema: composable schema',
-          'traits:',
-          '  - bodiable:',
-          '      responses:',
-          '        200:',
-          '          body:',
-          '            example: example of a response',
-          '/resource:',
-          '  type: gettable'
-        ].join('\n');
-        var expected = {
-          title: "MyApi",
-          mediaType: "application/json",
-          resourceTypes: [
-            {
-              gettable: {
-                type: "secondLevel"
-              }
-            },
-            {
-              secondLevel: {
-                is: [ "bodiable" ],
-                get: {
-                  responses: {
-                    200: {
-                      body: {
-                        schema: "composable schema"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          ],
-          traits: [{
-            bodiable: {
-              responses: {
-                200: {
-                  body:{
-                    example: "example of a response"
-                  }
-                }
-              }
-            }
-          }],
-          resources:[
-            {
-              type: "gettable",
-              relativeUri: "/resource",
-              methods: [
-                {
-                  responses: {
-                    200: {
-                      body: {
-                        "application/json": {
-                          schema: "composable schema",
-                          example: "example of a response"
-                        }
-                      },
-                    }
-                  },
-                  method: "get"
-                }
-              ]
-            }
-          ]
-        };
-        raml.load(definition).should.become(expected).and.notify(done);
-      });
     });
   });
   describe('Error reporting', function () {

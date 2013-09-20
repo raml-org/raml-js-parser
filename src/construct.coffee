@@ -48,7 +48,9 @@ class @BaseConstructor
     while not util.is_empty @deferred_constructors
       @deferred_constructors.pop()()
 
-    @findAndInsertUriParameters data
+    @findAndInsertMissingBaseUriParameters data
+    resources = data.resources
+    @findAndInsertMissinngBaseUriParameters resources
     return data
 
   defer: (f) -> @deferred_constructors.push f

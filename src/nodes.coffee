@@ -16,14 +16,11 @@ class @ScalarNode extends @Node
   id: 'scalar'
   constructor: (@tag, @value, @start_mark, @end_mark, @style) ->
     super
-
-  cloneRemoveIs: ->
-    return @clone()
-
+    
   clone: ->
     temp = new @constructor(@tag, @value, @start_mark, @end_mark)
     return temp
-
+    
   combine: (node) ->
     if this.tag is "tag:yaml.org,2002:null" and node.tag is 'tag:yaml.org,2002:map'
       @value = new exports.MappingNode 'tag:yaml.org,2002:map', [], node.start_mark, node.end_mark
@@ -40,9 +37,6 @@ class @CollectionNode extends @Node
 
 class @SequenceNode extends @CollectionNode
   id: 'sequence'
-
-  cloneRemoveIs: ->
-    return @clone()
 
   clone: ->
     items = []
@@ -90,8 +84,8 @@ class @MappingNode extends @CollectionNode
   cloneRemoveIs: ->
     properties = []
     @value.forEach (property) =>
-      name = property[0].cloneRemoveIs()
-      value = property[1].cloneRemoveIs()
+      name = property[0].clone()
+      value = property[1].clone()
 
       # skip 'is', 'displayName' and 'description' property
       unless name.value.match(/^(is|type)$/)

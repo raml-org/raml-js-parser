@@ -41,7 +41,7 @@ class @Traits
         @apply_traits_to_resource resource[1], removeQs
 
   apply_traits_to_resource: (resource, removeQs) ->
-    return unless @isMapping resource
+    return unless resource
     methods = @child_methods resource
     # apply traits at the resource level, which is basically the same as applying to each method in the resource
     if @has_property resource, /^is$/
@@ -68,7 +68,6 @@ class @Traits
     # by aplying the parameter mapping first, we allow users to rename things in the trait,
     # and then merge it with the resource
     @apply_parameters temp, plainParameters, useKey
-    @apply_default_media_type_to_method temp
     temp.combine method[1]
     method[1] = temp
 
@@ -94,7 +93,7 @@ class @Traits
   get_parameters_from_type_key: (typeKey) ->
     parameters = @value_or_undefined typeKey
     result = {}
-    if parameters and parameters[0] and parameters[0][1] and parameters[0][1].value and parameters[0][1].value.length
+    if parameters and parameters[0] and parameters[0][1] and parameters[0][1].value
       parameters[0][1].value.forEach (parameter) ->
         unless parameter[1].tag == 'tag:yaml.org,2002:str'
           throw new exports.TraitError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
