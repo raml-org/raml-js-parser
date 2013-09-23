@@ -15,6 +15,7 @@ class @ResourceTypes
 
   # Loading is extra careful because it is done before validation (so it can be used for validation)
   load_types: (node) =>
+    @load_default_media_type(node)
     if @has_property node, /^resourceTypes$/
       allTypes = @property_value node, /^resourceTypes$/
       if allTypes and typeof allTypes is "object"
@@ -42,10 +43,16 @@ class @ResourceTypes
     if @has_types node
       resources = @child_resources node
       resources.forEach (resource) =>
+        @apply_default_media_type_to_resource resource[1]
+
         if @has_property resource[1], /^type$/
           type = @get_property resource[1], /^type$/
           @apply_type resource, type
         @apply_types resource[1]
+    else
+      resources = @child_resources node
+      resources.forEach (resource) =>
+        @apply_default_media_type_to_resource resource[1]
 
   apply_type: (resource, typeKey) =>
     tempType = @resolve_inheritance_chain typeKey
@@ -59,6 +66,7 @@ class @ResourceTypes
     typeName = @key_or_value typeKey
     compiledTypes = {}
     type = @apply_parameters_to_type typeName, typeKey
+    @apply_default_media_type_to_resource type
     @apply_traits_to_resource type, false
     compiledTypes[ typeName ] = type
     typesToApply = [ typeName ]
@@ -73,11 +81,11 @@ class @ResourceTypes
       child_type_key = @get_property @get_type(child_type)[1], /^type$/
       parentTypeMapping = @apply_parameters_to_type parentTypeName, child_type_key
       compiledTypes[parentTypeName] = parentTypeMapping
+      @apply_default_media_type_to_resource parentTypeMapping
       # apply traits
-      @apply_traits_to_resource parentTypeMapping[1], false
+      @apply_traits_to_resource parentTypeMapping, false
       typesToApply.push parentTypeName
       child_type = parentTypeName
-
     root_type = typesToApply.pop()
     baseType = compiledTypes[root_type].cloneRemoveIs()
     result = baseType
@@ -86,7 +94,6 @@ class @ResourceTypes
       baseType = compiledTypes[inherits_from].cloneRemoveIs()
       baseType.combine result
       result = baseType
-
     return result
 
   apply_parameters_to_type: (typeName, typeKey) =>
@@ -98,7 +105,7 @@ class @ResourceTypes
   _get_parameters_from_type_key: (typeKey) ->
     parameters = @value_or_undefined typeKey
     result = {}
-    if parameters and parameters[0] and parameters[0][1] and parameters[0][1].value
+    if parameters and parameters[0] and parameters[0][1] and parameters[0][1].value and parameters[0][1].value.length
       parameters[0][1].value.forEach (parameter) ->
         unless parameter[1].tag == 'tag:yaml.org,2002:str'
           throw new exports.ResourceTypeError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
