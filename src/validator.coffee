@@ -172,8 +172,8 @@ class @Validator
 
         if parameterName in reservedNames
           throw new exports.ValidationError 'while validating baseUri', null, uriParameter[0].value + ' parameter not allowed here', uriParameter[0].start_mark
-        unless @isNullableMapping(uriParameter[1])
-          throw new exports.ValidationError 'while validating baseUri', null, 'parameter must be a mapping', uriParameter[0].start_mark
+        unless @isNullableMapping(uriParameter[1], allowParameterKeys) or @isNullableSequence(uriParameter[1], allowParameterKeys)
+          throw new exports.ValidationError 'while validating baseUri', null, 'URI parameter must be a mapping', uriParameter[0].start_mark
         unless @isNull(uriParameter[1])
           @valid_common_parameter_properties uriParameter[1], allowParameterKeys
         unless skipParameterUseCheck or @isParameterKey(uriParameter) or parameterName in expressions
@@ -223,10 +223,19 @@ class @Validator
       return propertyName.slice(0,-1)
     return propertyName
 
-
   valid_common_parameter_properties: (node, allowParameterKeys) ->
     return unless node.value
+    if @isSequence(node)
+      if node.value.length == 0
+        throw new exports.ValidationError 'while validating parameter properties', null, 'named parameter needs at least one type', node.start_mark
+      unless node.value.length > 1
+        throw new exports.ValidationError 'while validating parameter properties', null, 'single type for variably typed parameter', node.start_mark
+      node.value.forEach (parameter) =>
+        @validate_named_parameter(parameter, allowParameterKeys)
+    else
+      @validate_named_parameter(node, allowParameterKeys)
 
+  validate_named_parameter: (node, allowParameterKeys) ->
     node.value.forEach (childNode) =>
       propertyName = childNode[0].value
       propertyValue = childNode[1].value
@@ -464,6 +473,9 @@ class @Validator
       switch key
         when "securedBy"
           @validate_secured_by property
+        when "usage"
+          unless allowParameterKeys
+            throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a resource", property[0].start_mark
         else
           unless valid
             throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a #{context}", property[0].start_mark
@@ -484,7 +496,7 @@ class @Validator
     unless @isMapping property[1]
       throw new exports.ValidationError 'while validating query parameters', null, "property: 'queryParameters' must be a mapping", property[0].start_mark
     property[1].value.forEach (param) =>
-      unless @isNullableMapping param[1]
+      unless @isNullableMapping(param[1]) or @isNullableSequence(param[1])
         throw new exports.ValidationError 'while validating query parameters', null, "each query parameter must be a mapping", param[1].start_mark
       @valid_common_parameter_properties param[1], allowParameterKeys
 
@@ -494,7 +506,7 @@ class @Validator
     unless @isMapping property[1]
       throw new exports.ValidationError 'while validating query parameters', null, "property: 'formParameters' must be a mapping", property[0].start_mark
     property[1].value.forEach (param) =>
-      unless @isNullableMapping param[1]
+      unless @isNullableMapping(param[1]) or @isNullableSequence(param[1])
         throw new exports.ValidationError 'while validating query parameters', null, "each form parameter must be a mapping", param[1].start_mark
       @valid_common_parameter_properties param[1], allowParameterKeys
 
@@ -504,7 +516,7 @@ class @Validator
     unless @isMapping property[1]
       throw new exports.ValidationError 'while validating headers', null, "property: 'headers' must be a mapping", property[0].start_mark
     property[1].value.forEach (param) =>
-      unless @isNullableMapping param[1]
+      unless @isNullableMapping(param[1]) or @isNullableSequence(param[1])
         throw new exports.ValidationError 'while validating query parameters', null, "each header must be a mapping", param[1].start_mark
       @valid_common_parameter_properties param[1], allowParameterKeys
 
@@ -532,6 +544,10 @@ class @Validator
           when "summary"
             unless @isScalar(property[1])
               throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
+          when "headers"
+            unless @isNullableMapping(property[1])
+              throw new exports.ValidationError 'while validating resources', null, "property 'headers' must be a mapping", property[0].start_mark
+            @validate_headers property
           else
             throw new exports.ValidationError 'while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
 
@@ -660,12 +676,12 @@ class @Validator
     child_resources.forEach (childResource) =>
       resourceResponse = {}
       resourceResponse.methods = []
-      
+
       if parentPath?
         resourceResponse.uri = parentPath + childResource[0].value
       else
         resourceResponse.uri = childResource[0].value
-      
+
       if @has_property childResource[1], "displayName"
         resourceResponse.displayName = @property_value childResource[1], "displayName"
 
@@ -683,7 +699,7 @@ class @Validator
         resourceResponse.methods.push 'head'
       if @has_property childResource[1], "options"
         resourceResponse.methods.push 'options'
-      
+
       resourceResponse.line = childResource[0].start_mark.line + 1
       resourceResponse.column = childResource[0].start_mark.column + 1
       if childResource[0].start_mark.name?

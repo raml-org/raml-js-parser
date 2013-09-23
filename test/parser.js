@@ -325,6 +325,57 @@ describe('Parser', function() {
         }
       }).and.notify(done);
     });
+    it('should fail when a parameter uses array syntax with only one type', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'baseUriParameters:',
+        '  a:',
+        '    - displayName: A',
+        '      description: This is A',
+        ''
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
+    });
+    it('should succeed when dealing with URI parameters with two types', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'baseUriParameters:',
+        '  a:',
+        '    - displayName: A',
+        '      description: This is A',
+        '      type: string',
+        '    - displayName: A',
+        '      description: This is A',
+        '      type: file',
+      ].join('\n');
+
+      raml.load(definition).should.become({
+        title: 'Test',
+        baseUri: 'http://{a}.myapi.org',
+        baseUriParameters: {
+          'a': [
+            {
+              displayName: 'A',
+              description: 'This is A',
+              type: "string"
+            },
+            {
+              displayName: 'A',
+              description: 'This is A',
+              type: "file"
+            },
+          ]
+        }
+      }).and.notify(done);
+    });
+
     it('should fail when declaring a URI parameter not on the baseUri', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -928,6 +979,742 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.and.notify(done);
     });
+  });
+  describe('MultiType Named Parameters', function() {
+    describe('Named parameters in baseUriParameters at root level', function(){
+      it('should succeed with null baseUriParameters', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          'baseUriParameters:',
+        ].join('\n');
+        var expected= {
+          title: "Test",
+          baseUri: "http://myapi.org",
+          baseUriParameters: null
+        };
+        raml.load(definition).should.become(expected).and.notify(done);
+      });
+      it('should fail when a parameter uses array syntax with no types', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://{a}.myapi.org',
+          'baseUriParameters:',
+          '  a: []'
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
+      });
+      it('should fail when a parameter uses array syntax with only one type', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://{a}.myapi.org',
+          'baseUriParameters:',
+          '  a:',
+          '    - displayName: A',
+          '      description: This is A',
+          ''
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
+      });
+      it('should succeed when dealing with URI parameters with two types', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://{a}.myapi.org',
+          'baseUriParameters:',
+          '  a:',
+          '    - displayName: A',
+          '      description: This is A',
+          '      type: string',
+          '    - displayName: A',
+          '      description: This is A',
+          '      type: file',
+        ].join('\n');
+
+        raml.load(definition).should.become({
+          title: 'Test',
+          baseUri: 'http://{a}.myapi.org',
+          baseUriParameters: {
+            'a': [
+              {
+                displayName: 'A',
+                description: 'This is A',
+                type: "string"
+              },
+              {
+                displayName: 'A',
+                description: 'This is A',
+                type: "file"
+              },
+            ]
+          }
+        }).and.notify(done);
+      });
+    });
+    describe('Named parameters in baseUriParameters at a resource level', function(){
+      it('should succeed with null baseUriParameters', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://{a}.myapi.org',
+          '/resource:',
+          '  baseUriParameters:',
+        ].join('\n');
+
+        raml.load(definition).should.become({
+          title: 'Test',
+          baseUri: 'http://{a}.myapi.org',
+          baseUriParameters: {
+            'a': {
+              displayName: 'a',
+              type: "string",
+              required: true
+            }
+          },
+          resources: [
+            {
+              relativeUri: "/resource",
+              baseUriParameters: null
+            }
+          ]
+        }).and.notify(done);
+      });
+      it('should fail when a parameter uses array syntax with no types', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://{a}.myapi.org',
+          '/resource:',
+          '  baseUriParameters:',
+          '    a: []'
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
+      });
+      it('should fail when a parameter uses array syntax with only one type', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://{a}.myapi.org',
+          '/resource:',
+          '  baseUriParameters:',
+          '    a:',
+          '      - displayName: A',
+          '        description: This is A',
+          ''
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
+      });
+      it('should succeed when dealing with URI parameters with two types', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://{a}.myapi.org',
+          '/resource:',
+          '  baseUriParameters:',
+          '    a:',
+          '      - displayName: A',
+          '        description: This is A',
+          '        type: string',
+          '      - displayName: A',
+          '        description: This is A',
+          '        type: file',
+        ].join('\n');
+
+        raml.load(definition).should.become({
+          title: 'Test',
+          baseUri: 'http://{a}.myapi.org',
+          baseUriParameters: {
+            'a': {
+              displayName: 'a',
+              type: "string",
+              required: true
+            }
+          },
+          resources: [
+            {
+              relativeUri: "/resource",
+              baseUriParameters: {
+                'a': [
+                  {
+                    displayName: 'A',
+                    description: 'This is A',
+                    type: "string"
+                  },
+                  {
+                    displayName: 'A',
+                    description: 'This is A',
+                    type: "file"
+                  },
+                ]
+              }
+
+            }
+          ]
+        }).and.notify(done);
+      });
+    });
+    describe('Named parameters in uriParameters', function(){
+      it('should succeed with null uriParameters', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/{a}resource:',
+          '  uriParameters:'
+        ].join('\n');
+
+        raml.load(definition).should.become({
+          title: 'Test',
+          baseUri: 'http://myapi.org',
+          resources: [
+            {
+              relativeUri: "/{a}resource",
+              uriParameters: {
+                'a':
+                  {
+                    displayName: 'a',
+                    required: true,
+                    type: "string"
+                  }
+              }
+
+            }
+          ]
+        }).and.notify(done);
+      });
+      it('should fail when a parameter uses array syntax with no types', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/{a}resource:',
+          '  uriParameters:',
+          '    a: []'
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
+      });
+      it('should fail when a parameter uses array syntax with only one type', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/{a}resource:',
+          '  uriParameters:',
+          '    a:',
+          '      - displayName: A',
+          '        description: This is A',
+          ''
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
+      });
+      it('should succeed when dealing with URI parameters with two types', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/{a}resource:',
+          '  uriParameters:',
+          '    a:',
+          '      - displayName: A',
+          '        description: This is A',
+          '        type: string',
+          '      - displayName: A',
+          '        description: This is A',
+          '        type: file',
+        ].join('\n');
+
+        raml.load(definition).should.become({
+          title: 'Test',
+          baseUri: 'http://myapi.org',
+          resources: [
+            {
+              relativeUri: "/{a}resource",
+              uriParameters: {
+                'a': [
+                  {
+                    displayName: 'A',
+                    description: 'This is A',
+                    type: "string"
+                  },
+                  {
+                    displayName: 'A',
+                    description: 'This is A',
+                    type: "file"
+                  },
+                ]
+              }
+
+            }
+          ]
+        }).and.notify(done);
+      });
+    });
+    describe('Named parameters in request headers', function(){
+      it('should succeed with null headers', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  get:',
+          '    headers:'
+        ].join('\n');
+
+        raml.load(definition).should.become({
+          title: 'Test',
+          baseUri: 'http://myapi.org',
+          resources: [
+            {
+              relativeUri: "/resource",
+              methods: [{
+                method: "get",
+                headers: null
+              }]
+            }
+          ]
+        }).and.notify(done);
+      });
+      it('should fail when a parameter uses array syntax with only one type', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  get:',
+          '    headers:',
+          '      a: []'
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
+      });
+      it('should fail when a parameter uses array syntax with only one type', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  get:',
+          '    headers:',
+          '      a:',
+          '        - displayName: A',
+          '          description: This is A',
+          ''
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
+      });
+      it('should succeed when dealing with URI parameters with two types', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  get:',
+          '    headers:',
+          '      a:',
+          '        - displayName: A',
+          '          description: This is A',
+          '          type: string',
+          '        - displayName: A',
+          '          description: This is A',
+          '          type: file',
+        ].join('\n');
+
+        raml.load(definition).should.become({
+          title: 'Test',
+          baseUri: 'http://myapi.org',
+          resources: [
+            {
+              relativeUri: "/resource",
+              methods: [{
+                method: "get",
+                headers: {
+                  'a': [
+                    {
+                      displayName: 'A',
+                      description: 'This is A',
+                      type: "string"
+                    },
+                    {
+                      displayName: 'A',
+                      description: 'This is A',
+                      type: "file"
+                    },
+                  ]
+                }
+              }]
+            }
+          ]
+        }).and.notify(done);
+      });
+    });
+    describe('Named parameters in query string parameter', function(){
+      it('should succeed with null URI parameters', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  get:',
+          '    queryParameters:'
+        ].join('\n');
+
+        raml.load(definition).should.become({
+          title: 'Test',
+          baseUri: 'http://myapi.org',
+          resources: [
+            {
+              relativeUri: "/resource",
+              methods: [{
+                method: "get",
+                queryParameters: null
+              }]
+            }
+          ]
+        }).and.notify(done);
+      });
+      it('should fail when a parameter uses array syntax with only one type', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  get:',
+          '    queryParameters:',
+          '      a: []'
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
+      });
+      it('should fail when a parameter uses array syntax with only one type', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  get:',
+          '    queryParameters:',
+          '      a:',
+          '        - displayName: A',
+          '          description: This is A',
+          ''
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
+      });
+      it('should succeed when dealing with URI parameters with two types', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  get:',
+          '    queryParameters:',
+          '      a:',
+          '        - displayName: A',
+          '          description: This is A',
+          '          type: string',
+          '        - displayName: A',
+          '          description: This is A',
+          '          type: file',
+        ].join('\n');
+
+        raml.load(definition).should.become({
+          title: 'Test',
+          baseUri: 'http://myapi.org',
+          resources: [
+            {
+              relativeUri: "/resource",
+              methods: [{
+                method: "get",
+                queryParameters: {
+                  'a': [
+                    {
+                      displayName: 'A',
+                      description: 'This is A',
+                      type: "string"
+                    },
+                    {
+                      displayName: 'A',
+                      description: 'This is A',
+                      type: "file"
+                    },
+                  ]
+                }
+              }]
+            }
+          ]
+        }).and.notify(done);
+      });
+    });
+    describe('Named parameters in form parameters', function(){
+      it('should succeed null form parameters', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'mediaType: multipart/form-data',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  post:',
+          '    body:',
+          '      formParameters:'
+        ].join('\n');
+
+        raml.load(definition).should.become({
+          title: 'Test',
+          mediaType: 'multipart/form-data',
+          baseUri: 'http://myapi.org',
+          resources: [
+            {
+              relativeUri: "/resource",
+              methods: [{
+                body: {
+                  "multipart/form-data": {
+                    formParameters: null
+                  }
+                },
+                method: "post"
+              }]
+            }
+          ]
+        }).and.notify(done);
+      });
+      it('should fail when a parameter uses array syntax with only one type', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  post:',
+          '    body: ',
+          '      formParameters:',
+          '        a: []'
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
+      });
+      it('should fail when a parameter uses array syntax with only one type', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  post:',
+          '    body: ',
+          '      formParameters:',
+          '        a:',
+          '          - displayName: A',
+          '            description: This is A',
+          ''
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
+      });
+      it('should succeed when dealing with URI parameters with two types', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'mediaType: multipart/form-data',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  post:',
+          '    body:',
+          '      formParameters:',
+          '        a:',
+          '          - displayName: A',
+          '            description: This is A',
+          '            type: string',
+          '          - displayName: A',
+          '            description: This is A',
+          '            type: file',
+        ].join('\n');
+
+        raml.load(definition).should.become({
+          title: 'Test',
+          mediaType: 'multipart/form-data',
+          baseUri: 'http://myapi.org',
+          resources: [
+            {
+              relativeUri: "/resource",
+              methods: [{
+                body: {
+                  "multipart/form-data": {
+                    formParameters: {
+                      'a': [
+                        {
+                          displayName: 'A',
+                          description: 'This is A',
+                          type: "string"
+                        },
+                        {
+                          displayName: 'A',
+                          description: 'This is A',
+                          type: "file"
+                        },
+                      ]
+                    }
+                  }
+                },
+                method: "post"
+              }]
+            }
+          ]
+        }).and.notify(done);
+      });
+    });
+    describe('Named parameters in response headers', function(){
+      it('should succeed with null header', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  get:',
+          '    responses:',
+          '      200:',
+          '        headers:'
+        ].join('\n');
+
+        raml.load(definition).should.become({
+          title: 'Test',
+          baseUri: 'http://myapi.org',
+          resources: [
+            {
+              relativeUri: "/resource",
+              methods: [{
+                method: "get",
+                responses: {
+                  200: {
+                    headers: null
+                  }
+                }
+              }]
+            }
+          ]
+        }).and.notify(done);
+      });
+      it('should fail when a parameter uses array syntax with only one type', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  get:',
+          '    responses:',
+          '      200:',
+          '        headers:',
+          '          a: []'
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
+      });
+      it('should fail when a parameter uses array syntax with only one type', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  get:',
+          '    responses:',
+          '      200:',
+          '        headers:',
+          '          a:',
+          '            - displayName: A',
+          '              description: This is A',
+          ''
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
+      });
+      it('should succeed when a parameter uses array syntax with two types', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  get:',
+          '    responses:',
+          '      200:',
+          '        headers:',
+          '           a:',
+          '            - displayName: A',
+          '              description: This is A',
+          '              type: string',
+          '            - displayName: A',
+          '              description: This is A',
+          '              type: file',
+        ].join('\n');
+
+        raml.load(definition).should.become({
+          title: 'Test',
+          baseUri: 'http://myapi.org',
+          resources: [
+            {
+              relativeUri: "/resource",
+              methods: [{
+                method: "get",
+                responses: {
+                  200: {
+                    headers: {
+                      'a': [
+                        {
+                          displayName: 'A',
+                          description: 'This is A',
+                          type: "string"
+                        },
+                        {
+                          displayName: 'A',
+                          description: 'This is A',
+                          type: "file"
+                        },
+                      ]
+                    }
+                  }
+                }
+              }]
+            }
+          ]
+        }).and.notify(done);
+      });
+    });
+
   });
   describe('Resources', function() {
     it('should succeed extracting resource information', function(done) {
@@ -5051,7 +5838,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/each header must be a mapping/).and.notify(done);
     });
-    it('should fail if header is sequence', function(done) {
+    it('should fail if header is empty sequence', function(done) {
       var definition = [
         '#%RAML 0.2',
         'title: Test',
@@ -5060,7 +5847,7 @@ describe('Parser', function() {
         '    headers:',
         '      foo: []'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/each header must be a mapping/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
     });
     it('should fail if header uses unknown property', function(done) {
       var definition = [

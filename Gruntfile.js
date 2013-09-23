@@ -67,14 +67,14 @@ module.exports = function(grunt) {
           urls: [
             'http://localhost:9001/test/parser.html'
           ],
-        reporter: 'spec',
+        reporter: 'dot',
         }
       }
     },
     mochacli: {
         options: {
             require: ['chai', 'chai-as-promised'],
-            reporter: 'spec',
+            reporter: 'dot',
             bail: false
         },
         all: ['test/parser.js', 'test/local.js', 'test/resourceTypesValidations.js']
