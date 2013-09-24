@@ -44,19 +44,7 @@ describe('Parser', function() {
         '    otherTrait:',
         '      description: Some description',
       ].join('\n');
-      var expected = {
-        title: "MyApi",
-        traits: [
-          {
-            emptyTrait: null,
-            otherTrait: {
-              description: 'Some description'
-            }
-          }
-        ]
-      };
-
-      raml.load(definition).should.become(expected).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/invalid trait definition, it must be a mapping/).and.notify(done);
     });
     it('it should not fail to parse an empty trait list', function(done) {
       var definition = [

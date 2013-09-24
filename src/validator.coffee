@@ -207,7 +207,7 @@ class @Validator
         throw new exports.ValidationError 'while validating traits', null, 'invalid traits definition, it must be an array', traitProperty.start_mark
 
       trait_entry.value.forEach (trait) =>
-        unless @isNullableMapping trait[1]
+        unless @isMapping trait[1]
           throw new exports.ValidationError 'while validating traits', null, 'invalid trait definition, it must be a mapping', trait[1].start_mark
         @valid_traits_properties trait
 
