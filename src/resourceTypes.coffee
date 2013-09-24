@@ -38,7 +38,7 @@ class @ResourceTypes
       return @property_value type, /^type$/
     return null
 
-  apply_types: (node) =>
+  apply_types: (node, resourceUri = "") =>
     return unless @isMapping(node)
     if @has_types node
       resources = @child_resources node
@@ -47,27 +47,27 @@ class @ResourceTypes
 
         if @has_property resource[1], /^type$/
           type = @get_property resource[1], /^type$/
-          @apply_type resource, type
-        @apply_types resource[1]
+          @apply_type resourceUri + resource[0].value, resource, type
+        @apply_types resource[1], resourceUri + resource[0].value
     else
       resources = @child_resources node
       resources.forEach (resource) =>
         @apply_default_media_type_to_resource resource[1]
 
-  apply_type: (resource, typeKey) =>
-    tempType = @resolve_inheritance_chain typeKey
+  apply_type: (resourceUri, resource, typeKey) =>
+    tempType = @resolve_inheritance_chain resourceUri, typeKey
     tempType.combine resource[1]
     resource[1] = tempType
     resource[1].remove_question_mark_properties()
 
   # calculates and resolve the inheritance chain from a starting type to the root_parent, applies parameters and traits
   # in all steps in the middle
-  resolve_inheritance_chain: (typeKey) ->
+  resolve_inheritance_chain: (resourceUri, typeKey) ->
     typeName = @key_or_value typeKey
     compiledTypes = {}
-    type = @apply_parameters_to_type typeName, typeKey
+    type = @apply_parameters_to_type resourceUri, typeName, typeKey
     @apply_default_media_type_to_resource type
-    @apply_traits_to_resource type, false
+    @apply_traits_to_resource resourceUri, type, false
     compiledTypes[ typeName ] = type
     typesToApply = [ typeName ]
     child_type = typeName
@@ -79,35 +79,40 @@ class @ResourceTypes
         throw new exports.ResourceTypeError 'while aplying resourceTypes', null, 'circular reference detected: ' + parentTypeName + "->" + typesToApply , child_type.start_mark
       # apply parameters
       child_type_key = @get_property @get_type(child_type)[1], /^type$/
-      parentTypeMapping = @apply_parameters_to_type parentTypeName, child_type_key
+      parentTypeMapping = @apply_parameters_to_type resourceUri, parentTypeName, child_type_key
       compiledTypes[parentTypeName] = parentTypeMapping
       @apply_default_media_type_to_resource parentTypeMapping
       # apply traits
-      @apply_traits_to_resource parentTypeMapping, false
+      @apply_traits_to_resource resourceUri, parentTypeMapping, false
       typesToApply.push parentTypeName
       child_type = parentTypeName
+
     root_type = typesToApply.pop()
-    baseType = compiledTypes[root_type].cloneRemoveIs()
+    baseType = compiledTypes[root_type].cloneForResourceType()
     result = baseType
 
     while inherits_from = typesToApply.pop()
-      baseType = compiledTypes[inherits_from].cloneRemoveIs()
-      baseType.combine result
-      result = baseType
+      baseType = compiledTypes[inherits_from].cloneForResourceType()
+      result.combine baseType
     return result
 
-  apply_parameters_to_type: (typeName, typeKey) =>
-    type = (@get_type typeName)[1].cloneForTrait()
-    parameters = @_get_parameters_from_type_key typeKey
+  apply_parameters_to_type: (resourceUri, typeName, typeKey) =>
+    type = (@get_type typeName)[1].clone()
+    parameters = @_get_parameters_from_type_key resourceUri, typeKey
     @apply_parameters type, parameters, typeKey
     return type
 
-  _get_parameters_from_type_key: (typeKey) ->
+  _get_parameters_from_type_key: (resourceUri, typeKey) ->
+    result = {
+      resourcePath: resourceUri.replace(/\/\/*/g, '/')
+    }
+    return result unless @isMapping typeKey
     parameters = @value_or_undefined typeKey
-    result = {}
-    if parameters and parameters[0] and parameters[0][1] and parameters[0][1].value and parameters[0][1].value.length
+    unless @isNull parameters[0][1]
       parameters[0][1].value.forEach (parameter) ->
         unless parameter[1].tag == 'tag:yaml.org,2002:str'
           throw new exports.ResourceTypeError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
+        if parameter[1].value in [ "methodName", "resourcePath", "resourcePathName"]
+          throw new exports.ResourceTypeError 'while aplying parameters', null, 'invalid parameter name "methodName", "resourcePath" are reserved parameter names "resourcePathName"', parameter[1].start_mark
         result[parameter[0].value] = parameter[1].value
     return result

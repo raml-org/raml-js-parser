@@ -3082,6 +3082,216 @@ window.RAML = {}
 
 window.RAML.Parser = require('../lib/raml')
 },{"../lib/raml":11}],12:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, events, nodes, raml, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  events = require('./events');
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  raml = require('./raml');
+
+  this.ComposerError = (function(_super) {
+    __extends(ComposerError, _super);
+
+    function ComposerError() {
+      _ref = ComposerError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return ComposerError;
+
+  })(MarkedYAMLError);
+
+  this.Composer = (function() {
+    function Composer() {
+      this.anchors = {};
+    }
+
+    Composer.prototype.check_node = function() {
+      if (this.check_event(events.StreamStartEvent)) {
+        this.get_event();
+      }
+      return !this.check_event(events.StreamEndEvent);
+    };
+
+    /*
+    Get the root node of the next document.
+    */
+
+
+    Composer.prototype.get_node = function() {
+      if (!this.check_event(events.StreamEndEvent)) {
+        return this.compose_document();
+      }
+    };
+
+    Composer.prototype.get_single_node = function(validate, apply, join) {
+      var document, event;
+      if (validate == null) {
+        validate = true;
+      }
+      if (apply == null) {
+        apply = true;
+      }
+      if (join == null) {
+        join = true;
+      }
+      this.get_event();
+      document = null;
+      if (!this.check_event(events.StreamEndEvent)) {
+        document = this.compose_document();
+      }
+      if (!this.check_event(events.StreamEndEvent)) {
+        event = this.get_event();
+        throw new exports.ComposerError('expected a single document in the stream', document.start_mark, 'but found another document', event.start_mark);
+      }
+      this.get_event();
+      if (validate || apply) {
+        this.load_schemas(document);
+        this.load_traits(document);
+        this.load_types(document);
+        this.load_security_schemes(document);
+      }
+      if (validate) {
+        this.validate_document(document);
+      }
+      if (apply) {
+        this.apply_types(document);
+        this.apply_traits(document);
+        this.apply_schemas(document);
+      }
+      if (join) {
+        this.join_resources(document);
+      }
+      return document;
+    };
+
+    Composer.prototype.compose_document = function() {
+      var node;
+      this.get_event();
+      node = this.compose_node();
+      this.get_event();
+      this.anchors = {};
+      return node;
+    };
+
+    Composer.prototype.compose_node = function(parent, index) {
+      var anchor, event, node;
+      if (this.check_event(events.AliasEvent)) {
+        event = this.get_event();
+        anchor = event.anchor;
+        if (!(anchor in this.anchors)) {
+          throw new exports.ComposerError(null, null, "found undefined alias " + anchor, event.start_mark);
+        }
+        return this.anchors[anchor];
+      }
+      event = this.peek_event();
+      anchor = event.anchor;
+      if (anchor !== null && anchor in this.anchors) {
+        throw new exports.ComposerError("found duplicate anchor " + anchor + "; first occurence", this.anchors[anchor].start_mark, 'second occurrence', event.start_mark);
+      }
+      this.descend_resolver(parent, index);
+      if (this.check_event(events.ScalarEvent)) {
+        node = this.compose_scalar_node(anchor);
+      } else if (this.check_event(events.SequenceStartEvent)) {
+        node = this.compose_sequence_node(anchor);
+      } else if (this.check_event(events.MappingStartEvent)) {
+        node = this.compose_mapping_node(anchor);
+      }
+      this.ascend_resolver();
+      return node;
+    };
+
+    Composer.prototype.compose_fixed_scalar_node = function(anchor, value) {
+      var event, node;
+      event = this.get_event();
+      node = new nodes.ScalarNode('tag:yaml.org,2002:str', value, event.start_mark, event.end_mark, event.style);
+      if (anchor !== null) {
+        this.anchors[anchor] = node;
+      }
+      return node;
+    };
+
+    Composer.prototype.compose_scalar_node = function(anchor) {
+      var event, extension, node, tag;
+      event = this.get_event();
+      tag = event.tag;
+      if (tag === null || tag === '!') {
+        tag = this.resolve(nodes.ScalarNode, event.value, event.implicit);
+      }
+      if (event.tag === '!include') {
+        extension = event.value.split(".").pop();
+        if (this.src != null) {
+          event.value = require('url').resolve(this.src, event.value);
+        }
+        if (extension === 'yaml' || extension === 'yml' || extension === 'raml') {
+          return raml.composeFile(event.value, false, false, false);
+        } else {
+          node = new nodes.ScalarNode('tag:yaml.org,2002:str', raml.readFile(event.value), event.start_mark, event.end_mark, event.style);
+        }
+      } else {
+        node = new nodes.ScalarNode(tag, event.value, event.start_mark, event.end_mark, event.style);
+      }
+      if (anchor !== null) {
+        this.anchors[anchor] = node;
+      }
+      return node;
+    };
+
+    Composer.prototype.compose_sequence_node = function(anchor) {
+      var end_event, index, node, start_event, tag;
+      start_event = this.get_event();
+      tag = start_event.tag;
+      if (tag === null || tag === '!') {
+        tag = this.resolve(nodes.SequenceNode, null, start_event.implicit);
+      }
+      node = new nodes.SequenceNode(tag, [], start_event.start_mark, null, start_event.flow_style);
+      if (anchor !== null) {
+        this.anchors[anchor] = node;
+      }
+      index = 0;
+      while (!this.check_event(events.SequenceEndEvent)) {
+        node.value.push(this.compose_node(node, index));
+        index++;
+      }
+      end_event = this.get_event();
+      node.end_mark = end_event.end_mark;
+      return node;
+    };
+
+    Composer.prototype.compose_mapping_node = function(anchor) {
+      var end_event, item_key, item_value, node, start_event, tag;
+      start_event = this.get_event();
+      tag = start_event.tag;
+      if (tag === null || tag === '!') {
+        tag = this.resolve(nodes.MappingNode, null, start_event.implicit);
+      }
+      node = new nodes.MappingNode(tag, [], start_event.start_mark, null, start_event.flow_style);
+      if (anchor !== null) {
+        this.anchors[anchor] = node;
+      }
+      while (!this.check_event(events.MappingEndEvent)) {
+        item_key = this.compose_node(node);
+        item_value = this.compose_node(node, item_key);
+        node.value.push([item_key, item_value]);
+      }
+      end_event = this.get_event();
+      node.end_mark = end_event.end_mark;
+      return node;
+    };
+
+    return Composer;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./events":2,"./nodes":13,"./raml":11,"url":7}],14:[function(require,module,exports){
 require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{1:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
@@ -6946,7 +7156,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 },{}]},{},[])
 ;;module.exports=require("buffer-browserify")
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 (function(Buffer){(function() {
   var MarkedYAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -7558,217 +7768,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 }).call(this);
 
 })(require("__browserify_buffer").Buffer)
-},{"./errors":1,"./nodes":14,"./util":4,"__browserify_buffer":12}],15:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, events, nodes, raml, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  events = require('./events');
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  raml = require('./raml');
-
-  this.ComposerError = (function(_super) {
-    __extends(ComposerError, _super);
-
-    function ComposerError() {
-      _ref = ComposerError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return ComposerError;
-
-  })(MarkedYAMLError);
-
-  this.Composer = (function() {
-    function Composer() {
-      this.anchors = {};
-    }
-
-    Composer.prototype.check_node = function() {
-      if (this.check_event(events.StreamStartEvent)) {
-        this.get_event();
-      }
-      return !this.check_event(events.StreamEndEvent);
-    };
-
-    /*
-    Get the root node of the next document.
-    */
-
-
-    Composer.prototype.get_node = function() {
-      if (!this.check_event(events.StreamEndEvent)) {
-        return this.compose_document();
-      }
-    };
-
-    Composer.prototype.get_single_node = function(validate, apply, join) {
-      var document, event;
-      if (validate == null) {
-        validate = true;
-      }
-      if (apply == null) {
-        apply = true;
-      }
-      if (join == null) {
-        join = true;
-      }
-      this.get_event();
-      document = null;
-      if (!this.check_event(events.StreamEndEvent)) {
-        document = this.compose_document();
-      }
-      if (!this.check_event(events.StreamEndEvent)) {
-        event = this.get_event();
-        throw new exports.ComposerError('expected a single document in the stream', document.start_mark, 'but found another document', event.start_mark);
-      }
-      this.get_event();
-      if (validate || apply) {
-        this.load_schemas(document);
-        this.load_traits(document);
-        this.load_types(document);
-        this.load_security_schemes(document);
-      }
-      if (validate) {
-        this.validate_document(document);
-      }
-      if (apply) {
-        this.apply_types(document);
-        this.apply_traits(document);
-        this.apply_schemas(document);
-      }
-      if (join) {
-        this.join_resources(document);
-      }
-      return document;
-    };
-
-    Composer.prototype.compose_document = function() {
-      var node;
-      this.get_event();
-      node = this.compose_node();
-      this.get_event();
-      this.anchors = {};
-      return node;
-    };
-
-    Composer.prototype.compose_node = function(parent, index) {
-      var anchor, event, node;
-      if (this.check_event(events.AliasEvent)) {
-        event = this.get_event();
-        anchor = event.anchor;
-        if (!(anchor in this.anchors)) {
-          throw new exports.ComposerError(null, null, "found undefined alias " + anchor, event.start_mark);
-        }
-        return this.anchors[anchor];
-      }
-      event = this.peek_event();
-      anchor = event.anchor;
-      if (anchor !== null && anchor in this.anchors) {
-        throw new exports.ComposerError("found duplicate anchor " + anchor + "; first occurence", this.anchors[anchor].start_mark, 'second occurrence', event.start_mark);
-      }
-      this.descend_resolver(parent, index);
-      if (this.check_event(events.ScalarEvent)) {
-        node = this.compose_scalar_node(anchor);
-      } else if (this.check_event(events.SequenceStartEvent)) {
-        node = this.compose_sequence_node(anchor);
-      } else if (this.check_event(events.MappingStartEvent)) {
-        node = this.compose_mapping_node(anchor);
-      }
-      this.ascend_resolver();
-      return node;
-    };
-
-    Composer.prototype.compose_fixed_scalar_node = function(anchor, value) {
-      var event, node;
-      event = this.get_event();
-      node = new nodes.ScalarNode('tag:yaml.org,2002:str', value, event.start_mark, event.end_mark, event.style);
-      if (anchor !== null) {
-        this.anchors[anchor] = node;
-      }
-      return node;
-    };
-
-    Composer.prototype.compose_scalar_node = function(anchor) {
-      var event, extension, node, tag;
-      event = this.get_event();
-      tag = event.tag;
-      if (tag === null || tag === '!') {
-        tag = this.resolve(nodes.ScalarNode, event.value, event.implicit);
-      }
-      if (event.tag === '!include') {
-        extension = event.value.split(".").pop();
-        if (this.src != null) {
-          event.value = require('url').resolve(this.src, event.value);
-        }
-        if (extension === 'yaml' || extension === 'yml' || extension === 'raml') {
-          return raml.composeFile(event.value, false, false, false);
-        } else {
-          node = new nodes.ScalarNode('tag:yaml.org,2002:str', raml.readFile(event.value), event.start_mark, event.end_mark, event.style);
-        }
-      } else {
-        node = new nodes.ScalarNode(tag, event.value, event.start_mark, event.end_mark, event.style);
-      }
-      if (anchor !== null) {
-        this.anchors[anchor] = node;
-      }
-      return node;
-    };
-
-    Composer.prototype.compose_sequence_node = function(anchor) {
-      var end_event, index, node, start_event, tag;
-      start_event = this.get_event();
-      tag = start_event.tag;
-      if (tag === null || tag === '!') {
-        tag = this.resolve(nodes.SequenceNode, null, start_event.implicit);
-      }
-      node = new nodes.SequenceNode(tag, [], start_event.start_mark, null, start_event.flow_style);
-      if (anchor !== null) {
-        this.anchors[anchor] = node;
-      }
-      index = 0;
-      while (!this.check_event(events.SequenceEndEvent)) {
-        node.value.push(this.compose_node(node, index));
-        index++;
-      }
-      end_event = this.get_event();
-      node.end_mark = end_event.end_mark;
-      return node;
-    };
-
-    Composer.prototype.compose_mapping_node = function(anchor) {
-      var end_event, item_key, item_value, node, start_event, tag;
-      start_event = this.get_event();
-      tag = start_event.tag;
-      if (tag === null || tag === '!') {
-        tag = this.resolve(nodes.MappingNode, null, start_event.implicit);
-      }
-      node = new nodes.MappingNode(tag, [], start_event.start_mark, null, start_event.flow_style);
-      if (anchor !== null) {
-        this.anchors[anchor] = node;
-      }
-      while (!this.check_event(events.MappingEndEvent)) {
-        item_key = this.compose_node(node);
-        item_value = this.compose_node(node, item_key);
-        node.value.push([item_key, item_value]);
-      }
-      end_event = this.get_event();
-      node.end_mark = end_event.end_mark;
-      return node;
-    };
-
-    return Composer;
-
-  })();
-
-}).call(this);
-
-},{"./errors":1,"./events":2,"./nodes":14,"./raml":11,"url":7}],16:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4,"__browserify_buffer":14}],16:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -7877,7 +7877,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":14}],17:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],17:[function(require,module,exports){
 (function() {
   var composer, construct, joiner, parser, reader, resolver, scanner, schemas, securitySchemes, traits, transformations, types, util, validator;
 
@@ -7984,7 +7984,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./composer":15,"./construct":13,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./securitySchemes":26,"./traits":23,"./transformations":27,"./util":4,"./validator":22}],14:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./securitySchemes":26,"./traits":23,"./transformations":27,"./util":4,"./validator":22}],13:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -8157,12 +8157,29 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
     MappingNode.prototype.cloneForTrait = function() {
       var properties, temp,
         _this = this;
+      this.clone();
       properties = [];
       this.value.forEach(function(property) {
         var name, value;
         name = property[0].clone();
         value = property[1].clone();
-        if (!name.value.match(/^(displayName|description)$/)) {
+        if (!name.value.match(/^(usage|displayName)$/)) {
+          return properties.push([name, value]);
+        }
+      });
+      temp = new this.constructor(this.tag, properties, this.start_mark, this.end_mark, this.flow_style);
+      return temp;
+    };
+
+    MappingNode.prototype.cloneForResourceType = function() {
+      var properties, temp,
+        _this = this;
+      properties = [];
+      this.value.forEach(function(property) {
+        var name, value;
+        name = property[0].cloneRemoveIs();
+        value = property[1].cloneRemoveIs();
+        if (!name.value.match(/^(is|type|usage|displayName)$/)) {
           return properties.push([name, value]);
         }
       });
@@ -9154,7 +9171,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":14,"./util":4}],24:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4}],24:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9236,9 +9253,12 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       return null;
     };
 
-    ResourceTypes.prototype.apply_types = function(node) {
+    ResourceTypes.prototype.apply_types = function(node, resourceUri) {
       var resources,
         _this = this;
+      if (resourceUri == null) {
+        resourceUri = "";
+      }
       if (!this.isMapping(node)) {
         return;
       }
@@ -9249,9 +9269,9 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
           _this.apply_default_media_type_to_resource(resource[1]);
           if (_this.has_property(resource[1], /^type$/)) {
             type = _this.get_property(resource[1], /^type$/);
-            _this.apply_type(resource, type);
+            _this.apply_type(resourceUri + resource[0].value, resource, type);
           }
-          return _this.apply_types(resource[1]);
+          return _this.apply_types(resource[1], resourceUri + resource[0].value);
         });
       } else {
         resources = this.child_resources(node);
@@ -9261,21 +9281,21 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       }
     };
 
-    ResourceTypes.prototype.apply_type = function(resource, typeKey) {
+    ResourceTypes.prototype.apply_type = function(resourceUri, resource, typeKey) {
       var tempType;
-      tempType = this.resolve_inheritance_chain(typeKey);
+      tempType = this.resolve_inheritance_chain(resourceUri, typeKey);
       tempType.combine(resource[1]);
       resource[1] = tempType;
       return resource[1].remove_question_mark_properties();
     };
 
-    ResourceTypes.prototype.resolve_inheritance_chain = function(typeKey) {
+    ResourceTypes.prototype.resolve_inheritance_chain = function(resourceUri, typeKey) {
       var baseType, child_type, child_type_key, compiledTypes, inherits_from, parentTypeMapping, parentTypeName, result, root_type, type, typeName, typesToApply;
       typeName = this.key_or_value(typeKey);
       compiledTypes = {};
-      type = this.apply_parameters_to_type(typeName, typeKey);
+      type = this.apply_parameters_to_type(resourceUri, typeName, typeKey);
       this.apply_default_media_type_to_resource(type);
-      this.apply_traits_to_resource(type, false);
+      this.apply_traits_to_resource(resourceUri, type, false);
       compiledTypes[typeName] = type;
       typesToApply = [typeName];
       child_type = typeName;
@@ -9285,40 +9305,48 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
           throw new exports.ResourceTypeError('while aplying resourceTypes', null, 'circular reference detected: ' + parentTypeName + "->" + typesToApply, child_type.start_mark);
         }
         child_type_key = this.get_property(this.get_type(child_type)[1], /^type$/);
-        parentTypeMapping = this.apply_parameters_to_type(parentTypeName, child_type_key);
+        parentTypeMapping = this.apply_parameters_to_type(resourceUri, parentTypeName, child_type_key);
         compiledTypes[parentTypeName] = parentTypeMapping;
         this.apply_default_media_type_to_resource(parentTypeMapping);
-        this.apply_traits_to_resource(parentTypeMapping, false);
+        this.apply_traits_to_resource(resourceUri, parentTypeMapping, false);
         typesToApply.push(parentTypeName);
         child_type = parentTypeName;
       }
       root_type = typesToApply.pop();
-      baseType = compiledTypes[root_type].cloneRemoveIs();
+      baseType = compiledTypes[root_type].cloneForResourceType();
       result = baseType;
       while (inherits_from = typesToApply.pop()) {
-        baseType = compiledTypes[inherits_from].cloneRemoveIs();
-        baseType.combine(result);
-        result = baseType;
+        baseType = compiledTypes[inherits_from].cloneForResourceType();
+        result.combine(baseType);
       }
       return result;
     };
 
-    ResourceTypes.prototype.apply_parameters_to_type = function(typeName, typeKey) {
+    ResourceTypes.prototype.apply_parameters_to_type = function(resourceUri, typeName, typeKey) {
       var parameters, type;
-      type = (this.get_type(typeName))[1].cloneForTrait();
-      parameters = this._get_parameters_from_type_key(typeKey);
+      type = (this.get_type(typeName))[1].clone();
+      parameters = this._get_parameters_from_type_key(resourceUri, typeKey);
       this.apply_parameters(type, parameters, typeKey);
       return type;
     };
 
-    ResourceTypes.prototype._get_parameters_from_type_key = function(typeKey) {
+    ResourceTypes.prototype._get_parameters_from_type_key = function(resourceUri, typeKey) {
       var parameters, result;
+      result = {
+        resourcePath: resourceUri.replace(/\/\/*/g, '/')
+      };
+      if (!this.isMapping(typeKey)) {
+        return result;
+      }
       parameters = this.value_or_undefined(typeKey);
-      result = {};
-      if (parameters && parameters[0] && parameters[0][1] && parameters[0][1].value && parameters[0][1].value.length) {
+      if (!this.isNull(parameters[0][1])) {
         parameters[0][1].value.forEach(function(parameter) {
+          var _ref1;
           if (parameter[1].tag !== 'tag:yaml.org,2002:str') {
             throw new exports.ResourceTypeError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
+          }
+          if ((_ref1 = parameter[1].value) === "methodName" || _ref1 === "resourcePath" || _ref1 === "resourcePathName") {
+            throw new exports.ResourceTypeError('while aplying parameters', null, 'invalid parameter name "methodName", "resourcePath" are reserved parameter names "resourcePathName"', parameter[1].start_mark);
           }
           return result[parameter[0].value] = parameter[1].value;
         });
@@ -9332,108 +9360,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":14}],25:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, nodes, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  /*
-  The Schemas throws these.
-  */
-
-
-  this.SchemaError = (function(_super) {
-    __extends(SchemaError, _super);
-
-    function SchemaError() {
-      _ref = SchemaError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return SchemaError;
-
-  })(MarkedYAMLError);
-
-  /*
-    The Schemas class deals with applying schemas to resources according to the spec
-  */
-
-
-  this.Schemas = (function() {
-    function Schemas() {
-      this.get_schemas_used = __bind(this.get_schemas_used, this);
-      this.apply_schemas = __bind(this.apply_schemas, this);
-      this.get_all_schemas = __bind(this.get_all_schemas, this);
-      this.has_schemas = __bind(this.has_schemas, this);
-      this.load_schemas = __bind(this.load_schemas, this);
-      this.declaredSchemas = {};
-    }
-
-    Schemas.prototype.load_schemas = function(node) {
-      var allSchemas,
-        _this = this;
-      if (this.has_property(node, /^schemas$/)) {
-        allSchemas = this.property_value(node, /^schemas$/);
-        if (allSchemas && typeof allSchemas === "object") {
-          return allSchemas.forEach(function(schema_entry) {
-            if (schema_entry && typeof schema_entry === "object" && typeof schema_entry.value === "object") {
-              return schema_entry.value.forEach(function(schema) {
-                return _this.declaredSchemas[schema[0].value] = schema;
-              });
-            }
-          });
-        }
-      }
-    };
-
-    Schemas.prototype.has_schemas = function(node) {
-      if (this.declaredSchemas.length === 0 && this.has_property(node, /^schemas$/)) {
-        this.load_schemas(node);
-      }
-      return Object.keys(this.declaredSchemas).length > 0;
-    };
-
-    Schemas.prototype.get_all_schemas = function() {
-      return this.declaredSchemas;
-    };
-
-    Schemas.prototype.apply_schemas = function(node) {
-      var resources, schemas,
-        _this = this;
-      resources = this.child_resources(node);
-      schemas = this.get_schemas_used(resources);
-      return schemas.forEach(function(schema) {
-        if (schema[1].value in _this.declaredSchemas) {
-          return schema[1].value = _this.declaredSchemas[schema[1].value][1].value;
-        }
-      });
-    };
-
-    Schemas.prototype.get_schemas_used = function(resources) {
-      var schemas,
-        _this = this;
-      schemas = [];
-      resources.forEach(function(resource) {
-        var properties;
-        properties = _this.get_properties(resource[1], /^schema$/);
-        return schemas = schemas.concat(properties);
-      });
-      return schemas;
-    };
-
-    return Schemas;
-
-  })();
-
-}).call(this);
-
-},{"./errors":1,"./nodes":14}],19:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10941,7 +10868,108 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./tokens":3,"./util":4}],26:[function(require,module,exports){
+},{"./errors":1,"./tokens":3,"./util":4}],25:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, nodes, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  /*
+  The Schemas throws these.
+  */
+
+
+  this.SchemaError = (function(_super) {
+    __extends(SchemaError, _super);
+
+    function SchemaError() {
+      _ref = SchemaError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return SchemaError;
+
+  })(MarkedYAMLError);
+
+  /*
+    The Schemas class deals with applying schemas to resources according to the spec
+  */
+
+
+  this.Schemas = (function() {
+    function Schemas() {
+      this.get_schemas_used = __bind(this.get_schemas_used, this);
+      this.apply_schemas = __bind(this.apply_schemas, this);
+      this.get_all_schemas = __bind(this.get_all_schemas, this);
+      this.has_schemas = __bind(this.has_schemas, this);
+      this.load_schemas = __bind(this.load_schemas, this);
+      this.declaredSchemas = {};
+    }
+
+    Schemas.prototype.load_schemas = function(node) {
+      var allSchemas,
+        _this = this;
+      if (this.has_property(node, /^schemas$/)) {
+        allSchemas = this.property_value(node, /^schemas$/);
+        if (allSchemas && typeof allSchemas === "object") {
+          return allSchemas.forEach(function(schema_entry) {
+            if (schema_entry && typeof schema_entry === "object" && typeof schema_entry.value === "object") {
+              return schema_entry.value.forEach(function(schema) {
+                return _this.declaredSchemas[schema[0].value] = schema;
+              });
+            }
+          });
+        }
+      }
+    };
+
+    Schemas.prototype.has_schemas = function(node) {
+      if (this.declaredSchemas.length === 0 && this.has_property(node, /^schemas$/)) {
+        this.load_schemas(node);
+      }
+      return Object.keys(this.declaredSchemas).length > 0;
+    };
+
+    Schemas.prototype.get_all_schemas = function() {
+      return this.declaredSchemas;
+    };
+
+    Schemas.prototype.apply_schemas = function(node) {
+      var resources, schemas,
+        _this = this;
+      resources = this.child_resources(node);
+      schemas = this.get_schemas_used(resources);
+      return schemas.forEach(function(schema) {
+        if (schema[1].value in _this.declaredSchemas) {
+          return schema[1].value = _this.declaredSchemas[schema[1].value][1].value;
+        }
+      });
+    };
+
+    Schemas.prototype.get_schemas_used = function(resources) {
+      var schemas,
+        _this = this;
+      schemas = [];
+      resources.forEach(function(resource) {
+        var properties;
+        properties = _this.get_properties(resource[1], /^schema$/);
+        return schemas = schemas.concat(properties);
+      });
+      return schemas;
+    };
+
+    return Schemas;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./nodes":13}],26:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11021,184 +11049,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":14}],23:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, nodes, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  /*
-  The Traits throws these.
-  */
-
-
-  this.TraitError = (function(_super) {
-    __extends(TraitError, _super);
-
-    function TraitError() {
-      _ref = TraitError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return TraitError;
-
-  })(MarkedYAMLError);
-
-  /*
-  The Traits class deals with applying traits to resources according to the spec
-  */
-
-
-  this.Traits = (function() {
-    function Traits() {
-      this.declaredTraits = {};
-    }
-
-    Traits.prototype.load_traits = function(node) {
-      var allTraits,
-        _this = this;
-      if (this.has_property(node, /^traits$/)) {
-        allTraits = this.property_value(node, /^traits$/);
-        if (allTraits && typeof allTraits === "object") {
-          return allTraits.forEach(function(trait_item) {
-            if (trait_item && typeof trait_item === "object" && typeof trait_item.value === "object") {
-              return trait_item.value.forEach(function(trait) {
-                return _this.declaredTraits[trait[0].value] = trait;
-              });
-            }
-          });
-        }
-      }
-    };
-
-    Traits.prototype.has_traits = function(node) {
-      if (this.declaredTraits.length === 0 && this.has_property(node, /^traits$/)) {
-        this.load_traits(node);
-      }
-      return Object.keys(this.declaredTraits).length > 0;
-    };
-
-    Traits.prototype.get_trait = function(traitName) {
-      if (traitName in this.declaredTraits) {
-        return this.declaredTraits[traitName][1];
-      }
-      return null;
-    };
-
-    Traits.prototype.apply_traits = function(node, removeQs) {
-      var resources,
-        _this = this;
-      if (removeQs == null) {
-        removeQs = true;
-      }
-      if (!this.isMapping(node)) {
-        return;
-      }
-      if (this.has_traits(node)) {
-        resources = this.child_resources(node);
-        return resources.forEach(function(resource) {
-          return _this.apply_traits_to_resource(resource[1], removeQs);
-        });
-      }
-    };
-
-    Traits.prototype.apply_traits_to_resource = function(resource, removeQs) {
-      var methods, uses,
-        _this = this;
-      if (!this.isMapping(resource)) {
-        return;
-      }
-      methods = this.child_methods(resource);
-      if (this.has_property(resource, /^is$/)) {
-        uses = this.property_value(resource, /^is$/);
-        uses.forEach(function(use) {
-          return methods.forEach(function(method) {
-            return _this.apply_trait(method, use);
-          });
-        });
-      }
-      methods.forEach(function(method) {
-        if (_this.has_property(method[1], /^is$/)) {
-          uses = _this.property_value(method[1], /^is$/);
-          return uses.forEach(function(use) {
-            return _this.apply_trait(method, use);
-          });
-        }
-      });
-      if (removeQs) {
-        resource.remove_question_mark_properties();
-      }
-      return this.apply_traits(resource, removeQs);
-    };
-
-    Traits.prototype.apply_trait = function(method, useKey) {
-      var plainParameters, temp, trait;
-      trait = this.get_trait(this.key_or_value(useKey));
-      plainParameters = this.get_parameters_from_type_key(useKey);
-      temp = trait.cloneForTrait();
-      this.apply_parameters(temp, plainParameters, useKey);
-      this.apply_default_media_type_to_method(temp);
-      temp.combine(method[1]);
-      return method[1] = temp;
-    };
-
-    Traits.prototype.apply_parameters = function(resource, parameters, useKey) {
-      var parameterUse,
-        _this = this;
-      if (!resource) {
-        return;
-      }
-      if (resource.tag === 'tag:yaml.org,2002:str') {
-        parameterUse = [];
-        if (parameterUse = resource.value.match(/<<([^>]+)>>/g)) {
-          parameterUse.forEach(function(parameter) {
-            parameter = parameter.replace(/[<>]+/g, '').trim();
-            if (!(parameter in parameters)) {
-              throw new exports.TraitError('while aplying parameters', null, 'value was not provided for parameter: ' + parameter, useKey.start_mark);
-            }
-            return resource.value = resource.value.replace("<<" + parameter + ">>", parameters[parameter]);
-          });
-        }
-      }
-      if (resource.tag === 'tag:yaml.org,2002:seq') {
-        resource.value.forEach(function(node) {
-          return _this.apply_parameters(node, parameters, useKey);
-        });
-      }
-      if (resource.tag === 'tag:yaml.org,2002:map') {
-        return resource.value.forEach(function(res) {
-          _this.apply_parameters(res[0], parameters, useKey);
-          return _this.apply_parameters(res[1], parameters, useKey);
-        });
-      }
-    };
-
-    Traits.prototype.get_parameters_from_type_key = function(typeKey) {
-      var parameters, result;
-      parameters = this.value_or_undefined(typeKey);
-      result = {};
-      if (parameters && parameters[0] && parameters[0][1] && parameters[0][1].value && parameters[0][1].value.length) {
-        parameters[0][1].value.forEach(function(parameter) {
-          if (parameter[1].tag !== 'tag:yaml.org,2002:str') {
-            throw new exports.TraitError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
-          }
-          return result[parameter[0].value] = parameter[1].value;
-        });
-      }
-      return result;
-    };
-
-    return Traits;
-
-  })();
-
-}).call(this);
-
-},{"./errors":1,"./nodes":14}],8:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],8:[function(require,module,exports){
 
 /**
  * Object#toString() ref for stringify().
@@ -11759,7 +11610,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./composer":15,"./construct":13,"./errors":1,"./events":2,"./loader":17,"./nodes":14,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":28}],27:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":28}],27:[function(require,module,exports){
 (function() {
   var nodes, uritemplate,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -11922,7 +11773,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./nodes":14,"uritemplate":29}],22:[function(require,module,exports){
+},{"./nodes":13,"uritemplate":29}],22:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, traits, uritemplate, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11983,7 +11834,7 @@ function decode(str) {
   this.Validator = (function() {
     function Validator() {
       this.get_properties = __bind(this.get_properties, this);
-      this.validations = [this.is_map, this.validate_base_uri_parameters, this.valid_root_properties, this.valid_absolute_uris];
+      this.validations = [this.is_map, this.valid_root_properties, this.validate_base_uri_parameters, this.valid_absolute_uris];
     }
 
     Validator.prototype.validate_document = function(node) {
@@ -12179,6 +12030,9 @@ function decode(str) {
     };
 
     Validator.prototype.is_map = function(node) {
+      var baseUriProperty;
+      baseUriProperty = this.get_property(node, "baseUri");
+      this.baseUri = baseUriProperty.value;
       if (!(node || this.isNull(node))) {
         throw new exports.ValidationError('while validating root', null, 'empty document', 0);
       }
@@ -12267,6 +12121,9 @@ function decode(str) {
           throw new exports.ValidationError('while validating traits', null, 'invalid traits definition, it must be an array', traitProperty.start_mark);
         }
         return trait_entry.value.forEach(function(trait) {
+          if (!_this.isNullableMapping(trait[1])) {
+            throw new exports.ValidationError('while validating traits', null, 'invalid trait definition, it must be a mapping', trait[1].start_mark);
+          }
           return _this.valid_traits_properties(trait);
         });
       });
@@ -12275,6 +12132,9 @@ function decode(str) {
     Validator.prototype.valid_traits_properties = function(node) {
       var invalid;
       if (!node[1].value) {
+        return;
+      }
+      if (!this.isMapping(node[1])) {
         return;
       }
       invalid = node[1].value.filter(function(childNode) {
@@ -12614,6 +12474,11 @@ function decode(str) {
       if (!(this.isMapping(property[1]) || this.isString(property[1]))) {
         throw new exports.ValidationError('while validating resources', null, "property 'type' must be a string or a mapping", property[0].start_mark);
       }
+      if (this.isMapping(property[1])) {
+        if (property[1].value.length > 1) {
+          throw new exports.ValidationError('while validating resources', null, "a resource or resourceType can inherit from a single resourceType", property[0].start_mark);
+        }
+      }
       if (!this.get_type(typeName)) {
         throw new exports.ValidationError('while validating resource consumption', null, 'there is no type named ' + typeName, property[1].start_mark);
       }
@@ -12788,7 +12653,12 @@ function decode(str) {
     };
 
     Validator.prototype.isParameterKey = function(property) {
-      return property[0].value.match(/<<\s*([\w-_]+)\s*>>/);
+      if (property[0].value.match(/<<\s*([^\|\s>]+)\s*>>/g) || property[0].value.match(/<<\s*([^\|\s>]+)\s*(\|\s*\!\s*(singularize|pluralize))?\s*>>/g)) {
+        return true;
+      } else if (property[0].value.match(/<<\s*([^\|\s>]+)\s*\|.*\s*>>/g)) {
+        throw new exports.ValidationError('while validating parameter', null, "unknown function applied to property name", property[0].start_mark);
+      }
+      return false;
     };
 
     Validator.prototype.validate_body = function(property, allowParameterKeys, bodyMode) {
@@ -13123,7 +12993,225 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":14,"./traits":23,"uritemplate":29}],28:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./traits":23,"uritemplate":29}],23:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, inflection, nodes, _ref, _ref1,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  inflection = require('inflection');
+
+  /*
+  The Traits throws these.
+  */
+
+
+  this.TraitError = (function(_super) {
+    __extends(TraitError, _super);
+
+    function TraitError() {
+      _ref = TraitError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return TraitError;
+
+  })(MarkedYAMLError);
+
+  /*
+  */
+
+
+  this.ParameterError = (function(_super) {
+    __extends(ParameterError, _super);
+
+    function ParameterError() {
+      _ref1 = ParameterError.__super__.constructor.apply(this, arguments);
+      return _ref1;
+    }
+
+    return ParameterError;
+
+  })(MarkedYAMLError);
+
+  /*
+  The Traits class deals with applying traits to resources according to the spec
+  */
+
+
+  this.Traits = (function() {
+    function Traits() {
+      this.declaredTraits = {};
+    }
+
+    Traits.prototype.load_traits = function(node) {
+      var allTraits,
+        _this = this;
+      if (this.has_property(node, /^traits$/)) {
+        allTraits = this.property_value(node, /^traits$/);
+        if (allTraits && typeof allTraits === "object") {
+          return allTraits.forEach(function(trait_item) {
+            if (trait_item && typeof trait_item === "object" && typeof trait_item.value === "object") {
+              return trait_item.value.forEach(function(trait) {
+                return _this.declaredTraits[trait[0].value] = trait;
+              });
+            }
+          });
+        }
+      }
+    };
+
+    Traits.prototype.has_traits = function(node) {
+      if (this.declaredTraits.length === 0 && this.has_property(node, /^traits$/)) {
+        this.load_traits(node);
+      }
+      return Object.keys(this.declaredTraits).length > 0;
+    };
+
+    Traits.prototype.get_trait = function(traitName) {
+      if (traitName in this.declaredTraits) {
+        return this.declaredTraits[traitName][1];
+      }
+      return null;
+    };
+
+    Traits.prototype.apply_traits = function(node, resourceUri, removeQs) {
+      var resources,
+        _this = this;
+      if (resourceUri == null) {
+        resourceUri = "";
+      }
+      if (removeQs == null) {
+        removeQs = true;
+      }
+      if (!this.isMapping(node)) {
+        return;
+      }
+      if (this.has_traits(node)) {
+        resources = this.child_resources(node);
+        return resources.forEach(function(resource) {
+          return _this.apply_traits_to_resource(resourceUri + resource[0].value, resource[1], removeQs);
+        });
+      }
+    };
+
+    Traits.prototype.apply_traits_to_resource = function(resourceUri, resource, removeQs) {
+      var methods, uses,
+        _this = this;
+      if (!this.isMapping(resource)) {
+        return;
+      }
+      methods = this.child_methods(resource);
+      if (this.has_property(resource, /^is$/)) {
+        uses = this.property_value(resource, /^is$/);
+        uses.forEach(function(use) {
+          return methods.forEach(function(method) {
+            return _this.apply_trait(resourceUri, method, use);
+          });
+        });
+      }
+      methods.forEach(function(method) {
+        if (_this.has_property(method[1], /^is$/)) {
+          uses = _this.property_value(method[1], /^is$/);
+          return uses.forEach(function(use) {
+            return _this.apply_trait(resourceUri, method, use);
+          });
+        }
+      });
+      if (removeQs) {
+        resource.remove_question_mark_properties();
+      }
+      return this.apply_traits(resource, resourceUri, removeQs);
+    };
+
+    Traits.prototype.apply_trait = function(resourceUri, method, useKey) {
+      var plainParameters, temp, trait;
+      trait = this.get_trait(this.key_or_value(useKey));
+      plainParameters = this.get_parameters_from_is_key(resourceUri, method[0].value, useKey);
+      temp = trait.cloneForTrait();
+      this.apply_parameters(temp, plainParameters, useKey);
+      this.apply_default_media_type_to_method(temp);
+      temp.combine(method[1]);
+      return method[1] = temp;
+    };
+
+    Traits.prototype.apply_parameters = function(resource, parameters, useKey) {
+      var parameterUse,
+        _this = this;
+      if (!resource) {
+        return;
+      }
+      if (this.isString(resource)) {
+        parameterUse = [];
+        if (parameterUse = resource.value.match(/<<\s*([^\|\s>]+)\s*(\|.*)?\s*>>/g)) {
+          parameterUse.forEach(function(parameter) {
+            var method, parameterName, value, _ref2, _ref3;
+            parameterName = parameter != null ? (_ref2 = parameter.trim()) != null ? _ref2.replace(/[<>]+/g, '').trim() : void 0 : void 0;
+            _ref3 = parameterName.split(/\s*\|\s*/), parameterName = _ref3[0], method = _ref3[1];
+            if (!(parameterName in parameters)) {
+              throw new exports.ParameterError('while aplying parameters', null, 'value was not provided for parameter: ' + parameterName, useKey.start_mark);
+            }
+            value = parameters[parameterName];
+            if (method) {
+              if (method.match(/!\s*singularize/)) {
+                value = inflection.singularize(value);
+              } else if (method.match(/!\s*pluralize/)) {
+                value = inflection.pluralize(value);
+              } else {
+                throw new exports.ParameterError('while validating parameter', null, "unknown function applied to parameter", resource.start_mark);
+              }
+            }
+            return resource.value = resource.value.replace(parameter, value);
+          });
+        }
+      }
+      if (this.isSequence(resource)) {
+        resource.value.forEach(function(node) {
+          return _this.apply_parameters(node, parameters, useKey);
+        });
+      }
+      if (this.isMapping(resource)) {
+        return resource.value.forEach(function(property) {
+          _this.apply_parameters(property[0], parameters, useKey);
+          return _this.apply_parameters(property[1], parameters, useKey);
+        });
+      }
+    };
+
+    Traits.prototype.get_parameters_from_is_key = function(resourceUri, methodName, typeKey) {
+      var parameters, result;
+      result = {
+        methodName: methodName,
+        resourcePath: resourceUri.replace(/\/\/*/g, '/')
+      };
+      if (!this.isMapping(typeKey)) {
+        return result;
+      }
+      parameters = this.value_or_undefined(typeKey);
+      parameters[0][1].value.forEach(function(parameter) {
+        var _ref2;
+        if (parameter[1].tag !== 'tag:yaml.org,2002:str') {
+          throw new exports.TraitError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
+        }
+        if ((_ref2 = parameter[1].value) === "methodName" || _ref2 === "resourcePath" || _ref2 === "resourcePathName") {
+          throw new exports.TraitError('while aplying parameters', null, 'invalid parameter name "methodName", "resourcePath" are reserved parameter names "resourcePathName"', parameter[1].start_mark);
+        }
+        return result[parameter[0].value] = parameter[1].value;
+      });
+      return result;
+    };
+
+    return Traits;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./nodes":13,"inflection":30}],28:[function(require,module,exports){
 (function(process,Buffer){/**
  * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
  *
@@ -13689,7 +13777,7 @@ exports.XMLHttpRequest = function() {
 };
 
 })(require("__browserify_process"),require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":12,"__browserify_process":5,"child_process":30,"fs":9,"http":31,"https":32,"url":7}],29:[function(require,module,exports){
+},{"__browserify_buffer":14,"__browserify_process":5,"child_process":31,"fs":9,"http":32,"https":33,"url":7}],29:[function(require,module,exports){
 (function(global){/*global unescape, module, define, window, global*/
 
 /*
@@ -14577,11 +14665,11 @@ var UriTemplate = (function () {
 ));
 
 })(window)
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 exports.spawn = function () {};
 exports.exec = function () {};
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 var http = require('http');
 
 var https = module.exports;
@@ -14595,7 +14683,9 @@ https.request = function (params, cb) {
     params.scheme = 'https';
     return http.request.call(this, params, cb);
 }
-},{"http":31}],33:[function(require,module,exports){
+},{"http":32}],30:[function(require,module,exports){
+module.exports = require( './lib/inflection' );
+},{"./lib/inflection":34}],35:[function(require,module,exports){
 (function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
 
 var EventEmitter = exports.EventEmitter = process.EventEmitter;
@@ -14792,7 +14882,7 @@ EventEmitter.listenerCount = function(emitter, type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":5}],31:[function(require,module,exports){
+},{"__browserify_process":5}],32:[function(require,module,exports){
 var http = module.exports;
 var EventEmitter = require('events').EventEmitter;
 var Request = require('./lib/request');
@@ -14854,7 +14944,544 @@ var xhrHttp = (function () {
     }
 })();
 
-},{"./lib/request":34,"events":33}],35:[function(require,module,exports){
+},{"./lib/request":36,"events":35}],34:[function(require,module,exports){
+/*!
+ * inflection
+ * Copyright(c) 2011 Ben Lin <ben@dreamerslab.com>
+ * MIT Licensed
+ *
+ * @fileoverview
+ * A port of inflection-js to node.js module
+ */
+
+/**
+ * @description This is a list of nouns that use the same form for both singular and plural.
+ *              This list should remain entirely in lower case to correctly match Strings.
+ * @private
+ */
+var uncountable_words = [
+  'equipment', 'information', 'rice', 'money', 'species',
+  'series', 'fish', 'sheep', 'moose', 'deer', 'news'
+];
+
+/**
+ * @description These rules translate from the singular form of a noun to its plural form.
+ * @private
+ */
+var plural_rules = [
+  [ new RegExp( '(m)an$', 'gi' ),                 '$1en' ],
+  [ new RegExp( '(pe)rson$', 'gi' ),              '$1ople' ],
+  [ new RegExp( '(child)$', 'gi' ),               '$1ren' ],
+  [ new RegExp( '^(ox)$', 'gi' ),                 '$1en' ],
+  [ new RegExp( '(ax|test)is$', 'gi' ),           '$1es' ],
+  [ new RegExp( '(octop|vir)us$', 'gi' ),         '$1i' ],
+  [ new RegExp( '(alias|status)$', 'gi' ),        '$1es' ],
+  [ new RegExp( '(bu)s$', 'gi' ),                 '$1ses' ],
+  [ new RegExp( '(buffal|tomat|potat)o$', 'gi' ), '$1oes' ],
+  [ new RegExp( '([ti])um$', 'gi' ),              '$1a' ],
+  [ new RegExp( 'sis$', 'gi' ),                   'ses' ],
+  [ new RegExp( '(?:([^f])fe|([lr])f)$', 'gi' ),  '$1$2ves' ],
+  [ new RegExp( '(hive)$', 'gi' ),                '$1s' ],
+  [ new RegExp( '([^aeiouy]|qu)y$', 'gi' ),       '$1ies' ],
+  [ new RegExp( '(x|ch|ss|sh)$', 'gi' ),          '$1es' ],
+  [ new RegExp( '(matr|vert|ind)ix|ex$', 'gi' ),  '$1ices' ],
+  [ new RegExp( '([m|l])ouse$', 'gi' ),           '$1ice' ],
+  [ new RegExp( '(quiz)$', 'gi' ),                '$1zes' ],
+  [ new RegExp( 's$', 'gi' ),                     's' ],
+  [ new RegExp( '$', 'gi' ),                      's' ]
+];
+
+/**
+ * @description These rules translate from the plural form of a noun to its singular form.
+ * @private
+ */
+var singular_rules = [
+  [ new RegExp( '(m)en$', 'gi' ),                                                       '$1an' ],
+  [ new RegExp( '(pe)ople$', 'gi' ),                                                    '$1rson' ],
+  [ new RegExp( '(child)ren$', 'gi' ),                                                  '$1' ],
+  [ new RegExp( '([ti])a$', 'gi' ),                                                     '$1um' ],
+  [ new RegExp( '((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$','gi' ), '$1$2sis' ],
+  [ new RegExp( '(hive)s$', 'gi' ),                                                     '$1' ],
+  [ new RegExp( '(tive)s$', 'gi' ),                                                     '$1' ],
+  [ new RegExp( '(curve)s$', 'gi' ),                                                    '$1' ],
+  [ new RegExp( '([lr])ves$', 'gi' ),                                                   '$1f' ],
+  [ new RegExp( '([^fo])ves$', 'gi' ),                                                  '$1fe' ],
+  [ new RegExp( '([^aeiouy]|qu)ies$', 'gi' ),                                           '$1y' ],
+  [ new RegExp( '(s)eries$', 'gi' ),                                                    '$1eries' ],
+  [ new RegExp( '(m)ovies$', 'gi' ),                                                    '$1ovie' ],
+  [ new RegExp( '(x|ch|ss|sh)es$', 'gi' ),                                              '$1' ],
+  [ new RegExp( '([m|l])ice$', 'gi' ),                                                  '$1ouse' ],
+  [ new RegExp( '(bus)es$', 'gi' ),                                                     '$1' ],
+  [ new RegExp( '(o)es$', 'gi' ),                                                       '$1' ],
+  [ new RegExp( '(shoe)s$', 'gi' ),                                                     '$1' ],
+  [ new RegExp( '(cris|ax|test)es$', 'gi' ),                                            '$1is' ],
+  [ new RegExp( '(octop|vir)i$', 'gi' ),                                                '$1us' ],
+  [ new RegExp( '(alias|status)es$', 'gi' ),                                            '$1' ],
+  [ new RegExp( '^(ox)en', 'gi' ),                                                      '$1' ],
+  [ new RegExp( '(vert|ind)ices$', 'gi' ),                                              '$1ex' ],
+  [ new RegExp( '(matr)ices$', 'gi' ),                                                  '$1ix' ],
+  [ new RegExp( '(quiz)zes$', 'gi' ),                                                   '$1' ],
+  [ new RegExp( 's$', 'gi' ),                                                           '' ]
+];
+
+/**
+ * @description This is a list of words that should not be capitalized for title case.
+ * @private
+ */
+var non_titlecased_words = [
+  'and', 'or', 'nor', 'a', 'an', 'the', 'so', 'but', 'to', 'of', 'at','by',
+  'from', 'into', 'on', 'onto', 'off', 'out', 'in', 'over', 'with', 'for'
+];
+
+/**
+ * @description These are regular expressions used for converting between String formats.
+ * @private
+ */
+var id_suffix         = new RegExp( '(_ids|_id)$', 'g' );
+var underbar          = new RegExp( '_', 'g' );
+var space_or_underbar = new RegExp( '[\ _]', 'g' );
+var uppercase         = new RegExp( '([A-Z])', 'g' );
+var underbar_prefix   = new RegExp( '^_' );
+
+
+
+module.exports = {
+
+/**
+ * @public
+ * @version 0.0.1
+ */
+  version : '0.0.1',
+
+
+
+/**
+ * A helper method that applies rules based replacement to a String.
+ * @private
+ * @function
+ * @param {String} str String to modify and return based on the passed rules.
+ * @param {Array: [RegExp, String]} rules Regexp to match paired with String to use for replacement
+ * @param {Array: [String]} skip Strings to skip if they match
+ * @param {String} override String to return as though this method succeeded (used to conform to APIs)
+ * @return {String} Return passed String modified by passed rules.
+ * @example
+ *
+ *     this._apply_rules( 'cows', singular_rules ); // === 'cow'
+ */
+  _apply_rules : function( str, rules, skip, override ){
+      if( override ){
+        str = override;
+      }else{
+        var ignore = ( this.indexOf( skip, str.toLowerCase()) > -1 );
+
+        if( !ignore ){
+          var i = 0;
+          var j = rules.length;
+
+          for( ; i < j; i++ ){
+            if( str.match( rules[ i ][ 0 ])){
+              str = str.replace( rules[ i ][ 0 ], rules[ i ][ 1 ]);
+              break;
+            }
+          }
+        }
+      }
+
+      return str;
+  },
+
+
+
+/**
+ * This lets us detect if an Array contains a given element.
+ * @public
+ * @function
+ * @param {Array} arr The subject array.
+ * @param {Object} item Object to locate in the Array.
+ * @param {Number} fromIndex Starts checking from this position in the Array.(optional)
+ * @param {Function} compareFunc Function used to compare Array item vs passed item.(optional)
+ * @return {Number} Return index position in the Array of the passed item.
+ * @example
+ *
+ *     var inflection = require( 'inflection' );
+ *
+ *     inflection.indexOf([ 'hi','there' ], 'guys' ); // === -1
+ *     inflection.indexOf([ 'hi','there' ], 'hi' ); // === 0
+ */
+  indexOf : function( arr, item, fromIndex, compareFunc ){
+    if( !fromIndex ){
+      fromIndex = -1;
+    }
+
+    var index = -1;
+    var i     = fromIndex;
+    var j     = arr.length;
+
+    for( ; i < j; i++ ){
+      if( arr[ i ]  === item || compareFunc && compareFunc( arr[ i ], item )){
+        index = i;
+        break;
+      }
+    }
+
+    return index;
+  },
+
+
+
+/**
+ * This function adds pluralization support to every String object.
+ * @public
+ * @function
+ * @param {String} str The subject string.
+ * @param {String} plural Overrides normal output with said String.(optional)
+ * @return {String} Singular English language nouns are returned in plural form.
+ * @example
+ *
+ *     var inflection = require( 'inflection' );
+ *
+ *     inflection.pluralize( 'person' ); // === 'people'
+ *     inflection.pluralize( 'octopus' ); // === "octopi"
+ *     inflection.pluralize( 'Hat' ); // === 'Hats'
+ *     inflection.pluralize( 'person', 'guys' ); // === 'guys'
+ */
+  pluralize : function ( str, plural ){
+    return this._apply_rules( str, plural_rules, uncountable_words, plural );
+  },
+
+
+
+/**
+ * This function adds singularization support to every String object.
+ * @public
+ * @function
+ * @param {String} str The subject string.
+ * @param {String} singular Overrides normal output with said String.(optional)
+ * @return {String} Plural English language nouns are returned in singular form.
+ * @example
+ *
+ *     var inflection = require( 'inflection' );
+ *
+ *     inflection.singularize( 'people' ); // === 'person'
+ *     inflection.singularize( 'octopi' ); // === "octopus"
+ *     inflection.singularize( 'Hats' ); // === 'Hat'
+ *     inflection.singularize( 'guys', 'person' ); // === 'person'
+ */
+  singularize : function ( str, singular ){
+    return this._apply_rules( str, singular_rules, uncountable_words, singular );
+  },
+
+
+
+/**
+ * This function adds camelization support to every String object.
+ * @public
+ * @function
+ * @param {String} str The subject string.
+ * @param {Boolean} lowFirstLetter Default is to capitalize the first letter of the results.(optional)
+ *                                 Passing true will lowercase it.
+ * @return {String} Lower case underscored words will be returned in camel case.
+ *                  additionally '/' is translated to '::'
+ * @example
+ *
+ *     var inflection = require( 'inflection' );
+ *
+ *     inflection.camelize( 'message_properties' ); // === 'MessageProperties'
+ *     inflection.camelize( 'message_properties', true ); // === 'messageProperties'
+ */
+  camelize : function ( str, lowFirstLetter ){
+    var str_path = str.toLowerCase().split( '/' );
+    var i        = 0;
+    var j        = str_path.length;
+
+    for( ; i < j; i++ ){
+      var str_arr = str_path[ i ].split( '_' );
+      var initX   = (( lowFirstLetter && i + 1 === j ) ? ( 1 ) : ( 0 ));
+      var k       = initX;
+      var l       = str_arr.length;
+
+      for( ; k < l; k++ ){
+        str_arr[ k ] = str_arr[ k ].charAt( 0 ).toUpperCase() + str_arr[ k ].substring( 1 );
+      }
+
+      str_path[ i ] = str_arr.join( '' );
+    }
+
+    return str_path.join( '::' );
+  },
+
+
+
+/**
+ * This function adds underscore support to every String object.
+ * @public
+ * @function
+ * @param {String} str The subject string.
+ * @return {String} Camel cased words are returned as lower cased and underscored.
+ *                  additionally '::' is translated to '/'.
+ * @example
+ *
+ *     var inflection = require( 'inflection' );
+ *
+ *     inflection.underscore( 'MessageProperties' ); // === 'message_properties'
+ *     inflection.underscore( 'messageProperties' ); // === 'message_properties'
+ */
+  underscore : function ( str ){
+    var str_path = str.split( '::' );
+    var i        = 0;
+    var j        = str_path.length;
+
+    for( ; i < j; i++ ){
+      str_path[ i ] = str_path[ i ].replace( uppercase, '_$1' );
+      str_path[ i ] = str_path[ i ].replace( underbar_prefix, '' );
+    }
+
+    return str_path.join( '/' ).toLowerCase();
+  },
+
+
+
+/**
+ * This function adds humanize support to every String object.
+ * @public
+ * @function
+ * @param {String} str The subject string.
+ * @param {Boolean} lowFirstLetter Default is to capitalize the first letter of the results.(optional)
+ *                                 Passing true will lowercase it.
+ * @return {String} Lower case underscored words will be returned in humanized form.
+ * @example
+ *
+ *     var inflection = require( 'inflection' );
+ *
+ *     inflection.humanize( 'message_properties' ); // === 'Message properties'
+ *     inflection.humanize( 'message_properties', true ); // === 'message properties'
+ */
+  humanize : function( str, lowFirstLetter ){
+    str = str.toLowerCase();
+    str = str.replace( id_suffix, '' );
+    str = str.replace( underbar, ' ' );
+
+    if( !lowFirstLetter ){
+      str = this.capitalize( str );
+    }
+
+    return str;
+  },
+
+
+
+/**
+ * This function adds capitalization support to every String object.
+ * @public
+ * @function
+ * @param {String} str The subject string.
+ * @return {String} All characters will be lower case and the first will be upper.
+ * @example
+ *
+ *     var inflection = require( 'inflection' );
+ *
+ *     inflection.capitalize( 'message_properties' ); // === 'Message_properties'
+ *     inflection.capitalize( 'message properties', true ); // === 'Message properties'
+ */
+  capitalize : function ( str ){
+    str = str.toLowerCase();
+
+    return str.substring( 0, 1 ).
+                toUpperCase() + str.substring( 1 );
+  },
+
+
+
+/**
+ * This function adds dasherization support to every String object.
+ * @public
+ * @function
+ * @param {String} str The subject string.
+ * @return {String} Replaces all spaces or underbars with dashes.
+ * @example
+ *
+ *     var inflection = require( 'inflection' );
+ *
+ *     inflection.dasherize( 'message_properties' ); // === 'message-properties'
+ *     inflection.dasherize( 'Message Properties' ); // === 'Message-Properties'
+ */
+  dasherize : function ( str ){
+    return str.replace( space_or_underbar, '-' );
+  },
+
+
+
+/**
+ * This function adds titleize support to every String object.
+ * @public
+ * @function
+ * @param {String} str The subject string.
+ * @return {String} Capitalizes words as you would for a book title.
+ * @example
+ *
+ *     var inflection = require( 'inflection' );
+ *
+ *     inflection.titleize( 'message_properties' ); // === 'Message Properties'
+ *     inflection.titleize( 'message properties to keep' ); // === 'Message Properties to Keep'
+ */
+  titleize : function ( str ){
+    str         = str.toLowerCase().replace( underbar, ' ');
+    var str_arr = str.split(' ');
+    var i       = 0;
+    var j       = str_arr.length;
+
+    for( ; i < j; i++ ){
+      var d = str_arr[ i ].split( '-' );
+      var k = 0;
+      var l = d.length;
+
+      for( ; k < l; k++){
+        if( this.indexOf( non_titlecased_words, d[ k ].toLowerCase()) < 0 ){
+          d[ k ] = this.capitalize( d[ k ]);
+        }
+      }
+
+      str_arr[ i ] = d.join( '-' );
+    }
+
+    str = str_arr.join( ' ' );
+    str = str.substring( 0, 1 ).toUpperCase() + str.substring( 1 );
+
+    return str;
+  },
+
+
+
+/**
+ * This function adds demodulize support to every String object.
+ * @public
+ * @function
+ * @param {String} str The subject string.
+ * @return {String} Removes module names leaving only class names.(Ruby style)
+ * @example
+ *
+ *     var inflection = require( 'inflection' );
+ *
+ *     inflection.demodulize( 'Message::Bus::Properties' ); // === 'Properties'
+ */
+  demodulize : function ( str ){
+    var str_arr = str.split( '::' );
+
+    return str_arr[ str_arr.length - 1 ];
+  },
+
+
+
+/**
+ * This function adds tableize support to every String object.
+ * @public
+ * @function
+ * @param {String} str The subject string.
+ * @return {String} Return camel cased words into their underscored plural form.
+ * @example
+ *
+ *     var inflection = require( 'inflection' );
+ *
+ *     inflection.tableize( 'MessageBusProperty' ); // === 'message_bus_properties'
+ */
+  tableize : function ( str ){
+    str = this.underscore( str );
+    str = this.pluralize( str );
+
+    return str;
+  },
+
+
+
+/**
+ * This function adds classification support to every String object.
+ * @public
+ * @function
+ * @param {String} str The subject string.
+ * @return {String} Underscored plural nouns become the camel cased singular form.
+ * @example
+ *
+ *     var inflection = require( 'inflection' );
+ *
+ *     inflection.classify( 'message_bus_properties' ); // === 'MessageBusProperty'
+ */
+  classify : function ( str ){
+    str = this.camelize( str );
+    str = this.singularize( str );
+
+    return str;
+  },
+
+
+
+/**
+ * This function adds foreign key support to every String object.
+ * @public
+ * @function
+ * @param {String} str The subject string.
+ * @param {Boolean} dropIdUbar Default is to seperate id with an underbar at the end of the class name,
+                               you can pass true to skip it.(optional)
+ * @return {String} Underscored plural nouns become the camel cased singular form.
+ * @example
+ *
+ *     var inflection = require( 'inflection' );
+ *
+ *     inflection.foreign_key( 'MessageBusProperty' ); // === 'message_bus_property_id'
+ *     inflection.foreign_key( 'MessageBusProperty', true ); // === 'message_bus_propertyid'
+ */
+  foreign_key : function( str, dropIdUbar ){
+    str = this.demodulize( str );
+    str = this.underscore( str ) + (( dropIdUbar ) ? ( '' ) : ( '_' )) + 'id';
+
+    return str;
+  },
+
+
+
+/**
+ * This function adds ordinalize support to every String object.
+ * @public
+ * @function
+ * @param {String} str The subject string.
+ * @return {String} Return all found numbers their sequence like "22nd".
+ * @example
+ *
+ *     var inflection = require( 'inflection' );
+ *
+ *     inflection.ordinalize( 'the 1 pitch' ); // === 'the 1st pitch'
+ */
+  ordinalize : function ( str ){
+    var str_arr = str.split(' ');
+    var i       = 0;
+    var j       = str_arr.length;
+
+    for( ; i < j; i++ ){
+      var k = parseInt( str_arr[ i ], 10 );
+
+      if( !isNaN( k )){
+        var ltd = str_arr[ i ].substring( str_arr[ i ].length - 2 );
+        var ld  = str_arr[ i ].substring( str_arr[ i ].length - 1 );
+        var suf = 'th';
+
+        if( ltd != '11' && ltd != '12' && ltd != '13' ){
+          if( ld === '1' ){
+            suf = 'st';
+          }else if( ld === '2' ){
+            suf = 'nd';
+          }else if( ld === '3' ){
+            suf = 'rd';
+          }
+        }
+
+        str_arr[ i ] += suf;
+      }
+    }
+
+    return str_arr.join( ' ' );
+  }
+};
+
+},{}],37:[function(require,module,exports){
 var events = require('events');
 var util = require('util');
 
@@ -14975,7 +15602,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":33,"util":36}],36:[function(require,module,exports){
+},{"events":35,"util":38}],38:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -15322,7 +15949,7 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":33}],37:[function(require,module,exports){
+},{"events":35}],39:[function(require,module,exports){
 (function(){// UTILITY
 var util = require('util');
 var Buffer = require("buffer").Buffer;
@@ -15637,7 +16264,7 @@ assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
 assert.ifError = function(err) { if (err) {throw err;}};
 
 })()
-},{"buffer":38,"util":36}],39:[function(require,module,exports){
+},{"buffer":40,"util":38}],41:[function(require,module,exports){
 var Stream = require('stream');
 
 var Response = module.exports = function (res) {
@@ -15758,7 +16385,7 @@ var isArray = Array.isArray || function (xs) {
     return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{"stream":35}],40:[function(require,module,exports){
+},{"stream":37}],42:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -15844,7 +16471,7 @@ exports.writeIEEE754 = function(buffer, value, offset, isBE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],38:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 (function(){var assert = require('assert');
 exports.Buffer = Buffer;
 exports.SlowBuffer = Buffer;
@@ -16928,7 +17555,7 @@ Buffer.prototype.writeDoubleBE = function(value, offset, noAssert) {
 };
 
 })()
-},{"./buffer_ieee754":40,"assert":37,"base64-js":41}],34:[function(require,module,exports){
+},{"./buffer_ieee754":42,"assert":39,"base64-js":43}],36:[function(require,module,exports){
 (function(){var Stream = require('stream');
 var Response = require('./response');
 var concatStream = require('concat-stream')
@@ -17062,7 +17689,7 @@ var indexOf = function (xs, x) {
 };
 
 })()
-},{"./response":39,"buffer":38,"concat-stream":42,"stream":35}],41:[function(require,module,exports){
+},{"./response":41,"buffer":40,"concat-stream":44,"stream":37}],43:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 
@@ -17148,7 +17775,7 @@ var indexOf = function (xs, x) {
 	module.exports.fromByteArray = uint8ToBase64;
 }());
 
-},{}],42:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 (function(Buffer){var stream = require('stream')
 var util = require('util')
 
@@ -17199,5 +17826,5 @@ module.exports = function(cb) {
 module.exports.ConcatStream = ConcatStream
 
 })(require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":12,"stream":35,"util":36}]},{},[10,15,13,1,2,16,17,14,20,11,18,21,24,19,25,26,3,23,27,4,22,6])
+},{"__browserify_buffer":14,"stream":37,"util":38}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,24,19,25,26,3,23,27,4,22,6])
 ;

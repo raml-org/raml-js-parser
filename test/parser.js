@@ -4005,6 +4005,7 @@ describe('Parser', function() {
         ],
         "resources": [
           {
+            "description": "This resourceType should be used for any collection of items",
             "summary": "The collection of Blah",
             "type": "collection",
             "relativeUri": "/"
@@ -4148,6 +4149,7 @@ describe('Parser', function() {
         ],
         resources: [
           {
+            description: "This resourceType should be used for any collection of items",
             type: "collection",
             relativeUri: "/",
             methods: [
@@ -4213,6 +4215,7 @@ describe('Parser', function() {
         ],
         resources: [
           {
+            description: "This resourceType should be used for any collection of items2",
             type: "collection",
             relativeUri: "/",
             methods: [
@@ -4261,6 +4264,7 @@ describe('Parser', function() {
         ],
         resources: [
           {
+            description: "This resourceType should be used for any collection of items",
             type: {
               collection: null
             },
@@ -4309,6 +4313,7 @@ describe('Parser', function() {
         ],
         resources: [
           {
+            description: "This resourceType should be used for any collection of items",
             type: {
               collection: {
                 foo: "bar"
@@ -4326,6 +4331,22 @@ describe('Parser', function() {
       };
 
       raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should fail if type property has more than one key', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'resourceTypes:',
+        '  - collection:',
+        '      displayName: Collection',
+        '      description: This resourceType should be used for any collection of items',
+        '      post:',
+        '       body:',
+        '/:',
+        '  type: { collection: { foo: bar }, collection }'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/a resource or resourceType can inherit from a single resourceType/).and.notify(done);
     });
     it('should apply a resource type to a type', function(done) {
       var definition = [
@@ -4377,16 +4398,17 @@ describe('Parser', function() {
         ],
         resources: [
           {
+            description: "This resourceType should be used for any collection of items post",
             type: "post",
             relativeUri: "/",
             methods: [
               {
                 body: null,
-                method: "post"
+                method: "get"
               },
               {
                 body: null,
-                method: "get"
+                method: "post"
               }
             ]
           }
@@ -4466,10 +4488,11 @@ describe('Parser', function() {
           {
             type: "post",
             relativeUri: "/",
+            description: "This resourceType should be used for any collection of items post",
             methods: [
               {
                 body: null,
-                method: "post"
+                method: "delete"
               },
               {
                 body: null,
@@ -4477,7 +4500,7 @@ describe('Parser', function() {
               },
               {
                 body: null,
-                method: "delete"
+                method: "post"
               }
             ]
           }
@@ -4520,6 +4543,7 @@ describe('Parser', function() {
         ],
         resources: [
           {
+            description: "bar resourceType should be used for any collection of items",
             type: {
               collection:{
                 foo: "bar",
@@ -4633,6 +4657,7 @@ describe('Parser', function() {
         ],
         resources: [
           {
+            description: "This resourceType should be used for any collection of items",
             type: "collection",
             relativeUri: "/",
             methods: [
@@ -4690,6 +4715,7 @@ describe('Parser', function() {
         ],
         resources: [
           {
+            description: "This resourceType should be used for any collection of items",
             type: "collection",
             relativeUri: "/",
             methods: [
@@ -4736,6 +4762,7 @@ describe('Parser', function() {
         ],
         resources: [
           {
+            description: "This resourceType should be used for any collection of items",
             type: "collection",
             relativeUri: "/",
             methods: [
@@ -4749,7 +4776,281 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
-
+  });
+  describe('Parameter methods', function(){
+    describe('- Unknown methods', function(){
+      describe('- In resources', function(){
+        it('should fail if calling an unknown method in a property', function(done){
+          var definition = [
+            '#%RAML 0.2',
+            '---',
+            'title: Test',
+            'resourceTypes:',
+            '  - collection:',
+            '      displayName: Collection',
+            '      <<parameterName|sarasa>>: resourceType should be used for any collection of items',
+            '/:'
+          ].join('\n');
+          raml.load(definition).should.be.rejected.with(/unknown function applied to property name/).and.notify(done);
+        });
+        it('should fail if calling an unknown method in a value in an applied type', function(done){
+          var definition = [
+            '#%RAML 0.2',
+            '---',
+            'title: Test',
+            'resourceTypes:',
+            '  - collection:',
+            '      displayName: Collection',
+            '      description: <<parameterName|unknownword>> resourceType should be used for any collection of items',
+            '/:',
+            '  type: { collection: {parameterName: someValue} }'
+          ].join('\n');
+          raml.load(definition).should.be.rejected.with(/unknown function applied to parameter/).and.notify(done);
+        });
+        it.skip('should fail if calling an unknown method in a value in an unapplied type', function(done){
+          var definition = [
+            '#%RAML 0.2',
+            '---',
+            'title: Test',
+            'resourceTypes:',
+            '  - collection:',
+            '      displayName: Collection',
+            '      description: <<parameterName|unknownword>> resourceType should be used for any collection of items',
+            '/:'
+          ].join('\n');
+          raml.load(definition).should.be.rejected.with(/unknown function applied to parameter/).and.notify(done);
+        });
+      });
+      describe('- In traits', function(){
+        it('should fail if calling an unknown method in a property', function(done){
+          var definition = [
+            '#%RAML 0.2',
+            '---',
+            'title: Test',
+            'traits:',
+            '  - traitName:',
+            '      displayName: Collection',
+            '      <<parameterName|sarasa>>: resourceType should be used for any collection of items',
+            '/:'
+          ].join('\n');
+          raml.load(definition).should.be.rejected.with(/unknown function applied to property name/).and.notify(done);
+        });
+        it('should fail if calling an unknown method in a value in an applied trait', function(done){
+          var definition = [
+            '#%RAML 0.2',
+            '---',
+            'title: Test',
+            'traits:',
+            '  - traitName:',
+            '      displayName: Collection',
+            '      description: <<parameterName|unknownword>> resourceType should be used for any collection of items',
+            '/:',
+            '  is: [ traitName: {parameterName: someValue} ]',
+            '  get:'
+          ].join('\n');
+          raml.load(definition).should.be.rejected.with(/unknown function applied to parameter/).and.notify(done);
+        });
+        it.skip('should fail if calling an unknown method in a value in an unapplied trait', function(done){
+          var definition = [
+            '#%RAML 0.2',
+            '---',
+            'title: Test',
+            'traits:',
+            '  - traitName:',
+            '      displayName: Collection',
+            '      description: <<parameterName|unknownword>> resourceType should be used for any collection of items',
+            '/:'
+          ].join('\n');
+          raml.load(definition).should.be.rejected.with(/unknown function applied to parameter/).and.notify(done);
+        });
+        it.skip('should fail if calling an unknown method in a value in a trait without methods', function(done){
+          var definition = [
+            '#%RAML 0.2',
+            '---',
+            'title: Test',
+            'traits:',
+            '  - traitName:',
+            '      displayName: Collection',
+            '      description: <<parameterName|unknownword>> resourceType should be used for any collection of items',
+            '/:',
+            '  is: [ traitName ]'
+          ].join('\n');
+          raml.load(definition).should.be.rejected.with(/unknown function applied to parameter/).and.notify(done);
+        });
+      });
+    });
+    describe('- Singuralize', function(){
+      describe('- In resources', function(){
+        it('should fail if calling an unknown method in a value in an applied type', function(done){
+          var definition = [
+            '#%RAML 0.2',
+            '---',
+            'title: Test',
+            'resourceTypes:',
+            '  - collection:',
+            '      displayName: Collection',
+            '      description: <<parameterName|!singularize>> resourceType should be used for any collection of items',
+            '/:',
+            '  type: { collection: {parameterName: commuters} }'
+          ].join('\n');
+          var expected = {
+            "title": "Test",
+            "resourceTypes": [
+              {
+                "collection": {
+                  "displayName": "Collection",
+                  "description": "<<parameterName|!singularize>> resourceType should be used for any collection of items"
+                }
+              }
+            ],
+            "resources": [
+              {
+                "description": "commuter resourceType should be used for any collection of items",
+                "type": {
+                  "collection": {
+                    "parameterName": "commuters"
+                  }
+                },
+                "relativeUri": "/"
+              }
+            ]
+          };
+          raml.load(definition).should.become(expected).and.notify(done);
+        });
+      });
+      describe('- In traits', function(){
+        it('should fail if calling an unknown method in a value in an applied trait', function(done){
+          var definition = [
+            '#%RAML 0.2',
+            '---',
+            'title: Test',
+            'traits:',
+            '  - traitName:',
+            '      displayName: Collection',
+            '      description: <<parameterName|!singularize>> resourceType should be used for any collection of items',
+            '/:',
+            '  is: [ traitName: {parameterName: commuters} ]',
+            '  get:'
+          ].join('\n');
+          var expected =  {
+            "title": "Test",
+            "traits": [
+              {
+                "traitName": {
+                  "displayName": "Collection",
+                  "description": "<<parameterName|!singularize>> resourceType should be used for any collection of items"
+                }
+              }
+            ],
+            "resources": [
+              {
+                "is": [
+                  {
+                    "traitName": {
+                      "parameterName": "commuters"
+                    }
+                  }
+                ],
+                "relativeUri": "/",
+                "methods": [
+                  {
+                    "description": "commuter resourceType should be used for any collection of items",
+                    "method": "get"
+                  }
+                ]
+              }
+            ]
+          };
+          raml.load(definition).should.become(expected).and.notify(done);
+        });
+      });
+    });
+    describe('Pluralize', function(){
+      describe('- In resources', function(){
+        it('should fail if calling an unknown method in a value in an applied type', function(done){
+          var definition = [
+            '#%RAML 0.2',
+            '---',
+            'title: Test',
+            'resourceTypes:',
+            '  - collection:',
+            '      displayName: Collection',
+            '      description: <<parameterName|!pluralize>> resourceType should be used for any collection of items',
+            '/:',
+            '  type: { collection: {parameterName: commuter} }'
+          ].join('\n');
+          var expected = {
+            "title": "Test",
+            "resourceTypes": [
+              {
+                "collection": {
+                  "displayName": "Collection",
+                  "description": "<<parameterName|!pluralize>> resourceType should be used for any collection of items"
+                }
+              }
+            ],
+            "resources": [
+              {
+                "description": "commuters resourceType should be used for any collection of items",
+                "type": {
+                  "collection": {
+                    "parameterName": "commuter"
+                  }
+                },
+                "relativeUri": "/"
+              }
+            ]
+          };
+          raml.load(definition).should.become(expected).and.notify(done);
+        });
+      });
+      describe('- In traits', function(){
+        it('should fail if calling an unknown method in a value in an applied trait', function(done){
+          var definition = [
+            '#%RAML 0.2',
+            '---',
+            'title: Test',
+            'traits:',
+            '  - traitName:',
+            '      displayName: Collection',
+            '      description: <<parameterName|!pluralize>> resourceType should be used for any collection of items',
+            '/:',
+            '  is: [ traitName: {parameterName: commuter} ]',
+            '  get:'
+          ].join('\n');
+          var expected =  {
+            "title": "Test",
+            "traits": [
+              {
+                "traitName": {
+                  "displayName": "Collection",
+                  "description": "<<parameterName|!pluralize>> resourceType should be used for any collection of items"
+                }
+              }
+            ],
+            "resources": [
+              {
+                "is": [
+                  {
+                    "traitName": {
+                      "parameterName": "commuter"
+                    }
+                  }
+                ],
+                "relativeUri": "/",
+                "methods": [
+                  {
+                    "description": "commuters resourceType should be used for any collection of items",
+                    "method": "get"
+                  }
+                ]
+              }
+            ]
+          };
+          raml.load(definition).should.become(expected).and.notify(done);
+        });
+      });
+    });
   });
   describe('Schema support', function(){
     it('should not fail when specifying schemas at the root level', function(done) {

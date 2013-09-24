@@ -23,7 +23,7 @@ The Validator class deals with validating a YAML file according to the spec
 ###
 class @Validator
   constructor: ->
-    @validations = [@is_map,  @validate_base_uri_parameters, @valid_root_properties, @valid_absolute_uris]
+    @validations = [@is_map, @valid_root_properties, @validate_base_uri_parameters, @valid_absolute_uris]
 
   validate_document: (node) ->
     @validations.forEach (validation) =>
@@ -146,6 +146,8 @@ class @Validator
         throw new exports.ValidationError 'while validating schemas', null, 'schema ' + schemaName + ' must be a string', schema[0].start_mark
 
   is_map: (node) ->
+    baseUriProperty = @get_property node, "baseUri"
+    @baseUri = baseUriProperty.value
     unless node or @isNull node
       throw new exports.ValidationError 'while validating root', null, 'empty document', 0
     unless @isMapping node
@@ -205,11 +207,13 @@ class @Validator
         throw new exports.ValidationError 'while validating traits', null, 'invalid traits definition, it must be an array', traitProperty.start_mark
 
       trait_entry.value.forEach (trait) =>
+        unless @isNullableMapping trait[1]
+          throw new exports.ValidationError 'while validating traits', null, 'invalid trait definition, it must be a mapping', trait[1].start_mark
         @valid_traits_properties trait
 
   valid_traits_properties: (node) ->  
     return unless node[1].value
-
+    return unless @isMapping node[1]
     invalid = node[1].value.filter (childNode) ->
       return (  childNode[0].value is "is" or
                 childNode[0].value is "type" )
@@ -437,6 +441,9 @@ class @Validator
     typeName = @key_or_value property[1]
     unless @isMapping(property[1]) or @isString(property[1])
       throw new exports.ValidationError 'while validating resources', null, "property 'type' must be a string or a mapping", property[0].start_mark
+    if @isMapping(property[1])
+      if property[1].value.length > 1
+        throw new exports.ValidationError 'while validating resources', null, "a resource or resourceType can inherit from a single resourceType", property[0].start_mark
     unless @get_type typeName
       throw new exports.ValidationError 'while validating resource consumption', null, 'there is no type named ' + typeName, property[1].start_mark
     if @isMapping property[1]
@@ -552,7 +559,12 @@ class @Validator
             throw new exports.ValidationError 'while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
 
   isParameterKey: (property) ->
-    property[0].value.match(/<<\s*([\w-_]+)\s*>>/)
+    if property[0].value.match(/<<\s*([^\|\s>]+)\s*>>/g) \
+        or property[0].value.match(/<<\s*([^\|\s>]+)\s*(\|\s*\!\s*(singularize|pluralize))?\s*>>/g)
+      return true
+    else if property[0].value.match(/<<\s*([^\|\s>]+)\s*\|.*\s*>>/g)
+      throw new exports.ValidationError 'while validating parameter', null, "unknown function applied to property name" , property[0].start_mark
+    return false
 
   validate_body: (property, allowParameterKeys, bodyMode = null) ->
     if @isNull property[1]
