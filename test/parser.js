@@ -4162,6 +4162,16 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/resource type cannot define child resources/).and.notify(done);
     });
+    it('should fail if type dictionary has no keys', function(done){
+      var definition = [
+      '#%RAML 0.2',
+      'title: titulo',
+      'baseUri: http://api.com',
+      '/resource:',
+      '  type: {}'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/missing type name in type property/).and.notify(done);
+    });
     it('should fail if a resource type inherits from a missing type', function(done) {
       var definition = [
         '#%RAML 0.2',
