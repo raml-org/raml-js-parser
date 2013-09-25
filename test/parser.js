@@ -468,6 +468,70 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+    it('should fail when declaring an enum with duplicated values', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'baseUriParameters:',
+        '  a:',
+        '    displayName: A',
+        '    description: This is A',
+        '    minLength: 123',
+        '    enum: [ "value", "value2", "value2" ]'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/enum contains duplicated values/).and.notify(done);
+    });
+    it('should fail when declaring an enum with no values', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'baseUriParameters:',
+        '  a:',
+        '    displayName: A',
+        '    description: This is A',
+        '    minLength: 123',
+        '    enum: []'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/enum is empty/).and.notify(done);
+    });
+    it('should succeed when declaring an enum with null value', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'baseUriParameters:',
+        '  a:',
+        '    displayName: A',
+        '    description: This is A',
+        '    minLength: 123',
+        '    enum:'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/enum is empty/).and.notify(done);
+    });
+    it('should fail when declaring an enum with mapping value', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'baseUriParameters:',
+        '  a:',
+        '    displayName: A',
+        '    description: This is A',
+        '    minLength: 123',
+        '    enum: {}'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/the value of enum must be an array/).and.notify(done);
+    });
     it('should succeed when declaring a maxLength validation as a number', function(done) {
       var definition = [
         '#%RAML 0.2',
