@@ -15,8 +15,8 @@ class @Schemas
 
   # Loading is extra careful because it is done before validation (so it can be used for validation)
   load_schemas: (node) =>
-    if @has_property node, /^schemas$/
-      allSchemas = @property_value node, /^schemas$/
+    if @has_property node, "schemas"
+      allSchemas = @property_value node, "schemas"
       if allSchemas and typeof allSchemas is "object"
         allSchemas.forEach (schema_entry) =>
           if schema_entry and typeof schema_entry is "object" and typeof schema_entry.value is "object"
@@ -24,7 +24,7 @@ class @Schemas
               @declaredSchemas[schema[0].value] = schema
 
   has_schemas: (node) =>
-    if @declaredSchemas.length == 0 and @has_property node, /^schemas$/
+    if @declaredSchemas.length == 0 and @has_property node, "schemas"
       @load_schemas node
     return Object.keys(@declaredSchemas).length > 0
 
@@ -41,6 +41,6 @@ class @Schemas
   get_schemas_used: (resources) =>
     schemas = []
     resources.forEach (resource) =>
-      properties = @get_properties resource[1], /^schema$/
+      properties = @get_properties resource[1], "schema"
       schemas = schemas.concat properties
     return schemas

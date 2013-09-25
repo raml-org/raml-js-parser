@@ -16,8 +16,8 @@ class @ResourceTypes
   # Loading is extra careful because it is done before validation (so it can be used for validation)
   load_types: (node) =>
     @load_default_media_type(node)
-    if @has_property node, /^resourceTypes$/
-      allTypes = @property_value node, /^resourceTypes$/
+    if @has_property node, "resourceTypes"
+      allTypes = @property_value node, "resourceTypes"
       if allTypes and typeof allTypes is "object"
         allTypes.forEach (type_item) =>
           if type_item and typeof type_item is "object" and typeof type_item.value is "object"
@@ -25,7 +25,7 @@ class @ResourceTypes
               @declaredTypes[type[0].value] = type
 
   has_types: (node) =>
-    if Object.keys(@declaredTypes).length == 0 and @has_property node, /^resourceTypes$/
+    if Object.keys(@declaredTypes).length == 0 and @has_property node, "resourceTypes"
       @load_types node
     return Object.keys(@declaredTypes).length > 0
 
@@ -34,8 +34,8 @@ class @ResourceTypes
 
   get_parent_type_name: (typeName) ->
     type = (@get_type typeName)[1]
-    if type and @has_property type, /^type$/
-      return @property_value type, /^type$/
+    if type and @has_property type, "type"
+      return @property_value type, "type"
     return null
 
   apply_types: (node, resourceUri = "") =>
@@ -45,8 +45,8 @@ class @ResourceTypes
       resources.forEach (resource) =>
         @apply_default_media_type_to_resource resource[1]
 
-        if @has_property resource[1], /^type$/
-          type = @get_property resource[1], /^type$/
+        if @has_property resource[1], "type"
+          type = @get_property resource[1], "type"
           @apply_type resourceUri + resource[0].value, resource, type
         @apply_types resource[1], resourceUri + resource[0].value
     else
@@ -76,9 +76,9 @@ class @ResourceTypes
     # Unwind the inheritance chain and check for circular references, while resolving final type shape
     while parentTypeName = @get_parent_type_name child_type
       if parentTypeName of compiledTypes
-        throw new exports.ResourceTypeError 'while aplying resourceTypes', null, 'circular reference detected: ' + parentTypeName + "->" + typesToApply , child_type.start_mark
+        throw new exports.ResourceTypeError 'while aplying resourceTypes', null, 'circular reference detected: ' + parentTypeName + "-> [" + typesToApply.reverse + "]", child_type.start_mark
       # apply parameters
-      child_type_key = @get_property @get_type(child_type)[1], /^type$/
+      child_type_key = @get_property @get_type(child_type)[1], "type"
       parentTypeMapping = @apply_parameters_to_type resourceUri, parentTypeName, child_type_key
       compiledTypes[parentTypeName] = parentTypeMapping
       @apply_default_media_type_to_resource parentTypeMapping

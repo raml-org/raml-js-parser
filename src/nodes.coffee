@@ -107,7 +107,7 @@ class @MappingNode extends @CollectionNode
       value = property[1].cloneRemoveIs()
 
       # skip 'is', 'displayName' and 'description' property
-      unless name.value.match(/^(is|type)$/)
+      unless name.value.match(/^(is)$/)
         properties.push [ name, value ]
     temp = new @constructor( @tag, properties, @start_mark, @end_mark, @flow_style)
     return temp

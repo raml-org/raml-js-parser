@@ -548,9 +548,6 @@ class @Validator
           when "description"
             unless @isScalar(property[1])
               throw new exports.ValidationError 'while validating responses', null, "property description must be a string", response[0].start_mark
-          when "summary"
-            unless @isScalar(property[1])
-              throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
           when "headers"
             unless @isNullableMapping(property[1])
               throw new exports.ValidationError 'while validating resources', null, "property 'headers' must be a mapping", property[0].start_mark
@@ -624,10 +621,6 @@ class @Validator
         when "description"
           unless @isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'description' must be a string", property[0].start_mark
-          return true
-        when "summary"
-          unless @isScalar(property[1])
-            throw new exports.ValidationError 'while validating resources', null, "property 'summary' must be a string", property[0].start_mark
           return true
 
       switch key

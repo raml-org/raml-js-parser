@@ -44,11 +44,13 @@ class @BaseConstructor
     return null
 
   construct_document: (node) ->
+    @applyAstTransformations node
+
     data = @construct_object node
     while not util.is_empty @deferred_constructors
       @deferred_constructors.pop()()
 
-    @findAndInsertUriParameters data
+    @applyTransformations data
     return data
 
   defer: (f) -> @deferred_constructors.push f

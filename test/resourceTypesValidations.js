@@ -153,7 +153,7 @@ describe('Resource Types Validations', function() {
         it('should succeed when given a "' + method + '" method property', function(done) {
           var definition = resourceTypeSnippet([
             method + ':',
-            '  summary: Summary of what a call to method does'
+            '  description: Description of what a call to method does'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });
@@ -223,7 +223,7 @@ describe('Resource Types Validations', function() {
     var definition = resourceTypeSnippet([
       '/resource:',
       '  get:',
-      '    summary: Get'
+      '    description: Get'
     ]);
     raml.load(definition).should.be.rejected.with(/resource type cannot define child resources/).and.notify(done);
   });
@@ -327,7 +327,7 @@ describe('Resource Types Validations', function() {
         it('should succeed when given a "' + method + '" method property', function(done) {
           var definition = resourceTypeSnippet([
             method + ':',
-            '  summary: Summary of what a call to method does'
+            '  description: Description of what a call to method does'
           ]);
           raml.load(definition).should.be.fulfilled.and.notify(done);
         });

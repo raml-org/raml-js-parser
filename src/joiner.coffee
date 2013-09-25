@@ -55,5 +55,3 @@ class @Joiner
       
       methodsValue = new nodes.SequenceNode 'tag:yaml.org,2002:seq', methodsArray, methods[0][0].start_mark, methods[ methods.length - 1 ][1].end_mark
       node.value.push [ methodsName, methodsValue ]
-    
-  

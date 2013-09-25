@@ -325,7 +325,9 @@ describe('Parser', function() {
         baseUriParameters: {
           'a': {
             displayName: 'A',
-            description: 'This is A'
+            description: 'This is A',
+            required: true,
+            type: "string"
           }
         }
       }).and.notify(done);
@@ -369,12 +371,14 @@ describe('Parser', function() {
             {
               displayName: 'A',
               description: 'This is A',
-              type: "string"
+              type: "string",
+              required: true
             },
             {
               displayName: 'A',
               description: 'This is A',
-              type: "file"
+              type: "file",
+              required: true
             },
           ]
         }
@@ -1053,12 +1057,14 @@ describe('Parser', function() {
               {
                 displayName: 'A',
                 description: 'This is A',
-                type: "string"
+                type: "string",
+                required: true
               },
               {
                 displayName: 'A',
                 description: 'This is A',
-                type: "file"
+                type: "file",
+                required: true
               },
             ]
           }
@@ -1143,33 +1149,34 @@ describe('Parser', function() {
         raml.load(definition).should.become({
           title: 'Test',
           baseUri: 'http://{a}.myapi.org',
-          baseUriParameters: {
-            'a': {
-              displayName: 'a',
-              type: "string",
-              required: true
-            }
-          },
           resources: [
             {
-              relativeUri: "/resource",
               baseUriParameters: {
                 'a': [
                   {
                     displayName: 'A',
                     description: 'This is A',
-                    type: "string"
+                    type: "string",
+                    required: true
                   },
                   {
                     displayName: 'A',
                     description: 'This is A',
-                    type: "file"
+                    type: "file",
+                    required: true
                   },
                 ]
-              }
-
+              },
+              relativeUri: "/resource"
             }
-          ]
+          ],
+          baseUriParameters: {
+            'a': {
+              type: "string",
+              required: true,
+              displayName: 'a'
+            }
+          }
         }).and.notify(done);
       });
     });
@@ -1260,12 +1267,14 @@ describe('Parser', function() {
                   {
                     displayName: 'A',
                     description: 'This is A',
-                    type: "string"
+                    type: "string",
+                    required: true
                   },
                   {
                     displayName: 'A',
                     description: 'This is A',
-                    type: "file"
+                    type: "file",
+                    required: true
                   },
                 ]
               }
@@ -1363,12 +1372,14 @@ describe('Parser', function() {
                     {
                       displayName: 'A',
                       description: 'This is A',
-                      type: "string"
+                      type: "string",
+                      required: true
                     },
                     {
                       displayName: 'A',
                       description: 'This is A',
-                      type: "file"
+                      type: "file",
+                      required: true
                     },
                   ]
                 }
@@ -1466,12 +1477,14 @@ describe('Parser', function() {
                     {
                       displayName: 'A',
                       description: 'This is A',
-                      type: "string"
+                      type: "string",
+                      required: true
                     },
                     {
                       displayName: 'A',
                       description: 'This is A',
-                      type: "file"
+                      type: "file",
+                      required: true
                     },
                   ]
                 }
@@ -1582,12 +1595,14 @@ describe('Parser', function() {
                         {
                           displayName: 'A',
                           description: 'This is A',
-                          type: "string"
+                          type: "string",
+                          required: true
                         },
                         {
                           displayName: 'A',
                           description: 'This is A',
-                          type: "file"
+                          type: "file",
+                          required: true
                         },
                       ]
                     }
@@ -1702,12 +1717,14 @@ describe('Parser', function() {
                         {
                           displayName: 'A',
                           description: 'This is A',
-                          type: "string"
+                          type: "string",
+                          required: true
                         },
                         {
                           displayName: 'A',
                           description: 'This is A',
-                          type: "file"
+                          type: "file",
+                          required: true
                         },
                       ]
                     }
@@ -2256,7 +2273,9 @@ describe('Parser', function() {
             displayName: 'Queryable',
             queryParameters: {
               q: {
-                type: 'string'
+                type: 'string',
+                displayName: "q",
+                required: true
               }
             }
           }
@@ -2270,7 +2289,9 @@ describe('Parser', function() {
                 method: 'get',
                 queryParameters: {
                   q: {
-                    type: 'string'
+                    type: 'string',
+                    displayName: "q",
+                    required: true
                   }
                 },
                 responses: {
@@ -2375,7 +2396,9 @@ describe('Parser', function() {
             displayName: 'Queryable',
             queryParameters: {
               q: {
-                type: 'string'
+                type: 'string',
+                displayName: "q",
+                required: true
               }
             }
           }
@@ -2389,7 +2412,9 @@ describe('Parser', function() {
                 method: 'get',
                 queryParameters: {
                   q: {
-                    type: 'string'
+                    type: 'string',
+                    displayName: "q",
+                    required: true
                   }
                 },
                 responses: {
@@ -2432,7 +2457,9 @@ describe('Parser', function() {
             displayName: 'Rate Limited',
             "headers?": {
               "x-header-extra": {
-                displayName: "API Limit Exceeded"
+                displayName: "API Limit Exceeded",
+                type: "string",
+                required: true
               }
             }
           }
@@ -2560,9 +2587,7 @@ describe('Parser', function() {
         '/users:',
         ' displayName: Tags',
         ' get:',
-        '  summary: Get a list of recently tagged media',
         ' post:',
-        '  summary: Create a new tag',
         ' /{userid}:',
         '  displayName: Search'
       ].join('\n');
@@ -2590,12 +2615,10 @@ describe('Parser', function() {
             relativeUri: '/users',
             methods: [
               {
-                summary: 'Get a list of recently tagged media',
                 method: 'get'
 
               },
               {
-                summary: 'Create a new tag',
                 method: 'post'
 
               }
@@ -2653,11 +2676,15 @@ describe('Parser', function() {
             'headers': {
               'If-None-Match?': {
                 description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
-                type: 'string'
+                type: 'string',
+                displayName: "If-None-Match",
+                required: true
               },
               'On-Behalf-Of?' : {
                 description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
-                type: 'string'
+                type: 'string',
+                displayName: "On-Behalf-Of",
+                required: true
               }
             }
           }
@@ -2719,11 +2746,15 @@ describe('Parser', function() {
             'headers?': {
               'If-None-Match?': {
                 description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
-                type: 'string'
+                type: 'string',
+                required: true,
+                displayName: "If-None-Match"
               },
               'On-Behalf-Of?' : {
                 description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
-                type: 'string'
+                type: 'string',
+                required: true,
+                displayName: "On-Behalf-Of"
               }
             }
           }
@@ -2784,11 +2815,15 @@ describe('Parser', function() {
             'headers?': {
               'If-None-Match?': {
                 description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
-                type: 'string'
+                type: 'string',
+                required: true,
+                displayName: "If-None-Match"
               },
               'On-Behalf-Of?' : {
                 description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
-                type: 'string'
+                type: 'string',
+                required: true,
+                displayName: "On-Behalf-Of"
               }
             }
           }
@@ -2945,7 +2980,10 @@ describe('Parser', function() {
             displayName: 'Rate Limited',
             'headers': {
               'Authorization': {
-                description: '<<param1>> <<param2>>'
+                description: '<<param1>> <<param2>>',
+                displayName: "Authorization",
+                required: true,
+                type: "string"
               }
             }
           }
@@ -2958,7 +2996,10 @@ describe('Parser', function() {
               {
                 'headers': {
                   'Authorization': {
-                    description: 'value1 value2'
+                    description: 'value1 value2',
+                    displayName: "Authorization",
+                    required: true,
+                    type: "string"
                   }
                 },
                 responses: {
@@ -3005,13 +3046,22 @@ describe('Parser', function() {
             displayName: 'Rate Limited',
             'headers': {
               'Authorization': {
-                description: '<<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>>'
+                description: '<<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>>',
+                displayName: "Authorization",
+                required: true,
+                type: "string"
               },
               'X-Random-Header': {
-                description: '<<param2>><<param2>><<param2>>'
+                description: '<<param2>><<param2>><<param2>>',
+                displayName: "X-Random-Header",
+                required: true,
+                type: "string"
               },
               '<<param2>><<param2>>': {
-                description: '<<param1>>'
+                description: '<<param1>>',
+                displayName: "<<param2>><<param2>>",
+                required: true,
+                type: "string"
               }
             }
           }
@@ -3024,13 +3074,22 @@ describe('Parser', function() {
               {
                 'headers': {
                   'Authorization': {
-                    description: 'value1 value2value1 value2value1 value2value1 value2value1 value2value1 value2'
+                    description: 'value1 value2value1 value2value1 value2value1 value2value1 value2value1 value2',
+                    displayName: "Authorization",
+                    required: true,
+                    type: "string"
                   },
                   'X-Random-Header': {
-                    description: 'value2value2value2'
+                    description: 'value2value2value2',
+                    displayName: "X-Random-Header",
+                    required: true,
+                    type: "string"
                   },
                   'value2value2': {
-                    description: 'value1'
+                    description: 'value1',
+                    displayName: "value2value2",
+                    required: true,
+                    type: "string"
                   }
                 },
                 responses: {
@@ -3073,7 +3132,10 @@ describe('Parser', function() {
             displayName: 'Rate Limited',
             'headers': {
               '<<header>>': {
-                description: '<<param1>> <<param2>>'
+                description: '<<param1>> <<param2>>',
+                displayName: "<<header>>",
+                required: true,
+                type: "string"
               }
             }
           }
@@ -3086,7 +3148,10 @@ describe('Parser', function() {
               {
                 'headers': {
                   'Authorization': {
-                    description: 'value1 value2'
+                    description: 'value1 value2',
+                    displayName: "Authorization",
+                    required: true,
+                    type: "string"
                   }
                 },
                 responses: {
@@ -3133,7 +3198,10 @@ describe('Parser', function() {
             displayName: 'Rate Limited',
             'headers': {
               '<<header>>': {
-                description: '<<param1>> <<param2>>'
+                description: '<<param1>> <<param2>>',
+                displayName: "<<header>>",
+                required: true,
+                type: "string"
               }
             }
           }
@@ -3146,7 +3214,10 @@ describe('Parser', function() {
               {
                 'headers': {
                   'Authorization': {
-                    description: 'value1 value2'
+                    description: 'value1 value2',
+                    displayName: "Authorization",
+                    required: true,
+                    type: "string"
                   }
                 },
                 responses: {
@@ -3159,7 +3230,10 @@ describe('Parser', function() {
               {
                 'headers': {
                   'Authorization': {
-                    description: 'value1 value2'
+                    description: 'value1 value2',
+                    displayName: "Authorization",
+                    required: true,
+                    type: "string"
                   }
                 },
                 responses: {
@@ -3278,7 +3352,9 @@ describe('Parser', function() {
             displayName: 'Queryable',
             queryParameters: {
               q: {
-                type: 'string'
+                type: 'string',
+                displayName: "q",
+                required: true
               }
             }
           }
@@ -3292,7 +3368,9 @@ describe('Parser', function() {
                 method: 'get',
                 queryParameters: {
                   q: {
-                    type: 'string'
+                    type: 'string',
+                    displayName: "q",
+                    required: true
                   }
                 },
                 responses: {
@@ -3335,7 +3413,9 @@ describe('Parser', function() {
             displayName: 'Rate Limited',
             "headers?": {
               "x-header-extra": {
-                displayName: "API Limit Exceeded"
+                displayName: "API Limit Exceeded",
+                required: true,
+                type: "string"
               }
             }
           }
@@ -3453,11 +3533,15 @@ describe('Parser', function() {
             'headers': {
               'If-None-Match?': {
                 description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
-                type: 'string'
+                type: 'string',
+                displayName: "If-None-Match",
+                required: true
               },
               'On-Behalf-Of?' : {
                 description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
-                type: 'string'
+                type: 'string',
+                displayName: "On-Behalf-Of",
+                required: true
               }
             }
           }
@@ -3519,11 +3603,15 @@ describe('Parser', function() {
             'headers?': {
               'If-None-Match?': {
                 description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
-                type: 'string'
+                type: 'string',
+                required: true,
+                displayName: "If-None-Match"
               },
               'On-Behalf-Of?' : {
                 description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
-                type: 'string'
+                type: 'string',
+                required: true,
+                displayName: "On-Behalf-Of"
               }
             }
           }
@@ -3584,11 +3672,15 @@ describe('Parser', function() {
             'headers?': {
               'If-None-Match?': {
                 description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
-                type: 'string'
+                type: 'string',
+                required: true,
+                displayName: "If-None-Match"
               },
               'On-Behalf-Of?' : {
                 description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
-                type: 'string'
+                type: 'string',
+                required: true,
+                displayName: "On-Behalf-Of"
               }
             }
           }
@@ -3715,7 +3807,10 @@ describe('Parser', function() {
             displayName: 'Rate Limited',
             'headers': {
               'Authorization': {
-                description: '<<param1>> <<param2>>'
+                description: '<<param1>> <<param2>>',
+                displayName: "Authorization",
+                required: true,
+                type: "string"
               }
             }
           }
@@ -3728,7 +3823,10 @@ describe('Parser', function() {
                 is: [ { rateLimited: { param1: 'value1', param2: 'value2'} }],
                 'headers': {
                   'Authorization': {
-                    description: 'value1 value2'
+                    description: 'value1 value2',
+                    displayName: "Authorization",
+                    required: true,
+                    type: "string"
                   }
                 },
                 responses: {
@@ -3771,7 +3869,10 @@ describe('Parser', function() {
             displayName: 'Rate Limited',
             'headers': {
               '<<header>>': {
-                description: '<<param1>> <<param2>>'
+                description: '<<param1>> <<param2>>',
+                displayName: "<<header>>",
+                required: true,
+                type: "string"
               }
             }
           }
@@ -3784,7 +3885,10 @@ describe('Parser', function() {
                 is: [ { rateLimited: { header: "Authorization", param1: 'value1', param2: 'value2'} }],
                 'headers': {
                   'Authorization': {
-                    description: 'value1 value2'
+                    description: 'value1 value2',
+                    displayName: "Authorization",
+                    required: true,
+                    type: "string"
                   }
                 },
                 responses: {
@@ -3811,12 +3915,11 @@ describe('Parser', function() {
         'resourceTypes:',
         '  - collection:',
         '      displayName: Collection',
-        '      description: This resourceType should be used for any collection of items',
-        '      summary: The collection of <<resourcePathName>>',
+        '      description: The collection of <<resourcePathName>>',
         '      get:',
-        '        summary: Get all <<resourcePathName>>, optionally filtered',
+        '        description: Get all <<resourcePathName>>, optionally filtered',
         '      post:',
-        '        summary: Create a new <<resourcePathName | !singularize>>',
+        '        description: Create a new <<resourcePathName | !singularize>>',
         '/:',
         '  displayName: Root'
       ].join('\n');
@@ -3826,13 +3929,12 @@ describe('Parser', function() {
         resourceTypes: [{
           collection: {
             displayName: 'Collection',
-            description: 'This resourceType should be used for any collection of items',
-            summary: 'The collection of <<resourcePathName>>',
+            description: 'The collection of <<resourcePathName>>',
             get: {
-              summary: 'Get all <<resourcePathName>>, optionally filtered'
+              description: 'Get all <<resourcePathName>>, optionally filtered'
             },
             post: {
-              summary: 'Create a new <<resourcePathName | !singularize>>'
+              description: 'Create a new <<resourcePathName | !singularize>>'
             }
           }
         }],
@@ -3855,24 +3957,22 @@ describe('Parser', function() {
         'resourceTypes:',
         '  - collection:',
         '      displayName: Collection',
-        '      description: This resourceType should be used for any collection of items',
-        '      summary: The collection of <<resourcePathName>>',
+        '      description: The collection of <<resourcePathName>>',
         '      get:',
-        '        summary: Get all <<resourcePathName>>, optionally filtered',
+        '        description: Get all <<resourcePathName>>, optionally filtered',
         '      post:',
-        '        summary: Create a new <<resourcePathName | !singularize>>',
+        '        description: Create a new <<resourcePathName | !singularize>>',
         '  - item:',
         '      displayName: Item',
-        '      description: This resourceType should be used for any individual items',
-        '      summary: A single <<resourcePathName>>',
+        '      description: A single <<resourcePathName>>',
         '      get:',
-        '        summary: Get a <<resourcePathName | !singularize>>',
+        '        description: Get a <<resourcePathName | !singularize>>',
         '      post:',
-        '        summary: Create a new <<resourcePathName | !singularize>>',
+        '        description: Create a new <<resourcePathName | !singularize>>',
         '      patch:',
-        '        summary: Update a <<resourcePathName | !singularize>>',
+        '        description: Update a <<resourcePathName | !singularize>>',
         '      delete:',
-        '        summary: Update a <<resourcePathName | !singularize>>',
+        '        description: Update a <<resourcePathName | !singularize>>',
         '/:',
         '  displayName: Root'
       ].join('\n');
@@ -3883,32 +3983,30 @@ describe('Parser', function() {
           {
             collection: {
               displayName: 'Collection',
-              description: 'This resourceType should be used for any collection of items',
-              summary: 'The collection of <<resourcePathName>>',
+              description: 'The collection of <<resourcePathName>>',
               get: {
-                summary: 'Get all <<resourcePathName>>, optionally filtered'
+                description: 'Get all <<resourcePathName>>, optionally filtered'
               },
               post: {
-                summary: 'Create a new <<resourcePathName | !singularize>>'
+                description: 'Create a new <<resourcePathName | !singularize>>'
               }
             }
           },
           {
             item: {
               displayName: 'Item',
-              description: 'This resourceType should be used for any individual items',
-              summary: 'A single <<resourcePathName>>',
+              description: 'A single <<resourcePathName>>',
               get: {
-                summary: 'Get a <<resourcePathName | !singularize>>'
+                description: 'Get a <<resourcePathName | !singularize>>'
               },
               post: {
-                summary: 'Create a new <<resourcePathName | !singularize>>'
+                description: 'Create a new <<resourcePathName | !singularize>>'
               },
               patch: {
-                summary: 'Update a <<resourcePathName | !singularize>>'
+                description: 'Update a <<resourcePathName | !singularize>>'
               },
               delete: {
-                summary: 'Update a <<resourcePathName | !singularize>>'
+                description: 'Update a <<resourcePathName | !singularize>>'
               }
             }
           }
@@ -3955,12 +4053,11 @@ describe('Parser', function() {
         'resourceTypes:',
         '  - collection:',
         '      displayName: Collection',
-        '      description: This resourceType should be used for any collection of items',
-        '      summary: The collection of <<resourcePathName>>',
+        '      description: The collection of <<resourcePathName>>',
         '      get:',
-        '        summary: Get all <<resourcePathName>>, optionally filtered',
+        '        description: Get all <<resourcePathName>>, optionally filtered',
         '      post:',
-        '        summary: Create a new <<resourcePathName | !singularize>>',
+        '        description: Create a new <<resourcePathName | !singularize>>',
         '/:',
         '  type: [ foo ]'
       ].join('\n');
@@ -3974,12 +4071,11 @@ describe('Parser', function() {
         'resourceTypes:',
         '  - collection:',
         '      displayName: Collection',
-        '      description: This resourceType should be used for any collection of items',
-        '      summary: The collection of <<resourcePathName>>',
+        '      description: The collection of <<resourcePathName>>',
         '      get:',
-        '        summary: Get all <<resourcePathName>>, optionally filtered',
+        '        description: Get all <<resourcePathName>>, optionally filtered',
         '      post:',
-        '        summary: Create a new <<resourcePathName | !singularize>>',
+        '        description: Create a new <<resourcePathName | !singularize>>',
         '/:',
         '  type: invalidType'
       ].join('\n');
@@ -3992,8 +4088,7 @@ describe('Parser', function() {
         'title: Test',
         'resourceTypes:',
         '  - collection:',
-        '      description: This resourceType should be used for any collection of items',
-        '      summary: The collection of Blah',
+        '      description: The collection of Blah',
         '/:',
         '  type: collection'
       ].join('\n');
@@ -4003,15 +4098,13 @@ describe('Parser', function() {
         "resourceTypes": [
           {
             "collection": {
-              "description": "This resourceType should be used for any collection of items",
-              "summary": "The collection of Blah"
+              "description": "The collection of Blah"
             }
           }
         ],
         "resources": [
           {
-            "description": "This resourceType should be used for any collection of items",
-            "summary": "The collection of Blah",
+            "description": "The collection of Blah",
             "type": "collection",
             "relativeUri": "/"
           }
@@ -4062,8 +4155,7 @@ describe('Parser', function() {
         'resourceTypes:',
         '  - collection:',
         '      displayName: Collection',
-        '      description: This resourceType should be used for any collection of items',
-        '      summary: The collection of <<resourcePathName>>',
+        '      description: The collection of <<resourcePathName>>',
         '      /bar:',
         '/:',
         '  type: collection'
@@ -4640,7 +4732,10 @@ describe('Parser', function() {
               displayName: "OAuth 2.0 security",
               queryParameters: {
                 access_token: {
-                  description: "OAuth Access token"
+                  description: "OAuth Access token",
+                  displayName: "access_token",
+                  required: true,
+                  type: "string"
                 }
               }
             }
@@ -4667,13 +4762,16 @@ describe('Parser', function() {
             relativeUri: "/",
             methods: [
               {
-                body: null,
-                method: "post",
                 queryParameters: {
                   access_token: {
-                    description: "OAuth Access token"
+                    description: "OAuth Access token",
+                    displayName: "access_token",
+                    required: true,
+                    type: "string"
                   }
-                }
+                },
+                body: null,
+                method: "post"
               }
             ]
           }
@@ -5869,32 +5967,6 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/property 'displayName' must be a string/).and.notify(done);
     });
-    it('should fail if summary is map', function(done) {
-      var definition = [
-        '#%RAML 0.2',
-        '---',
-        'title: Test',
-        '/a:',
-        '  displayName: A',
-        '  get:',
-        '  /b:',
-        '    summary: {}'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/property 'summary' must be a string/).and.notify(done);
-    });
-    it('should fail if summary is sequence', function(done) {
-      var definition = [
-        '#%RAML 0.2',
-        '---',
-        'title: Test',
-        '/a:',
-        '  displayName: A',
-        '  get:',
-        '  /b:',
-        '    summary: []'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/property 'summary' must be a string/).and.notify(done);
-    });
     it('should fail if description is map', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -5966,30 +6038,6 @@ describe('Parser', function() {
         '    displayName: []'
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/property 'displayName' must be a string/).and.notify(done);
-    });
-    it('should fail if methods summary is map', function(done) {
-      var definition = [
-        '#%RAML 0.2',
-        '---',
-        'title: Test',
-        '/a:',
-        '  displayName: A',
-        '  get:',
-        '    summary: {}'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/property 'summary' must be a string/).and.notify(done);
-    });
-    it('should fail if methods summary is sequence', function(done) {
-      var definition = [
-        '#%RAML 0.2',
-        '---',
-        'title: Test',
-        '/a:',
-        '  displayName: A',
-        '  get:',
-        '    summary: []'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/property 'summary' must be a string/).and.notify(done);
     });
     it('should fail if methods description is map', function(done) {
       var definition = [
@@ -6543,7 +6591,10 @@ describe('Parser', function() {
           {
             "baseUriParameters": {
               "domainName": {
-                "example": "your-bucket"
+                "example": "your-bucket",
+                type: "string",
+                required: true,
+                displayName: "domainName"
               }
             },
             "relativeUri": "/resource"
@@ -6585,7 +6636,10 @@ describe('Parser', function() {
                   {
                     "baseUriParameters": {
                       "domainName": {
-                        "example": "your-bucket"
+                        "example": "your-bucket",
+                        type: "string",
+                        required: true,
+                        displayName: "domainName"
                       }
                     },
                     "relativeUri": "/resource"
