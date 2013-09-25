@@ -78,14 +78,14 @@ representation tree.
 @composeFile = (file, validate = true, apply = true, join = true) ->
   stream = @readFile file
   return @compose stream, validate, apply, join, file
-  
+
 ###
 Parse the first RAML document in a file and produce a list of
   all the absolute URIs for all resources
 ###
 @resourcesFile = (file, validate = true) ->
   stream = @readFile file
-  return @resources stream, validate, file  
+  return @resources stream, validate, file
 
 ###
 Read file either locally or from the network
@@ -123,4 +123,4 @@ Read file from the network
      (typeof xhr.status is 'string' and xhr.status.match /^200/i)
     return xhr.responseText;
   else
-    throw new exports.FileError 'while reading ' + file, null, 'error ' + xhr.status, @start_mark
+    throw new exports.FileError 'while reading ' + file, null, 'cannot fetch ' + file + ' (HTTP ' + xhr.status + ' ' + xhr.statusText + ')', @start_mark

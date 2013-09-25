@@ -260,12 +260,11 @@ describe('Parser', function() {
     it('should fail if include not found', function(done) {
       var definition = [
         '#%RAML 0.2',
-        '%YAML 1.2',
         '---',
         'title: !include relative.md'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/error 404|cannot find relative.md/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/cannot (find|fetch) relative\.md/).and.notify(done);
     });
     it('should succeed on including another YAML file with .yml extension', function(done) {
       var definition = [
@@ -7499,6 +7498,16 @@ describe('Parser', function() {
         '---'
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/document must be a mapping/).and.notify(done);
+    });
+    it('should report error that contains URI inside', function(done) {
+      var uri        = 'http://localhost:9001/invalid/url';
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: !include ' + uri
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(uri).and.notify(done);
     });
   });
 });
