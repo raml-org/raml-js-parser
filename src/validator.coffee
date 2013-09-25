@@ -388,6 +388,8 @@ class @Validator
       catch err
         throw new exports.ValidationError 'while validating resource', null, "Resource name is invalid: " + err?.options?.message, resource[0].start_mark
 
+    return if @isNull resource[1]
+
     if resource[1].value
       resource[1].value.forEach (property) =>
         unless @validate_common_properties property, allowParameterKeys
@@ -438,12 +440,14 @@ class @Validator
           throw new exports.ValidationError 'while validating securityScheme consumption', null, 'there is no securityScheme named ' + securitySchemeName, secScheme.start_mark
 
   validate_type_property: (property, allowParameterKeys) ->
-    typeName = @key_or_value property[1]
     unless @isMapping(property[1]) or @isString(property[1])
       throw new exports.ValidationError 'while validating resources', null, "property 'type' must be a string or a mapping", property[0].start_mark
     if @isMapping(property[1])
       if property[1].value.length > 1
         throw new exports.ValidationError 'while validating resources', null, "a resource or resourceType can inherit from a single resourceType", property[0].start_mark
+    typeName = @key_or_value property[1]
+    unless typeName
+      throw new exports.ValidationError 'while validating resource consumption', null, 'missing type name in type property', property[1].start_mark
     unless @get_type typeName
       throw new exports.ValidationError 'while validating resource consumption', null, 'there is no type named ' + typeName, property[1].start_mark
     if @isMapping property[1]
@@ -740,7 +744,10 @@ class @Validator
     if node instanceof nodes.ScalarNode
       return node.value
     if node instanceof nodes.MappingNode
-      return node.value[0][0].value
+      possibleKeyName = node?.value?[0]?[0]?.value
+      if possibleKeyName
+        return possibleKeyName
+    return null
 
   value_or_undefined: (node) ->
     if node instanceof nodes.MappingNode
