@@ -1434,6 +1434,39 @@ describe('Parser', function() {
           ]
         }).and.notify(done);
       });
+      it('defaults query parameters requiredness to falsy', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  get:',
+          '    queryParameters:',
+          '      notRequired:',
+          '        type: integer'
+        ].join('\n');
+
+        raml.load(definition).should.become({
+          title: 'Test',
+          baseUri: 'http://myapi.org',
+          resources: [
+            {
+              relativeUri: "/resource",
+              methods: [{
+                method: "get",
+                queryParameters: {
+                  notRequired: {
+                    displayName: 'notRequired',
+                    type: 'integer'
+                  }
+                }
+              }]
+            }
+          ]
+        }).and.notify(done);
+      });
+
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
           '#%RAML 0.2',
