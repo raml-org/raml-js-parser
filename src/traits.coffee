@@ -1,11 +1,17 @@
 {MarkedYAMLError} = require './errors'
 nodes             = require './nodes'
+inflection        = require 'inflection'
 
 ###
 The Traits throws these.
 ###
 class @TraitError extends MarkedYAMLError
-  
+
+###
+###
+class @ParameterError extends MarkedYAMLError
+
+
 ###
 The Traits class deals with applying traits to resources according to the spec
 ###
@@ -33,14 +39,14 @@ class @Traits
       return @declaredTraits[traitName][1]
     return null
 
-  apply_traits: (node, removeQs = true) ->
+  apply_traits: (node, resourceUri = "", removeQs = true) ->
     return unless @isMapping(node)
     if @has_traits node
       resources = @child_resources node
       resources.forEach (resource) =>
-        @apply_traits_to_resource resource[1], removeQs
+        @apply_traits_to_resource resourceUri + resource[0].value, resource[1], removeQs
 
-  apply_traits_to_resource: (resource, removeQs) ->
+  apply_traits_to_resource: (resourceUri, resource, removeQs) ->
     return unless @isMapping resource
     methods = @child_methods resource
     # apply traits at the resource level, which is basically the same as applying to each method in the resource
@@ -48,22 +54,23 @@ class @Traits
       uses = @property_value resource, /^is$/
       uses.forEach (use) =>
         methods.forEach (method) =>
-            @apply_trait method, use
+            @apply_trait resourceUri, method, use
+
     # iterate over all methods and apply all their traits
     methods.forEach (method) =>
       if @has_property method[1], /^is$/
         uses = @property_value method[1], /^is$/
         uses.forEach (use) =>
-          @apply_trait method, use
+          @apply_trait resourceUri, method, use
 
     if removeQs
       resource.remove_question_mark_properties()
 
-    @apply_traits resource, removeQs
+    @apply_traits resource, resourceUri, removeQs
 
-  apply_trait: (method, useKey) ->
+  apply_trait: (resourceUri, method, useKey) ->
     trait = @get_trait @key_or_value useKey
-    plainParameters = @get_parameters_from_type_key useKey
+    plainParameters = @get_parameters_from_is_key resourceUri, method[0].value, useKey
     temp = trait.cloneForTrait()
     # by aplying the parameter mapping first, we allow users to rename things in the trait,
     # and then merge it with the resource
@@ -75,28 +82,42 @@ class @Traits
   apply_parameters: (resource, parameters, useKey) ->
     unless resource
       return
-    if resource.tag == 'tag:yaml.org,2002:str'
+    if @isString(resource)
       parameterUse = []
-      if parameterUse = resource.value.match(/<<([^>]+)>>/g)
+      if parameterUse = resource.value.match(/<<\s*([^\|\s>]+)\s*(\|.*)?\s*>>/g)
         parameterUse.forEach (parameter) =>
-          parameter = parameter.replace(/[<>]+/g, '').trim()
-          unless parameter of parameters
-            throw new exports.TraitError 'while aplying parameters', null, 'value was not provided for parameter: ' + parameter , useKey.start_mark
-          resource.value = resource.value.replace "<<" + parameter + ">>", parameters[parameter]
-    if resource.tag == 'tag:yaml.org,2002:seq'
+          parameterName = parameter?.trim()?.replace(/[<>]+/g, '').trim()
+          [parameterName, method] = parameterName.split(/\s*\|\s*/)
+          unless parameterName of parameters
+            throw new exports.ParameterError 'while aplying parameters', null, 'value was not provided for parameter: ' + parameterName , useKey.start_mark
+          value = parameters[parameterName]
+          if method
+            if method.match(/!\s*singularize/)
+              value = inflection.singularize(value)
+            else if method.match(/!\s*pluralize/)
+              value = inflection.pluralize(value)
+            else
+              throw new exports.ParameterError 'while validating parameter', null, "unknown function applied to parameter" , resource.start_mark
+          resource.value = resource.value.replace parameter, value
+    if @isSequence(resource)
       resource.value.forEach (node) =>
         @apply_parameters node, parameters, useKey
-    if resource.tag == 'tag:yaml.org,2002:map'
-      resource.value.forEach (res) =>
-        @apply_parameters res[0], parameters, useKey
-        @apply_parameters res[1], parameters, useKey
+    if @isMapping(resource)
+      resource.value.forEach (property) =>
+        @apply_parameters property[0], parameters, useKey
+        @apply_parameters property[1], parameters, useKey
 
-  get_parameters_from_type_key: (typeKey) ->
+  get_parameters_from_is_key: (resourceUri, methodName, typeKey) ->
+    result = {
+      methodName: methodName,
+      resourcePath: resourceUri.replace(/\/\/*/g, '/')
+    }
+    return result unless @isMapping typeKey
     parameters = @value_or_undefined typeKey
-    result = {}
-    if parameters and parameters[0] and parameters[0][1] and parameters[0][1].value and parameters[0][1].value.length
-      parameters[0][1].value.forEach (parameter) ->
-        unless parameter[1].tag == 'tag:yaml.org,2002:str'
-          throw new exports.TraitError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
-        result[parameter[0].value] = parameter[1].value
+    parameters[0][1].value.forEach (parameter) ->
+      unless parameter[1].tag == 'tag:yaml.org,2002:str'
+        throw new exports.TraitError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
+      if parameter[1].value in [ "methodName", "resourcePath", "resourcePathName"]
+        throw new exports.TraitError 'while aplying parameters', null, 'invalid parameter name "methodName", "resourcePath" are reserved parameter names "resourcePathName"', parameter[1].start_mark
+      result[parameter[0].value] = parameter[1].value
     return result

@@ -76,13 +76,26 @@ class @MappingNode extends @CollectionNode
     return temp
 
   cloneForTrait: ->
+    @clone()
     properties = []
     @value.forEach (property) =>
       name = property[0].clone()
       value = property[1].clone()
 
-      # skip 'displayName' and 'description' property
-      unless name.value.match(/^(displayName|description)$/)
+      # skip 'displayName' and 'usage' property
+      unless name.value.match(/^(usage|displayName)$/)
+        properties.push [ name, value ]
+    temp = new @constructor( @tag, properties, @start_mark, @end_mark, @flow_style)
+    return temp
+
+  cloneForResourceType: ->
+    properties = []
+    @value.forEach (property) =>
+      name = property[0].cloneRemoveIs()
+      value = property[1].cloneRemoveIs()
+
+      # skip 'is', 'displayName' and 'usage' property
+      unless name.value.match(/^(is|type|usage|displayName)$/)
         properties.push [ name, value ]
     temp = new @constructor( @tag, properties, @start_mark, @end_mark, @flow_style)
     return temp
