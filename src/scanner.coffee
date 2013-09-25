@@ -45,7 +45,8 @@ class @Scanner
     'u': 4
     'U': 8
 
-  RAML_VERSION = '#%RAML 0.2'
+  RAML_VERSION    = '#%RAML 0.2'
+  RAML_VERSION_RE = /^#%RAML .+$/
 
   ###
   Initialise the Scanner
@@ -683,32 +684,30 @@ class @Scanner
   plain scalars need to be modified.
   ###
   scan_to_next_token: ->
+    # strip the byte order mark if it's here
     @forward() if @index is 0 and @peek() == '\uFEFF'
+
     found = no
     while not found
       @forward() while @peek() == ' '
 
-      comment = ""
+      comment = ''
 
       if @peek() == '#'
-#        @forward() while @peek() not in C_LB + '\x00'
         while @peek() not in C_LB + '\x00'
           unless @ramlHeaderFound
             comment += @peek()
           @forward()
 
-      # thefirst bytes in a RAML file MUST be the RAML version
+      # the first bytes in a RAML file MUST be the RAML version
       unless @ramlHeaderFound
-        if comment
-          if @index - comment.length == 0
-            if comment is RAML_VERSION
-              @ramlHeaderFound = true
-            else
-              throw new exports.ScannerError 'version validation ', null, "Unsupported RAML version: '" + comment + "'", @get_mark()
+        if comment and RAML_VERSION_RE.test(comment)
+          if comment is RAML_VERSION
+            @ramlHeaderFound = true
           else
-            throw new exports.ScannerError 'version validation ', null, "the first line must be: '" + RAML_VERSION + "'", @get_mark()
-        else if @index > 0
-          throw new exports.ScannerError 'version validation', null, "the first line must be: '" + RAML_VERSION + "'", @get_mark()
+            throw new exports.ScannerError 'version validation', null, "Unsupported RAML version: '#{comment}'", @create_mark(0, 0)
+        else
+          throw new exports.ScannerError 'version validation', null, "The first line must be: '#{RAML_VERSION}'", @create_mark(0, 0)
 
       if @scan_line_break()
         @allow_simple_key = yes if @flow_level is 0
@@ -869,12 +868,12 @@ class @Scanner
     if length is 0
       throw new exports.ScannerError "while scanning an #{name}", start_mark, \
         "expected alphabetic or numeric character but found '#{char}'", \
-        @get_mark() 
+        @get_mark()
 
     value = @prefix length
     @forward length
     char = @peek()
-    if char not in C_LB + C_WS + '\x00' + '?:,]}%@`'    
+    if char not in C_LB + C_WS + '\x00' + '?:,]}%@`'
       throw new exports.ScannerError "while scanning an #{name}", start_mark, \
         "expected alphabetic or numeric character but found '#{char}'", \
         @get_mark()
@@ -1022,7 +1021,7 @@ class @Scanner
       throw new exports.ScannerError 'while scanning a block scalar', \
         start_mark,\
         "expected chomping or indentation indicators, but found #{char}", \
-        @get_mark() 
+        @get_mark()
 
     return [chomping, increment]
 
@@ -1313,7 +1312,7 @@ class @Scanner
       length = 0
     if chunks.length is 0
       throw new exports.ScannerError "while parsing a #{name}", start_mark, \
-        "expected URI but found #{char}", @get_mark() 
+        "expected URI but found #{char}", @get_mark()
     return chunks.join('')
 
   ###

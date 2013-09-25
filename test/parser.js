@@ -123,6 +123,23 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/Resource name is invalid:/).and.notify(done);
     });
+
+    it('should report correct line (RT-244)', function (done) {
+      var noop       = function () {};
+      var definition = [
+        '',
+        ''
+      ].join('\n');
+
+      raml.load(definition).then(noop, function (error) {
+        setTimeout(function () {
+          expect(error.problem_mark).to.exist;
+          error.problem_mark.column.should.be.equal(0);
+          error.problem_mark.line.should.be.equal(0);
+          done();
+        }, 0);
+      });
+    })
   });
   describe('Basic Information', function() {
     it('should fail unsupported yaml version', function(done) {

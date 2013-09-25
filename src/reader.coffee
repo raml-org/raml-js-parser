@@ -41,9 +41,12 @@ class @Reader
       else
         @column++
       length--
-  
+
+  create_mark: (line = @line, column = @column) ->
+    new Mark @src, line, column, @string, @index
+
   get_mark: ->
-    new Mark @src, @line, @column, @string, @index
+    @create_mark()
   
   check_printable: ->
     match = NON_PRINTABLE.exec @string
