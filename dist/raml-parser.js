@@ -7880,6 +7880,376 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 },{"./errors":1,"./nodes":13}],17:[function(require,module,exports){
 (function() {
+  var composer, construct, joiner, parser, reader, resolver, scanner, schemas, securitySchemes, traits, transformations, types, util, validator;
+
+  util = require('./util');
+
+  reader = require('./reader');
+
+  scanner = require('./scanner');
+
+  parser = require('./parser');
+
+  composer = require('./composer');
+
+  resolver = require('./resolver');
+
+  construct = require('./construct');
+
+  validator = require('./validator');
+
+  joiner = require('./joiner');
+
+  traits = require('./traits');
+
+  types = require('./resourceTypes');
+
+  schemas = require('./schemas');
+
+  securitySchemes = require('./securitySchemes');
+
+  transformations = require('./transformations');
+
+  this.make_loader = function(Reader, Scanner, Parser, Composer, Resolver, Validator, ResourceTypes, Traits, Schemas, Joiner, SecuritySchemes, Constructor, Transformations) {
+    if (Reader == null) {
+      Reader = reader.Reader;
+    }
+    if (Scanner == null) {
+      Scanner = scanner.Scanner;
+    }
+    if (Parser == null) {
+      Parser = parser.Parser;
+    }
+    if (Composer == null) {
+      Composer = composer.Composer;
+    }
+    if (Resolver == null) {
+      Resolver = resolver.Resolver;
+    }
+    if (Validator == null) {
+      Validator = validator.Validator;
+    }
+    if (ResourceTypes == null) {
+      ResourceTypes = types.ResourceTypes;
+    }
+    if (Traits == null) {
+      Traits = traits.Traits;
+    }
+    if (Schemas == null) {
+      Schemas = schemas.Schemas;
+    }
+    if (Joiner == null) {
+      Joiner = joiner.Joiner;
+    }
+    if (SecuritySchemes == null) {
+      SecuritySchemes = securitySchemes.SecuritySchemes;
+    }
+    if (Constructor == null) {
+      Constructor = construct.Constructor;
+    }
+    if (Transformations == null) {
+      Transformations = transformations.Transformations;
+    }
+    return (function() {
+      var component, components;
+
+      components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Schemas, Joiner, Constructor, SecuritySchemes, Transformations];
+
+      util.extend.apply(util, [_Class.prototype].concat((function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = components.length; _i < _len; _i++) {
+          component = components[_i];
+          _results.push(component.prototype);
+        }
+        return _results;
+      })()));
+
+      function _Class(stream, location, validate) {
+        var _i, _len, _ref;
+        components[0].call(this, stream, location);
+        components[1].call(this, validate);
+        _ref = components.slice(2);
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          component = _ref[_i];
+          component.call(this);
+        }
+      }
+
+      return _Class;
+
+    })();
+  };
+
+  this.Loader = this.make_loader();
+
+}).call(this);
+
+},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./securitySchemes":26,"./traits":23,"./transformations":27,"./util":4,"./validator":22}],13:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  unique_id = 0;
+
+  this.ApplicationError = (function(_super) {
+    __extends(ApplicationError, _super);
+
+    function ApplicationError() {
+      _ref = ApplicationError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return ApplicationError;
+
+  })(MarkedYAMLError);
+
+  this.Node = (function() {
+    function Node(tag, value, start_mark, end_mark) {
+      this.tag = tag;
+      this.value = value;
+      this.start_mark = start_mark;
+      this.end_mark = end_mark;
+      this.unique_id = "node_" + (unique_id++);
+    }
+
+    Node.prototype.clone = function() {
+      var temp;
+      temp = new this.constructor(this.tag, this.value.clone(), this.start_mark, this.end_mark);
+      return temp;
+    };
+
+    return Node;
+
+  })();
+
+  this.ScalarNode = (function(_super) {
+    __extends(ScalarNode, _super);
+
+    ScalarNode.prototype.id = 'scalar';
+
+    function ScalarNode(tag, value, start_mark, end_mark, style) {
+      this.tag = tag;
+      this.value = value;
+      this.start_mark = start_mark;
+      this.end_mark = end_mark;
+      this.style = style;
+      ScalarNode.__super__.constructor.apply(this, arguments);
+    }
+
+    ScalarNode.prototype.cloneRemoveIs = function() {
+      return this.clone();
+    };
+
+    ScalarNode.prototype.clone = function() {
+      var temp;
+      temp = new this.constructor(this.tag, this.value, this.start_mark, this.end_mark);
+      return temp;
+    };
+
+    ScalarNode.prototype.combine = function(node) {
+      if (this.tag === "tag:yaml.org,2002:null" && node.tag === 'tag:yaml.org,2002:map') {
+        this.value = new exports.MappingNode('tag:yaml.org,2002:map', [], node.start_mark, node.end_mark);
+        return this.value.combine(node);
+      } else if (!(node instanceof ScalarNode)) {
+        throw new exports.ApplicationError('while applying node', null, 'different YAML structures', this.start_mark);
+      }
+      return this.value = node.value;
+    };
+
+    ScalarNode.prototype.remove_question_mark_properties = function() {};
+
+    return ScalarNode;
+
+  })(this.Node);
+
+  this.CollectionNode = (function(_super) {
+    __extends(CollectionNode, _super);
+
+    function CollectionNode(tag, value, start_mark, end_mark, flow_style) {
+      this.tag = tag;
+      this.value = value;
+      this.start_mark = start_mark;
+      this.end_mark = end_mark;
+      this.flow_style = flow_style;
+      CollectionNode.__super__.constructor.apply(this, arguments);
+    }
+
+    return CollectionNode;
+
+  })(this.Node);
+
+  this.SequenceNode = (function(_super) {
+    __extends(SequenceNode, _super);
+
+    function SequenceNode() {
+      _ref1 = SequenceNode.__super__.constructor.apply(this, arguments);
+      return _ref1;
+    }
+
+    SequenceNode.prototype.id = 'sequence';
+
+    SequenceNode.prototype.cloneRemoveIs = function() {
+      return this.clone();
+    };
+
+    SequenceNode.prototype.clone = function() {
+      var items, temp,
+        _this = this;
+      items = [];
+      this.value.forEach(function(item) {
+        var value;
+        value = item.clone();
+        return items.push(value);
+      });
+      temp = new this.constructor(this.tag, items, this.start_mark, this.end_mark, this.flow_style);
+      return temp;
+    };
+
+    SequenceNode.prototype.combine = function(node) {
+      var _this = this;
+      if (!(node instanceof SequenceNode)) {
+        throw new exports.ApplicationError('while applying node', null, 'different YAML structures', this.start_mark);
+      }
+      return node.value.forEach(function(property) {
+        var value;
+        value = property.clone();
+        return _this.value.push(value);
+      });
+    };
+
+    SequenceNode.prototype.remove_question_mark_properties = function() {
+      return this.value.forEach(function(item) {
+        return item.remove_question_mark_properties();
+      });
+    };
+
+    return SequenceNode;
+
+  })(this.CollectionNode);
+
+  this.MappingNode = (function(_super) {
+    __extends(MappingNode, _super);
+
+    function MappingNode() {
+      _ref2 = MappingNode.__super__.constructor.apply(this, arguments);
+      return _ref2;
+    }
+
+    MappingNode.prototype.id = 'mapping';
+
+    MappingNode.prototype.clone = function() {
+      var properties, temp,
+        _this = this;
+      properties = [];
+      this.value.forEach(function(property) {
+        var name, value;
+        name = property[0].clone();
+        value = property[1].clone();
+        return properties.push([name, value]);
+      });
+      temp = new this.constructor(this.tag, properties, this.start_mark, this.end_mark, this.flow_style);
+      return temp;
+    };
+
+    MappingNode.prototype.cloneForTrait = function() {
+      var properties, temp,
+        _this = this;
+      this.clone();
+      properties = [];
+      this.value.forEach(function(property) {
+        var name, value;
+        name = property[0].clone();
+        value = property[1].clone();
+        if (!name.value.match(/^(usage|displayName)$/)) {
+          return properties.push([name, value]);
+        }
+      });
+      temp = new this.constructor(this.tag, properties, this.start_mark, this.end_mark, this.flow_style);
+      return temp;
+    };
+
+    MappingNode.prototype.cloneForResourceType = function() {
+      var properties, temp,
+        _this = this;
+      properties = [];
+      this.value.forEach(function(property) {
+        var name, value;
+        name = property[0].cloneRemoveIs();
+        value = property[1].cloneRemoveIs();
+        if (!name.value.match(/^(is|type|usage|displayName)$/)) {
+          return properties.push([name, value]);
+        }
+      });
+      temp = new this.constructor(this.tag, properties, this.start_mark, this.end_mark, this.flow_style);
+      return temp;
+    };
+
+    MappingNode.prototype.cloneRemoveIs = function() {
+      var properties, temp,
+        _this = this;
+      properties = [];
+      this.value.forEach(function(property) {
+        var name, value;
+        name = property[0].cloneRemoveIs();
+        value = property[1].cloneRemoveIs();
+        if (!name.value.match(/^(is)$/)) {
+          return properties.push([name, value]);
+        }
+      });
+      temp = new this.constructor(this.tag, properties, this.start_mark, this.end_mark, this.flow_style);
+      return temp;
+    };
+
+    MappingNode.prototype.combine = function(resourceNode) {
+      var _this = this;
+      if (resourceNode.tag === "tag:yaml.org,2002:null") {
+        resourceNode = new MappingNode('tag:yaml.org,2002:map', [], resourceNode.start_mark, resourceNode.end_mark);
+      }
+      if (!(resourceNode instanceof MappingNode)) {
+        throw new exports.ApplicationError('while applying node', null, 'different YAML structures', this.start_mark);
+      }
+      return resourceNode.value.forEach(function(resourceProperty) {
+        var name, node_has_property;
+        name = resourceProperty[0].value;
+        node_has_property = _this.value.some(function(someProperty) {
+          return (someProperty[0].value === name) || ((someProperty[0].value + '?') === name) || (someProperty[0].value === (name + '?'));
+        });
+        if (node_has_property) {
+          return _this.value.forEach(function(ownNodeProperty) {
+            var ownNodePropertyName;
+            ownNodePropertyName = ownNodeProperty[0].value;
+            if ((ownNodePropertyName === name) || ((ownNodePropertyName + '?') === name) || (ownNodePropertyName === (name + '?'))) {
+              ownNodeProperty[1].combine(resourceProperty[1]);
+              return ownNodeProperty[0].value = ownNodeProperty[0].value.replace(/\?$/, '');
+            }
+          });
+        } else {
+          return _this.value.push([resourceProperty[0].clone(), resourceProperty[1].clone()]);
+        }
+      });
+    };
+
+    MappingNode.prototype.remove_question_mark_properties = function() {
+      this.value = this.value.filter(function(property) {
+        return property[0].value.indexOf('?', property[0].value.length - 1) === -1;
+      });
+      return this.value.forEach(function(property) {
+        return property[1].remove_question_mark_properties();
+      });
+    };
+
+    return MappingNode;
+
+  })(this.CollectionNode);
+
+}).call(this);
+
+},{"./errors":1}],20:[function(require,module,exports){
+(function() {
   var MarkedYAMLError, events, tokens, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -8491,376 +8861,6 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 },{"./errors":1,"./events":2,"./tokens":3}],18:[function(require,module,exports){
 (function() {
-  var composer, construct, joiner, parser, reader, resolver, scanner, schemas, securitySchemes, traits, transformations, types, util, validator;
-
-  util = require('./util');
-
-  reader = require('./reader');
-
-  scanner = require('./scanner');
-
-  parser = require('./parser');
-
-  composer = require('./composer');
-
-  resolver = require('./resolver');
-
-  construct = require('./construct');
-
-  validator = require('./validator');
-
-  joiner = require('./joiner');
-
-  traits = require('./traits');
-
-  types = require('./resourceTypes');
-
-  schemas = require('./schemas');
-
-  securitySchemes = require('./securitySchemes');
-
-  transformations = require('./transformations');
-
-  this.make_loader = function(Reader, Scanner, Parser, Composer, Resolver, Validator, ResourceTypes, Traits, Schemas, Joiner, SecuritySchemes, Constructor, Transformations) {
-    if (Reader == null) {
-      Reader = reader.Reader;
-    }
-    if (Scanner == null) {
-      Scanner = scanner.Scanner;
-    }
-    if (Parser == null) {
-      Parser = parser.Parser;
-    }
-    if (Composer == null) {
-      Composer = composer.Composer;
-    }
-    if (Resolver == null) {
-      Resolver = resolver.Resolver;
-    }
-    if (Validator == null) {
-      Validator = validator.Validator;
-    }
-    if (ResourceTypes == null) {
-      ResourceTypes = types.ResourceTypes;
-    }
-    if (Traits == null) {
-      Traits = traits.Traits;
-    }
-    if (Schemas == null) {
-      Schemas = schemas.Schemas;
-    }
-    if (Joiner == null) {
-      Joiner = joiner.Joiner;
-    }
-    if (SecuritySchemes == null) {
-      SecuritySchemes = securitySchemes.SecuritySchemes;
-    }
-    if (Constructor == null) {
-      Constructor = construct.Constructor;
-    }
-    if (Transformations == null) {
-      Transformations = transformations.Transformations;
-    }
-    return (function() {
-      var component, components;
-
-      components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Schemas, Joiner, Constructor, SecuritySchemes, Transformations];
-
-      util.extend.apply(util, [_Class.prototype].concat((function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = components.length; _i < _len; _i++) {
-          component = components[_i];
-          _results.push(component.prototype);
-        }
-        return _results;
-      })()));
-
-      function _Class(stream, location, validate) {
-        var _i, _len, _ref;
-        components[0].call(this, stream, location);
-        components[1].call(this, validate);
-        _ref = components.slice(2);
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          component = _ref[_i];
-          component.call(this);
-        }
-      }
-
-      return _Class;
-
-    })();
-  };
-
-  this.Loader = this.make_loader();
-
-}).call(this);
-
-},{"./composer":12,"./construct":15,"./joiner":16,"./parser":17,"./reader":19,"./resolver":21,"./resourceTypes":24,"./scanner":20,"./schemas":25,"./securitySchemes":26,"./traits":23,"./transformations":27,"./util":4,"./validator":22}],13:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  unique_id = 0;
-
-  this.ApplicationError = (function(_super) {
-    __extends(ApplicationError, _super);
-
-    function ApplicationError() {
-      _ref = ApplicationError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return ApplicationError;
-
-  })(MarkedYAMLError);
-
-  this.Node = (function() {
-    function Node(tag, value, start_mark, end_mark) {
-      this.tag = tag;
-      this.value = value;
-      this.start_mark = start_mark;
-      this.end_mark = end_mark;
-      this.unique_id = "node_" + (unique_id++);
-    }
-
-    Node.prototype.clone = function() {
-      var temp;
-      temp = new this.constructor(this.tag, this.value.clone(), this.start_mark, this.end_mark);
-      return temp;
-    };
-
-    return Node;
-
-  })();
-
-  this.ScalarNode = (function(_super) {
-    __extends(ScalarNode, _super);
-
-    ScalarNode.prototype.id = 'scalar';
-
-    function ScalarNode(tag, value, start_mark, end_mark, style) {
-      this.tag = tag;
-      this.value = value;
-      this.start_mark = start_mark;
-      this.end_mark = end_mark;
-      this.style = style;
-      ScalarNode.__super__.constructor.apply(this, arguments);
-    }
-
-    ScalarNode.prototype.cloneRemoveIs = function() {
-      return this.clone();
-    };
-
-    ScalarNode.prototype.clone = function() {
-      var temp;
-      temp = new this.constructor(this.tag, this.value, this.start_mark, this.end_mark);
-      return temp;
-    };
-
-    ScalarNode.prototype.combine = function(node) {
-      if (this.tag === "tag:yaml.org,2002:null" && node.tag === 'tag:yaml.org,2002:map') {
-        this.value = new exports.MappingNode('tag:yaml.org,2002:map', [], node.start_mark, node.end_mark);
-        return this.value.combine(node);
-      } else if (!(node instanceof ScalarNode)) {
-        throw new exports.ApplicationError('while applying node', null, 'different YAML structures', this.start_mark);
-      }
-      return this.value = node.value;
-    };
-
-    ScalarNode.prototype.remove_question_mark_properties = function() {};
-
-    return ScalarNode;
-
-  })(this.Node);
-
-  this.CollectionNode = (function(_super) {
-    __extends(CollectionNode, _super);
-
-    function CollectionNode(tag, value, start_mark, end_mark, flow_style) {
-      this.tag = tag;
-      this.value = value;
-      this.start_mark = start_mark;
-      this.end_mark = end_mark;
-      this.flow_style = flow_style;
-      CollectionNode.__super__.constructor.apply(this, arguments);
-    }
-
-    return CollectionNode;
-
-  })(this.Node);
-
-  this.SequenceNode = (function(_super) {
-    __extends(SequenceNode, _super);
-
-    function SequenceNode() {
-      _ref1 = SequenceNode.__super__.constructor.apply(this, arguments);
-      return _ref1;
-    }
-
-    SequenceNode.prototype.id = 'sequence';
-
-    SequenceNode.prototype.cloneRemoveIs = function() {
-      return this.clone();
-    };
-
-    SequenceNode.prototype.clone = function() {
-      var items, temp,
-        _this = this;
-      items = [];
-      this.value.forEach(function(item) {
-        var value;
-        value = item.clone();
-        return items.push(value);
-      });
-      temp = new this.constructor(this.tag, items, this.start_mark, this.end_mark, this.flow_style);
-      return temp;
-    };
-
-    SequenceNode.prototype.combine = function(node) {
-      var _this = this;
-      if (!(node instanceof SequenceNode)) {
-        throw new exports.ApplicationError('while applying node', null, 'different YAML structures', this.start_mark);
-      }
-      return node.value.forEach(function(property) {
-        var value;
-        value = property.clone();
-        return _this.value.push(value);
-      });
-    };
-
-    SequenceNode.prototype.remove_question_mark_properties = function() {
-      return this.value.forEach(function(item) {
-        return item.remove_question_mark_properties();
-      });
-    };
-
-    return SequenceNode;
-
-  })(this.CollectionNode);
-
-  this.MappingNode = (function(_super) {
-    __extends(MappingNode, _super);
-
-    function MappingNode() {
-      _ref2 = MappingNode.__super__.constructor.apply(this, arguments);
-      return _ref2;
-    }
-
-    MappingNode.prototype.id = 'mapping';
-
-    MappingNode.prototype.clone = function() {
-      var properties, temp,
-        _this = this;
-      properties = [];
-      this.value.forEach(function(property) {
-        var name, value;
-        name = property[0].clone();
-        value = property[1].clone();
-        return properties.push([name, value]);
-      });
-      temp = new this.constructor(this.tag, properties, this.start_mark, this.end_mark, this.flow_style);
-      return temp;
-    };
-
-    MappingNode.prototype.cloneForTrait = function() {
-      var properties, temp,
-        _this = this;
-      this.clone();
-      properties = [];
-      this.value.forEach(function(property) {
-        var name, value;
-        name = property[0].clone();
-        value = property[1].clone();
-        if (!name.value.match(/^(usage|displayName)$/)) {
-          return properties.push([name, value]);
-        }
-      });
-      temp = new this.constructor(this.tag, properties, this.start_mark, this.end_mark, this.flow_style);
-      return temp;
-    };
-
-    MappingNode.prototype.cloneForResourceType = function() {
-      var properties, temp,
-        _this = this;
-      properties = [];
-      this.value.forEach(function(property) {
-        var name, value;
-        name = property[0].cloneRemoveIs();
-        value = property[1].cloneRemoveIs();
-        if (!name.value.match(/^(is|type|usage|displayName)$/)) {
-          return properties.push([name, value]);
-        }
-      });
-      temp = new this.constructor(this.tag, properties, this.start_mark, this.end_mark, this.flow_style);
-      return temp;
-    };
-
-    MappingNode.prototype.cloneRemoveIs = function() {
-      var properties, temp,
-        _this = this;
-      properties = [];
-      this.value.forEach(function(property) {
-        var name, value;
-        name = property[0].cloneRemoveIs();
-        value = property[1].cloneRemoveIs();
-        if (!name.value.match(/^(is)$/)) {
-          return properties.push([name, value]);
-        }
-      });
-      temp = new this.constructor(this.tag, properties, this.start_mark, this.end_mark, this.flow_style);
-      return temp;
-    };
-
-    MappingNode.prototype.combine = function(resourceNode) {
-      var _this = this;
-      if (resourceNode.tag === "tag:yaml.org,2002:null") {
-        resourceNode = new MappingNode('tag:yaml.org,2002:map', [], resourceNode.start_mark, resourceNode.end_mark);
-      }
-      if (!(resourceNode instanceof MappingNode)) {
-        throw new exports.ApplicationError('while applying node', null, 'different YAML structures', this.start_mark);
-      }
-      return resourceNode.value.forEach(function(resourceProperty) {
-        var name, node_has_property;
-        name = resourceProperty[0].value;
-        node_has_property = _this.value.some(function(someProperty) {
-          return (someProperty[0].value === name) || ((someProperty[0].value + '?') === name) || (someProperty[0].value === (name + '?'));
-        });
-        if (node_has_property) {
-          return _this.value.forEach(function(ownNodeProperty) {
-            var ownNodePropertyName;
-            ownNodePropertyName = ownNodeProperty[0].value;
-            if ((ownNodePropertyName === name) || ((ownNodePropertyName + '?') === name) || (ownNodePropertyName === (name + '?'))) {
-              ownNodeProperty[1].combine(resourceProperty[1]);
-              return ownNodeProperty[0].value = ownNodeProperty[0].value.replace(/\?$/, '');
-            }
-          });
-        } else {
-          return _this.value.push([resourceProperty[0].clone(), resourceProperty[1].clone()]);
-        }
-      });
-    };
-
-    MappingNode.prototype.remove_question_mark_properties = function() {
-      this.value = this.value.filter(function(property) {
-        return property[0].value.indexOf('?', property[0].value.length - 1) === -1;
-      });
-      return this.value.forEach(function(property) {
-        return property[1].remove_question_mark_properties();
-      });
-    };
-
-    return MappingNode;
-
-  })(this.CollectionNode);
-
-}).call(this);
-
-},{"./errors":1}],19:[function(require,module,exports){
-(function() {
   var Mark, YAMLError, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -9371,188 +9371,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],25:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, nodes, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  /*
-  The Schemas throws these.
-  */
-
-
-  this.SchemaError = (function(_super) {
-    __extends(SchemaError, _super);
-
-    function SchemaError() {
-      _ref = SchemaError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return SchemaError;
-
-  })(MarkedYAMLError);
-
-  /*
-    The Schemas class deals with applying schemas to resources according to the spec
-  */
-
-
-  this.Schemas = (function() {
-    function Schemas() {
-      this.get_schemas_used = __bind(this.get_schemas_used, this);
-      this.apply_schemas = __bind(this.apply_schemas, this);
-      this.get_all_schemas = __bind(this.get_all_schemas, this);
-      this.has_schemas = __bind(this.has_schemas, this);
-      this.load_schemas = __bind(this.load_schemas, this);
-      this.declaredSchemas = {};
-    }
-
-    Schemas.prototype.load_schemas = function(node) {
-      var allSchemas,
-        _this = this;
-      if (this.has_property(node, "schemas")) {
-        allSchemas = this.property_value(node, "schemas");
-        if (allSchemas && typeof allSchemas === "object") {
-          return allSchemas.forEach(function(schema_entry) {
-            if (schema_entry && typeof schema_entry === "object" && typeof schema_entry.value === "object") {
-              return schema_entry.value.forEach(function(schema) {
-                return _this.declaredSchemas[schema[0].value] = schema;
-              });
-            }
-          });
-        }
-      }
-    };
-
-    Schemas.prototype.has_schemas = function(node) {
-      if (this.declaredSchemas.length === 0 && this.has_property(node, "schemas")) {
-        this.load_schemas(node);
-      }
-      return Object.keys(this.declaredSchemas).length > 0;
-    };
-
-    Schemas.prototype.get_all_schemas = function() {
-      return this.declaredSchemas;
-    };
-
-    Schemas.prototype.apply_schemas = function(node) {
-      var resources, schemas,
-        _this = this;
-      resources = this.child_resources(node);
-      schemas = this.get_schemas_used(resources);
-      return schemas.forEach(function(schema) {
-        if (schema[1].value in _this.declaredSchemas) {
-          return schema[1].value = _this.declaredSchemas[schema[1].value][1].value;
-        }
-      });
-    };
-
-    Schemas.prototype.get_schemas_used = function(resources) {
-      var schemas,
-        _this = this;
-      schemas = [];
-      resources.forEach(function(resource) {
-        var properties;
-        properties = _this.get_properties(resource[1], "schema");
-        return schemas = schemas.concat(properties);
-      });
-      return schemas;
-    };
-
-    return Schemas;
-
-  })();
-
-}).call(this);
-
-},{"./errors":1,"./nodes":13}],26:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, nodes, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  /*
-  The Schemas throws these.
-  */
-
-
-  this.SecuritySchemeError = (function(_super) {
-    __extends(SecuritySchemeError, _super);
-
-    /*
-      The Schemas class deals with applying schemas to resources according to the spec
-    */
-
-
-    function SecuritySchemeError() {
-      _ref = SecuritySchemeError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return SecuritySchemeError;
-
-  })(MarkedYAMLError);
-
-  this.SecuritySchemes = (function() {
-    function SecuritySchemes() {
-      this.get_security_scheme = __bind(this.get_security_scheme, this);
-      this.get_all_schemes = __bind(this.get_all_schemes, this);
-      this.has_schemes = __bind(this.has_schemes, this);
-      this.load_security_schemes = __bind(this.load_security_schemes, this);
-      this.declaredSchemes = {};
-    }
-
-    SecuritySchemes.prototype.load_security_schemes = function(node) {
-      var allschemes,
-        _this = this;
-      if (this.has_property(node, "securitySchemes")) {
-        allschemes = this.property_value(node, "securitySchemes");
-        if (allschemes && typeof allschemes === "object") {
-          return allschemes.forEach(function(scheme_entry) {
-            if (scheme_entry.tag === 'tag:yaml.org,2002:map') {
-              return scheme_entry.value.forEach(function(scheme) {
-                return _this.declaredSchemes[scheme[0].value] = scheme[1].value;
-              });
-            }
-          });
-        }
-      }
-    };
-
-    SecuritySchemes.prototype.has_schemes = function(node) {
-      if (this.declaredSchemes.length === 0 && this.has_property(node, "schemes")) {
-        this.load_schemes(node);
-      }
-      return Object.keys(this.declaredSchemes).length > 0;
-    };
-
-    SecuritySchemes.prototype.get_all_schemes = function() {
-      return this.declaredSchemes;
-    };
-
-    SecuritySchemes.prototype.get_security_scheme = function(schemaName) {
-      return this.declaredSchemes[schemaName];
-    };
-
-    return SecuritySchemes;
-
-  })();
-
-}).call(this);
-
-},{"./errors":1,"./nodes":13}],20:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11058,7 +10877,188 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./tokens":3,"./util":4}],8:[function(require,module,exports){
+},{"./errors":1,"./tokens":3,"./util":4}],26:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, nodes, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  /*
+  The Schemas throws these.
+  */
+
+
+  this.SecuritySchemeError = (function(_super) {
+    __extends(SecuritySchemeError, _super);
+
+    /*
+      The Schemas class deals with applying schemas to resources according to the spec
+    */
+
+
+    function SecuritySchemeError() {
+      _ref = SecuritySchemeError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return SecuritySchemeError;
+
+  })(MarkedYAMLError);
+
+  this.SecuritySchemes = (function() {
+    function SecuritySchemes() {
+      this.get_security_scheme = __bind(this.get_security_scheme, this);
+      this.get_all_schemes = __bind(this.get_all_schemes, this);
+      this.has_schemes = __bind(this.has_schemes, this);
+      this.load_security_schemes = __bind(this.load_security_schemes, this);
+      this.declaredSchemes = {};
+    }
+
+    SecuritySchemes.prototype.load_security_schemes = function(node) {
+      var allschemes,
+        _this = this;
+      if (this.has_property(node, "securitySchemes")) {
+        allschemes = this.property_value(node, "securitySchemes");
+        if (allschemes && typeof allschemes === "object") {
+          return allschemes.forEach(function(scheme_entry) {
+            if (scheme_entry.tag === 'tag:yaml.org,2002:map') {
+              return scheme_entry.value.forEach(function(scheme) {
+                return _this.declaredSchemes[scheme[0].value] = scheme[1].value;
+              });
+            }
+          });
+        }
+      }
+    };
+
+    SecuritySchemes.prototype.has_schemes = function(node) {
+      if (this.declaredSchemes.length === 0 && this.has_property(node, "schemes")) {
+        this.load_schemes(node);
+      }
+      return Object.keys(this.declaredSchemes).length > 0;
+    };
+
+    SecuritySchemes.prototype.get_all_schemes = function() {
+      return this.declaredSchemes;
+    };
+
+    SecuritySchemes.prototype.get_security_scheme = function(schemaName) {
+      return this.declaredSchemes[schemaName];
+    };
+
+    return SecuritySchemes;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./nodes":13}],25:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, nodes, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  /*
+  The Schemas throws these.
+  */
+
+
+  this.SchemaError = (function(_super) {
+    __extends(SchemaError, _super);
+
+    function SchemaError() {
+      _ref = SchemaError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return SchemaError;
+
+  })(MarkedYAMLError);
+
+  /*
+    The Schemas class deals with applying schemas to resources according to the spec
+  */
+
+
+  this.Schemas = (function() {
+    function Schemas() {
+      this.get_schemas_used = __bind(this.get_schemas_used, this);
+      this.apply_schemas = __bind(this.apply_schemas, this);
+      this.get_all_schemas = __bind(this.get_all_schemas, this);
+      this.has_schemas = __bind(this.has_schemas, this);
+      this.load_schemas = __bind(this.load_schemas, this);
+      this.declaredSchemas = {};
+    }
+
+    Schemas.prototype.load_schemas = function(node) {
+      var allSchemas,
+        _this = this;
+      if (this.has_property(node, "schemas")) {
+        allSchemas = this.property_value(node, "schemas");
+        if (allSchemas && typeof allSchemas === "object") {
+          return allSchemas.forEach(function(schema_entry) {
+            if (schema_entry && typeof schema_entry === "object" && typeof schema_entry.value === "object") {
+              return schema_entry.value.forEach(function(schema) {
+                return _this.declaredSchemas[schema[0].value] = schema;
+              });
+            }
+          });
+        }
+      }
+    };
+
+    Schemas.prototype.has_schemas = function(node) {
+      if (this.declaredSchemas.length === 0 && this.has_property(node, "schemas")) {
+        this.load_schemas(node);
+      }
+      return Object.keys(this.declaredSchemas).length > 0;
+    };
+
+    Schemas.prototype.get_all_schemas = function() {
+      return this.declaredSchemas;
+    };
+
+    Schemas.prototype.apply_schemas = function(node) {
+      var resources, schemas,
+        _this = this;
+      resources = this.child_resources(node);
+      schemas = this.get_schemas_used(resources);
+      return schemas.forEach(function(schema) {
+        if (schema[1].value in _this.declaredSchemas) {
+          return schema[1].value = _this.declaredSchemas[schema[1].value][1].value;
+        }
+      });
+    };
+
+    Schemas.prototype.get_schemas_used = function(resources) {
+      var schemas,
+        _this = this;
+      schemas = [];
+      resources.forEach(function(resource) {
+        var properties;
+        properties = _this.get_properties(resource[1], "schema");
+        return schemas = schemas.concat(properties);
+      });
+      return schemas;
+    };
+
+    return Schemas;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./nodes":13}],8:[function(require,module,exports){
 
 /**
  * Object#toString() ref for stringify().
@@ -11619,7 +11619,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":18,"./nodes":13,"./parser":17,"./reader":19,"./resolver":21,"./scanner":20,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":28}],27:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":28}],27:[function(require,module,exports){
 (function() {
   var nodes, uritemplate,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -12245,7 +12245,7 @@ function decode(str) {
             }
             break;
           case "describedBy":
-            return _this.validate_method(property, true);
+            return _this.validate_method(property, true, "security scheme");
           case "settings":
             settings = property;
             if (!_this.isNullableMapping(property[1])) {
@@ -12735,7 +12735,7 @@ function decode(str) {
               }
               return _this.validate_resource(property, allowParameterKeys);
             } else if (property[0].value.match(new RegExp("^(get|post|put|delete|head|patch|options)" + (allowParameterKeys ? '\\??' : '') + "$"))) {
-              return _this.validate_method(property, allowParameterKeys);
+              return _this.validate_method(property, allowParameterKeys, 'method');
             } else {
               key = property[0].value;
               canonicalKey = _this.canonicalizePropertyName(key, allowParameterKeys);
@@ -13053,7 +13053,7 @@ function decode(str) {
       }
       if (bodyMode === "implicit") {
         if (!this.get_media_type()) {
-          throw new exports.ValidationError('while validating body', null, "body tries to use default Media Type, but mediaType is null", property.start_mark);
+          throw new exports.ValidationError('while validating body', null, "body tries to use default Media Type, but mediaType is null", property[0].start_mark);
         }
       }
     };
@@ -15007,9 +15007,7 @@ https.request = function (params, cb) {
     params.scheme = 'https';
     return http.request.call(this, params, cb);
 }
-},{"http":32}],30:[function(require,module,exports){
-module.exports = require( './lib/inflection' );
-},{"./lib/inflection":34}],35:[function(require,module,exports){
+},{"http":32}],34:[function(require,module,exports){
 (function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
 
 var EventEmitter = exports.EventEmitter = process.EventEmitter;
@@ -15206,7 +15204,9 @@ EventEmitter.listenerCount = function(emitter, type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":5}],32:[function(require,module,exports){
+},{"__browserify_process":5}],30:[function(require,module,exports){
+module.exports = require( './lib/inflection' );
+},{"./lib/inflection":35}],32:[function(require,module,exports){
 var http = module.exports;
 var EventEmitter = require('events').EventEmitter;
 var Request = require('./lib/request');
@@ -15268,7 +15268,7 @@ var xhrHttp = (function () {
     }
 })();
 
-},{"./lib/request":36,"events":35}],34:[function(require,module,exports){
+},{"./lib/request":36,"events":34}],35:[function(require,module,exports){
 /*!
  * inflection
  * Copyright(c) 2011 Ben Lin <ben@dreamerslab.com>
@@ -15926,7 +15926,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":35,"util":38}],38:[function(require,module,exports){
+},{"events":34,"util":38}],38:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -16273,7 +16273,7 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":35}],39:[function(require,module,exports){
+},{"events":34}],39:[function(require,module,exports){
 (function(){// UTILITY
 var util = require('util');
 var Buffer = require("buffer").Buffer;
@@ -18150,5 +18150,5 @@ module.exports = function(cb) {
 module.exports.ConcatStream = ConcatStream
 
 })(require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":14,"stream":37,"util":38}]},{},[10,12,15,1,2,16,17,18,13,11,19,21,24,20,25,26,3,23,27,4,22,6])
+},{"__browserify_buffer":14,"stream":37,"util":38}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,24,19,25,26,3,23,27,4,22,6])
 ;

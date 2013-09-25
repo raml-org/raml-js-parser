@@ -75,7 +75,7 @@ class @Validator
           unless @isString(property[1]) and type.match(/^(OAuth 1.0|OAuth 2.0|Basic Authentication|Digest Authentication|x-.+)$/)
             throw new exports.ValidationError 'while validating security scheme', null, 'schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-\{.+\}"', property[1].start_mark
         when "describedBy"
-          @validate_method property, true
+          @validate_method property, true, "security scheme"
         when "settings"
           settings = property
           unless @isNullableMapping property[1]
@@ -398,7 +398,7 @@ class @Validator
               throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', property[0].start_mark
             @validate_resource property, allowParameterKeys
           else if property[0].value.match(new RegExp("^(get|post|put|delete|head|patch|options)#{ if allowParameterKeys then '\\??' else '' }$"))
-            @validate_method property, allowParameterKeys
+            @validate_method property, allowParameterKeys, 'method'
           else
             key = property[0].value
             canonicalKey = @canonicalizePropertyName(key, allowParameterKeys)
@@ -607,7 +607,7 @@ class @Validator
             throw new exports.ValidationError 'while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark
     if bodyMode is "implicit"
       unless @get_media_type()
-        throw new exports.ValidationError 'while validating body', null, "body tries to use default Media Type, but mediaType is null", property.start_mark
+        throw new exports.ValidationError 'while validating body', null, "body tries to use default Media Type, but mediaType is null", property[0].start_mark
 
   validate_common_properties: (property, allowParameterKeys) ->
     if @isParameterKey(property)

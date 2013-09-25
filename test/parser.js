@@ -123,7 +123,6 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/Resource name is invalid:/).and.notify(done);
     });
-
     it('should report correct line (RT-244)', function (done) {
       var noop       = function () {};
       var definition = [
@@ -136,6 +135,26 @@ describe('Parser', function() {
           expect(error.problem_mark).to.exist;
           error.problem_mark.column.should.be.equal(0);
           error.problem_mark.line.should.be.equal(0);
+          done();
+        }, 0);
+      });
+    })
+    it('should report correct line for null media type in implicit mode', function (done) {
+      var noop       = function () {};
+      var definition = [
+        '#%RAML 0.2',
+        '/resource:',
+        '  post:',
+        '    body:',
+        '      schema: someSchema',
+      ].join('\n');
+
+      raml.load(definition).then(noop, function (error) {
+        setTimeout(function () {
+          error.message.should.be.equal("body tries to use default Media Type, but mediaType is null");
+          expect(error.problem_mark).to.exist;
+          error.problem_mark.column.should.be.equal(4);
+          error.problem_mark.line.should.be.equal(3);
           done();
         }, 0);
       });
