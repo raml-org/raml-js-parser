@@ -244,7 +244,7 @@ class @Transformations
         switch canonicalProperty
           when "example"        then @noop()
           when "schema"         then @noop()
-          when "formParameters" then @transform_named_params bodyProperty, allowParameterKeys
+          when "formParameters" then @transform_named_params bodyProperty, allowParameterKeys, false
           else @noop()
 
   transform_common_properties: (property, allowParameterKeys) ->

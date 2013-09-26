@@ -26,7 +26,7 @@ module.exports = function(grunt) {
             'lib/joiner.js': 'src/joiner.coffee',
             'lib/raml.js': 'src/raml.coffee'
           }
-        }      
+        }
     },
     browserify: {
       'dist/raml-parser.js': ['src/browserify.js', 'lib/*.js', 'node_modules/q/q.js']
@@ -52,7 +52,7 @@ module.exports = function(grunt) {
           'dist/raml-parser.min.js': ['dist/raml-parser.js']
         }
       }
-    },    
+    },
     connect: {
       server: {
         options: {
@@ -77,10 +77,10 @@ module.exports = function(grunt) {
             reporter: 'dot',
             bail: false
         },
-        all: ['test/parser.js', 'test/local.js', 'test/resourceTypesValidations.js']
-    }        
+        all: ['test/*.js']
+    }
   });
-  
+
   grunt.loadNpmTasks('grunt-contrib-coffee');
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-watch');

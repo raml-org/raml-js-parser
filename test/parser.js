@@ -1708,14 +1708,12 @@ describe('Parser', function() {
                         {
                           displayName: 'A',
                           description: 'This is A',
-                          type: "string",
-                          required: true
+                          type: "string"
                         },
                         {
                           displayName: 'A',
                           description: 'This is A',
-                          type: "file",
-                          required: true
+                          type: "file"
                         },
                       ]
                     }
