@@ -1496,14 +1496,12 @@ describe('Parser', function() {
                     {
                       displayName: 'A',
                       description: 'This is A',
-                      type: "string",
-                      required: true
+                      type: "string"
                     },
                     {
                       displayName: 'A',
                       description: 'This is A',
-                      type: "file",
-                      required: true
+                      type: "file"
                     },
                   ]
                 }
@@ -2293,8 +2291,7 @@ describe('Parser', function() {
             queryParameters: {
               q: {
                 type: 'string',
-                displayName: "q",
-                required: true
+                displayName: "q"
               }
             }
           }
@@ -2309,8 +2306,7 @@ describe('Parser', function() {
                 queryParameters: {
                   q: {
                     type: 'string',
-                    displayName: "q",
-                    required: true
+                    displayName: "q"
                   }
                 },
                 responses: {
@@ -2416,8 +2412,7 @@ describe('Parser', function() {
             queryParameters: {
               q: {
                 type: 'string',
-                displayName: "q",
-                required: true
+                displayName: "q"
               }
             }
           }
@@ -2432,8 +2427,7 @@ describe('Parser', function() {
                 queryParameters: {
                   q: {
                     type: 'string',
-                    displayName: "q",
-                    required: true
+                    displayName: "q"
                   }
                 },
                 responses: {
@@ -3372,8 +3366,7 @@ describe('Parser', function() {
             queryParameters: {
               q: {
                 type: 'string',
-                displayName: "q",
-                required: true
+                displayName: "q"
               }
             }
           }
@@ -3388,8 +3381,7 @@ describe('Parser', function() {
                 queryParameters: {
                   q: {
                     type: 'string',
-                    displayName: "q",
-                    required: true
+                    displayName: "q"
                   }
                 },
                 responses: {
@@ -4763,7 +4755,6 @@ describe('Parser', function() {
                 access_token: {
                   description: "OAuth Access token",
                   displayName: "access_token",
-                  required: true,
                   type: "string"
                 }
               }
@@ -4795,7 +4786,6 @@ describe('Parser', function() {
                   access_token: {
                     description: "OAuth Access token",
                     displayName: "access_token",
-                    required: true,
                     type: "string"
                   }
                 },
@@ -7500,5 +7490,75 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/document must be a mapping/).and.notify(done);
     });
+    it('should not mark query parameters as required by default', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Title',
+        'baseUri: http://server/api',
+        '/:',
+        '  get:',
+        '    queryParameters:',
+        '      notRequired:',
+        '        type: integer'
+      ].join('\n');
+      var expected = {
+        title: 'Title',
+        baseUri: 'http://server/api',
+        resources: [
+          {
+            relativeUri: '/',
+            methods: [
+              {
+                method: 'get',
+                queryParameters: {
+                  notRequired: {
+                    type: 'integer',
+                    displayName: 'notRequired'
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+      raml.load(definition).should.become(expected).and.notify(done);
+    })
+    it('should mark query parameters as required when explicitly requested', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Title',
+        'baseUri: http://server/api',
+        '/:',
+        '  get:',
+        '    queryParameters:',
+        '      mustBeRequired:',
+        '        type: integer',
+        '        required: true'
+      ].join('\n');
+      var expected = {
+        title: 'Title',
+        baseUri: 'http://server/api',
+        resources: [
+          {
+            relativeUri: '/',
+            methods: [
+              {
+                method: 'get',
+                queryParameters: {
+                  mustBeRequired: {
+                    type: 'integer',
+                    displayName: 'mustBeRequired',
+                    required: true
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+      raml.load(definition).should.become(expected).and.notify(done);
+    })
   });
 });

@@ -114,22 +114,23 @@ class @Transformations
       trait_entry.value.forEach (trait) =>
         @transform_method trait[1], true
 
-  transform_named_params: (property, allowParameterKeys) ->
+  transform_named_params: (property, allowParameterKeys, requiredByDefault = true) ->
     return if @isNull property[1]
-    property[1].value.forEach (param) => @transform_common_parameter_properties param[0].value, param[1], allowParameterKeys
+    property[1].value.forEach (param) => @transform_common_parameter_properties param[0].value, param[1], allowParameterKeys, requiredByDefault
 
-  transform_common_parameter_properties: (parameterName, node, allowParameterKeys) ->
+  transform_common_parameter_properties: (parameterName, node, allowParameterKeys, requiredByDefault) ->
     return unless node.value
     if @isSequence(node)
       node.value.forEach (parameter) =>
-        @transform_named_parameter(parameterName, parameter, allowParameterKeys)
+        @transform_named_parameter(parameterName, parameter, allowParameterKeys, requiredByDefault)
     else
-      @transform_named_parameter(parameterName, node, allowParameterKeys)
+      @transform_named_parameter(parameterName, node, allowParameterKeys, requiredByDefault)
 
-  transform_named_parameter: (parameterName, node, allowParameterKeys) ->
+  transform_named_parameter: (parameterName, node, allowParameterKeys, requiredByDefault) ->
     hasDisplayName = false
-    hasRequired = false
-    hasType = false
+    hasRequired    = false
+    hasType        = false
+
     node.value.forEach (childNode) =>
       return if allowParameterKeys && @isParameterKey(childNode)
       canonicalPropertyName = @canonicalizePropertyName childNode[0].value, allowParameterKeys
@@ -148,10 +149,14 @@ class @Transformations
         when "type" then hasType = true
         when "required" then hasRequired = true
         else @noop()
+
     unless hasDisplayName
       @add_key_value_to_node(node, 'displayName', 'tag:yaml.org,2002:str', @canonicalizePropertyName(parameterName, allowParameterKeys))
+
     unless hasRequired
-      @add_key_value_to_node(node, 'required', 'tag:yaml.org,2002:bool', 'true')
+      if requiredByDefault
+        @add_key_value_to_node(node, 'required', 'tag:yaml.org,2002:bool', 'true')
+
     unless hasType
       @add_key_value_to_node(node, 'type', 'tag:yaml.org,2002:str', 'string')
 
@@ -206,7 +211,7 @@ class @Transformations
         when "securedBy"        then @noop()
         when "usage"            then @noop()
         when "headers"          then @transform_named_params property, allowParameterKeys
-        when "queryParameters"  then @transform_named_params property, allowParameterKeys
+        when "queryParameters"  then @transform_named_params property, allowParameterKeys, false
         when "body"             then @transform_body property, allowParameterKeys
         when "responses"        then @transform_responses property, allowParameterKeys
         else @noop()
