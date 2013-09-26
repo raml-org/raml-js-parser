@@ -57,7 +57,7 @@ module.exports = function(grunt) {
       server: {
         options: {
           port: 9001,
-          base: '.',
+          base: '.'
         }
       }
     },
@@ -67,7 +67,7 @@ module.exports = function(grunt) {
           urls: [
             'http://localhost:9001/test/parser.html'
           ],
-        reporter: 'dot',
+        reporter: 'dot'
         }
       }
     },
@@ -77,7 +77,7 @@ module.exports = function(grunt) {
             reporter: 'dot',
             bail: false
         },
-        all: ['test/parser.js', 'test/local.js', 'test/resourceTypesValidations.js']
+        all: ['test/parser.js', 'test/local.js', 'test/resourceTypesValidations.js', 'test/duplicateKeysValidations.js']
     }        
   });
   

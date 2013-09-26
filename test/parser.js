@@ -4378,7 +4378,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
-    it('should apply last resource type declared if names collide', function(done) {
+    it.skip('should fail if names collide', function(done) {
       var definition = [
         '#%RAML 0.2',
         '---',
@@ -4399,52 +4399,7 @@ describe('Parser', function() {
         '  type: collection'
       ].join('\n');
 
-      var expected = {
-        title: "Test",
-        resourceTypes: [
-          {
-            collection:
-            {
-              displayName: "Collection",
-              description: "This resourceType should be used for any collection of items",
-              post:
-              {
-                body: null
-              }
-            }
-          },
-          {
-            collection:
-            {
-              displayName: "Collection2",
-              description: "This resourceType should be used for any collection of items2",
-              post:
-              {
-                body: {
-                  "application/json": null
-                }
-              }
-            }
-          }
-        ],
-        resources: [
-          {
-            description: "This resourceType should be used for any collection of items2",
-            type: "collection",
-            relativeUri: "/",
-            methods: [
-              {
-                method: "post",
-                body: {
-                  "application/json": null
-                }
-              }
-            ]
-          }
-        ]
-      };
-
-      raml.load(definition).should.become(expected).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/Resource type with the same name already exists/).and.notify(done);
     });
     it('should apply a resource type if type key is mapping', function(done) {
       var definition = [
@@ -5746,6 +5701,38 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+    it('should fail when type is "OAuth 2.0" and authorizationUrl is missing in settings', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: OAuth 2.0',
+        '     settings:',
+        '       accessTokenUrl: https://api.dropbox.com/1/oauth2/token',
+        '       authorizationGrants: [ code, token ]',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/authorizationUrl must be a URL/).and.notify(done);
+    });
+    it('should fail when type is "OAuth 2.0" and accessTokenUrl is missing in settings', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: OAuth 2.0',
+        '     settings:',
+        '       authorizationUrl: https://www.dropbox.com/1/oauth2/authorize',
+        '       authorizationGrants: [ code, token ]',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/accessTokenUrl must be a URL/).and.notify(done);
+    });
     it('should succeed when type is "OAuth 1.0"', function(done) {
       var definition = [
         '#%RAML 0.2',
@@ -5783,6 +5770,54 @@ describe('Parser', function() {
         ]
       };
       raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should fail when type is "OAuth 1.0" and requestTokenUri is missing in settings', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: OAuth 1.0',
+        '     settings:',
+        '       authorizationUri: https://www.dropbox.com/1/oauth/authorize',
+        '       tokenCredentialsUri: https://api.dropbox.com/1/oauth/access_token',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/requestTokenUri must be a URL/).and.notify(done);
+    });
+    it('should fail when type is "OAuth 1.0" and authorizationUri is missing in settings', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: OAuth 1.0',
+        '     settings:',
+        '       requestTokenUri: https://api.dropbox.com/1/oauth/request_token',
+        '       tokenCredentialsUri: https://api.dropbox.com/1/oauth/access_token',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/authorizationUri must be a URL/).and.notify(done);
+    });
+    it('should fail when type is "OAuth 1.0" and tokenCredentialsUri is missing in settings', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: OAuth 1.0',
+        '     settings:',
+        '       requestTokenUri: https://api.dropbox.com/1/oauth/request_token',
+        '       authorizationUri: https://www.dropbox.com/1/oauth/authorize',
+        '/resource:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/tokenCredentialsUri must be a URL/).and.notify(done);
     });
     it('should succeed when type is "Basic Authentication"', function(done) {
       var definition = [
@@ -6000,6 +6035,21 @@ describe('Parser', function() {
         ]
       };
       raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should fail when using a securityScheme twice in the same property', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'securitySchemes:',
+        ' - scheme:',
+        '     description: This is some text',
+        '     type: x-other-something',
+        '/resource:',
+        '  get:',
+        '    securedBy: [ scheme, scheme ]'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/securitySchemes can only be referenced once in a securedBy property/).and.notify(done);
     });
     it('should fail when type is null', function(done) {
       var definition = [
