@@ -7564,5 +7564,39 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/document must be a mapping/).and.notify(done);
     });
+    it('should report correct line/column for unavailable file in !include', function(done) {
+      var noop       = function () {};
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: !include unavailable.raml'
+      ].join('\n');
+
+      raml.load(definition).then(noop, function (error) {
+        setTimeout(function () {
+          expect(error.problem_mark).to.exist;
+          error.problem_mark.line.should.be.equal(2);
+          error.problem_mark.column.should.be.equal(7);
+          done();
+        }, 0);
+      });
+    });
+    it('should report correct line/column for unavailable URI in !include', function(done) {
+      var noop       = function () {};
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: !include http://localhost:9001/invalid/url'
+      ].join('\n');
+
+      raml.load(definition).then(noop, function (error) {
+        setTimeout(function () {
+          expect(error.problem_mark).to.exist;
+          error.problem_mark.line.should.be.equal(2);
+          error.problem_mark.column.should.be.equal(7);
+          done();
+        }, 0);
+      });
+    });
   });
 });
