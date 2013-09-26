@@ -260,8 +260,13 @@ class @Validator
           unless @isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of default must be a scalar', childNode[1].start_mark
         when "enum"
-          unless @isSequence(childNode[1])
+          unless @isNullableSequence(childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of enum must be an array', childNode[1].start_mark
+          unless childNode[1].value.length
+            throw new exports.ValidationError 'while validating parameter properties', null, 'enum is empty', childNode[1].start_mark
+          enumValues = @get_enum_values (childNode[1].value)
+          if enumValues.hasDuplicates()
+            throw new exports.ValidationError 'while validating parameter properties', null, 'enum contains duplicated values', childNode[1].start_mark
         when "description"
           unless @isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of description must be a scalar', childNode[1].start_mark
@@ -292,6 +297,9 @@ class @Validator
             throw new exports.ValidationError 'while validating parameter properties', null, 'repeat can be any either true or false', childNode[1].start_mark
         else
           throw new exports.ValidationError 'while validating parameter properties', null, 'unknown property ' + propertyName, childNode[0].start_mark
+
+  get_enum_values: (node) =>
+    return node.map (item) => item.value
 
   valid_root_properties: (node) ->
     hasTitle = false
@@ -769,3 +777,11 @@ class @Validator
         
   is_valid: ->
     return @validation_errors.length == 0
+
+  Array::hasDuplicates = ->
+    output = {}
+    for key in [0...@length]
+      if @[key] of output
+        return true
+      output[@[key]] = true
+    return false

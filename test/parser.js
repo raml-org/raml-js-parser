@@ -260,12 +260,11 @@ describe('Parser', function() {
     it('should fail if include not found', function(done) {
       var definition = [
         '#%RAML 0.2',
-        '%YAML 1.2',
         '---',
         'title: !include relative.md'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/error 404|cannot find relative.md/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/cannot (find|fetch) relative\.md/).and.notify(done);
     });
     it('should succeed on including another YAML file with .yml extension', function(done) {
       var definition = [
@@ -467,6 +466,70 @@ describe('Parser', function() {
       ].join('\n');
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+    it('should fail when declaring an enum with duplicated values', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'baseUriParameters:',
+        '  a:',
+        '    displayName: A',
+        '    description: This is A',
+        '    minLength: 123',
+        '    enum: [ "value", "value2", "value2" ]'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/enum contains duplicated values/).and.notify(done);
+    });
+    it('should fail when declaring an enum with no values', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'baseUriParameters:',
+        '  a:',
+        '    displayName: A',
+        '    description: This is A',
+        '    minLength: 123',
+        '    enum: []'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/enum is empty/).and.notify(done);
+    });
+    it('should succeed when declaring an enum with null value', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'baseUriParameters:',
+        '  a:',
+        '    displayName: A',
+        '    description: This is A',
+        '    minLength: 123',
+        '    enum:'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/enum is empty/).and.notify(done);
+    });
+    it('should fail when declaring an enum with mapping value', function(done) {
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: Test',
+        'baseUri: http://{a}.myapi.org',
+        'baseUriParameters:',
+        '  a:',
+        '    displayName: A',
+        '    description: This is A',
+        '    minLength: 123',
+        '    enum: {}'
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(/the value of enum must be an array/).and.notify(done);
     });
     it('should succeed when declaring a maxLength validation as a number', function(done) {
       var definition = [
@@ -1434,6 +1497,39 @@ describe('Parser', function() {
           ]
         }).and.notify(done);
       });
+      it('defaults query parameters requiredness to falsy', function(done) {
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  get:',
+          '    queryParameters:',
+          '      notRequired:',
+          '        type: integer'
+        ].join('\n');
+
+        raml.load(definition).should.become({
+          title: 'Test',
+          baseUri: 'http://myapi.org',
+          resources: [
+            {
+              relativeUri: "/resource",
+              methods: [{
+                method: "get",
+                queryParameters: {
+                  notRequired: {
+                    displayName: 'notRequired',
+                    type: 'integer'
+                  }
+                }
+              }]
+            }
+          ]
+        }).and.notify(done);
+      });
+
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
           '#%RAML 0.2',
@@ -7559,6 +7655,50 @@ describe('Parser', function() {
         ]
       }
       raml.load(definition).should.become(expected).and.notify(done);
-    })
+    });
+    it('should report error that contains URI inside', function(done) {
+      var uri        = 'http://localhost:9001/invalid/url';
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: !include ' + uri
+      ].join('\n');
+
+      raml.load(definition).should.be.rejected.with(uri).and.notify(done);
+    });
+    it('should report correct line/column for unavailable file in !include', function(done) {
+      var noop       = function () {};
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: !include unavailable.raml'
+      ].join('\n');
+
+      raml.load(definition).then(noop, function (error) {
+        setTimeout(function () {
+          expect(error.problem_mark).to.exist;
+          error.problem_mark.line.should.be.equal(2);
+          error.problem_mark.column.should.be.equal(7);
+          done();
+        }, 0);
+      });
+    });
+    it('should report correct line/column for unavailable URI in !include', function(done) {
+      var noop       = function () {};
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: !include http://localhost:9001/invalid/url'
+      ].join('\n');
+
+      raml.load(definition).then(noop, function (error) {
+        setTimeout(function () {
+          expect(error.problem_mark).to.exist;
+          error.problem_mark.line.should.be.equal(2);
+          error.problem_mark.column.should.be.equal(7);
+          done();
+        }, 0);
+      });
+    });
   });
 });
