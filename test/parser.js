@@ -7563,7 +7563,6 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/document must be a mapping/).and.notify(done);
     });
-<<<<<<< HEAD
     it('should report error that contains URI inside', function(done) {
       var uri        = 'http://localhost:9001/invalid/url';
       var definition = [
@@ -7573,7 +7572,7 @@ describe('Parser', function() {
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(uri).and.notify(done);
-=======
+    });
     it('should report correct line/column for unavailable file in !include', function(done) {
       var noop       = function () {};
       var definition = [
@@ -7607,7 +7606,6 @@ describe('Parser', function() {
           done();
         }, 0);
       });
->>>>>>> master
     });
   });
 });
