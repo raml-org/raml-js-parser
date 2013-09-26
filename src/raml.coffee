@@ -51,7 +51,7 @@ Javascript object.
 
 ###
 Parse the first RAML document in a stream and produce a list of
-  all the absolute URIs for all resources
+all the absolute URIs for all resources.
 ###
 @resources = (stream, validate = true, location) ->
   loader = new exports.loader.Loader stream, location, validate
@@ -81,14 +81,14 @@ representation tree.
 
 ###
 Parse the first RAML document in a file and produce a list of
-  all the absolute URIs for all resources
+all the absolute URIs for all resources.
 ###
 @resourcesFile = (file, validate = true) ->
   stream = @readFile file
   return @resources stream, validate, file
 
 ###
-Read file either locally or from the network
+Read file either locally or from the network.
 ###
 @readFile = (file) ->
   url = require('url').parse(file)
@@ -109,7 +109,7 @@ Read file either locally or from the network
       return @fetchFile file
 
 ###
-Read file from the network
+Read file from the network.
 ###
 @fetchFile = (file) ->
   if not window?
