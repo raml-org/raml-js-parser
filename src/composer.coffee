@@ -114,18 +114,19 @@ class @Composer
       tag = @resolve nodes.ScalarNode, event.value, event.implicit
 
     if event.tag is '!include'
-      # Compose include
-      extension = event.value.split(".").pop()
-
       if @src?
         event.value = require('url').resolve(@src, event.value)
 
-      if extension == 'yaml' or extension == 'yml' or extension == 'raml'
+      if @isInIncludeTagsStack(event.value)
+        throw new exports.ComposerError 'while composing scalar out of !include', null, "detected circular !include of #{event.value}", event.start_mark
+
+      extension = event.value.split(".").pop()
+      if extension in ['yaml', 'yml', 'raml']
         raml.start_mark = event.start_mark
-        return raml.composeFile(event.value, false, false, false);
-      else
-        raml.start_mark = event.start_mark
-        node = new nodes.ScalarNode 'tag:yaml.org,2002:str', raml.readFile(event.value), event.start_mark, event.end_mark, event.style
+        return raml.composeFile(event.value, false, false, false, @);
+
+      raml.start_mark = event.start_mark
+      node = new nodes.ScalarNode 'tag:yaml.org,2002:str', raml.readFile(event.value), event.start_mark, event.end_mark, event.style
     else
       node = new nodes.ScalarNode tag, event.value, event.start_mark, event.end_mark, event.style
     @anchors[anchor] = node if anchor isnt null
@@ -165,3 +166,12 @@ class @Composer
     end_event = @get_event()
     node.end_mark = end_event.end_mark
     return node
+
+  isInIncludeTagsStack: (include) ->
+    parent = @
+
+    while parent = parent.parent
+      if parent.src is include
+        return true
+
+    return false

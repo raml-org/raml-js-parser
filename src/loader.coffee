@@ -17,7 +17,7 @@ transformations = require './transformations'
   components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Schemas, Joiner, Constructor, SecuritySchemes, Transformations]
   util.extend.apply util, [@::].concat (component.prototype for component in components)
 
-  constructor: (stream, location, validate) ->
+  constructor: (stream, location, validate, @parent) ->
     components[0].call @, stream, location
     components[1].call @, validate
     component.call @ for component in components[2..]

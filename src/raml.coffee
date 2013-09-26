@@ -31,8 +31,8 @@ Parse a RAML stream and produce parsing events.
 Parse the first RAML document in a stream and produce the corresponding
 representation tree.
 ###
-@compose = (stream, validate = true, apply = true, join = true, location) ->
-  loader = new exports.loader.Loader stream, location, validate
+@compose = (stream, validate = true, apply = true, join = true, location, parent) ->
+  loader = new exports.loader.Loader stream, location, validate, parent
   return loader.get_single_node(validate, apply, join)
 
 ###
@@ -75,9 +75,9 @@ Javascript object.
 Parse the first RAML document in a file and produce the corresponding
 representation tree.
 ###
-@composeFile = (file, validate = true, apply = true, join = true) ->
+@composeFile = (file, validate = true, apply = true, join = true, parent) ->
   stream = @readFile file
-  return @compose stream, validate, apply, join, file
+  return @compose stream, validate, apply, join, file, parent
 
 ###
 Parse the first RAML document in a file and produce a list of

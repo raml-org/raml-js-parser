@@ -7700,5 +7700,9 @@ describe('Parser', function() {
         }, 0);
       });
     });
+    it('should detect circular !include of the same resource', function (done) {
+      var file = 'http://localhost:9001/test/RT-261.raml';
+      raml.loadFile(file).should.be.rejected.with('detected circular !include of').and.notify(done);
+    });
   });
 });
