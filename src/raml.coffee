@@ -40,36 +40,27 @@ Parse the first RAML document in a stream and produce the corresponding
 Javascript object.
 ###
 @load = (stream, validate = true, location) ->
-  loader = new exports.loader.Loader stream, location, validate
-  deferred = new @q.defer
-  try
-    result = loader.get_single_data()
-    deferred.resolve result
-  catch error
-    deferred.reject error
-  return deferred.promise
+  @q.fcall =>
+    loader = new exports.loader.Loader stream, location, validate
+    return loader.get_single_data()
 
 ###
 Parse the first RAML document in a stream and produce a list of
 all the absolute URIs for all resources.
 ###
 @resources = (stream, validate = true, location) ->
-  loader = new exports.loader.Loader stream, location, validate
-  deferred = new @q.defer
-  try
-    result = loader.resources()
-    deferred.resolve result
-  catch error
-    deferred.reject error
-  return deferred.promise
+  @q.fcall =>
+    loader = new exports.loader.Loader stream, location, validate
+    return loader.resources()
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
 Javascript object.
 ###
 @loadFile = (file, validate = true) ->
-  stream = @readFile file
-  return @load stream, validate, file
+  @q.fcall =>
+    stream = @readFile file
+    return @load stream, validate, file
 
 ###
 Parse the first RAML document in a file and produce the corresponding
