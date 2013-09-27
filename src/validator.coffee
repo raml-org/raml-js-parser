@@ -171,10 +171,10 @@ class @Validator
     @baseUri = baseUriProperty.value
     if @has_property node, "baseUriParameters"
       unless @isScalar baseUriProperty
-        throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', node.start_mark
+        throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', property.start_mark
       property = @get_property(node, "baseUriParameters")
       unless @isNullableMapping(property)
-        throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a mapping', node.start_mark
+        throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a mapping', property.start_mark
       @validate_uri_parameters @baseUri, property, false, false, [ "version" ]
 
   validate_uri_parameters: (uri, uriProperty, allowParameterKeys, skipParameterUseCheck, reservedNames = []) ->
