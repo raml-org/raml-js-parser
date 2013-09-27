@@ -34,8 +34,8 @@ class @Composer
     # Ensure that the stream contains no more documents.
     unless @check_event events.StreamEndEvent
       event = @get_event()
-      throw new exports.ComposerError 'expected a single document in the stream',
-        document.start_mark, 'but found another document', event.start_mark
+      throw new exports.ComposerError 'document scan',
+        document.start_mark, 'expected a single document in the stream but found another document', event.start_mark
 
     # Drop the STREAM-END event.
     @get_event()
