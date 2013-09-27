@@ -534,8 +534,8 @@ class @Validator
         when "securedBy"
           @validate_secured_by property
         when "usage"
-          unless allowParameterKeys
-            throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a resource", property[0].start_mark
+          unless allowParameterKeys and context is "trait"
+            throw new exports.ValidationError 'while validating resources', null, "property: 'usage' is invalid in a #{context}", property[0].start_mark
         else
           unless valid
             throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a #{context}", property[0].start_mark
