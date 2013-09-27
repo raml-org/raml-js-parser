@@ -133,6 +133,27 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/Resource name is invalid:/).and.notify(done);
     });
+    it('it should reject RAML with more than one YAML document', function(done){
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: hola',
+        'version: v0.1',
+        '---'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/expected a single document in the stream but found another document/).and.notify(done);
+    });
+    it('it should inject exception coontext into message when message is null', function(done){
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: hola',
+        'version: v0.1',
+        '...',
+        'somepropertyName'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/expected '<document start>', but found <scalar>/).and.notify(done);
+    });
     it('it should fail if baseUriParameters is a string - RT-274', function(done){
       var definition = [
         '#%RAML 0.2',
@@ -143,6 +164,26 @@ describe('Parser', function() {
         '  someparam'
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/base uri parameters must be a mapping/).and.notify(done);
+    });
+    it('it should fail if baseUriParameters is a string - RT-274 - with proper line numbering', function(done){
+      var noop       = function () {};
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: hola',
+        'version: v0.1',
+        'baseUriParameters:',
+        '  someparam'
+      ].join('\n');
+      raml.load(definition).then(noop, function (error) {
+        setTimeout(function () {
+          error.message.should.be.equal("base uri parameters must be a mapping");
+          expect(error.problem_mark).to.exist;
+          error.problem_mark.column.should.be.equal(2);
+          error.problem_mark.line.should.be.equal(5);
+          done();
+        }, 0);
+      });
     });
     it('it should fail if baseUriParameters in a resource is a string - RT-274', function(done){
       var definition = [
@@ -170,7 +211,6 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/uri parameters must be a mapping/).and.notify(done);
     });
-
     it('should report correct line (RT-244)', function (done) {
       var noop       = function () {};
       var definition = [

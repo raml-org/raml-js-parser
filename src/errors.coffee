@@ -40,6 +40,8 @@ class @YAMLError extends Error
 
 class @MarkedYAMLError extends @YAMLError
   constructor: (@context, @context_mark, @message, @problem_mark, @note) ->
+    unless @message
+      @message = @context
     super()
   
   toString: ->
