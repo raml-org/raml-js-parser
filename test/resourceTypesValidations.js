@@ -235,6 +235,14 @@ describe('Resource Types Validations', function() {
     raml.load(definition).should.be.fulfilled.and.notify(done);
   });
 
+  it('should fail when given a usage property in a method', function(done) {
+    var definition = resourceTypeSnippet([
+      'post:',
+      '  usage: This resourceType should be used for any collection of items'
+    ]);
+    raml.load(definition).should.be.rejected.with(/property: 'usage' is invalid in a method/).and.notify(done);
+  });
+
   describe('Optional Properties', function() {
     it('should succeed when given a "displayName?" property', function(done) {
       var definition = resourceTypeSnippet([ 'displayName?: Display Name']);
