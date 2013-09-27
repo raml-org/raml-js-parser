@@ -135,19 +135,19 @@ class @Transformations
       return if allowParameterKeys && @isParameterKey(childNode)
       canonicalPropertyName = @canonicalizePropertyName childNode[0].value, allowParameterKeys
       switch canonicalPropertyName
-        when "pattern"  then @noop()
-        when "default"  then @noop()
-        when "enum" then @noop()
-        when "description" then @noop()
-        when "example" then @noop()
-        when "minLength" then @noop()
-        when "maxLength" then @noop()
-        when "minimum" then @noop()
-        when "maximum" then @noop()
-        when "repeat" then @noop()
-        when "displayName" then hasDisplayName = true
-        when "type" then hasType = true
-        when "required" then hasRequired = true
+        when "pattern"      then @noop()
+        when "default"      then @noop()
+        when "enum"         then @noop()
+        when "description"  then @noop()
+        when "example"      then @noop()
+        when "minLength"    then @noop()
+        when "maxLength"    then @noop()
+        when "minimum"      then @noop()
+        when "maximum"      then @noop()
+        when "repeat"       then @noop()
+        when "displayName"  then hasDisplayName = true
+        when "type"         then hasType = true
+        when "required"     then hasRequired = true
         else @noop()
 
     unless hasDisplayName
@@ -244,7 +244,7 @@ class @Transformations
         switch canonicalProperty
           when "example"        then @noop()
           when "schema"         then @noop()
-          when "formParameters" then @transform_named_params bodyProperty, allowParameterKeys
+          when "formParameters" then @transform_named_params bodyProperty, allowParameterKeys, false
           else @noop()
 
   transform_common_properties: (property, allowParameterKeys) ->

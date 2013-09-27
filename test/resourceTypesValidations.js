@@ -98,8 +98,8 @@ describe('Resource Types Validations', function() {
     return [
       '#%RAML 0.2',
       '---',
-      'title: Test',
-      'baseUri: http://{apiSubdomain}.api.com/{someUriParameter}'
+      'title: Test'
+//      'baseUri: http://{apiSubdomain}.api.com/{someUriParameter}'
     ]
     .concat(topLevelRaml)
     .concat([
@@ -142,7 +142,7 @@ describe('Resource Types Validations', function() {
         'baseUri: https://{apiSubdomain}.example.com/'
       ], [
         'baseUriParameters:',
-        '  someUriParameter:',
+        '  apiSubdomain:',
         '    enum: [ "api-content" ]'
       ]);
       raml.load(definition).should.be.fulfilled.and.notify(done);
@@ -512,7 +512,7 @@ describe('Resource Types Validations', function() {
           'baseUri: https://{apiSubdomain}.example.com/'
         ], [
           'baseUriParameters:',
-          '  someUriParameter:',
+          '  apiSubdomain:',
           '    <<some-parameter>>:'
         ]);
         raml.load(definition).should.be.fulfilled.and.notify(done);
