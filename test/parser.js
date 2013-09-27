@@ -123,6 +123,54 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/Resource name is invalid:/).and.notify(done);
     });
+    it('it should fail if resource URI is invalid', function(done){
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: hola',
+        'version: v0.1',
+        '/resourceName{}:'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/Resource name is invalid:/).and.notify(done);
+    });
+    it('it should fail if baseUriParameters is a string - RT-274', function(done){
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: hola',
+        'version: v0.1',
+        'baseUriParameters:',
+        '  someparam'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/base uri parameters must be a mapping/).and.notify(done);
+    });
+    it('it should fail if baseUriParameters in a resource is a string - RT-274', function(done){
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: hola',
+        'version: v0.1',
+        'baseUri: http://localhost',
+        '/resource:',
+        '  baseUriParameters:',
+        '    someparam'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/base uri parameters must be a mapping/).and.notify(done);
+    });
+    it('it should fail if baseUriParameters in a resource is a string - RT-274', function(done){
+      var definition = [
+        '#%RAML 0.2',
+        '---',
+        'title: hola',
+        'version: v0.1',
+        'baseUri: http://localhost',
+        '/resource:',
+        '  uriParameters:',
+        '    someparam'
+      ].join('\n');
+      raml.load(definition).should.be.rejected.with(/uri parameters must be a mapping/).and.notify(done);
+    });
+
     it('should report correct line (RT-244)', function (done) {
       var noop       = function () {};
       var definition = [

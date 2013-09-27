@@ -172,7 +172,10 @@ class @Validator
     if @has_property node, "baseUriParameters"
       unless @isScalar baseUriProperty
         throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', node.start_mark
-      @validate_uri_parameters @baseUri, @get_property(node, "baseUriParameters"), false, false, [ "version" ]
+      property = @get_property(node, "baseUriParameters")
+      unless @isNullableMapping(property)
+        throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a mapping', node.start_mark
+      @validate_uri_parameters @baseUri, property, false, false, [ "version" ]
 
   validate_uri_parameters: (uri, uriProperty, allowParameterKeys, skipParameterUseCheck, reservedNames = []) ->
     try
@@ -442,10 +445,14 @@ class @Validator
             # these properties are allowed to be parametrized in resource types
             switch canonicalKey
               when "uriParameters"
+                unless @isNullableMapping(property[1])
+                  throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters must be a mapping', property[0].start_mark
                 @validate_uri_parameters resource[0].value, property[1], allowParameterKeys, allowParameterKeys
               when "baseUriParameters"
                 unless @baseUri
                   throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
+                unless @isNullableMapping(property[1])
+                  throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a mapping', property[0].start_mark
                 @validate_uri_parameters @baseUri, property[1], allowParameterKeys
               else
                 valid = false
