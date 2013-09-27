@@ -98,4 +98,38 @@ describe('Transformations', function () {
         };
         raml.load(definition).should.become(expected).and.notify(done);
     });
+
+    it('should fill empty named parameters with default values like displayName and type', function (done) {
+        var definition = [
+            '#%RAML 0.2',
+            '---',
+            'title: Title',
+            'baseUri: http://server/api',
+            '/:',
+            '  get:',
+            '    queryParameters:',
+            '      parameter1:'
+        ].join('\n');
+        var expected = {
+            title: 'Title',
+            baseUri: 'http://server/api',
+            resources: [
+                {
+                    relativeUri: '/',
+                    methods: [
+                        {
+                            method: 'get',
+                            queryParameters: {
+                                parameter1: {
+                                    displayName: 'parameter1',
+                                    type: 'string'
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+        raml.load(definition).should.become(expected).and.notify(done);
+    });
 });

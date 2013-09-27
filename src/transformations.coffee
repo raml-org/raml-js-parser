@@ -115,11 +115,16 @@ class @Transformations
         @transform_method trait[1], true
 
   transform_named_params: (property, allowParameterKeys, requiredByDefault = true) ->
-    return if @isNull property[1]
-    property[1].value.forEach (param) => @transform_common_parameter_properties param[0].value, param[1], allowParameterKeys, requiredByDefault
+    if @isNull property[1]
+      return
+
+    property[1].value.forEach (param) =>
+      if @isNull param[1]
+        param[1] = new nodes.MappingNode('tag:yaml.org,2002:map', [], param[1].start_mark, param[1].end_mark)
+
+      @transform_common_parameter_properties param[0].value, param[1], allowParameterKeys, requiredByDefault
 
   transform_common_parameter_properties: (parameterName, node, allowParameterKeys, requiredByDefault) ->
-    return unless node.value
     if @isSequence(node)
       node.value.forEach (parameter) =>
         @transform_named_parameter(parameterName, parameter, allowParameterKeys, requiredByDefault)
