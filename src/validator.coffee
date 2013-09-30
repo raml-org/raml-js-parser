@@ -211,7 +211,7 @@ class @Validator
       type_entry.value.forEach (type) =>
         #@trackRepeatedProperties(typesNamesTrack, type[0].value, type[0].start_mark, 'while validating resource types', "Resource type with the same name already exists")
         unless @isMapping type[1]
-            throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
+          throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type[1].start_mark
         @validate_resource type, true, 'resource type'
 
   validate_traits: (traitProperty) ->
