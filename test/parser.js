@@ -269,25 +269,28 @@ describe('Parser', function() {
       });
     });
     it('it should allow a trait parameter with an integer value - RT-279', function(done){
-      var noop       = function () {};
       var definition = [
           '#%RAML 0.2',
           '---',
-          'title: "muse:"',
-          'baseUri: http://ces.com/muse',
-          '/r1/r2:',
-          '/r1:',
-          '  /r2:'
+          'traits:',
+          '  - getMethod: {}',
+          'title: title',
+          '/test:',
+          ' is: [ getMethod: { description: 1 }]'
       ].join('\n');
-      raml.load(definition).then(noop, function (error) {
-          setTimeout(function () {
-              error.message.should.be.equal("two resources share same URI /r1/r2");
-              expect(error.problem_mark).to.exist;
-              error.problem_mark.column.should.be.equal(2);
-              error.problem_mark.line.should.be.equal(6);
-              done();
-          }, 0);
-      });
+      raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+    it('it should allow a trait parameter with an integer value - RT-279', function(done){
+          var definition = [
+              '#%RAML 0.2',
+              '---',
+              'resourceTypes:',
+              '  - someType: {}',
+              'title: title',
+              '/test:',
+              ' type: { someType: { description: 1 }}'
+          ].join('\n');
+          raml.load(definition).should.be.fulfilled.and.notify(done);
     });
     it('should apply a resourceType that inherits from another type that uses parameters', function(done){
         var definition = [
