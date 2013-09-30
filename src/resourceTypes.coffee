@@ -76,7 +76,8 @@ class @ResourceTypes
     # Unwind the inheritance chain and check for circular references, while resolving final type shape
     while parentTypeName = @get_parent_type_name child_type
       if parentTypeName of compiledTypes
-        throw new exports.ResourceTypeError 'while aplying resourceTypes', null, 'circular reference detected: ' + parentTypeName + "-> [" + typesToApply.reverse + "]", child_type.start_mark
+        pathToCircularRef = typesToApply.concat(parentTypeName).join(' -> ')
+        throw new exports.ResourceTypeError 'while aplying resourceTypes', null, "circular reference of \"#{parentTypeName}\" has been detected: #{pathToCircularRef}", child_type.start_mark
       # apply parameters
       child_type_key = @get_property @get_type(child_type)[1], "type"
       parentTypeMapping = @apply_parameters_to_type resourceUri, parentTypeName, child_type_key
