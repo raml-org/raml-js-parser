@@ -353,6 +353,26 @@ describe('Parser', function() {
         };
         raml.load(definition).should.become(expected).and.notify(done);
       });
+      it('it should report correct line for resourceType not map error - RT-283', function(done){
+          var noop       = function () {};
+          var definition = [
+              '#%RAML 0.2',
+              '---',
+              'title: "muse:"',
+              'resourceTypes:',
+              '  - type1: {}',
+              '    type:'
+          ].join('\n');
+          raml.load(definition).then(noop, function (error) {
+              setTimeout(function () {
+                  error.message.should.be.equal("invalid resourceType definition, it must be a mapping");
+                  expect(error.problem_mark).to.exist;
+                  error.problem_mark.column.should.be.equal(9);
+                  error.problem_mark.line.should.be.equal(5);
+                  done();
+              }, 0);
+          });
+      });
   });
   describe('Basic Information', function() {
     it('should fail unsupported yaml version', function(done) {
