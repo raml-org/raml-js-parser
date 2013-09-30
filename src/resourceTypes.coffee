@@ -75,23 +75,24 @@ class @ResourceTypes
     @apply_traits_to_resource resourceUri, type, false
     compiledTypes[ typeName ] = type
     typesToApply = [ typeName ]
-    child_type = typeName
+    childTypeName = typeName
     parentTypeName = null
 
     # Unwind the inheritance chain and check for circular references, while resolving final type shape
-    while parentTypeName = @get_parent_type_name child_type
+    while parentTypeName = @get_parent_type_name childTypeName
       if parentTypeName of compiledTypes
         pathToCircularRef = typesToApply.concat(parentTypeName).join(' -> ')
-        throw new exports.ResourceTypeError 'while aplying resourceTypes', null, "circular reference of \"#{parentTypeName}\" has been detected: #{pathToCircularRef}", child_type.start_mark
+        childTypeProperty = @get_type(childTypeName)[0]
+        throw new exports.ResourceTypeError 'while aplying resourceTypes', null, "circular reference of \"#{parentTypeName}\" has been detected: #{pathToCircularRef}", childTypeProperty.start_mark
       # apply parameters
-      child_type_key = @get_property @get_type(child_type)[1], "type"
+      child_type_key = @get_property @get_type(childTypeName)[1], "type"
       parentTypeMapping = @apply_parameters_to_type resourceUri, parentTypeName, child_type_key
       compiledTypes[parentTypeName] = parentTypeMapping
       @apply_default_media_type_to_resource parentTypeMapping
       # apply traits
       @apply_traits_to_resource resourceUri, parentTypeMapping, false
       typesToApply.push parentTypeName
-      child_type = parentTypeName
+      childTypeName = parentTypeName
 
     root_type = typesToApply.pop()
     baseType = compiledTypes[root_type].cloneForResourceType()

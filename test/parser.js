@@ -373,6 +373,30 @@ describe('Parser', function() {
               }, 0);
           });
       });
+      it('it should report correct line for resourceType circular reference - RT-257', function(done){
+          var noop       = function () {};
+          var definition = [
+              '#%RAML 0.2',
+              '---',
+              'title: "muse:"',
+              'resourceTypes:',
+              '  - rt1:',
+              '      type: rt2',
+              '  - rt2:',
+              '      type: rt1',
+              '/resource:',
+              '  type: rt1'
+          ].join('\n');
+          raml.load(definition).then(noop, function (error) {
+              setTimeout(function () {
+                  error.message.should.be.equal("circular reference of \"rt1\" has been detected: rt1 -> rt2 -> rt1");
+                  expect(error.problem_mark).to.exist;
+                  error.problem_mark.column.should.be.equal(4);
+                  error.problem_mark.line.should.be.equal(6);
+                  done();
+              }, 0);
+          });
+      });
   });
   describe('Basic Information', function() {
     it('should fail unsupported yaml version', function(done) {
