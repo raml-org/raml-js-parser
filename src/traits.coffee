@@ -114,8 +114,8 @@ class @Traits
     }
     return result unless @isMapping typeKey
     parameters = @value_or_undefined typeKey
-    parameters[0][1].value.forEach (parameter) ->
-      unless parameter[1].tag == 'tag:yaml.org,2002:str'
+    parameters[0][1].value.forEach (parameter) =>
+      unless @isScalar(parameter[1])
         throw new exports.TraitError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
       if parameter[1].value in [ "methodName", "resourcePath", "resourcePathName"]
         throw new exports.TraitError 'while aplying parameters', null, 'invalid parameter name "methodName", "resourcePath" are reserved parameter names "resourcePathName"', parameter[1].start_mark

@@ -268,7 +268,27 @@ describe('Parser', function() {
           }, 0);
       });
     });
-
+    it('it should allow a trait parameter with an integer value - RT-279', function(done){
+      var noop       = function () {};
+      var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: "muse:"',
+          'baseUri: http://ces.com/muse',
+          '/r1/r2:',
+          '/r1:',
+          '  /r2:'
+      ].join('\n');
+      raml.load(definition).then(noop, function (error) {
+          setTimeout(function () {
+              error.message.should.be.equal("two resources share same URI /r1/r2");
+              expect(error.problem_mark).to.exist;
+              error.problem_mark.column.should.be.equal(2);
+              error.problem_mark.line.should.be.equal(6);
+              done();
+          }, 0);
+      });
+    });
   });
   describe('Basic Information', function() {
     it('should fail unsupported yaml version', function(done) {
@@ -6922,7 +6942,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
-    it('should succeed when a overriding baseUriParams in a resource', function(done) {
+    it('should succeed when a overriding baseUriParams in a method', function(done) {
       var definition = [
           '#%RAML 0.2',
           '---',
