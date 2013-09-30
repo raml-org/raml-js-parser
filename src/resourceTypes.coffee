@@ -35,7 +35,12 @@ class @ResourceTypes
   get_parent_type_name: (typeName) ->
     type = (@get_type typeName)[1]
     if type and @has_property type, "type"
-      return @property_value type, "type"
+      property =  @property_value type, "type"
+      if typeof property is "object"
+        if property.length == 2
+          return property[0].value
+      else
+        return property
     return null
 
   apply_types: (node, resourceUri = "") =>

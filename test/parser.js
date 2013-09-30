@@ -289,6 +289,67 @@ describe('Parser', function() {
           }, 0);
       });
     });
+    it('should apply a resourceType that inherits from another type that uses parameters', function(done){
+        var definition = [
+              '#%RAML 0.2',
+              '---',
+              'title: My API',
+              'resourceTypes:',
+              '  - base:',
+              '      get:',
+              '  - collection:',
+              '      type: { base: { resourPath: hola } }',
+              '      get:',
+              '  - typedCollection:',
+              '      type: collection',
+              '      get:',
+              '/presentations:',
+              '  type: { typedCollection: { schemaName: presentation } }'
+        ].join('\n');
+
+        var expected = {
+              "title": "My API",
+              "resourceTypes": [
+                  {
+                      "base": {
+                          "get": null
+                      }
+                  },
+                  {
+                      "collection": {
+                          "type": {
+                              "base": {
+                                  "resourPath": "hola"
+                              }
+                          },
+                          "get": null
+                      }
+                  },
+                  {
+                      "typedCollection": {
+                          "type": "collection",
+                          "get": null
+                      }
+                  }
+              ],
+              "resources": [
+                  {
+                      "type": {
+                          "typedCollection": {
+                              "schemaName": "presentation"
+                          }
+                      },
+                      "relativeUri": "/presentations",
+                      "methods": [
+                          {
+                              "method": "get"
+                          }
+                      ]
+                  }
+              ]
+        };
+        raml.load(definition).should.become(expected).and.notify(done);
+      });
   });
   describe('Basic Information', function() {
     it('should fail unsupported yaml version', function(done) {
