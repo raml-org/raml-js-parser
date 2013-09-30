@@ -217,6 +217,7 @@ class @Transformations
         when "usage"            then @noop()
         when "headers"          then @transform_named_params property, allowParameterKeys
         when "queryParameters"  then @transform_named_params property, allowParameterKeys, false
+        when "baseUriParameters"then @transform_named_params property, allowParameterKeys
         when "body"             then @transform_body property, allowParameterKeys
         when "responses"        then @transform_responses property, allowParameterKeys
         else @noop()

@@ -533,6 +533,12 @@ class @Validator
       switch key
         when "securedBy"
           @validate_secured_by property
+        when "baseUriParameters"
+          unless @baseUri
+            throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
+          unless @isNullableMapping(property[1])
+            throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a mapping', property[0].start_mark
+          @validate_uri_parameters @baseUri, property[1], allowParameterKeys
         when "usage"
           unless allowParameterKeys and context is "trait"
             throw new exports.ValidationError 'while validating resources', null, "property: 'usage' is invalid in a #{context}", property[0].start_mark

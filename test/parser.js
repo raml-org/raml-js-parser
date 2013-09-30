@@ -1761,7 +1761,7 @@ describe('Parser', function() {
             '    body:',
             '      application/json:',
             '        formParameters:',
-            '        schema:',
+            '        example:',
         ].join('\n');
         raml.load(definition).should.be.rejected.with(/formParameters cannot be used together with the example or schema properties/).and.notify(done);
       });
@@ -6919,6 +6919,49 @@ describe('Parser', function() {
             "relativeUri": "/resource"
           }
         ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should succeed when a overriding baseUriParams in a resource', function(done) {
+      var definition = [
+          '#%RAML 0.2',
+          '---',
+          'baseUri: https://{domainName}.myapi.com',
+          'title: Test',
+          '/resource:',
+          '  get:',
+          '     baseUriParameters:',
+          '       domainName:',
+          '         example: your-bucket'
+      ].join('\n');
+      var expected = {
+          "baseUri": "https://{domainName}.myapi.com",
+          "title": "Test",
+          "resources": [
+            {
+              "relativeUri": "/resource",
+              methods: [
+                {
+                    baseUriParameters: {
+                        "domainName": {
+                           example: "your-bucket",
+                           type: "string",
+                            required: true,
+                            displayName: "domainName"
+                        }
+                    },
+                    method: "get"
+                }
+              ],
+            }
+          ],
+          baseUriParameters: {
+              domainName: {
+                  type: "string",
+                  required: true,
+                  displayName: "domainName"
+              }
+          }
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
