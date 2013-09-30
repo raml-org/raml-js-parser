@@ -35,4 +35,56 @@ describe('Resource Types', function () {
         ].join('\n');
         raml.load(definition).should.be.rejected.with('circular reference of "a" has been detected: a -> b -> c -> a').and.notify(done);
     });
+
+    it('should inherit properties when applied with parameters at at least second level (RT-295)', function (done) {
+        var definition = [
+            '#%RAML 0.2',
+            '---',
+            'title: Title',
+            'resourceTypes:',
+            '   - a:',
+            '       get:',
+            '           description: Hello, <<name>>',
+            '   - b:',
+            '       type:',
+            '           a:',
+            '               name: John Galt',
+            '/:',
+            '   type: b'
+        ].join('\n');
+        raml.load([definition]).should.become({
+            title: 'Title',
+            resourceTypes: [
+                {
+                    a: {
+                        get: {
+                            description: 'Hello, <<name>>'
+                        }
+                    }
+                },
+
+                {
+                    b: {
+                        type: {
+                            a: {
+                                name: 'John Galt'
+                            }
+                        }
+                    }
+                }
+            ],
+            resources: [
+                {
+                    type: 'b',
+                    relativeUri: '/',
+                    methods: [
+                        {
+                            method: 'get',
+                            description: 'Hello, John Galt'
+                        }
+                    ]
+                }
+            ]
+        }).and.notify(done);
+    });
 });
