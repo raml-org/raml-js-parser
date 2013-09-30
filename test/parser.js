@@ -246,7 +246,49 @@ describe('Parser', function() {
           done();
         }, 0);
       });
-    })
+    });
+    it('it should report repeated URI\'s in the second uri\'s line - RT-279', function(done){
+      var noop       = function () {};
+      var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: "muse:"',
+          'baseUri: http://ces.com/muse',
+          '/r1/r2:',
+          '/r1:',
+          '  /r2:'
+      ].join('\n');
+      raml.load(definition).then(noop, function (error) {
+          setTimeout(function () {
+              error.message.should.be.equal("two resources share same URI /r1/r2");
+              expect(error.problem_mark).to.exist;
+              error.problem_mark.column.should.be.equal(2);
+              error.problem_mark.line.should.be.equal(6);
+              done();
+          }, 0);
+      });
+    });
+    it('it should allow a trait parameter with an integer value - RT-279', function(done){
+      var noop       = function () {};
+      var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: "muse:"',
+          'baseUri: http://ces.com/muse',
+          '/r1/r2:',
+          '/r1:',
+          '  /r2:'
+      ].join('\n');
+      raml.load(definition).then(noop, function (error) {
+          setTimeout(function () {
+              error.message.should.be.equal("two resources share same URI /r1/r2");
+              expect(error.problem_mark).to.exist;
+              error.problem_mark.column.should.be.equal(2);
+              error.problem_mark.line.should.be.equal(6);
+              done();
+          }, 0);
+      });
+    });
   });
   describe('Basic Information', function() {
     it('should fail unsupported yaml version', function(done) {
@@ -1696,6 +1738,53 @@ describe('Parser', function() {
       });
     });
     describe('Named parameters in form parameters', function(){
+      it('should fail if formParameters is used in a response', function(done){
+        var definition = [
+          '#%RAML 0.2',
+          '---',
+          'title: Test',
+          'baseUri: http://myapi.org',
+          '/resource:',
+          '  post:',
+          '    responses: ',
+          '      200:',
+          '        body:',
+          '          application/json:',
+          '            formParameters:',
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/formParameters cannot be used to describe response bodies/).and.notify(done);
+      });
+      it('should fail if formParameters is used together with schema', function(done){
+        var definition = [
+            '#%RAML 0.2',
+            '---',
+            'title: Test',
+            'baseUri: http://myapi.org',
+            '/resource:',
+            '  post:',
+            '    body:',
+            '      application/json:',
+            '        formParameters:',
+            '        schema:',
+        ].join('\n');
+        raml.load(definition).should.be.rejected.with(/formParameters cannot be used together with the example or schema properties/).and.notify(done);
+      });
+      it('should fail if formParameters is used together with example', function(done){
+        var definition = [
+            '#%RAML 0.2',
+            '---',
+            'title: Test',
+            'baseUri: http://myapi.org',
+            '/resource:',
+            '  post:',
+            '    body:',
+            '      application/json:',
+            '        formParameters:',
+            '        example:',
+        ].join('\n');
+        raml.load(definition).should.be.rejected.with(/formParameters cannot be used together with the example or schema properties/).and.notify(done);
+      });
       it('should succeed null form parameters', function(done) {
         var definition = [
           '#%RAML 0.2',
@@ -5638,7 +5727,6 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
-
   });
   describe('Security schemes', function(){
     it('should fail when schemes is mapping', function(done) {
@@ -6572,7 +6660,7 @@ describe('Parser', function() {
         '      application/json:',
         '      schema: foo'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/not compatible with explicit default Media Type/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/not compatible with explicit Media Type/).and.notify(done);
     });
     it('should fail if body is using explicit after implicit body', function(done) {
       var definition = [
@@ -6851,6 +6939,49 @@ describe('Parser', function() {
             "relativeUri": "/resource"
           }
         ]
+      };
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+    it('should succeed when a overriding baseUriParams in a method', function(done) {
+      var definition = [
+          '#%RAML 0.2',
+          '---',
+          'baseUri: https://{domainName}.myapi.com',
+          'title: Test',
+          '/resource:',
+          '  get:',
+          '     baseUriParameters:',
+          '       domainName:',
+          '         example: your-bucket'
+      ].join('\n');
+      var expected = {
+          "baseUri": "https://{domainName}.myapi.com",
+          "title": "Test",
+          "resources": [
+            {
+              "relativeUri": "/resource",
+              methods: [
+                {
+                    baseUriParameters: {
+                        "domainName": {
+                           example: "your-bucket",
+                           type: "string",
+                            required: true,
+                            displayName: "domainName"
+                        }
+                    },
+                    method: "get"
+                }
+              ],
+            }
+          ],
+          baseUriParameters: {
+              domainName: {
+                  type: "string",
+                  required: true,
+                  displayName: "domainName"
+              }
+          }
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
