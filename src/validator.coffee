@@ -49,26 +49,26 @@ class @Validator
       throw new exports.ValidationError "while validating #{section}", null, errorMessage + ": '#{property}'", mark
     properties[property] = true
 
-  isMapping: (node) -> return node?.tag is "tag:yaml.org,2002:map"
-  isNull: (node) -> return node?.tag is "tag:yaml.org,2002:null"
-  isSequence: (node) -> return node?.tag is "tag:yaml.org,2002:seq"
-  isString: (node) -> return node?.tag is "tag:yaml.org,2002:str"
-  isInteger: (node) -> return node?.tag is "tag:yaml.org,2002:int"
-  isNullableMapping: (node) -> return @isMapping(node) or @isNull(node)
-  isNullableString: (node) -> return @isString(node) or @isNull(node)
+  isMapping:          (node) -> return node?.tag is "tag:yaml.org,2002:map"
+  isNull:             (node) -> return node?.tag is "tag:yaml.org,2002:null"
+  isSequence:         (node) -> return node?.tag is "tag:yaml.org,2002:seq"
+  isString:           (node) -> return node?.tag is "tag:yaml.org,2002:str"
+  isInteger:          (node) -> return node?.tag is "tag:yaml.org,2002:int"
+  isNullableMapping:  (node) -> return @isMapping(node) or @isNull(node)
+  isNullableString:   (node) -> return @isString(node) or @isNull(node)
   isNullableSequence: (node) -> return @isSequence(node) or @isNull(node)
-  isScalar: (node) -> return node?.tag is 'tag:yaml.org,2002:null' or
-                             node?.tag is 'tag:yaml.org,2002:bool' or
-                             node?.tag is 'tag:yaml.org,2002:int' or
-                             node?.tag is 'tag:yaml.org,2002:float' or
-                             node?.tag is 'tag:yaml.org,2002:binary' or
-                             node?.tag is 'tag:yaml.org,2002:timestamp' or
-                             node?.tag is 'tag:yaml.org,2002:str'
-  isCollection: (node) -> node?.tag is 'tag:yaml.org,2002:omap' or
-                          node?.tag is 'tag:yaml.org,2002:pairs' or
-                          node?.tag is 'tag:yaml.org,2002:set' or
-                          node?.tag is 'tag:yaml.org,2002:seq' or
-                          node?.tag is 'tag:yaml.org,2002:map'
+  isScalar:           (node) -> return node?.tag is 'tag:yaml.org,2002:null' or
+                                       node?.tag is 'tag:yaml.org,2002:bool' or
+                                       node?.tag is 'tag:yaml.org,2002:int' or
+                                       node?.tag is 'tag:yaml.org,2002:float' or
+                                       node?.tag is 'tag:yaml.org,2002:binary' or
+                                       node?.tag is 'tag:yaml.org,2002:timestamp' or
+                                       node?.tag is 'tag:yaml.org,2002:str'
+  isCollection:       (node) -> return node?.tag is 'tag:yaml.org,2002:omap' or
+                                       node?.tag is 'tag:yaml.org,2002:pairs' or
+                                       node?.tag is 'tag:yaml.org,2002:set' or
+                                       node?.tag is 'tag:yaml.org,2002:seq' or
+                                       node?.tag is 'tag:yaml.org,2002:map'
 
   validate_security_scheme: (scheme) ->
     type = null
@@ -523,7 +523,7 @@ class @Validator
         when "queryParameters"
           @validate_query_params property, allowParameterKeys
         when "body"
-          @validate_body property, allowParameterKeys
+          @validate_body property, allowParameterKeys, null, false
         when "responses"
           @validate_responses property, allowParameterKeys
         else
@@ -608,7 +608,7 @@ class @Validator
         unless @isParameterKey(property)
           switch canonicalKey
             when "body"
-              @validate_body property, allowParameterKeys
+              @validate_body property, allowParameterKeys, null, true
             when "description"
               unless @isScalar(property[1])
                 throw new exports.ValidationError 'while validating responses', null, "property description must be a string", response[0].start_mark
@@ -629,7 +629,7 @@ class @Validator
       throw new exports.ValidationError 'while validating parameter', null, "unknown function applied to property name" , property[0].start_mark
     return false
 
-  validate_body: (property, allowParameterKeys, bodyMode = null) ->
+  validate_body: (property, allowParameterKeys, bodyMode = null, isResponseBody) ->
     if @isNull property[1]
       return
     unless @isMapping property[1]
@@ -646,30 +646,35 @@ class @Validator
         if bodyMode and bodyMode != "explicit"
           throw new exports.ValidationError 'while validating body', null, "not compatible with implicit default Media Type", bodyProperty[0].start_mark
         bodyMode = "explicit"
-        @validate_body bodyProperty, allowParameterKeys, "forcedImplicit"
+        @validate_body bodyProperty, allowParameterKeys, "forcedImplicit", isResponseBody
       else
         key = bodyProperty[0].value
         canonicalProperty = @canonicalizePropertyName( key, allowParameterKeys)
         switch canonicalProperty
           when "formParameters"
             if bodyMode and bodyMode not in implicitMode
-              throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
+              throw new exports.ValidationError 'while validating body', null, "not compatible with explicit Media Type", bodyProperty[0].start_mark
             bodyMode ?= "implicit"
             @validate_form_params bodyProperty, allowParameterKeys
           when "example"
             if bodyMode and bodyMode not in implicitMode
-              throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
+              throw new exports.ValidationError 'while validating body', null, "not compatible with explicit Media Type", bodyProperty[0].start_mark
             bodyMode ?= "implicit"
             unless @isScalar(bodyProperty[1])
               throw new exports.ValidationError 'while validating body', null, "example must be a string", bodyProperty[0].start_mark
           when "schema"
             if bodyMode and bodyMode not in implicitMode
-              throw new exports.ValidationError 'while validating body', null, "not compatible with explicit default Media Type", bodyProperty[0].start_mark
+              throw new exports.ValidationError 'while validating body', null, "not compatible with explicit Media Type", bodyProperty[0].start_mark
             bodyMode ?= "implicit"
             unless @isScalar(bodyProperty[1])
               throw new exports.ValidationError 'while validating body', null, "schema must be a string", bodyProperty[0].start_mark
           else
             throw new exports.ValidationError 'while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark
+    if "formParameters" of bodyProperties
+      if isResponseBody
+        throw new exports.ValidationError 'while validating body', null, "formParameters cannot be used to describe response bodies", property[0].start_mark
+      if "schema" of bodyProperties or "example" of bodyProperties
+        throw new exports.ValidationError 'while validating body', null, "formParameters cannot be used together with the example or schema properties", property[0].start_mark
     if bodyMode is "implicit"
       unless @get_media_type()
         throw new exports.ValidationError 'while validating body', null, "body tries to use default Media Type, but mediaType is null", property[0].start_mark
@@ -784,8 +789,8 @@ class @Validator
     
   valid_absolute_uris: (node ) ->
     uris = @get_absolute_uris node
-    if repeatedUri = uris.hasDuplicates()
-      throw new exports.ValidationError 'while validating trait consumption', null, 'two resources share same URI ' + repeatedUri, null
+    if repeatedUri = uris.hasDuplicatesUris()
+      throw new exports.ValidationError 'while validating trait consumption', null, "two resources share same URI #{repeatedUri.uri}", repeatedUri.mark
     
   get_absolute_uris: ( node = @get_single_node(true, true, false), parentPath ) ->
     response = []
@@ -797,8 +802,7 @@ class @Validator
         uri = parentPath + childResource[0].value
       else
         uri = childResource[0].value
-      
-      response.push uri
+      response.push { uri: uri, mark: childResource[0].start_mark }
       response = response.concat( @get_absolute_uris(childResource[1], uri) )
     return response 
       
@@ -831,6 +835,14 @@ class @Validator
         
   is_valid: ->
     return @validation_errors.length == 0
+
+  Array::hasDuplicatesUris = ->
+    output = {}
+    for key in [0...@length]
+      if @[key].uri of output
+        return @[key]
+      output[@[key].uri] = @[key]
+    return false
 
   Array::hasDuplicates = ->
     output = {}
