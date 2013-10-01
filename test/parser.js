@@ -273,19 +273,21 @@ describe('Parser', function() {
           '#%RAML 0.2',
           '---',
           'traits:',
-          '  - getMethod: {}',
+          '  - getMethod:',
+          '     description: <<description>>',
           'title: title',
           '/test:',
           ' is: [ getMethod: { description: 1 }]'
       ].join('\n');
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
-    it('it should allow a trait parameter with an integer value - RT-279', function(done){
+    it('it should allow a resource type parameter with an integer value - RT-279', function(done){
           var definition = [
               '#%RAML 0.2',
               '---',
               'resourceTypes:',
-              '  - someType: {}',
+              '  - someType:',
+              '     description: <<description>>',
               'title: title',
               '/test:',
               ' type: { someType: { description: 1 }}'
@@ -300,14 +302,16 @@ describe('Parser', function() {
               'resourceTypes:',
               '  - base:',
               '      get:',
+              '         description: <<description>>',
               '  - collection:',
-              '      type: { base: { resourPath: hola } }',
+              '      type: { base: { description: hola } }',
               '      get:',
               '  - typedCollection:',
               '      type: collection',
               '      get:',
+              '         description: <<description>>',
               '/presentations:',
-              '  type: { typedCollection: { schemaName: presentation } }'
+              '  type: { typedCollection: { description: description } }'
         ].join('\n');
 
         var expected = {
@@ -315,14 +319,16 @@ describe('Parser', function() {
               "resourceTypes": [
                   {
                       "base": {
-                          "get": null
+                          "get": {
+                            "description": "<<description>>"
+                          }
                       }
                   },
                   {
                       "collection": {
                           "type": {
                               "base": {
-                                  "resourPath": "hola"
+                                  "description": "hola"
                               }
                           },
                           "get": null
@@ -331,7 +337,9 @@ describe('Parser', function() {
                   {
                       "typedCollection": {
                           "type": "collection",
-                          "get": null
+                          "get": {
+                            "description": '<<description>>'
+                          }
                       }
                   }
               ],
@@ -339,13 +347,14 @@ describe('Parser', function() {
                   {
                       "type": {
                           "typedCollection": {
-                              "schemaName": "presentation"
+                              "description": "description"
                           }
                       },
                       "relativeUri": "/presentations",
                       "methods": [
                           {
-                              "method": "get"
+                              "method": "get",
+                              "description": "description"
                           }
                       ]
                   }
@@ -3191,8 +3200,10 @@ describe('Parser', function() {
         '            managed users. To enable this functionality, please contact us with your',
         '            API key.',
         '          type: string',
+        '      queryParameters:',
+        '        param1: {description: <<param1>>}',
         '/leagues:',
-        '  is: [ rateLimited: { param1: value, param2: value} ]',
+        '  is: [ rateLimited: { param1: value1 } ]',
         '  get:',
         '    responses:',
         '      200:',
@@ -3217,6 +3228,13 @@ describe('Parser', function() {
                 required: true,
                 displayName: "On-Behalf-Of"
               }
+            },
+            queryParameters: {
+                param1: {
+                    displayName: 'param1',
+                    description: '<<param1>>',
+                    type: 'string'
+                },
             }
           }
         }],
@@ -3225,8 +3243,7 @@ describe('Parser', function() {
             is: [
               {
                 rateLimited: {
-                  param1: 'value',
-                  param2: 'value'
+                  param1: 'value1'
                 }
               }
             ],
@@ -3234,6 +3251,13 @@ describe('Parser', function() {
             methods: [
               {
                 method: 'get',
+                queryParameters: {
+                    param1: {
+                        displayName: 'param1',
+                        description: 'value1',
+                        type: 'string'
+                    }
+                },
                 responses: {
                   '200': {
                     description: 'Retrieve a list of leagues'
@@ -3254,7 +3278,7 @@ describe('Parser', function() {
         'title: Test',
         'traits:',
         '  - rateLimited:',
-        '      displayName: Rate Limited',
+        '      displayName: Rate Limited (<<param1>>-<<param2>>)',
         '      headers?:',
         '        If-None-Match?:',
         '          description: |',
@@ -3268,7 +3292,7 @@ describe('Parser', function() {
         '            API key.',
         '          type: string',
         '/leagues:',
-        '  is: [ rateLimited: { param1: ["string"], param2: value} ]',
+        '  is: [ rateLimited: { param1: ["value1"], param2: value2} ]',
         '  get:',
         '    responses:',
         '      200:',
@@ -4046,9 +4070,12 @@ describe('Parser', function() {
         '            managed users. To enable this functionality, please contact us with your',
         '            API key.',
         '          type: string',
+        '      queryParameters:',
+        '        param1:',
+        '          description: <<param1>>',
         '/leagues:',
         '  get:',
-        '    is: [ rateLimited: { param1: value, param2: value} ]',
+        '    is: [ rateLimited: { param1: value1 } ]',
         '    responses:',
         '      200:',
         '        description: Retrieve a list of leagues'
@@ -4072,6 +4099,13 @@ describe('Parser', function() {
                 required: true,
                 displayName: "On-Behalf-Of"
               }
+            },
+            queryParameters: {
+                param1: {
+                    displayName: 'param1',
+                    description: '<<param1>>',
+                    type: 'string'
+                }
             }
           }
         }],
@@ -4083,8 +4117,7 @@ describe('Parser', function() {
                 is: [
                   {
                     rateLimited: {
-                      param1: 'value',
-                      param2: 'value'
+                      param1: 'value1'
                     }
                   }
                 ],
@@ -4093,6 +4126,13 @@ describe('Parser', function() {
                   '200': {
                     description: 'Retrieve a list of leagues'
                   }
+                },
+                queryParameters: {
+                    param1: {
+                        displayName: 'param1',
+                        description: 'value1',
+                        type: 'string'
+                    }
                 }
               }
             ]
@@ -4740,7 +4780,7 @@ describe('Parser', function() {
         'title: Test',
         'resourceTypes:',
         '  - collection:',
-        '      displayName: Collection',
+        '      displayName: Collection (<<foo>>)',
         '      description: This resourceType should be used for any collection of items',
         '      post:',
         '       body:',
@@ -4754,7 +4794,7 @@ describe('Parser', function() {
           {
             collection:
             {
-              displayName: "Collection",
+              displayName: "Collection (<<foo>>)",
               description: "This resourceType should be used for any collection of items",
               post:
               {
