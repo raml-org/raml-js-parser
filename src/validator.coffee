@@ -230,7 +230,7 @@ class @Validator
           throw new exports.ValidationError 'while validating traits', null, 'invalid trait definition, it must be a mapping', trait[1].start_mark
         @valid_traits_properties trait
 
-  valid_traits_properties: (node) ->  
+  valid_traits_properties: (node) ->
     return unless node[1].value
     return unless @isMapping node[1]
     invalid = node[1].value.filter (childNode) ->
@@ -510,7 +510,7 @@ class @Validator
     methodProperties = {}
     method[1].value.forEach (property) =>
       @trackRepeatedProperties(methodProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating method', "property already used")
-      return if @validate_common_properties property, allowParameterKeys
+      return if @validate_common_properties property, allowParameterKeys, context
 
       key = property[0].value
       canonicalKey = @canonicalizePropertyName(key, allowParameterKeys)
@@ -685,7 +685,7 @@ class @Validator
       unless @get_media_type()
         throw new exports.ValidationError 'while validating body', null, "body tries to use default Media Type, but mediaType is null", property[0].start_mark
 
-  validate_common_properties: (property, allowParameterKeys) ->
+  validate_common_properties: (property, allowParameterKeys, context) ->
     if @isParameterKey(property)
       unless allowParameterKeys
         throw new exports.ValidationError 'while validating resources', null, "property '" + property[0].value + "' is invalid in a resource", property[0].start_mark
@@ -695,8 +695,12 @@ class @Validator
       canonicalProperty = @canonicalizePropertyName( key, allowParameterKeys)
       switch canonicalProperty
         when "displayName"
+          if context is 'method'
+            return false
+
           unless @isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'displayName' must be a string", property[0].start_mark
+
           return true
         when "description"
           unless @isScalar(property[1])
@@ -792,12 +796,12 @@ class @Validator
       response.push resourceResponse
       response = response.concat( @resources(childResource[1], resourceResponse.uri) )
     return response
-    
+
   valid_absolute_uris: (node ) ->
     uris = @get_absolute_uris node
     if repeatedUri = uris.hasDuplicatesUris()
       throw new exports.ValidationError 'while validating trait consumption', null, "two resources share same URI #{repeatedUri.uri}", repeatedUri.mark
-    
+
   get_absolute_uris: ( node = @get_single_node(true, true, false), parentPath ) ->
     response = []
     unless @isNullableMapping node
@@ -810,8 +814,8 @@ class @Validator
         uri = childResource[0].value
       response.push { uri: uri, mark: childResource[0].start_mark }
       response = response.concat( @get_absolute_uris(childResource[1], uri) )
-    return response 
-      
+    return response
+
   key_or_value: (node) ->
     if node instanceof nodes.ScalarNode
       return node.value
@@ -838,7 +842,7 @@ class @Validator
 
   get_validation_errors: ->
     return @validation_errors
-        
+
   is_valid: ->
     return @validation_errors.length == 0
 
