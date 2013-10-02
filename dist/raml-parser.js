@@ -12932,7 +12932,7 @@ function decode(str) {
       return method[1].value.forEach(function(property) {
         var canonicalKey, key, valid;
         _this.trackRepeatedProperties(methodProperties, _this.canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating method', "property already used");
-        if (_this.validate_common_properties(property, allowParameterKeys)) {
+        if (_this.validate_common_properties(property, allowParameterKeys, context)) {
           return;
         }
         key = property[0].value;
@@ -13195,7 +13195,7 @@ function decode(str) {
       }
     };
 
-    Validator.prototype.validate_common_properties = function(property, allowParameterKeys) {
+    Validator.prototype.validate_common_properties = function(property, allowParameterKeys, context) {
       var canonicalProperty, key,
         _this = this;
       if (this.isParameterKey(property)) {
@@ -13208,6 +13208,9 @@ function decode(str) {
         canonicalProperty = this.canonicalizePropertyName(key, allowParameterKeys);
         switch (canonicalProperty) {
           case "displayName":
+            if (context === 'method') {
+              return false;
+            }
             if (!this.isScalar(property[1])) {
               throw new exports.ValidationError('while validating resources', null, "property 'displayName' must be a string", property[0].start_mark);
             }
@@ -16833,17 +16836,17 @@ function mix(from, into) {
   }
 }
 
-},{"./copy.js":48,"./create.js":49,"./from.js":43,"./is.js":45,"./join.js":47,"./read.js":50,"./subarray.js":46,"./to.js":44,"./write.js":51}],45:[function(require,module,exports){
-
-module.exports = function(buffer) {
-  return buffer instanceof Uint8Array;
-}
-
-},{}],46:[function(require,module,exports){
+},{"./copy.js":48,"./create.js":49,"./from.js":43,"./is.js":44,"./join.js":47,"./read.js":50,"./subarray.js":45,"./to.js":46,"./write.js":51}],45:[function(require,module,exports){
 module.exports = subarray
 
 function subarray(buf, from, to) {
   return buf.subarray(from || 0, to || buf.length)
+}
+
+},{}],44:[function(require,module,exports){
+
+module.exports = function(buffer) {
+  return buffer instanceof Uint8Array;
 }
 
 },{}],47:[function(require,module,exports){
@@ -17202,7 +17205,7 @@ function from_base64(str) {
   return new Uint8Array(base64.toByteArray(str)) 
 }
 
-},{"base64-js":53}],44:[function(require,module,exports){
+},{"base64-js":53}],46:[function(require,module,exports){
 module.exports = to
 
 var base64 = require('base64-js')
@@ -17401,5 +17404,5 @@ function reduced(list) {
   return out
 }
 
-},{}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,24,19,25,26,3,23,27,4,22,6])
+},{}]},{},[10,12,15,1,2,16,17,13,20,18,11,21,24,19,25,26,3,23,27,4,22,6])
 ;
