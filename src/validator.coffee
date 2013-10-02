@@ -23,7 +23,7 @@ The Validator class deals with validating a YAML file according to the spec
 ###
 class @Validator
   constructor: ->
-    @validations = [@is_map, @valid_root_properties, @validate_base_uri_parameters, @valid_absolute_uris]
+    @validations = [@validate_root, @validate_root_properties, @validate_base_uri_parameters, @valid_absolute_uris]
 
   validate_document: (node) ->
     @validations.forEach (validation) =>
@@ -49,6 +49,7 @@ class @Validator
       throw new exports.ValidationError "while validating #{section}", null, errorMessage + ": '#{property}'", mark
     properties[property] = true
 
+  isNoop:             (node) -> return node
   isMapping:          (node) -> return node?.tag is "tag:yaml.org,2002:map"
   isNull:             (node) -> return node?.tag is "tag:yaml.org,2002:null"
   isSequence:         (node) -> return node?.tag is "tag:yaml.org,2002:seq"
@@ -158,24 +159,30 @@ class @Validator
       unless schema[1].tag and @isString schema[1]
         throw new exports.ValidationError 'while validating schemas', null, 'schema ' + schemaName + ' must be a string', schema[0].start_mark
 
-  is_map: (node) ->
-    baseUriProperty = @get_property node, "baseUri"
-    @baseUri = baseUriProperty.value
+  validate_root: (node) ->
+    baseUriProperty = @get_property node, /^baseUri$/
+    @baseUri        = baseUriProperty.value
+
     unless node or @isNull node
-      throw new exports.ValidationError 'while validating root', null, 'empty document', 0
+      throw new exports.ValidationError 'while validating root', null, 'empty document', node?.start_mark
+
     unless @isMapping node
-      throw new exports.ValidationError 'while validating root', null, 'document must be a mapping', 0
+      throw new exports.ValidationError 'while validating root', null, 'document must be a mapping', node.start_mark
 
   validate_base_uri_parameters: (node) ->
-    baseUriProperty = @get_property node, "baseUri"
-    @baseUri = baseUriProperty.value
-    if @has_property node, "baseUriParameters"
-      unless @isScalar baseUriProperty
-        throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', property.start_mark
-      property = @get_property(node, "baseUriParameters")
-      unless @isNullableMapping(property)
-        throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a mapping', property.start_mark
-      @validate_uri_parameters @baseUri, property, false, false, [ "version" ]
+    baseUri           = @get_property node, /^baseUri$/
+    baseUriParameters = @get_property node, 'baseUriParameters'
+
+    unless @has_property node, 'baseUriParameters'
+      return
+
+    unless @has_property node, /^baseUri$/
+      throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', baseUriParameters.start_mark
+
+    unless @isNullableMapping baseUriParameters
+      throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a mapping', baseUriParameters.start_mark
+
+    @validate_uri_parameters @baseUri, baseUriParameters, false, false, [ "version" ]
 
   validate_uri_parameters: (uri, uriProperty, allowParameterKeys, skipParameterUseCheck, reservedNames = []) ->
     try
@@ -230,7 +237,7 @@ class @Validator
           throw new exports.ValidationError 'while validating traits', null, 'invalid trait definition, it must be a mapping', trait[1].start_mark
         @valid_traits_properties trait
 
-  valid_traits_properties: (node) ->  
+  valid_traits_properties: (node) ->
     return unless node[1].value
     return unless @isMapping node[1]
     invalid = node[1].value.filter (childNode) ->
@@ -321,7 +328,7 @@ class @Validator
   get_list_values: (node) =>
     return node.map (item) => item.value
 
-  valid_root_properties: (node) ->
+  validate_root_properties: (node) ->
     checkVersion = false
     rootProperties = {}
     if node?.value
@@ -358,7 +365,7 @@ class @Validator
             unless @isString property[1]
               throw new exports.ValidationError 'while validating root properties', null, 'mediaType must be a scalar', property[0].start_mark
           when "baseUriParameters"
-            @is_map node
+            @isNoop property[1]
           when "resourceTypes"
             @validate_types property[1]
           when "securedBy"
@@ -792,12 +799,12 @@ class @Validator
       response.push resourceResponse
       response = response.concat( @resources(childResource[1], resourceResponse.uri) )
     return response
-    
+
   valid_absolute_uris: (node ) ->
     uris = @get_absolute_uris node
     if repeatedUri = uris.hasDuplicatesUris()
       throw new exports.ValidationError 'while validating trait consumption', null, "two resources share same URI #{repeatedUri.uri}", repeatedUri.mark
-    
+
   get_absolute_uris: ( node = @get_single_node(true, true, false), parentPath ) ->
     response = []
     unless @isNullableMapping node
@@ -810,8 +817,8 @@ class @Validator
         uri = childResource[0].value
       response.push { uri: uri, mark: childResource[0].start_mark }
       response = response.concat( @get_absolute_uris(childResource[1], uri) )
-    return response 
-      
+    return response
+
   key_or_value: (node) ->
     if node instanceof nodes.ScalarNode
       return node.value
@@ -838,7 +845,7 @@ class @Validator
 
   get_validation_errors: ->
     return @validation_errors
-        
+
   is_valid: ->
     return @validation_errors.length == 0
 

@@ -160,6 +160,7 @@ describe('Parser', function() {
         '---',
         'title: hola',
         'version: v0.1',
+        'baseUri: http://example.com',
         'baseUriParameters:',
         '  someparam'
       ].join('\n');
@@ -172,6 +173,7 @@ describe('Parser', function() {
         '---',
         'title: hola',
         'version: v0.1',
+        'baseUri: http://example.com',
         'baseUriParameters:',
         '  someparam'
       ].join('\n');
@@ -179,8 +181,8 @@ describe('Parser', function() {
         setTimeout(function () {
           error.message.should.be.equal("base uri parameters must be a mapping");
           expect(error.problem_mark).to.exist;
+          error.problem_mark.line.should.be.equal(6);
           error.problem_mark.column.should.be.equal(2);
-          error.problem_mark.line.should.be.equal(5);
           done();
         }, 0);
       });
