@@ -80,32 +80,52 @@ class @Traits
     method[1] = temp
 
   apply_parameters: (resource, parameters, useKey) ->
+    @_apply_parameters resource, parameters, useKey, usedParameters = {
+        resourcePath: true,
+        methodName  : true
+    }
+
+    for parameterName of parameters
+      unless usedParameters[parameterName]
+          throw new exports.ParameterError 'while aplying parameters', null, "unused parameter: #{parameterName}", useKey.start_mark
+
+  _apply_parameters: (resource, parameters, useKey, usedParameters) ->
     unless resource
       return
+
     if @isString(resource)
-      parameterUse = []
       if parameterUse = resource.value.match(/<<\s*([^\|\s>]+)\s*(\|.*)?\s*>>/g)
         parameterUse.forEach (parameter) =>
           parameterName = parameter?.trim()?.replace(/[<>]+/g, '').trim()
           [parameterName, method] = parameterName.split(/\s*\|\s*/)
+
           unless parameterName of parameters
-            throw new exports.ParameterError 'while aplying parameters', null, 'value was not provided for parameter: ' + parameterName , useKey.start_mark
+            throw new exports.ParameterError 'while aplying parameters', null, "value was not provided for parameter: #{parameterName}", useKey.start_mark
+
           value = parameters[parameterName]
+          usedParameters[parameterName] = true
+
           if method
             if method.match(/!\s*singularize/)
               value = inflection.singularize(value)
             else if method.match(/!\s*pluralize/)
               value = inflection.pluralize(value)
             else
-              throw new exports.ParameterError 'while validating parameter', null, "unknown function applied to parameter" , resource.start_mark
+              throw new exports.ParameterError 'while validating parameter', null, 'unknown function applied to parameter', resource.start_mark
+
           resource.value = resource.value.replace parameter, value
+      return
+
     if @isSequence(resource)
       resource.value.forEach (node) =>
-        @apply_parameters node, parameters, useKey
+        @_apply_parameters node, parameters, useKey, usedParameters
+      return
+
     if @isMapping(resource)
       resource.value.forEach (property) =>
-        @apply_parameters property[0], parameters, useKey
-        @apply_parameters property[1], parameters, useKey
+        @_apply_parameters property[0], parameters, useKey, usedParameters
+        @_apply_parameters property[1], parameters, useKey, usedParameters
+      return
 
   get_parameters_from_is_key: (resourceUri, methodName, typeKey) ->
     result = {
