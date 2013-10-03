@@ -6504,7 +6504,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/method must be a mapping/).and.notify(done);
     });
-    it('should fail if methods displayName is map', function(done) {
+    it('should fail if displayName is defined within methods', function(done) {
       var definition = [
         '#%RAML 0.2',
         '---',
@@ -6514,19 +6514,7 @@ describe('Parser', function() {
         '  get:',
         '    displayName: {}'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/property 'displayName' must be a string/).and.notify(done);
-    });
-    it('should fail if methods displayName is sequence', function(done) {
-      var definition = [
-        '#%RAML 0.2',
-        '---',
-        'title: Test',
-        '/a:',
-        '  displayName: A',
-        '  get:',
-        '    displayName: []'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/property 'displayName' must be a string/).and.notify(done);
+      raml.load(definition).should.be.rejected.with('property: \'displayName\' is invalid in a method').and.notify(done);
     });
     it('should fail if methods description is map', function(done) {
       var definition = [

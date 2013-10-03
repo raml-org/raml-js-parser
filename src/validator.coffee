@@ -517,7 +517,7 @@ class @Validator
     methodProperties = {}
     method[1].value.forEach (property) =>
       @trackRepeatedProperties(methodProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating method', "property already used")
-      return if @validate_common_properties property, allowParameterKeys
+      return if @validate_common_properties property, allowParameterKeys, context
 
       key = property[0].value
       canonicalKey = @canonicalizePropertyName(key, allowParameterKeys)
@@ -692,7 +692,7 @@ class @Validator
       unless @get_media_type()
         throw new exports.ValidationError 'while validating body', null, "body tries to use default Media Type, but mediaType is null", property[0].start_mark
 
-  validate_common_properties: (property, allowParameterKeys) ->
+  validate_common_properties: (property, allowParameterKeys, context) ->
     if @isParameterKey(property)
       unless allowParameterKeys
         throw new exports.ValidationError 'while validating resources', null, "property '" + property[0].value + "' is invalid in a resource", property[0].start_mark
@@ -702,8 +702,12 @@ class @Validator
       canonicalProperty = @canonicalizePropertyName( key, allowParameterKeys)
       switch canonicalProperty
         when "displayName"
+          if context is 'method'
+            return false
+
           unless @isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'displayName' must be a string", property[0].start_mark
+
           return true
         when "description"
           unless @isScalar(property[1])
