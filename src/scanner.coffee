@@ -45,7 +45,7 @@ class @Scanner
     'u': 4
     'U': 8
 
-  RAML_VERSION    = '#%RAML 0.2'
+  RAML_VERSION    = '#%RAML 0.8'
   RAML_VERSION_RE = /^#%RAML .+$/
 
   ###

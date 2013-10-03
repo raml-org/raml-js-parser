@@ -96,7 +96,7 @@ describe('Resource Types Validations', function() {
     });
 
     return [
-      '#%RAML 0.2',
+      '#%RAML 0.8',
       '---',
       'title: Test'
 //      'baseUri: http://{apiSubdomain}.api.com/{someUriParameter}'
@@ -596,7 +596,7 @@ describe('Trait Validations', function() {
     });
 
     return [
-      '#%RAML 0.2',
+      '#%RAML 0.8',
       '---',
       'title: Test'
     ]

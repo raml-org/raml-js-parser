@@ -23,7 +23,7 @@ describe('Parser', function() {
     });
     it('should fail if baseUriParameter is not a mapping', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         'baseUri: http://www.api.com/{version}/{company}',
         'version: v1.1',
@@ -37,7 +37,7 @@ describe('Parser', function() {
     });
     it('it should not fail to parse an empty trait', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: MyApi',
         'traits:',
         '  - emptyTrait:',
@@ -48,7 +48,7 @@ describe('Parser', function() {
     });
     it('it should not fail to parse an empty trait list', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://www.api.com/{version}/{company}',
@@ -60,7 +60,7 @@ describe('Parser', function() {
     it('it should fail to parse a RAML header ', function(done) {
       var noop = function () {};
       var definition = [
-        '#%RAML 0.2'
+        '#%RAML 0.8'
       ].join('\n');
 
       raml.load(definition).then(noop, function (error) {
@@ -72,14 +72,14 @@ describe('Parser', function() {
     });
     it('it should not fail to parse a RAML file only with headers', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---'
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/document must be a mapping/).and.notify(done);
     });
     it('it should not fail to parse a RAML null uriParameters. RT-178', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: hola',
         'version: v0.1',
@@ -103,7 +103,7 @@ describe('Parser', function() {
     });
     it('it should fail if baseUriParamters has a version parameter. RT-199', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: hola',
         'version: v0.1',
@@ -115,7 +115,7 @@ describe('Parser', function() {
     });
     it('it should fail if resource URI is invalid', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: hola',
         'version: v0.1',
@@ -125,7 +125,7 @@ describe('Parser', function() {
     });
     it('it should fail if resource URI is invalid', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: hola',
         'version: v0.1',
@@ -135,7 +135,7 @@ describe('Parser', function() {
     });
     it('it should reject RAML with more than one YAML document', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: hola',
         'version: v0.1',
@@ -145,7 +145,7 @@ describe('Parser', function() {
     });
     it('it should inject exception coontext into message when message is null', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: hola',
         'version: v0.1',
@@ -156,7 +156,7 @@ describe('Parser', function() {
     });
     it('it should fail if baseUriParameters is a string - RT-274', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: hola',
         'version: v0.1',
@@ -169,7 +169,7 @@ describe('Parser', function() {
     it('it should fail if baseUriParameters is a string - RT-274 - with proper line numbering', function(done){
       var noop       = function () {};
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: hola',
         'version: v0.1',
@@ -189,7 +189,7 @@ describe('Parser', function() {
     });
     it('it should fail if baseUriParameters in a resource is a string - RT-274', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: hola',
         'version: v0.1',
@@ -202,7 +202,7 @@ describe('Parser', function() {
     });
     it('it should fail if baseUriParameters in a resource is a string - RT-274', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: hola',
         'version: v0.1',
@@ -232,7 +232,7 @@ describe('Parser', function() {
     it('should report correct line for null media type in implicit mode', function (done) {
       var noop       = function () {};
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '/resource:',
         '  post:',
         '    body:',
@@ -252,7 +252,7 @@ describe('Parser', function() {
     it('it should report repeated URI\'s in the second uri\'s line - RT-279', function(done){
       var noop       = function () {};
       var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: "muse:"',
           'baseUri: http://ces.com/muse',
@@ -272,7 +272,7 @@ describe('Parser', function() {
     });
     it('it should allow a trait parameter with an integer value - RT-279', function(done){
       var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'traits:',
           '  - getMethod:',
@@ -285,7 +285,7 @@ describe('Parser', function() {
     });
     it('it should allow a resource type parameter with an integer value - RT-279', function(done){
           var definition = [
-              '#%RAML 0.2',
+              '#%RAML 0.8',
               '---',
               'resourceTypes:',
               '  - someType:',
@@ -298,7 +298,7 @@ describe('Parser', function() {
     });
     it('should apply a resourceType that inherits from another type that uses parameters', function(done){
         var definition = [
-              '#%RAML 0.2',
+              '#%RAML 0.8',
               '---',
               'title: My API',
               'resourceTypes:',
@@ -367,7 +367,7 @@ describe('Parser', function() {
       it('it should report correct line for resourceType not map error - RT-283', function(done){
           var noop       = function () {};
           var definition = [
-              '#%RAML 0.2',
+              '#%RAML 0.8',
               '---',
               'title: "muse:"',
               'resourceTypes:',
@@ -387,7 +387,7 @@ describe('Parser', function() {
       it('it should report correct line for resourceType circular reference - RT-257', function(done){
           var noop       = function () {};
           var definition = [
-              '#%RAML 0.2',
+              '#%RAML 0.8',
               '---',
               'title: "muse:"',
               'resourceTypes:',
@@ -412,7 +412,7 @@ describe('Parser', function() {
   describe('Basic Information', function() {
     it('should fail unsupported yaml version', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '%YAML 1.1',
         '---',
         'title: MyApi'
@@ -422,7 +422,7 @@ describe('Parser', function() {
     });
     it('should succeed', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '%YAML 1.2',
         '---',
         'title: MyApi',
@@ -435,7 +435,7 @@ describe('Parser', function() {
     });
     it('should fail if no title', function(done) {
     var definition = [
-      '#%RAML 0.2',
+      '#%RAML 0.8',
       '---',
       'baseUri: http://myapi.com'
     ].join('\n');
@@ -444,7 +444,7 @@ describe('Parser', function() {
   });
     it('should fail if title is array', function(done) {
         var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: ["title", "title line 2", "title line 3"]',
             'baseUri: http://myapi.com'
@@ -454,7 +454,7 @@ describe('Parser', function() {
     });
     it('should fail if title is mapping', function(done) {
         var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: { line 1: line 1, line 2: line 2 }',
             'baseUri: http://myapi.com'
@@ -464,7 +464,7 @@ describe('Parser', function() {
     });
     it('should succeed if title is longer than 48 chars', function(done) {
         var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: this is a very long title, it should fail the length validation for titles with an exception clearly marking it so',
             'baseUri: http://myapi.com'
@@ -474,7 +474,7 @@ describe('Parser', function() {
     });
     it('should allow number title', function(done) {
       var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: 54',
           'baseUri: http://myapi.com'
@@ -484,7 +484,7 @@ describe('Parser', function() {
     });
     it('should fail if there is a root property with wrong displayName', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'version: v1',
@@ -495,7 +495,7 @@ describe('Parser', function() {
   });
     it('should fail if there is a root property with array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'version: v1',
@@ -508,7 +508,7 @@ describe('Parser', function() {
   describe('Include', function() {
     it('should fail if include not found', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: !include relative.md'
       ].join('\n');
@@ -517,7 +517,7 @@ describe('Parser', function() {
     });
     it('should succeed on including another YAML file with .yml extension', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         '!include http://localhost:9001/test/external.yml'
       ].join('\n');
@@ -526,7 +526,7 @@ describe('Parser', function() {
     });
     it('should succeed on including another YAML file with .yaml extension', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         '!include http://localhost:9001/test/external.yaml'
       ].join('\n');
@@ -535,7 +535,7 @@ describe('Parser', function() {
     });
     it('should succeed on including another YAML file mid-document', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -575,7 +575,7 @@ describe('Parser', function() {
   describe('URI Parameters', function() {
     it('should succeed when dealing with URI parameters', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -601,7 +601,7 @@ describe('Parser', function() {
     });
     it('should fail when a parameter uses array syntax with only one type', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -616,7 +616,7 @@ describe('Parser', function() {
     });
     it('should succeed when dealing with URI parameters with two types', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -654,7 +654,7 @@ describe('Parser', function() {
 
     it('should fail when declaring a URI parameter not on the baseUri', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -669,7 +669,7 @@ describe('Parser', function() {
     });
     it('should fail when declaring a URI parameter not on the resource URI', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -688,7 +688,7 @@ describe('Parser', function() {
     });
     it('should fail when declaring a property inside a URI parameter that is not valid', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -703,7 +703,7 @@ describe('Parser', function() {
     });
     it('should succeed when declaring a minLength validation as a number', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -718,7 +718,7 @@ describe('Parser', function() {
     });
     it('should fail when declaring an enum with duplicated values', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -734,7 +734,7 @@ describe('Parser', function() {
     });
     it('should fail when declaring an enum with no values', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -750,7 +750,7 @@ describe('Parser', function() {
     });
     it('should succeed when declaring an enum with null value', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -766,7 +766,7 @@ describe('Parser', function() {
     });
     it('should fail when declaring an enum with mapping value', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -782,7 +782,7 @@ describe('Parser', function() {
     });
     it('should succeed when declaring a maxLength validation as a number', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -797,7 +797,7 @@ describe('Parser', function() {
     });
     it('should succeed when declaring a minimum validation as a number', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -812,7 +812,7 @@ describe('Parser', function() {
     });
     it('should succeed when declaring a maximum validation as a number', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -827,7 +827,7 @@ describe('Parser', function() {
     });
     it('should fail when declaring a minLength validation as anything other than a number', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -842,7 +842,7 @@ describe('Parser', function() {
     });
     it('should fail when declaring a maxLength validation as anything other than a number', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -857,7 +857,7 @@ describe('Parser', function() {
     });
     it('should fail when declaring a minimum validation as anything other than a number', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -872,7 +872,7 @@ describe('Parser', function() {
     });
     it('should fail when declaring a maximum validation as anything other than a number', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -887,7 +887,7 @@ describe('Parser', function() {
     });
     it('should fail when declaring a URI parameter with an invalid type', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -902,7 +902,7 @@ describe('Parser', function() {
     });
     it('should succeed when declaring a URI parameter with a string type', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -917,7 +917,7 @@ describe('Parser', function() {
     });
     it('should succeed when declaring a URI parameter with a number type', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -932,7 +932,7 @@ describe('Parser', function() {
     });
     it('should succeed when declaring a URI parameter with a integer type', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -947,7 +947,7 @@ describe('Parser', function() {
     });
     it('should succeed when declaring a URI parameter with a date type', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -962,7 +962,7 @@ describe('Parser', function() {
     });
     it('should succeed when declaring a URI parameter with a file type', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -977,7 +977,7 @@ describe('Parser', function() {
     });
     it('should succeed when declaring a URI parameter with a boolean type', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -992,7 +992,7 @@ describe('Parser', function() {
     });
     it('should succeed when declaring a URI parameter with an example', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
         'baseUriParameters:',
@@ -1006,7 +1006,7 @@ describe('Parser', function() {
     });
     it('should fail if baseUri value its not really a URI', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'baseUri: http://{myapi.com'
@@ -1016,7 +1016,7 @@ describe('Parser', function() {
     });
     it('should fail if baseUri uses version but there is no version defined', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'baseUri: http://myapi.com/{version}'
@@ -1026,7 +1026,7 @@ describe('Parser', function() {
     });
     it('should succeed if baseUri uses version and there is a version defined', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'version: v1',
@@ -1051,7 +1051,7 @@ describe('Parser', function() {
     });
     it('should fail when a URI parameter has required "y"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -1067,7 +1067,7 @@ describe('Parser', function() {
     });
     it('should fail when a URI parameter has required "yes"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -1084,7 +1084,7 @@ describe('Parser', function() {
 
     it('should fail when a URI parameter has required "YES"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -1101,7 +1101,7 @@ describe('Parser', function() {
 
     it('should fail when a URI parameter has required "t"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -1118,7 +1118,7 @@ describe('Parser', function() {
 
     it('should succeed when a URI parameter has required "true"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -1135,7 +1135,7 @@ describe('Parser', function() {
 
     it('should fail when a URI parameter has required "TRUE"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -1152,7 +1152,7 @@ describe('Parser', function() {
 
     it('should fail when a URI parameter has required "n"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -1169,7 +1169,7 @@ describe('Parser', function() {
 
     it('should fail when a URI parameter has required "no"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -1186,7 +1186,7 @@ describe('Parser', function() {
 
     it('should fail when a URI parameter has required "NO"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -1203,7 +1203,7 @@ describe('Parser', function() {
 
     it('should fail when a URI parameter has required "f"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -1220,7 +1220,7 @@ describe('Parser', function() {
 
     it('should succeed when a URI parameter has required "false"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -1237,7 +1237,7 @@ describe('Parser', function() {
 
     it('should fail when a URI parameter has required "FALSE"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -1254,7 +1254,7 @@ describe('Parser', function() {
 
     it('should succeed when a URI parameter has repeat "false"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -1271,7 +1271,7 @@ describe('Parser', function() {
 
     it('should fail when a URI parameter has repeat "FALSE"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -1288,7 +1288,7 @@ describe('Parser', function() {
 
     it('should succeed when a URI parameter has repeat "true"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -1305,7 +1305,7 @@ describe('Parser', function() {
 
     it('should fail when a URI parameter has repeat "TRUE"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -1324,7 +1324,7 @@ describe('Parser', function() {
     describe('Named parameters in baseUriParameters at root level', function(){
       it('should succeed with null baseUriParameters', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1339,7 +1339,7 @@ describe('Parser', function() {
       });
       it('should fail when a parameter uses array syntax with no types', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://{a}.myapi.org',
@@ -1351,7 +1351,7 @@ describe('Parser', function() {
       });
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://{a}.myapi.org',
@@ -1366,7 +1366,7 @@ describe('Parser', function() {
       });
       it('should succeed when dealing with URI parameters with two types', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://{a}.myapi.org',
@@ -1405,7 +1405,7 @@ describe('Parser', function() {
     describe('Named parameters in baseUriParameters at a resource level', function(){
       it('should succeed with null baseUriParameters', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://{a}.myapi.org',
@@ -1433,7 +1433,7 @@ describe('Parser', function() {
       });
       it('should fail when a parameter uses array syntax with no types', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://{a}.myapi.org',
@@ -1446,7 +1446,7 @@ describe('Parser', function() {
       });
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://{a}.myapi.org',
@@ -1462,7 +1462,7 @@ describe('Parser', function() {
       });
       it('should succeed when dealing with URI parameters with two types', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://{a}.myapi.org',
@@ -1514,7 +1514,7 @@ describe('Parser', function() {
     describe('Named parameters in uriParameters', function(){
       it('should succeed with null uriParameters', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1543,7 +1543,7 @@ describe('Parser', function() {
       });
       it('should fail when a parameter uses array syntax with no types', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1556,7 +1556,7 @@ describe('Parser', function() {
       });
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1572,7 +1572,7 @@ describe('Parser', function() {
       });
       it('should succeed when dealing with URI parameters with two types', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1618,7 +1618,7 @@ describe('Parser', function() {
     describe('Named parameters in request headers', function(){
       it('should succeed with null headers', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1643,7 +1643,7 @@ describe('Parser', function() {
       });
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1657,7 +1657,7 @@ describe('Parser', function() {
       });
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1674,7 +1674,7 @@ describe('Parser', function() {
       });
       it('should succeed when dealing with URI parameters with two types', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1723,7 +1723,7 @@ describe('Parser', function() {
     describe('Named parameters in query string parameter', function(){
       it('should succeed with null URI parameters', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1748,7 +1748,7 @@ describe('Parser', function() {
       });
       it('defaults query parameters requiredness to falsy', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1781,7 +1781,7 @@ describe('Parser', function() {
 
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1795,7 +1795,7 @@ describe('Parser', function() {
       });
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1812,7 +1812,7 @@ describe('Parser', function() {
       });
       it('should succeed when dealing with URI parameters with two types', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1859,7 +1859,7 @@ describe('Parser', function() {
     describe('Named parameters in form parameters', function(){
       it('should fail if formParameters is used in a response', function(done){
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1876,7 +1876,7 @@ describe('Parser', function() {
       });
       it('should fail if formParameters is used together with schema', function(done){
         var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Test',
             'baseUri: http://myapi.org',
@@ -1891,7 +1891,7 @@ describe('Parser', function() {
       });
       it('should fail if formParameters is used together with example', function(done){
         var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Test',
             'baseUri: http://myapi.org',
@@ -1906,7 +1906,7 @@ describe('Parser', function() {
       });
       it('should succeed null form parameters', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'mediaType: multipart/form-data',
@@ -1938,7 +1938,7 @@ describe('Parser', function() {
       });
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1953,7 +1953,7 @@ describe('Parser', function() {
       });
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -1971,7 +1971,7 @@ describe('Parser', function() {
       });
       it('should succeed when dealing with URI parameters with two types', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'mediaType: multipart/form-data',
@@ -2025,7 +2025,7 @@ describe('Parser', function() {
     describe('Named parameters in response headers', function(){
       it('should succeed with null header', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -2056,7 +2056,7 @@ describe('Parser', function() {
       });
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -2072,7 +2072,7 @@ describe('Parser', function() {
       });
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -2091,7 +2091,7 @@ describe('Parser', function() {
       });
       it('should succeed when a parameter uses array syntax with two types', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
@@ -2148,7 +2148,7 @@ describe('Parser', function() {
   describe('Resources', function() {
     it('should succeed extracting resource information', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/a:',
@@ -2197,7 +2197,7 @@ describe('Parser', function() {
     });
     it('should fail on duplicate absolute URIs', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/a:',
@@ -2212,7 +2212,7 @@ describe('Parser', function() {
     });
     it('should succeed', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/a:',
@@ -2245,7 +2245,7 @@ describe('Parser', function() {
     });
     it('should succeed when a method is null', function(done) {
       var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           '/a:',
@@ -2271,7 +2271,7 @@ describe('Parser', function() {
     });
     it('should allow resources named like HTTP verbs', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/getSomething:',
@@ -2368,7 +2368,7 @@ describe('Parser', function() {
     });
     it('it should not fail when resource is null', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/:'
@@ -2387,7 +2387,7 @@ describe('Parser', function() {
     });
     it('is should fail when resource is a scalar', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/: foo'
@@ -2397,7 +2397,7 @@ describe('Parser', function() {
     });
     it('is should fail when resource is a sequence', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/: foo'
@@ -2409,7 +2409,7 @@ describe('Parser', function() {
   describe('Resource Responses', function() {
     it('should succeed with arrays as keys', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/foo:',
@@ -2443,7 +2443,7 @@ describe('Parser', function() {
 
     it('should succeed with null response', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/foo:',
@@ -2473,7 +2473,7 @@ describe('Parser', function() {
     });
     it('should fail if status code is string', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/foo:',
@@ -2489,7 +2489,7 @@ describe('Parser', function() {
 
     it('should overwrite existing node with arrays as keys', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/foo:',
@@ -2525,7 +2525,7 @@ describe('Parser', function() {
 
     it('should overwrite arrays as keys with new single node', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/foo:',
@@ -2561,7 +2561,7 @@ describe('Parser', function() {
 
     it('should fail to load a yaml with hash as key', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/foo:',
@@ -2580,7 +2580,7 @@ describe('Parser', function() {
   describe('Traits at resource level', function() {
     it('should succeed when applying traits across !include boundaries', function(done) {
       var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: Test',
           'traits:',
@@ -2641,7 +2641,7 @@ describe('Parser', function() {
     });
     it('should succeed when applying multiple traits', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2715,7 +2715,7 @@ describe('Parser', function() {
     });
     it('should succeed when applying a trait to a null method', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2764,7 +2764,7 @@ describe('Parser', function() {
     });
     it('should succeed when applying multiple traits in a single array entry', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2836,7 +2836,7 @@ describe('Parser', function() {
     });
     it('should remove nodes with question mark that are not used', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2887,7 +2887,7 @@ describe('Parser', function() {
     });
     it('should succeed if trait is missing displayName property', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2931,7 +2931,7 @@ describe('Parser', function() {
     });
     it('should fail if traits value is scalar', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits: foo',
@@ -2942,7 +2942,7 @@ describe('Parser', function() {
     });
     it('should fail if traits value is dictionary', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2955,7 +2955,7 @@ describe('Parser', function() {
     });
     it('should fail if use property is not an array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/:',
@@ -2965,7 +2965,7 @@ describe('Parser', function() {
     });
     it('should fail on invalid trait name', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2982,7 +2982,7 @@ describe('Parser', function() {
     });
     it('should allow using "use" as a resource name', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://www.api.com/{version}/{company}',
@@ -3045,7 +3045,7 @@ describe('Parser', function() {
     });
     it('should not add intermediate structures in optional keys for missing properties', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -3115,7 +3115,7 @@ describe('Parser', function() {
     });
     it('should allow dictionary keys as names of traits', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -3184,7 +3184,7 @@ describe('Parser', function() {
     });
     it('should allow parameters in a trait usage', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -3275,7 +3275,7 @@ describe('Parser', function() {
     });
     it('should reject parameters whose value is an array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -3304,7 +3304,7 @@ describe('Parser', function() {
     });
     it('should reject parameters whose value is a mapping', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -3353,7 +3353,7 @@ describe('Parser', function() {
     });
     it('should reject trait with missing provided parameters', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -3374,7 +3374,7 @@ describe('Parser', function() {
     });
     it('should apply parameters in traits', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -3436,7 +3436,7 @@ describe('Parser', function() {
     });
     it('should apply parameters in traits in each occurrence', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -3526,7 +3526,7 @@ describe('Parser', function() {
     });
     it('should apply parameters in keys in traits', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -3588,7 +3588,7 @@ describe('Parser', function() {
     });
     it('should apply traits in all methods', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -3672,7 +3672,7 @@ describe('Parser', function() {
   describe('Traits at method level', function() {
     it('should succeed when applying traits across !include boundaries', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -3733,7 +3733,7 @@ describe('Parser', function() {
     });
     it('should succeed when applying multiple traits', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -3805,7 +3805,7 @@ describe('Parser', function() {
     });
     it('should remove nodes with question mark that are not used', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -3856,7 +3856,7 @@ describe('Parser', function() {
     });
     it('should succeed if trait is missing displayName property', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -3885,7 +3885,7 @@ describe('Parser', function() {
     });
     it('should fail if use property is not an array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/:',
@@ -3897,7 +3897,7 @@ describe('Parser', function() {
     });
     it('should fail on invalid trait name', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -3915,7 +3915,7 @@ describe('Parser', function() {
     });
     it('should not add intermediate structures in optional keys for missing properties', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -3985,7 +3985,7 @@ describe('Parser', function() {
     });
     it('should allow dictionary keys as names of traits', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -4054,7 +4054,7 @@ describe('Parser', function() {
     });
     it('should allow parameters in a trait usage', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -4146,7 +4146,7 @@ describe('Parser', function() {
     });
     it('should reject parameters whose value is an array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -4176,7 +4176,7 @@ describe('Parser', function() {
     });
     it('should reject parameters whose value is a mapping', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -4194,7 +4194,7 @@ describe('Parser', function() {
     });
     it('should reject trait with missing provided parameters', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -4215,7 +4215,7 @@ describe('Parser', function() {
     });
     it('should apply parameters in traits', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -4277,7 +4277,7 @@ describe('Parser', function() {
     });
     it('should apply parameters in keys in traits', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -4341,7 +4341,7 @@ describe('Parser', function() {
   describe('Resource Types', function () {
     it('should allow resourceTypes key at root level', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4383,7 +4383,7 @@ describe('Parser', function() {
     });
     it('should allow resourceTypes array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4457,7 +4457,7 @@ describe('Parser', function() {
     });
     it('should fail if resourceTypes value is scalar', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes: foo',
@@ -4467,7 +4467,7 @@ describe('Parser', function() {
     });
     it('should fail if resourceTypes value is dictionary', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4479,7 +4479,7 @@ describe('Parser', function() {
     });
     it('should fail if type is an array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4497,7 +4497,7 @@ describe('Parser', function() {
     });
     it('should fail if resource is of a missing type', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4515,7 +4515,7 @@ describe('Parser', function() {
     });
     it('should succeed if resource type is missing displayName', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4547,7 +4547,7 @@ describe('Parser', function() {
     });
     it('should fail if resource type is null', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4559,7 +4559,7 @@ describe('Parser', function() {
     });
     it('should fail if resource type is null', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4570,7 +4570,7 @@ describe('Parser', function() {
     });
     it('should fail if resource type is not mapping', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4581,7 +4581,7 @@ describe('Parser', function() {
     });
     it('should fail if resource type declares a sub resource', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4596,7 +4596,7 @@ describe('Parser', function() {
     });
     it('should fail if type dictionary has no keys', function(done){
       var definition = [
-      '#%RAML 0.2',
+      '#%RAML 0.8',
       'title: titulo',
       'baseUri: http://api.com',
       '/resource:',
@@ -4606,7 +4606,7 @@ describe('Parser', function() {
     });
     it('should fail if a resource type inherits from a missing type', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4621,7 +4621,7 @@ describe('Parser', function() {
     });
     it('should fail if a resource type applies a missing trait', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -4639,7 +4639,7 @@ describe('Parser', function() {
     });
     it('should fail if a resource type\'s method applies a missing trait', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -4658,7 +4658,7 @@ describe('Parser', function() {
     });
     it('should apply a resource type', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4705,7 +4705,7 @@ describe('Parser', function() {
     });
     it.skip('should fail if names collide', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4728,7 +4728,7 @@ describe('Parser', function() {
     });
     it('should apply a resource type if type key is mapping', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4777,7 +4777,7 @@ describe('Parser', function() {
     });
     it('should apply a resource type if type key is mapping and type name is mapping', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4828,7 +4828,7 @@ describe('Parser', function() {
     });
     it('should fail if type property has more than one key', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4844,7 +4844,7 @@ describe('Parser', function() {
     });
     it('should apply a resource type to a type', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -4913,7 +4913,7 @@ describe('Parser', function() {
     });
     it('should resolve a 3 level deep inheritance chain', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -5005,7 +5005,7 @@ describe('Parser', function() {
     });
     it('should apply parameters to a resource type', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -5060,7 +5060,7 @@ describe('Parser', function() {
     });
     it('should fail if parameters are missing', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -5078,7 +5078,7 @@ describe('Parser', function() {
     });
     it('should fail if resourceType uses a missing trait', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -5101,7 +5101,7 @@ describe('Parser', function() {
     });
     it('should apply a trait to a resource type', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -5177,7 +5177,7 @@ describe('Parser', function() {
     });
     it('should apply a resource type skipping missing optional parameter', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -5229,7 +5229,7 @@ describe('Parser', function() {
     });
     it('should apply a resource type adding optional parameter', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -5280,7 +5280,7 @@ describe('Parser', function() {
       describe('- In resources', function(){
         it('should fail if calling an unknown method in a property', function(done){
           var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Test',
             'resourceTypes:',
@@ -5293,7 +5293,7 @@ describe('Parser', function() {
         });
         it('should fail if calling an unknown method in a value in an applied type', function(done){
           var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Test',
             'resourceTypes:',
@@ -5307,7 +5307,7 @@ describe('Parser', function() {
         });
         it.skip('should fail if calling an unknown method in a value in an unapplied type', function(done){
           var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Test',
             'resourceTypes:',
@@ -5322,7 +5322,7 @@ describe('Parser', function() {
       describe('- In traits', function(){
         it('should fail if calling an unknown method in a property', function(done){
           var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Test',
             'traits:',
@@ -5335,7 +5335,7 @@ describe('Parser', function() {
         });
         it('should fail if calling an unknown method in a value in an applied trait', function(done){
           var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Test',
             'traits:',
@@ -5350,7 +5350,7 @@ describe('Parser', function() {
         });
         it.skip('should fail if calling an unknown method in a value in an unapplied trait', function(done){
           var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Test',
             'traits:',
@@ -5363,7 +5363,7 @@ describe('Parser', function() {
         });
         it.skip('should fail if calling an unknown method in a value in a trait without methods', function(done){
           var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Test',
             'traits:',
@@ -5381,7 +5381,7 @@ describe('Parser', function() {
       describe('- In resources', function(){
         it('should fail if calling an unknown method in a value in an applied type', function(done){
           var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Test',
             'resourceTypes:',
@@ -5419,7 +5419,7 @@ describe('Parser', function() {
       describe('- In traits', function(){
         it('should fail if calling an unknown method in a value in an applied trait', function(done){
           var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Test',
             'traits:',
@@ -5467,7 +5467,7 @@ describe('Parser', function() {
       describe('- In resources', function(){
         it('should fail if calling an unknown method in a value in an applied type', function(done){
           var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Test',
             'resourceTypes:',
@@ -5505,7 +5505,7 @@ describe('Parser', function() {
       describe('- In traits', function(){
         it('should fail if calling an unknown method in a value in an applied trait', function(done){
           var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Test',
             'traits:',
@@ -5553,7 +5553,7 @@ describe('Parser', function() {
   describe('Schema support', function(){
     it('should not fail when specifying schemas at the root level', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'schemas:',
@@ -5580,7 +5580,7 @@ describe('Parser', function() {
     });
     it('should fail when specifying schemas is scalar', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'schemas: foo',
@@ -5590,7 +5590,7 @@ describe('Parser', function() {
     });
     it('should fail when specifying schemas is scalar', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'schemas: {}',
@@ -5600,7 +5600,7 @@ describe('Parser', function() {
     });
     it('should fail when schema is null', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'schemas:',
@@ -5611,7 +5611,7 @@ describe('Parser', function() {
     });
     it('should fail when schema is sequence', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'schemas:',
@@ -5622,7 +5622,7 @@ describe('Parser', function() {
     });
     it('should fail if a schema is a mapping', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'schemas:',
@@ -5649,7 +5649,7 @@ describe('Parser', function() {
     });
     it('should fail if a schema is an array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'schemas:',
@@ -5676,7 +5676,7 @@ describe('Parser', function() {
     });
     it('should apply trait', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'schemas:',
@@ -5743,7 +5743,7 @@ describe('Parser', function() {
     });
     it('should apply trait multiple times', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'schemas:',
@@ -5807,7 +5807,7 @@ describe('Parser', function() {
     });
     it('should apply multiple schemas', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'schemas:',
@@ -5881,7 +5881,7 @@ describe('Parser', function() {
   describe('Security schemes', function(){
     it('should fail when schemes is mapping', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -5893,7 +5893,7 @@ describe('Parser', function() {
     });
     it('should fail when schemes is scalar', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes: foo',
@@ -5903,7 +5903,7 @@ describe('Parser', function() {
     });
     it('should fail when schemes is null', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -5913,7 +5913,7 @@ describe('Parser', function() {
     });
     it('should succeed when schemes is empty', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes: []',
@@ -5932,7 +5932,7 @@ describe('Parser', function() {
     });
     it('should fail when schemes has a null scheme', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -5943,7 +5943,7 @@ describe('Parser', function() {
     });
     it('should fail when scheme is scalar', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -5954,7 +5954,7 @@ describe('Parser', function() {
     });
     it('should fail when scheme is array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -5965,7 +5965,7 @@ describe('Parser', function() {
     });
     it('should fail when scheme contains a wrong property', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -5977,7 +5977,7 @@ describe('Parser', function() {
     });
     it('should fail when scheme does not have type', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -5989,7 +5989,7 @@ describe('Parser', function() {
     });
     it('should succeed when type is "OAuth 2.0"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6027,7 +6027,7 @@ describe('Parser', function() {
     });
     it('should fail when type is "OAuth 2.0" and authorizationUrl is missing in settings', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6043,7 +6043,7 @@ describe('Parser', function() {
     });
     it('should fail when type is "OAuth 2.0" and accessTokenUrl is missing in settings', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6059,7 +6059,7 @@ describe('Parser', function() {
     });
     it('should succeed when type is "OAuth 1.0"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6097,7 +6097,7 @@ describe('Parser', function() {
     });
     it('should fail when type is "OAuth 1.0" and requestTokenUri is missing in settings', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6113,7 +6113,7 @@ describe('Parser', function() {
     });
     it('should fail when type is "OAuth 1.0" and authorizationUri is missing in settings', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6129,7 +6129,7 @@ describe('Parser', function() {
     });
     it('should fail when type is "OAuth 1.0" and tokenCredentialsUri is missing in settings', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6145,7 +6145,7 @@ describe('Parser', function() {
     });
     it('should succeed when type is "Basic Authentication"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6174,7 +6174,7 @@ describe('Parser', function() {
     });
     it('should succeed when type is "Digest Authentication"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6203,7 +6203,7 @@ describe('Parser', function() {
     });
     it('should succeed when type is "x-other-something"', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6232,7 +6232,7 @@ describe('Parser', function() {
     });
     it('should succeed when using null securityScheme', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6263,7 +6263,7 @@ describe('Parser', function() {
     });
     it('should succeed when using a securityScheme', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6294,7 +6294,7 @@ describe('Parser', function() {
     });
     it('should succeed when using a securityScheme', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6325,7 +6325,7 @@ describe('Parser', function() {
     });
     it('should succeed when using a securityScheme', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6362,7 +6362,7 @@ describe('Parser', function() {
     });
     it('should fail when using a securityScheme twice in the same property', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6377,7 +6377,7 @@ describe('Parser', function() {
     });
     it('should fail when type is null', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6390,7 +6390,7 @@ describe('Parser', function() {
     });
     it('should fail when type is array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6403,7 +6403,7 @@ describe('Parser', function() {
     });
     it('should fail when type is map', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -6418,7 +6418,7 @@ describe('Parser', function() {
   describe('Resource Validations', function() {
     it('should fail if using parametric property name in a resource', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/a:',
@@ -6432,7 +6432,7 @@ describe('Parser', function() {
     });
     it('should fail if displayName is map', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/a:',
@@ -6445,7 +6445,7 @@ describe('Parser', function() {
     });
     it('should fail if displayName is sequence', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/a:',
@@ -6458,7 +6458,7 @@ describe('Parser', function() {
     });
     it('should fail if description is map', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/a:',
@@ -6471,7 +6471,7 @@ describe('Parser', function() {
     });
     it('should fail if description is sequence', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/a:',
@@ -6484,7 +6484,7 @@ describe('Parser', function() {
     });
     it('should fail if method is sequence', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/a:',
@@ -6495,7 +6495,7 @@ describe('Parser', function() {
     });
     it('should fail if method is scalar', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/a:',
@@ -6506,7 +6506,7 @@ describe('Parser', function() {
     });
     it('should fail if displayName is defined within methods', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/a:',
@@ -6518,7 +6518,7 @@ describe('Parser', function() {
     });
     it('should fail if methods description is map', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/a:',
@@ -6530,7 +6530,7 @@ describe('Parser', function() {
     });
     it('should fail if methods description is sequence', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/a:',
@@ -6542,7 +6542,7 @@ describe('Parser', function() {
     });
     it('should fail when declaring a URI parameter in a resource with a wrong property', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -6561,7 +6561,7 @@ describe('Parser', function() {
     });
     it('should fail when declaring a URI parameter in a nested resource with a wrong property', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -6584,7 +6584,7 @@ describe('Parser', function() {
     });
     it('should fail when not using a declared URI parameter in a nested resource', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -6606,7 +6606,7 @@ describe('Parser', function() {
     });
     it('should fail if headers is string', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
@@ -6623,7 +6623,7 @@ describe('Parser', function() {
     });
     it('should fail if headers is array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/foo:',
@@ -6635,7 +6635,7 @@ describe('Parser', function() {
     });
     it('should succeed if headers is null', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/foo:',
         '  get:',
@@ -6660,7 +6660,7 @@ describe('Parser', function() {
     });
     it('should fail if header is scalar', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/foo:',
         '  get:',
@@ -6671,7 +6671,7 @@ describe('Parser', function() {
     });
     it('should fail if header is empty sequence', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/foo:',
         '  get:',
@@ -6682,7 +6682,7 @@ describe('Parser', function() {
     });
     it('should fail if header uses unknown property', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/foo:',
         '  get:',
@@ -6694,7 +6694,7 @@ describe('Parser', function() {
     });
     it('should fail if queryParams is string', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
         '/{hello}:',
@@ -6706,7 +6706,7 @@ describe('Parser', function() {
     });
     it('should fail if queryParameters is array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/foo:',
@@ -6718,7 +6718,7 @@ describe('Parser', function() {
     });
     it('should succeed if queryParameters is null', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/foo:',
         '  get:',
@@ -6744,7 +6744,7 @@ describe('Parser', function() {
     });
     it('should fail if queryParameters use wrong property name', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/foo:',
         '  get:',
@@ -6756,7 +6756,7 @@ describe('Parser', function() {
     });
     it('should fail if body is a scalar', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/foo:',
         '  get:',
@@ -6766,7 +6766,7 @@ describe('Parser', function() {
     });
     it('should succeed if body is null', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/foo:',
         '  get:',
@@ -6790,7 +6790,7 @@ describe('Parser', function() {
     });
     it('should fail if body is using implicit after explicit body', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/foo:',
         '  get:',
@@ -6802,7 +6802,7 @@ describe('Parser', function() {
     });
     it('should fail if body is using explicit after implicit body', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/foo:',
         '  get:',
@@ -6814,7 +6814,7 @@ describe('Parser', function() {
     });
     it('should fail if formParameters kicks implicit mode on', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/foo:',
         '  get:',
@@ -6826,7 +6826,7 @@ describe('Parser', function() {
     });
     it('should fail if schema kicks implicit mode on', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/foo:',
         '  get:',
@@ -6838,7 +6838,7 @@ describe('Parser', function() {
     });
     it('should fail if example kicks implicit mode on', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/foo:',
         '  get:',
@@ -6851,7 +6851,7 @@ describe('Parser', function() {
 
     it('should fail if formParameters is string', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
         '/{hello}:',
@@ -6864,7 +6864,7 @@ describe('Parser', function() {
     });
     it('should fail if queryParameters is array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
         '/{hello}:',
@@ -6877,7 +6877,7 @@ describe('Parser', function() {
     });
     it('should succeed if queryParameters is null', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         'mediaType: application/json',
         'baseUri: http://{a}.myapi.org',
@@ -6926,7 +6926,7 @@ describe('Parser', function() {
     });
     it('should fail if queryParameters use wrong property name', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
         '/{hello}:',
@@ -6940,7 +6940,7 @@ describe('Parser', function() {
     });
     it('should fail if responses is scalar', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/root:',
         '  post:',
@@ -6950,7 +6950,7 @@ describe('Parser', function() {
     });
     it('should fail if responses is array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/root:',
         '  post:',
@@ -6960,7 +6960,7 @@ describe('Parser', function() {
     });
     it('should succeed if responses is null', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/root:',
         '  post:',
@@ -6985,7 +6985,7 @@ describe('Parser', function() {
     });
     it('should fail if response code is string', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/root:',
         '  post:',
@@ -6996,7 +6996,7 @@ describe('Parser', function() {
     });
     it('should fail if response code is null', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/root:',
         '  post:',
@@ -7007,7 +7007,7 @@ describe('Parser', function() {
     });
     it('should fail if response code in list is null', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: Test',
         '/root:',
         '  post:',
@@ -7020,7 +7020,7 @@ describe('Parser', function() {
   describe('Base Uri Parameters', function(){
     it('should fail when a resource specified baseUriParams and baseuri is null', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/resource:',
@@ -7032,7 +7032,7 @@ describe('Parser', function() {
     });
     it('should fail when a resource specified baseUriParams unused in the URI', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'baseUri: https://myapi.com',
         'title: Test',
@@ -7045,7 +7045,7 @@ describe('Parser', function() {
     });
     it('should succeed when a overriding baseUriParams in a resource', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'baseUri: https://{domainName}.myapi.com',
         'title: Test',
@@ -7082,7 +7082,7 @@ describe('Parser', function() {
     });
     it('should succeed when a overriding baseUriParams in a method', function(done) {
       var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'baseUri: https://{domainName}.myapi.com',
           'title: Test',
@@ -7125,7 +7125,7 @@ describe('Parser', function() {
     });
     it('should succeed when a overriding baseUriParams in a resource 3 levels deep', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'baseUri: https://{domainName}.myapi.com',
         'title: Test',
@@ -7177,7 +7177,7 @@ describe('Parser', function() {
   describe('Documentation section', function() {
     it('should fail if docsection is empty array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'documentation: []'
@@ -7187,7 +7187,7 @@ describe('Parser', function() {
     });
     it('should fail if docsection is missing title', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'documentation:',
@@ -7198,7 +7198,7 @@ describe('Parser', function() {
     });
     it('should fail if docsection is missing content', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'documentation:',
@@ -7209,7 +7209,7 @@ describe('Parser', function() {
     });
     it('should fail if docsection is mapping', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'documentation: {}'
@@ -7219,7 +7219,7 @@ describe('Parser', function() {
     });
     it('should fail if docsection is scalar', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'documentation: scalar'
@@ -7229,7 +7229,7 @@ describe('Parser', function() {
     });
     it('should fail if docentry is scalar', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'documentation: [scalar]'
@@ -7239,7 +7239,7 @@ describe('Parser', function() {
     });
     it('should fail if docentry is array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'documentation: [[scalar]]'
@@ -7249,7 +7249,7 @@ describe('Parser', function() {
     });
     it('should fail if docentry uses wrong property name', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'documentation:',
@@ -7262,7 +7262,7 @@ describe('Parser', function() {
     });
     it('should fail if has null title', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'documentation:',
@@ -7274,7 +7274,7 @@ describe('Parser', function() {
     });
     it('should fail if has null content', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'documentation:',
@@ -7288,7 +7288,7 @@ describe('Parser', function() {
   describe('Default Media Type', function() {
     it('should fail if mediaType property is null', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'mediaType:'
@@ -7297,7 +7297,7 @@ describe('Parser', function() {
     });
     it('should fail if mediaType property is array', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'mediaType: []'
@@ -7306,7 +7306,7 @@ describe('Parser', function() {
     });
     it('should fail if mediaType property is mapping', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'mediaType: {}'
@@ -7315,7 +7315,7 @@ describe('Parser', function() {
     });
     it('should not fail if mediaType property is used in root', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'mediaType: application/json'
@@ -7328,7 +7328,7 @@ describe('Parser', function() {
     });
     it('should fail if mediaType property is not present and implicit mode is detected in a resource', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         '/resource:',
@@ -7340,7 +7340,7 @@ describe('Parser', function() {
     });
     it('should fail if mediaType property is not present and implicit mode is detected in a trait', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'traits:',
@@ -7354,7 +7354,7 @@ describe('Parser', function() {
     });
     it('should fail if mediaType property is not present and implicit mode is detected in a resourceType', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: MyApi',
         'resourceTypes:',
@@ -7370,7 +7370,7 @@ describe('Parser', function() {
     describe('Default Media Type in request body', function(){
       it('should apply mediaType property in a resource', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: MyApi',
           'mediaType: application/json',
@@ -7402,7 +7402,7 @@ describe('Parser', function() {
       });
       it('should apply mediaType property in a resourceType', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: MyApi',
           'mediaType: application/json',
@@ -7449,7 +7449,7 @@ describe('Parser', function() {
       });
       it('should apply mediaType property in a trait composed with a resourceType', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: MyApi',
           'mediaType: application/json',
@@ -7504,7 +7504,7 @@ describe('Parser', function() {
       });
       it('should apply mediaType property in a trait composed resource', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: MyApi',
           'mediaType: application/json',
@@ -7560,7 +7560,7 @@ describe('Parser', function() {
       });
       it('should apply mediaType property in a trait composed with a resourceType which inherits from another RT and applies a trait', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: MyApi',
           'mediaType: application/json',
@@ -7630,7 +7630,7 @@ describe('Parser', function() {
     describe('Default Media Type in response body', function(){
       it('should apply mediaType property in a resource', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: MyApi',
           'mediaType: application/json',
@@ -7668,7 +7668,7 @@ describe('Parser', function() {
       });
       it('should apply mediaType property in a resourceType', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: MyApi',
           'mediaType: application/json',
@@ -7725,7 +7725,7 @@ describe('Parser', function() {
       });
       it('should apply mediaType property in a trait composed with a resourceType', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: MyApi',
           'mediaType: application/json',
@@ -7790,7 +7790,7 @@ describe('Parser', function() {
       });
       it('should apply mediaType property in a trait composed resource', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: MyApi',
           'mediaType: application/json',
@@ -7856,7 +7856,7 @@ describe('Parser', function() {
       });
       it('should apply mediaType property in a trait composed with a resourceType which inherits from another RT and applies a trait', function(done) {
         var definition = [
-          '#%RAML 0.2',
+          '#%RAML 0.8',
           '---',
           'title: MyApi',
           'mediaType: application/json',
@@ -7944,7 +7944,7 @@ describe('Parser', function() {
     it('should report correct line/column for invalid trait error', function(done) {
       var noop = function () {};
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -7969,7 +7969,7 @@ describe('Parser', function() {
     it('should report correct line/column for missing title', function(done) {
       var noop = function () {};
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         '/:',
         '  get:'
@@ -7986,14 +7986,14 @@ describe('Parser', function() {
     it('should report correct line/column for missing title', function(done) {
       var noop = function () {};
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---'
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/document must be a mapping/).and.notify(done);
     });
     it('should not mark query parameters as required by default', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Title',
         'baseUri: http://server/api',
@@ -8027,7 +8027,7 @@ describe('Parser', function() {
     })
     it('should mark query parameters as required when explicitly requested', function(done) {
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Title',
         'baseUri: http://server/api',
@@ -8064,7 +8064,7 @@ describe('Parser', function() {
     it('should report error that contains URI inside', function(done) {
       var uri        = 'http://localhost:9001/invalid/url';
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: !include ' + uri
       ].join('\n');
@@ -8074,7 +8074,7 @@ describe('Parser', function() {
     it('should report correct line/column for unavailable file in !include', function(done) {
       var noop       = function () {};
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: !include unavailable.raml'
       ].join('\n');
@@ -8091,7 +8091,7 @@ describe('Parser', function() {
     it('should report correct line/column for unavailable URI in !include', function(done) {
       var noop       = function () {};
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: !include http://localhost:9001/invalid/url'
       ].join('\n');

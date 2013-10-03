@@ -17,7 +17,7 @@ if (typeof window === 'undefined') {
 describe('Validator', function () {
     it('should fail if baseUriParameters is defined without baseUri', function (done) {
         raml.load([
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Example',
             'baseUriParameters:'
