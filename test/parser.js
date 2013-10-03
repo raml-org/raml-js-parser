@@ -513,7 +513,7 @@ describe('Parser', function() {
         'title: !include relative.md'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/cannot (find|fetch) relative\.md/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/cannot (read|fetch) relative\.md/).and.notify(done);
     });
     it('should succeed on including another YAML file with .yml extension', function(done) {
       var definition = [

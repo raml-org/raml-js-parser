@@ -86,32 +86,36 @@ Read file either locally or from the network.
 
   if url.protocol?
     unless url.protocol.match(/^https?/i)
-      throw new exports.FileError 'while reading ' + file, null, 'unknown protocol ' + url.protocol, @start_mark
+      throw new exports.FileError "while reading #{file}", null, "unknown protocol #{url.protocol}", @start_mark
     else
       return @fetchFile file
   else
-    if (not (window?))
-      fs = require('fs')
-      if fs.existsSync file
-        return fs.readFileSync(file).toString()
-      else
-        throw new exports.FileError 'while reading ' + file, null, 'cannot find ' + file, @start_mark
-    else
+    if window?
       return @fetchFile file
+    else
+      try
+        return require('fs').readFileSync(file).toString()
+      catch error
+        throw new exports.FileError "while reading #{file}", null, "cannot read #{file} (#{error})", @start_mark
 
 ###
 Read file from the network.
 ###
 @fetchFile = (file) ->
-  if not window?
-    xhr = new (require("xmlhttprequest").XMLHttpRequest)()
-  else
+  if window?
     xhr = new XMLHttpRequest()
-  xhr.open 'GET', file, false
-  xhr.setRequestHeader 'Accept', 'application/raml+yaml, */*'
-  xhr.send null
-  if (typeof xhr.status is 'number' and xhr.status == 200) or
-     (typeof xhr.status is 'string' and xhr.status.match /^200/i)
-    return xhr.responseText;
   else
-    throw new exports.FileError 'while reading ' + file, null, 'cannot fetch ' + file + ' (HTTP ' + xhr.status + ' ' + xhr.statusText + ')', @start_mark
+    xhr = new (require('xmlhttprequest').XMLHttpRequest)()
+
+  try
+    xhr.open 'GET', file, false
+    xhr.setRequestHeader 'Accept', 'application/raml+yaml, */*'
+    xhr.send null
+
+    if (typeof xhr.status is 'number' and xhr.status == 200) or
+       (typeof xhr.status is 'string' and xhr.status.match /^200/i)
+      return xhr.responseText;
+
+    throw "HTTP #{xhr.status} #{xhr.statusText}"
+  catch error
+    throw new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{error})", @start_mark
