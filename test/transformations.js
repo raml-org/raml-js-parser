@@ -17,7 +17,7 @@ if (typeof window === 'undefined') {
 describe('Transformations', function () {
     it('should not mark formParameters as required by default', function (done) {
         var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Title',
             'baseUri: http://server/api',
@@ -58,7 +58,7 @@ describe('Transformations', function () {
 
     it('should mark formParameters as required only when explicitly requested', function (done) {
         var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Title',
             'baseUri: http://server/api',
@@ -101,7 +101,7 @@ describe('Transformations', function () {
 
     it('should fill empty named parameters with default values like displayName and type', function (done) {
         var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Title',
             'baseUri: http://server/api',

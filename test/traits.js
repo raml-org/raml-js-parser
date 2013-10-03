@@ -17,7 +17,7 @@ if (typeof window === 'undefined') {
 describe('Traits', function () {
     it('should detect unused trait parameters and throw an exception', function (done) {
         raml.load([
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Example',
             'traits:',
@@ -36,7 +36,7 @@ describe('Traits', function () {
 
     it('should detect unused resource type parameters and throw an exception', function (done) {
         raml.load([
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Example',
             'resourceTypes:',

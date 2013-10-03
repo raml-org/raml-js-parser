@@ -1,5 +1,3 @@
-%TAG ! tag:raml.org,0.1:
----
 displayName: Root
 get:
   is: [ "customTrait" ]

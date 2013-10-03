@@ -16,7 +16,7 @@ describe('Duplicated properties', function (){
   describe('in Security Schemes', function(){
     it.skip('should fail if two security schemes have the same name', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: some API',
         'securitySchemes:',
         '  - scheme1:',
@@ -29,7 +29,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if a security scheme repeats the type property', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         'title: some API',
         'securitySchemes:',
         '  - scheme1:',
@@ -41,7 +41,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if a OAuth 2.0 settings repeats a known property', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -59,7 +59,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if a OAuth 2.0 settings repeats an unknown property', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -78,7 +78,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if a OAuth 1.0 settings repeats a known property', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -96,7 +96,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if a OAuth 1.0 settings repeats an unknown property', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'securitySchemes:',
@@ -117,7 +117,7 @@ describe('Duplicated properties', function (){
   describe('in URI parameters', function(){
     it('should fail if there are repeated base URI parameter names at the root level', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://api.com/{param1}',
@@ -130,7 +130,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a base URI parameter at the root level', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://api.com/{param1}',
@@ -144,7 +144,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated base URI parameter names in a resource', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://api.com/{param1}',
@@ -158,7 +158,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a base URI parameter in a resource', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://api.com/{param1}',
@@ -173,7 +173,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated URI parameter names in a resource', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://api.com/{param1}',
@@ -187,7 +187,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a URI parameter in a resource', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'baseUri: http://api.com/{param1}',
@@ -204,7 +204,7 @@ describe('Duplicated properties', function (){
   describe('in resource type names', function(){
     it.skip('should fail if there are two resource types with the same name in the same list', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -217,7 +217,7 @@ describe('Duplicated properties', function (){
     });
     it.skip('should fail if there are two resource types with the same name in separate lists', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -233,7 +233,7 @@ describe('Duplicated properties', function (){
   describe('in traits names', function(){
     it.skip('should fail if there are two traits with the same name in the same list', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -246,7 +246,7 @@ describe('Duplicated properties', function (){
     });
     it.skip('should fail if there are two resource types with the same name in separate lists', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -262,7 +262,7 @@ describe('Duplicated properties', function (){
   describe('in root', function(){
     it('should fail if there are repeated root properties', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'title: Test'
@@ -274,7 +274,7 @@ describe('Duplicated properties', function (){
   describe('in documentation', function(){
     it('should fail if there are repeated doc section titles', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'documentation:',
@@ -296,7 +296,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated doc section content', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'documentation:',
@@ -311,7 +311,7 @@ describe('Duplicated properties', function (){
   describe('in resource names', function(){
     it('should fail if there are repeated resources in the document', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/resource:',
@@ -322,7 +322,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated resources in a resource', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/resource1:',
@@ -337,7 +337,7 @@ describe('Duplicated properties', function (){
   describe('in method names', function(){
     it('should fail if there are repeated methods in a resource', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/resource1:',
@@ -351,7 +351,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated methods in a resource type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -366,7 +366,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated methods in a resource type first declaration optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -381,7 +381,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated methods in a resource type second declaration optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -396,7 +396,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated methods in a resource type both declarations optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -411,7 +411,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated methods in a resource type both declarations parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -428,7 +428,7 @@ describe('Duplicated properties', function (){
   describe('in a resource', function(){
     it('should fail if there are repeated properties in a resource', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/resource1:',
@@ -440,7 +440,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a resource type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -453,7 +453,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a resource type first declaration optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -466,7 +466,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a resource type second declaration optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -479,7 +479,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a resource type both declarations optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -495,7 +495,7 @@ describe('Duplicated properties', function (){
   describe('in a method', function(){
     it('should fail if there are repeated properties in a method', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/resource:',
@@ -508,7 +508,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a trait', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -521,7 +521,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a trait first declararion optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -534,7 +534,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a trait second declaration optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -547,7 +547,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a trait both declarations optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -560,7 +560,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a trait both declarations parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -573,7 +573,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a method in a resource type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -587,7 +587,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a method in a resource type first declararion optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -601,7 +601,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a method in a resource type second declaration optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -615,7 +615,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a method in a resource type both declarations optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -629,7 +629,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a method in a resource type both declarations parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -645,7 +645,7 @@ describe('Duplicated properties', function (){
   describe('in response codes', function(){
     it('should fail if there are repeated response codes in a method', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/resource:',
@@ -661,7 +661,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated response codes in a trait', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -677,7 +677,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated response codes in a trait first declararion optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -693,7 +693,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated response codes in a trait second declaration optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -709,7 +709,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated response codes in a trait both declarations optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -725,7 +725,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated response codes in a trait both declarations parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -741,7 +741,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated response codes in a method in a resource type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -758,7 +758,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated response codes in a method in a resource type first declararion optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -775,7 +775,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated response codes in a method in a resource type second declaration optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -792,7 +792,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated response codes in a method in a resource type both declarations optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -809,7 +809,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated response codes in a method in a resource type both declarations parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -828,7 +828,7 @@ describe('Duplicated properties', function (){
   describe('in responses', function(){
     it('should fail if there are repeated properties in a response in a method', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/resource:',
@@ -843,7 +843,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a response in a trait', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -858,7 +858,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a response in a trait first declararion optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -873,7 +873,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a response in a trait second declaration optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -888,7 +888,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a response in a trait both declarations optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -903,7 +903,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a response in a trait both declarations parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -918,7 +918,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a response in a method in a resource type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -934,7 +934,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a response in a method in a resource type first declararion optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -950,7 +950,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a response in a method in a resource type second declaration optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -966,7 +966,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a response in a method in a resource type both declarations optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -982,7 +982,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a response in a method in a resource type both declarations parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1000,7 +1000,7 @@ describe('Duplicated properties', function (){
   describe('in query parameters', function(){
     it('should fail if there are repeated query parameter names in a method', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/resource:',
@@ -1014,7 +1014,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated query parameter names in a trait', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1028,7 +1028,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated query parameter names in a trait first optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1042,7 +1042,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated query parameter names in a trait second optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1056,7 +1056,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated query parameter names in a trait both optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1070,7 +1070,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated query parameter names in a trait both parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1084,7 +1084,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated query parameter names in a resource type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1099,7 +1099,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated query parameter names in a resource type first optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1114,7 +1114,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated query parameter names in a resource type second optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1129,7 +1129,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated query parameter names in a resource type both optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1144,7 +1144,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated query parameter names in a resource type both parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1161,7 +1161,7 @@ describe('Duplicated properties', function (){
   describe('in URI parameters', function(){
     it('should fail if there are repeated properties in a URI parameter in a method', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/resource:',
@@ -1176,7 +1176,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a URI parameter in a trait', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1191,7 +1191,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a URI parameter in a trait first optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1206,7 +1206,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a URI parameter in a trait second optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1221,7 +1221,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a URI parameter in a trait both optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1236,7 +1236,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a URI parameter in a trait both parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1251,7 +1251,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a URI parameter in a resourceType', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1267,7 +1267,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a URI parameter in a resourceType first optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1283,7 +1283,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a URI parameter in a resourceType second optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1299,7 +1299,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a URI parameter in a resourceType both optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1315,7 +1315,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a URI parameter in a resourceType both parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1333,7 +1333,7 @@ describe('Duplicated properties', function (){
   describe('form parameters', function(){
     it('should fail if there are repeated form parameter names in a method with default Media Type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'mediaType: application/json',
@@ -1349,7 +1349,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a trait with default Media Type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1364,7 +1364,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a trait first optional with default Media Type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1379,7 +1379,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a trait second optional with default Media Type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1394,7 +1394,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a trait both optional with default Media Type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1409,7 +1409,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a trait both parameters with default Media Type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1424,7 +1424,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a resource type with default Media Type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1440,7 +1440,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a resource type first optional with default Media Type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1456,7 +1456,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a resource type second optional with default Media Type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1472,7 +1472,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a resource type both optional with default Media Type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1488,7 +1488,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a resource type both parameters with default Media Type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1504,7 +1504,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a method with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/resource:',
@@ -1520,7 +1520,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a trait with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1536,7 +1536,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a trait first optional with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1552,7 +1552,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a trait second optional with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1568,7 +1568,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a trait both optional with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1584,7 +1584,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a trait both parameters with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1600,7 +1600,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a resource type with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1617,7 +1617,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a resource type first optional with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1634,7 +1634,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a resource type second optional with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1651,7 +1651,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a resource type both optional with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1668,7 +1668,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated form parameter names in a resource type both parameters with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1687,7 +1687,7 @@ describe('Duplicated properties', function (){
 
     it('should fail if there are repeated properties in a form parameter in a method with default media type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/resource:',
@@ -1703,7 +1703,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a trait with default media type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1719,7 +1719,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a trait first optional with default media type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1735,7 +1735,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a trait second optional with default media type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1751,7 +1751,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a trait both optional with default media type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1767,7 +1767,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a trait both parameters with default media type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1783,7 +1783,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a resourceType with default media type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1800,7 +1800,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a resourceType first optional with default media type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1817,7 +1817,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a resourceType second optional with default media type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1834,7 +1834,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a resourceType both optional with default media type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1851,7 +1851,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a resourceType both parameters with default media type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1869,7 +1869,7 @@ describe('Duplicated properties', function (){
 
     it('should fail if there are repeated properties in a form parameter in a method with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/resource:',
@@ -1886,7 +1886,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a trait with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1903,7 +1903,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a trait first optional with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1920,7 +1920,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a trait second optional with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1937,7 +1937,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a trait both optional with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1954,7 +1954,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a trait both parameters with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -1971,7 +1971,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a resourceType with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -1989,7 +1989,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a resourceType first optional with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2007,7 +2007,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a resourceType second optional with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2025,7 +2025,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a resourceType both optional with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2043,7 +2043,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a form parameter in a resourceType both parameters with content type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2063,7 +2063,7 @@ describe('Duplicated properties', function (){
   describe('in content types', function(){
     it('should fail if there are repeated content types in a body in a resource', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/resource:',
@@ -2077,7 +2077,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated content types in a body in a resource type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2092,7 +2092,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated content types in a body in a resource type first optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2107,7 +2107,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated content types in a body in a resource type second optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2122,7 +2122,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated content types in a body in a resource type both optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2137,7 +2137,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated content types in a body in a resource type both parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2152,7 +2152,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated content types in a body in a trait', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2166,7 +2166,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated content types in a body in a trait first optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2180,7 +2180,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated content types in a body in a trait second optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2194,7 +2194,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated content types in a body in a trait both optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2208,7 +2208,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated content types in a body in a trait both parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2225,7 +2225,7 @@ describe('Duplicated properties', function (){
   describe('in body properties', function(){
     it('should fail if there are repeated properties in a body in a resource', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/resource:',
@@ -2239,7 +2239,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a body in a resource type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2254,7 +2254,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a body in a resource type first optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2269,7 +2269,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a body in a resource type second optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2284,7 +2284,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a body in a resource type both optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2299,7 +2299,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a body in a resource type both parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2314,7 +2314,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a body in a trait', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2328,7 +2328,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a body in a trait first optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2342,7 +2342,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a body in a trait second optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2356,7 +2356,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a body in a trait both optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2370,7 +2370,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated properties in a body in a trait both parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2386,7 +2386,7 @@ describe('Duplicated properties', function (){
   describe('in header', function(){
     it('should fail if there are repeated header names in a method', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         '/resource:',
@@ -2400,7 +2400,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated header names in a trait', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2414,7 +2414,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated header names in a trait first optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2428,7 +2428,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated header names in a trait second optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2442,7 +2442,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated header names in a trait both optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2456,7 +2456,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated header names in a trait both parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'traits:',
@@ -2470,7 +2470,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated header names in a resource type', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2485,7 +2485,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated header names in a resource type first optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2500,7 +2500,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated header names in a resource type second optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2515,7 +2515,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated header names in a resource type both optional', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',
@@ -2530,7 +2530,7 @@ describe('Duplicated properties', function (){
     });
     it('should fail if there are repeated header names in a resource type both parameters', function(done){
       var definition = [
-        '#%RAML 0.2',
+        '#%RAML 0.8',
         '---',
         'title: Test',
         'resourceTypes:',

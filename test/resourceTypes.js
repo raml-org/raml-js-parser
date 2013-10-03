@@ -17,7 +17,7 @@ if (typeof window === 'undefined') {
 describe('Resource Types', function () {
     it('should report an error with better message when circular reference is detected', function (done) {
         var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Title',
             'resourceTypes:',
@@ -38,7 +38,7 @@ describe('Resource Types', function () {
 
     it('should inherit properties when applied with parameters at at least second level (RT-295)', function (done) {
         var definition = [
-            '#%RAML 0.2',
+            '#%RAML 0.8',
             '---',
             'title: Title',
             'resourceTypes:',
