@@ -84,10 +84,13 @@
       this.message = message;
       this.problem_mark = problem_mark;
       this.note = note;
+      MarkedYAMLError.__super__.constructor.call(this);
       if (!this.message) {
         this.message = this.context;
       }
-      MarkedYAMLError.__super__.constructor.call(this);
+      if (!this.problem_mark) {
+        this.problem_mark = this.context_mark;
+      }
     }
 
     MarkedYAMLError.prototype.toString = function() {
@@ -7896,7 +7899,115 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],13:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],17:[function(require,module,exports){
+(function() {
+  var composer, construct, joiner, parser, reader, resolver, scanner, schemas, securitySchemes, traits, transformations, types, util, validator;
+
+  util = require('./util');
+
+  reader = require('./reader');
+
+  scanner = require('./scanner');
+
+  parser = require('./parser');
+
+  composer = require('./composer');
+
+  resolver = require('./resolver');
+
+  construct = require('./construct');
+
+  validator = require('./validator');
+
+  joiner = require('./joiner');
+
+  traits = require('./traits');
+
+  types = require('./resourceTypes');
+
+  schemas = require('./schemas');
+
+  securitySchemes = require('./securitySchemes');
+
+  transformations = require('./transformations');
+
+  this.make_loader = function(Reader, Scanner, Parser, Composer, Resolver, Validator, ResourceTypes, Traits, Schemas, Joiner, SecuritySchemes, Constructor, Transformations) {
+    if (Reader == null) {
+      Reader = reader.Reader;
+    }
+    if (Scanner == null) {
+      Scanner = scanner.Scanner;
+    }
+    if (Parser == null) {
+      Parser = parser.Parser;
+    }
+    if (Composer == null) {
+      Composer = composer.Composer;
+    }
+    if (Resolver == null) {
+      Resolver = resolver.Resolver;
+    }
+    if (Validator == null) {
+      Validator = validator.Validator;
+    }
+    if (ResourceTypes == null) {
+      ResourceTypes = types.ResourceTypes;
+    }
+    if (Traits == null) {
+      Traits = traits.Traits;
+    }
+    if (Schemas == null) {
+      Schemas = schemas.Schemas;
+    }
+    if (Joiner == null) {
+      Joiner = joiner.Joiner;
+    }
+    if (SecuritySchemes == null) {
+      SecuritySchemes = securitySchemes.SecuritySchemes;
+    }
+    if (Constructor == null) {
+      Constructor = construct.Constructor;
+    }
+    if (Transformations == null) {
+      Transformations = transformations.Transformations;
+    }
+    return (function() {
+      var component, components;
+
+      components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Schemas, Joiner, Constructor, SecuritySchemes, Transformations];
+
+      util.extend.apply(util, [_Class.prototype].concat((function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = components.length; _i < _len; _i++) {
+          component = components[_i];
+          _results.push(component.prototype);
+        }
+        return _results;
+      })()));
+
+      function _Class(stream, location, validate, parent) {
+        var _i, _len, _ref;
+        this.parent = parent;
+        components[0].call(this, stream, location);
+        components[1].call(this, validate);
+        _ref = components.slice(2);
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          component = _ref[_i];
+          component.call(this);
+        }
+      }
+
+      return _Class;
+
+    })();
+  };
+
+  this.Loader = this.make_loader();
+
+}).call(this);
+
+},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./securitySchemes":26,"./traits":23,"./transformations":27,"./util":4,"./validator":22}],13:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -8159,115 +8270,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],17:[function(require,module,exports){
-(function() {
-  var composer, construct, joiner, parser, reader, resolver, scanner, schemas, securitySchemes, traits, transformations, types, util, validator;
-
-  util = require('./util');
-
-  reader = require('./reader');
-
-  scanner = require('./scanner');
-
-  parser = require('./parser');
-
-  composer = require('./composer');
-
-  resolver = require('./resolver');
-
-  construct = require('./construct');
-
-  validator = require('./validator');
-
-  joiner = require('./joiner');
-
-  traits = require('./traits');
-
-  types = require('./resourceTypes');
-
-  schemas = require('./schemas');
-
-  securitySchemes = require('./securitySchemes');
-
-  transformations = require('./transformations');
-
-  this.make_loader = function(Reader, Scanner, Parser, Composer, Resolver, Validator, ResourceTypes, Traits, Schemas, Joiner, SecuritySchemes, Constructor, Transformations) {
-    if (Reader == null) {
-      Reader = reader.Reader;
-    }
-    if (Scanner == null) {
-      Scanner = scanner.Scanner;
-    }
-    if (Parser == null) {
-      Parser = parser.Parser;
-    }
-    if (Composer == null) {
-      Composer = composer.Composer;
-    }
-    if (Resolver == null) {
-      Resolver = resolver.Resolver;
-    }
-    if (Validator == null) {
-      Validator = validator.Validator;
-    }
-    if (ResourceTypes == null) {
-      ResourceTypes = types.ResourceTypes;
-    }
-    if (Traits == null) {
-      Traits = traits.Traits;
-    }
-    if (Schemas == null) {
-      Schemas = schemas.Schemas;
-    }
-    if (Joiner == null) {
-      Joiner = joiner.Joiner;
-    }
-    if (SecuritySchemes == null) {
-      SecuritySchemes = securitySchemes.SecuritySchemes;
-    }
-    if (Constructor == null) {
-      Constructor = construct.Constructor;
-    }
-    if (Transformations == null) {
-      Transformations = transformations.Transformations;
-    }
-    return (function() {
-      var component, components;
-
-      components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Schemas, Joiner, Constructor, SecuritySchemes, Transformations];
-
-      util.extend.apply(util, [_Class.prototype].concat((function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = components.length; _i < _len; _i++) {
-          component = components[_i];
-          _results.push(component.prototype);
-        }
-        return _results;
-      })()));
-
-      function _Class(stream, location, validate, parent) {
-        var _i, _len, _ref;
-        this.parent = parent;
-        components[0].call(this, stream, location);
-        components[1].call(this, validate);
-        _ref = components.slice(2);
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          component = _ref[_i];
-          component.call(this);
-        }
-      }
-
-      return _Class;
-
-    })();
-  };
-
-  this.Loader = this.make_loader();
-
-}).call(this);
-
-},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./securitySchemes":26,"./traits":23,"./transformations":27,"./util":4,"./validator":22}],20:[function(require,module,exports){
+},{"./errors":1}],20:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, events, tokens, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -8992,204 +8995,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],24:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, nodes, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  /*
-  The ResourceTypes throws these.
-  */
-
-
-  this.ResourceTypeError = (function(_super) {
-    __extends(ResourceTypeError, _super);
-
-    function ResourceTypeError() {
-      _ref = ResourceTypeError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return ResourceTypeError;
-
-  })(MarkedYAMLError);
-
-  /*
-  The ResourceTypes class deals with applying ResourceTypes to resources according to the spec
-  */
-
-
-  this.ResourceTypes = (function() {
-    function ResourceTypes() {
-      this.apply_parameters_to_type = __bind(this.apply_parameters_to_type, this);
-      this.apply_type = __bind(this.apply_type, this);
-      this.apply_types = __bind(this.apply_types, this);
-      this.get_type = __bind(this.get_type, this);
-      this.has_types = __bind(this.has_types, this);
-      this.load_types = __bind(this.load_types, this);
-      this.declaredTypes = {};
-    }
-
-    ResourceTypes.prototype.load_types = function(node) {
-      var allTypes,
-        _this = this;
-      this.load_default_media_type(node);
-      if (this.has_property(node, "resourceTypes")) {
-        allTypes = this.property_value(node, "resourceTypes");
-        if (allTypes && typeof allTypes === "object") {
-          return allTypes.forEach(function(type_item) {
-            if (type_item && typeof type_item === "object" && typeof type_item.value === "object") {
-              return type_item.value.forEach(function(type) {
-                return _this.declaredTypes[type[0].value] = type;
-              });
-            }
-          });
-        }
-      }
-    };
-
-    ResourceTypes.prototype.has_types = function(node) {
-      if (Object.keys(this.declaredTypes).length === 0 && this.has_property(node, "resourceTypes")) {
-        this.load_types(node);
-      }
-      return Object.keys(this.declaredTypes).length > 0;
-    };
-
-    ResourceTypes.prototype.get_type = function(typeName) {
-      return this.declaredTypes[typeName];
-    };
-
-    ResourceTypes.prototype.get_parent_type_name = function(typeName) {
-      var property, type;
-      type = (this.get_type(typeName))[1];
-      if (type && this.has_property(type, "type")) {
-        property = this.property_value(type, "type");
-        if (typeof property === "object") {
-          return property[0][0].value;
-        } else {
-          return property;
-        }
-      }
-      return null;
-    };
-
-    ResourceTypes.prototype.apply_types = function(node, resourceUri) {
-      var resources,
-        _this = this;
-      if (resourceUri == null) {
-        resourceUri = "";
-      }
-      if (!this.isMapping(node)) {
-        return;
-      }
-      if (this.has_types(node)) {
-        resources = this.child_resources(node);
-        return resources.forEach(function(resource) {
-          var type;
-          _this.apply_default_media_type_to_resource(resource[1]);
-          if (_this.has_property(resource[1], "type")) {
-            type = _this.get_property(resource[1], "type");
-            _this.apply_type(resourceUri + resource[0].value, resource, type);
-          }
-          return _this.apply_types(resource[1], resourceUri + resource[0].value);
-        });
-      } else {
-        resources = this.child_resources(node);
-        return resources.forEach(function(resource) {
-          return _this.apply_default_media_type_to_resource(resource[1]);
-        });
-      }
-    };
-
-    ResourceTypes.prototype.apply_type = function(resourceUri, resource, typeKey) {
-      var tempType;
-      tempType = this.resolve_inheritance_chain(resourceUri, typeKey);
-      tempType.combine(resource[1]);
-      resource[1] = tempType;
-      return resource[1].remove_question_mark_properties();
-    };
-
-    ResourceTypes.prototype.resolve_inheritance_chain = function(resourceUri, typeKey) {
-      var baseType, childTypeName, childTypeProperty, child_type_key, compiledTypes, inherits_from, parentTypeMapping, parentTypeName, pathToCircularRef, result, root_type, type, typeName, typesToApply;
-      typeName = this.key_or_value(typeKey);
-      compiledTypes = {};
-      type = this.apply_parameters_to_type(resourceUri, typeName, typeKey);
-      this.apply_default_media_type_to_resource(type);
-      this.apply_traits_to_resource(resourceUri, type, false);
-      compiledTypes[typeName] = type;
-      typesToApply = [typeName];
-      childTypeName = typeName;
-      parentTypeName = null;
-      while (parentTypeName = this.get_parent_type_name(childTypeName)) {
-        if (parentTypeName in compiledTypes) {
-          pathToCircularRef = typesToApply.concat(parentTypeName).join(' -> ');
-          childTypeProperty = this.get_type(childTypeName)[0];
-          throw new exports.ResourceTypeError('while aplying resourceTypes', null, "circular reference of \"" + parentTypeName + "\" has been detected: " + pathToCircularRef, childTypeProperty.start_mark);
-        }
-        child_type_key = this.get_property(this.get_type(childTypeName)[1], "type");
-        parentTypeMapping = this.apply_parameters_to_type(resourceUri, parentTypeName, child_type_key);
-        compiledTypes[parentTypeName] = parentTypeMapping;
-        this.apply_default_media_type_to_resource(parentTypeMapping);
-        this.apply_traits_to_resource(resourceUri, parentTypeMapping, false);
-        typesToApply.push(parentTypeName);
-        childTypeName = parentTypeName;
-      }
-      root_type = typesToApply.pop();
-      baseType = compiledTypes[root_type].cloneForResourceType();
-      result = baseType;
-      while (inherits_from = typesToApply.pop()) {
-        baseType = compiledTypes[inherits_from].cloneForResourceType();
-        result.combine(baseType);
-      }
-      return result;
-    };
-
-    ResourceTypes.prototype.apply_parameters_to_type = function(resourceUri, typeName, typeKey) {
-      var parameters, type;
-      type = (this.get_type(typeName))[1].clone();
-      parameters = this._get_parameters_from_type_key(resourceUri, typeKey);
-      this.apply_parameters(type, parameters, typeKey);
-      return type;
-    };
-
-    ResourceTypes.prototype._get_parameters_from_type_key = function(resourceUri, typeKey) {
-      var parameters, result,
-        _this = this;
-      result = {
-        resourcePath: resourceUri.replace(/\/\/*/g, '/')
-      };
-      if (!this.isMapping(typeKey)) {
-        return result;
-      }
-      parameters = this.value_or_undefined(typeKey);
-      if (!this.isNull(parameters[0][1])) {
-        parameters[0][1].value.forEach(function(parameter) {
-          var _ref1;
-          if (!_this.isScalar(parameter[1])) {
-            throw new exports.ResourceTypeError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
-          }
-          if ((_ref1 = parameter[1].value) === "methodName" || _ref1 === "resourcePath" || _ref1 === "resourcePathName") {
-            throw new exports.ResourceTypeError('while aplying parameters', null, 'invalid parameter name "methodName", "resourcePath" are reserved parameter names "resourcePathName"', parameter[1].start_mark);
-          }
-          return result[parameter[0].value] = parameter[1].value;
-        });
-      }
-      return result;
-    };
-
-    return ResourceTypes;
-
-  })();
-
-}).call(this);
-
-},{"./errors":1,"./nodes":13}],21:[function(require,module,exports){
+},{"./errors":1}],21:[function(require,module,exports){
 (function() {
   var YAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -9398,7 +9204,305 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./util":4}],19:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4}],24:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, nodes, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  /*
+  The ResourceTypes throws these.
+  */
+
+
+  this.ResourceTypeError = (function(_super) {
+    __extends(ResourceTypeError, _super);
+
+    function ResourceTypeError() {
+      _ref = ResourceTypeError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return ResourceTypeError;
+
+  })(MarkedYAMLError);
+
+  /*
+  The ResourceTypes class deals with applying ResourceTypes to resources according to the spec
+  */
+
+
+  this.ResourceTypes = (function() {
+    function ResourceTypes() {
+      this.apply_parameters_to_type = __bind(this.apply_parameters_to_type, this);
+      this.apply_type = __bind(this.apply_type, this);
+      this.apply_types = __bind(this.apply_types, this);
+      this.get_type = __bind(this.get_type, this);
+      this.has_types = __bind(this.has_types, this);
+      this.load_types = __bind(this.load_types, this);
+      this.declaredTypes = {};
+    }
+
+    ResourceTypes.prototype.load_types = function(node) {
+      var allTypes,
+        _this = this;
+      this.load_default_media_type(node);
+      if (this.has_property(node, "resourceTypes")) {
+        allTypes = this.property_value(node, "resourceTypes");
+        if (allTypes && typeof allTypes === "object") {
+          return allTypes.forEach(function(type_item) {
+            if (type_item && typeof type_item === "object" && typeof type_item.value === "object") {
+              return type_item.value.forEach(function(type) {
+                return _this.declaredTypes[type[0].value] = type;
+              });
+            }
+          });
+        }
+      }
+    };
+
+    ResourceTypes.prototype.has_types = function(node) {
+      if (Object.keys(this.declaredTypes).length === 0 && this.has_property(node, "resourceTypes")) {
+        this.load_types(node);
+      }
+      return Object.keys(this.declaredTypes).length > 0;
+    };
+
+    ResourceTypes.prototype.get_type = function(typeName) {
+      return this.declaredTypes[typeName];
+    };
+
+    ResourceTypes.prototype.get_parent_type_name = function(typeName) {
+      var property, type;
+      type = (this.get_type(typeName))[1];
+      if (type && this.has_property(type, "type")) {
+        property = this.property_value(type, "type");
+        if (typeof property === "object") {
+          return property[0][0].value;
+        } else {
+          return property;
+        }
+      }
+      return null;
+    };
+
+    ResourceTypes.prototype.apply_types = function(node, resourceUri) {
+      var resources,
+        _this = this;
+      if (resourceUri == null) {
+        resourceUri = "";
+      }
+      if (!this.isMapping(node)) {
+        return;
+      }
+      if (this.has_types(node)) {
+        resources = this.child_resources(node);
+        return resources.forEach(function(resource) {
+          var type;
+          _this.apply_default_media_type_to_resource(resource[1]);
+          if (_this.has_property(resource[1], "type")) {
+            type = _this.get_property(resource[1], "type");
+            _this.apply_type(resourceUri + resource[0].value, resource, type);
+          }
+          return _this.apply_types(resource[1], resourceUri + resource[0].value);
+        });
+      } else {
+        resources = this.child_resources(node);
+        return resources.forEach(function(resource) {
+          return _this.apply_default_media_type_to_resource(resource[1]);
+        });
+      }
+    };
+
+    ResourceTypes.prototype.apply_type = function(resourceUri, resource, typeKey) {
+      var tempType;
+      tempType = this.resolve_inheritance_chain(resourceUri, typeKey);
+      tempType.combine(resource[1]);
+      resource[1] = tempType;
+      return resource[1].remove_question_mark_properties();
+    };
+
+    ResourceTypes.prototype.resolve_inheritance_chain = function(resourceUri, typeKey) {
+      var baseType, childTypeName, childTypeProperty, child_type_key, compiledTypes, inherits_from, parentTypeMapping, parentTypeName, pathToCircularRef, result, root_type, type, typeName, typesToApply;
+      typeName = this.key_or_value(typeKey);
+      compiledTypes = {};
+      type = this.apply_parameters_to_type(resourceUri, typeName, typeKey);
+      this.apply_default_media_type_to_resource(type);
+      this.apply_traits_to_resource(resourceUri, type, false);
+      compiledTypes[typeName] = type;
+      typesToApply = [typeName];
+      childTypeName = typeName;
+      parentTypeName = null;
+      while (parentTypeName = this.get_parent_type_name(childTypeName)) {
+        if (parentTypeName in compiledTypes) {
+          pathToCircularRef = typesToApply.concat(parentTypeName).join(' -> ');
+          childTypeProperty = this.get_type(childTypeName)[0];
+          throw new exports.ResourceTypeError('while aplying resourceTypes', null, "circular reference of \"" + parentTypeName + "\" has been detected: " + pathToCircularRef, childTypeProperty.start_mark);
+        }
+        child_type_key = this.get_property(this.get_type(childTypeName)[1], "type");
+        parentTypeMapping = this.apply_parameters_to_type(resourceUri, parentTypeName, child_type_key);
+        compiledTypes[parentTypeName] = parentTypeMapping;
+        this.apply_default_media_type_to_resource(parentTypeMapping);
+        this.apply_traits_to_resource(resourceUri, parentTypeMapping, false);
+        typesToApply.push(parentTypeName);
+        childTypeName = parentTypeName;
+      }
+      root_type = typesToApply.pop();
+      baseType = compiledTypes[root_type].cloneForResourceType();
+      result = baseType;
+      while (inherits_from = typesToApply.pop()) {
+        baseType = compiledTypes[inherits_from].cloneForResourceType();
+        result.combine(baseType);
+      }
+      return result;
+    };
+
+    ResourceTypes.prototype.apply_parameters_to_type = function(resourceUri, typeName, typeKey) {
+      var parameters, type;
+      type = (this.get_type(typeName))[1].clone();
+      parameters = this._get_parameters_from_type_key(resourceUri, typeKey);
+      this.apply_parameters(type, parameters, typeKey);
+      return type;
+    };
+
+    ResourceTypes.prototype._get_parameters_from_type_key = function(resourceUri, typeKey) {
+      var parameters, result,
+        _this = this;
+      result = {
+        resourcePath: resourceUri.replace(/\/\/*/g, '/')
+      };
+      if (!this.isMapping(typeKey)) {
+        return result;
+      }
+      parameters = this.value_or_undefined(typeKey);
+      if (!this.isNull(parameters[0][1])) {
+        parameters[0][1].value.forEach(function(parameter) {
+          var _ref1;
+          if (!_this.isScalar(parameter[1])) {
+            throw new exports.ResourceTypeError('while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark);
+          }
+          if ((_ref1 = parameter[1].value) === "methodName" || _ref1 === "resourcePath" || _ref1 === "resourcePathName") {
+            throw new exports.ResourceTypeError('while aplying parameters', null, 'invalid parameter name "methodName", "resourcePath" are reserved parameter names "resourcePathName"', parameter[1].start_mark);
+          }
+          return result[parameter[0].value] = parameter[1].value;
+        });
+      }
+      return result;
+    };
+
+    return ResourceTypes;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./nodes":13}],25:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, nodes, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  /*
+  The Schemas throws these.
+  */
+
+
+  this.SchemaError = (function(_super) {
+    __extends(SchemaError, _super);
+
+    function SchemaError() {
+      _ref = SchemaError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return SchemaError;
+
+  })(MarkedYAMLError);
+
+  /*
+    The Schemas class deals with applying schemas to resources according to the spec
+  */
+
+
+  this.Schemas = (function() {
+    function Schemas() {
+      this.get_schemas_used = __bind(this.get_schemas_used, this);
+      this.apply_schemas = __bind(this.apply_schemas, this);
+      this.get_all_schemas = __bind(this.get_all_schemas, this);
+      this.has_schemas = __bind(this.has_schemas, this);
+      this.load_schemas = __bind(this.load_schemas, this);
+      this.declaredSchemas = {};
+    }
+
+    Schemas.prototype.load_schemas = function(node) {
+      var allSchemas,
+        _this = this;
+      if (this.has_property(node, "schemas")) {
+        allSchemas = this.property_value(node, "schemas");
+        if (allSchemas && typeof allSchemas === "object") {
+          return allSchemas.forEach(function(schema_entry) {
+            if (schema_entry && typeof schema_entry === "object" && typeof schema_entry.value === "object") {
+              return schema_entry.value.forEach(function(schema) {
+                return _this.declaredSchemas[schema[0].value] = schema;
+              });
+            }
+          });
+        }
+      }
+    };
+
+    Schemas.prototype.has_schemas = function(node) {
+      if (this.declaredSchemas.length === 0 && this.has_property(node, "schemas")) {
+        this.load_schemas(node);
+      }
+      return Object.keys(this.declaredSchemas).length > 0;
+    };
+
+    Schemas.prototype.get_all_schemas = function() {
+      return this.declaredSchemas;
+    };
+
+    Schemas.prototype.apply_schemas = function(node) {
+      var resources, schemas,
+        _this = this;
+      resources = this.child_resources(node);
+      schemas = this.get_schemas_used(resources);
+      return schemas.forEach(function(schema) {
+        if (schema[1].value in _this.declaredSchemas) {
+          return schema[1].value = _this.declaredSchemas[schema[1].value][1].value;
+        }
+      });
+    };
+
+    Schemas.prototype.get_schemas_used = function(resources) {
+      var schemas,
+        _this = this;
+      schemas = [];
+      resources.forEach(function(resource) {
+        var properties;
+        properties = _this.get_properties(resource[1], "schema");
+        return schemas = schemas.concat(properties);
+      });
+      return schemas;
+    };
+
+    return Schemas;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./nodes":13}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -10904,108 +11008,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./tokens":3,"./util":4}],25:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, nodes, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  /*
-  The Schemas throws these.
-  */
-
-
-  this.SchemaError = (function(_super) {
-    __extends(SchemaError, _super);
-
-    function SchemaError() {
-      _ref = SchemaError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return SchemaError;
-
-  })(MarkedYAMLError);
-
-  /*
-    The Schemas class deals with applying schemas to resources according to the spec
-  */
-
-
-  this.Schemas = (function() {
-    function Schemas() {
-      this.get_schemas_used = __bind(this.get_schemas_used, this);
-      this.apply_schemas = __bind(this.apply_schemas, this);
-      this.get_all_schemas = __bind(this.get_all_schemas, this);
-      this.has_schemas = __bind(this.has_schemas, this);
-      this.load_schemas = __bind(this.load_schemas, this);
-      this.declaredSchemas = {};
-    }
-
-    Schemas.prototype.load_schemas = function(node) {
-      var allSchemas,
-        _this = this;
-      if (this.has_property(node, "schemas")) {
-        allSchemas = this.property_value(node, "schemas");
-        if (allSchemas && typeof allSchemas === "object") {
-          return allSchemas.forEach(function(schema_entry) {
-            if (schema_entry && typeof schema_entry === "object" && typeof schema_entry.value === "object") {
-              return schema_entry.value.forEach(function(schema) {
-                return _this.declaredSchemas[schema[0].value] = schema;
-              });
-            }
-          });
-        }
-      }
-    };
-
-    Schemas.prototype.has_schemas = function(node) {
-      if (this.declaredSchemas.length === 0 && this.has_property(node, "schemas")) {
-        this.load_schemas(node);
-      }
-      return Object.keys(this.declaredSchemas).length > 0;
-    };
-
-    Schemas.prototype.get_all_schemas = function() {
-      return this.declaredSchemas;
-    };
-
-    Schemas.prototype.apply_schemas = function(node) {
-      var resources, schemas,
-        _this = this;
-      resources = this.child_resources(node);
-      schemas = this.get_schemas_used(resources);
-      return schemas.forEach(function(schema) {
-        if (schema[1].value in _this.declaredSchemas) {
-          return schema[1].value = _this.declaredSchemas[schema[1].value][1].value;
-        }
-      });
-    };
-
-    Schemas.prototype.get_schemas_used = function(resources) {
-      var schemas,
-        _this = this;
-      schemas = [];
-      resources.forEach(function(resource) {
-        var properties;
-        properties = _this.get_properties(resource[1], "schema");
-        return schemas = schemas.concat(properties);
-      });
-      return schemas;
-    };
-
-    return Schemas;
-
-  })();
-
-}).call(this);
-
-},{"./errors":1,"./nodes":13}],26:[function(require,module,exports){
+},{"./errors":1,"./tokens":3,"./util":4}],26:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -15229,7 +15232,9 @@ https.request = function (params, cb) {
     params.scheme = 'https';
     return http.request.call(this, params, cb);
 }
-},{"http":32}],34:[function(require,module,exports){
+},{"http":32}],30:[function(require,module,exports){
+module.exports = require( './lib/inflection' );
+},{"./lib/inflection":34}],35:[function(require,module,exports){
 (function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
 
 var EventEmitter = exports.EventEmitter = process.EventEmitter;
@@ -15426,71 +15431,7 @@ EventEmitter.listenerCount = function(emitter, type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":5}],30:[function(require,module,exports){
-module.exports = require( './lib/inflection' );
-},{"./lib/inflection":35}],32:[function(require,module,exports){
-var http = module.exports;
-var EventEmitter = require('events').EventEmitter;
-var Request = require('./lib/request');
-
-http.request = function (params, cb) {
-    if (!params) params = {};
-    if (!params.host) params.host = window.location.host.split(':')[0];
-    if (!params.port) params.port = window.location.port;
-    if (!params.scheme) params.scheme = window.location.protocol.split(':')[0];
-    
-    var req = new Request(new xhrHttp, params);
-    if (cb) req.on('response', cb);
-    return req;
-};
-
-http.get = function (params, cb) {
-    params.method = 'GET';
-    var req = http.request(params, cb);
-    req.end();
-    return req;
-};
-
-http.Agent = function () {};
-http.Agent.defaultMaxSockets = 4;
-
-var xhrHttp = (function () {
-    if (typeof window === 'undefined') {
-        throw new Error('no window object present');
-    }
-    else if (window.XMLHttpRequest) {
-        return window.XMLHttpRequest;
-    }
-    else if (window.ActiveXObject) {
-        var axs = [
-            'Msxml2.XMLHTTP.6.0',
-            'Msxml2.XMLHTTP.3.0',
-            'Microsoft.XMLHTTP'
-        ];
-        for (var i = 0; i < axs.length; i++) {
-            try {
-                var ax = new(window.ActiveXObject)(axs[i]);
-                return function () {
-                    if (ax) {
-                        var ax_ = ax;
-                        ax = null;
-                        return ax_;
-                    }
-                    else {
-                        return new(window.ActiveXObject)(axs[i]);
-                    }
-                };
-            }
-            catch (e) {}
-        }
-        throw new Error('ajax not supported in this browser')
-    }
-    else {
-        throw new Error('ajax not supported in this browser');
-    }
-})();
-
-},{"./lib/request":36,"events":34}],35:[function(require,module,exports){
+},{"__browserify_process":5}],34:[function(require,module,exports){
 /*!
  * inflection
  * Copyright(c) 2011 Ben Lin <ben@dreamerslab.com>
@@ -16027,7 +15968,69 @@ module.exports = {
   }
 };
 
-},{}],37:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
+var http = module.exports;
+var EventEmitter = require('events').EventEmitter;
+var Request = require('./lib/request');
+
+http.request = function (params, cb) {
+    if (!params) params = {};
+    if (!params.host) params.host = window.location.host.split(':')[0];
+    if (!params.port) params.port = window.location.port;
+    if (!params.scheme) params.scheme = window.location.protocol.split(':')[0];
+    
+    var req = new Request(new xhrHttp, params);
+    if (cb) req.on('response', cb);
+    return req;
+};
+
+http.get = function (params, cb) {
+    params.method = 'GET';
+    var req = http.request(params, cb);
+    req.end();
+    return req;
+};
+
+http.Agent = function () {};
+http.Agent.defaultMaxSockets = 4;
+
+var xhrHttp = (function () {
+    if (typeof window === 'undefined') {
+        throw new Error('no window object present');
+    }
+    else if (window.XMLHttpRequest) {
+        return window.XMLHttpRequest;
+    }
+    else if (window.ActiveXObject) {
+        var axs = [
+            'Msxml2.XMLHTTP.6.0',
+            'Msxml2.XMLHTTP.3.0',
+            'Microsoft.XMLHTTP'
+        ];
+        for (var i = 0; i < axs.length; i++) {
+            try {
+                var ax = new(window.ActiveXObject)(axs[i]);
+                return function () {
+                    if (ax) {
+                        var ax_ = ax;
+                        ax = null;
+                        return ax_;
+                    }
+                    else {
+                        return new(window.ActiveXObject)(axs[i]);
+                    }
+                };
+            }
+            catch (e) {}
+        }
+        throw new Error('ajax not supported in this browser')
+    }
+    else {
+        throw new Error('ajax not supported in this browser');
+    }
+})();
+
+},{"./lib/request":36,"events":35}],37:[function(require,module,exports){
 var events = require('events');
 var util = require('util');
 
@@ -16148,7 +16151,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":34,"util":38}],38:[function(require,module,exports){
+},{"events":35,"util":38}],38:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -16495,7 +16498,7 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":34}],39:[function(require,module,exports){
+},{"events":35}],39:[function(require,module,exports){
 var Stream = require('stream');
 var util = require('util');
 
@@ -17448,5 +17451,5 @@ function reduced(list) {
   return out
 }
 
-},{}]},{},[10,12,15,1,2,16,17,13,20,18,11,21,24,19,25,26,3,23,27,4,22,6])
+},{}]},{},[10,12,15,1,2,16,17,13,20,11,18,21,24,19,25,26,3,23,27,4,22,6])
 ;
