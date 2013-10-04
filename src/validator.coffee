@@ -530,7 +530,7 @@ class @Validator
         when "queryParameters"
           @validate_query_params property, allowParameterKeys
         when "body"
-          @validate_body property, allowParameterKeys, null, false
+          @validate_body property, allowParameterKeys, false
         when "responses"
           @validate_responses property, allowParameterKeys
         else
@@ -621,7 +621,7 @@ class @Validator
         unless @isParameterKey(property)
           switch canonicalKey
             when "body"
-              @validate_body property, allowParameterKeys, null, true
+              @validate_body property, allowParameterKeys, true
             when "description"
               unless @isScalar(property[1])
                 throw new exports.ValidationError 'while validating responses', null, "property description must be a string", response[0].start_mark
@@ -642,55 +642,109 @@ class @Validator
       throw new exports.ValidationError 'while validating parameter', null, "unknown function applied to property name" , property[0].start_mark
     return false
 
-  validate_body: (property, allowParameterKeys, bodyMode = null, isResponseBody) ->
-    if @isNull property[1]
-      return
-    unless @isMapping property[1]
-      throw new exports.ValidationError 'while validating body', null, "property: body specification must be a mapping", property[0].start_mark
-    implicitMode = ["implicit", "forcedImplicit"]
-    bodyProperties = {}
-    property[1].value?.forEach (bodyProperty) =>
-      @trackRepeatedProperties(bodyProperties, @canonicalizePropertyName(bodyProperty[0].value, true), bodyProperty[0].start_mark, 'while validating body', "property already used")
+  isMediaType: (value) ->
+    return value.match /^[^\/]+\/[^\/]+\??$/
 
-      if @isParameterKey(bodyProperty)
-        unless allowParameterKeys
-          throw new exports.ValidationError 'while validating body', null, "property '" + bodyProperty[0].value + "' is invalid in a resource", bodyProperty[0].start_mark
-      else if bodyProperty[0].value.match(/^[^\/]+\/[^\/]+$/)
-        if bodyMode and bodyMode != "explicit"
-          throw new exports.ValidationError 'while validating body', null, "not compatible with implicit default Media Type", bodyProperty[0].start_mark
-        bodyMode = "explicit"
-        @validate_body bodyProperty, allowParameterKeys, "forcedImplicit", isResponseBody
+  isWebFormMediaType: (mediaType) ->
+    return mediaType.match /^(application\/x-www-form-urlencoded|multipart\/form-data)\??$/
+
+  validate_body: (bodyProperty, allowParameterKeys, isResponseBody) ->
+    if @isNull bodyProperty[1]
+      mediaType = @get_media_type()
+      if mediaType and @isWebFormMediaType(mediaType) and not isResponseBody
+        throw new exports.ValidationError 'while validating body', null, "body must be a mapping with 'formParameters' property as default media type is '#{mediaType}'", bodyProperty[0].start_mark
+      return
+
+    unless @isMapping bodyProperty[1]
+      throw new exports.ValidationError 'while validating body', null, 'property: body specification must be a mapping', bodyProperty[0].start_mark
+
+    defaultMediaType  = @get_media_type()
+    trackedProperties = {}
+    seenMediaType     = false
+    seenProperty      = false
+
+    bodyProperty[1].value?.forEach (property) =>
+      @trackRepeatedProperties(trackedProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating body', 'property already used')
+
+      if @isMediaType property[0].value
+        seenMediaType = true
+        if seenProperty
+          throw new exports.ValidationError 'while validating body', null, 'mixing media types and parameters within body is not allowed', property[0].start_mark
+
+        @validate_body_media_type property, allowParameterKeys, isResponseBody
       else
-        key = bodyProperty[0].value
-        canonicalProperty = @canonicalizePropertyName( key, allowParameterKeys)
-        switch canonicalProperty
-          when "formParameters"
-            if bodyMode and bodyMode not in implicitMode
-              throw new exports.ValidationError 'while validating body', null, "not compatible with explicit Media Type", bodyProperty[0].start_mark
-            bodyMode ?= "implicit"
-            @validate_form_params bodyProperty, allowParameterKeys
-          when "example"
-            if bodyMode and bodyMode not in implicitMode
-              throw new exports.ValidationError 'while validating body', null, "not compatible with explicit Media Type", bodyProperty[0].start_mark
-            bodyMode ?= "implicit"
-            unless @isScalar(bodyProperty[1])
-              throw new exports.ValidationError 'while validating body', null, "example must be a string", bodyProperty[0].start_mark
-          when "schema"
-            if bodyMode and bodyMode not in implicitMode
-              throw new exports.ValidationError 'while validating body', null, "not compatible with explicit Media Type", bodyProperty[0].start_mark
-            bodyMode ?= "implicit"
-            unless @isScalar(bodyProperty[1])
-              throw new exports.ValidationError 'while validating body', null, "schema must be a string", bodyProperty[0].start_mark
-          else
-            throw new exports.ValidationError 'while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark
-    if "formParameters" of bodyProperties
-      if isResponseBody
-        throw new exports.ValidationError 'while validating body', null, "formParameters cannot be used to describe response bodies", property[0].start_mark
-      if "schema" of bodyProperties or "example" of bodyProperties
-        throw new exports.ValidationError 'while validating body', null, "formParameters cannot be used together with the example or schema properties", property[0].start_mark
-    if bodyMode is "implicit"
-      unless @get_media_type()
-        throw new exports.ValidationError 'while validating body', null, "body tries to use default Media Type, but mediaType is null", property[0].start_mark
+        seenProperty = true
+        if seenMediaType
+          throw new exports.ValidationError 'while validating body', null, 'mixing media types and parameters within body is not allowed', property[0].start_mark
+
+        unless defaultMediaType
+          throw new exports.ValidationError 'while validating body', null, 'body tries to use default Media Type, but mediaType is null', bodyProperty[0].start_mark
+
+        @validate_body_properties property, allowParameterKeys, isResponseBody, defaultMediaType, 'body', trackedProperties
+
+    unless seenMediaType
+      if defaultMediaType and @isWebFormMediaType defaultMediaType
+        unless 'formParameters' of trackedProperties
+          throw new exports.ValidationError 'while validating body', null, "body must have 'formParameters' property as default media type is '#{defaultMediaType}'", bodyProperty[0].start_mark
+
+  validate_body_media_type: (mediaTypeProperty, allowParameterKeys, isResponseBody) ->
+    if @isNull mediaTypeProperty[1]
+      if @isWebFormMediaType(mediaTypeProperty[0].value) and not isResponseBody
+        throw new exports.ValidationError 'while validating media type', null, 'media type must be a mapping with \'formParameters\' property', mediaTypeProperty[0].start_mark
+      return
+
+    unless @isMapping mediaTypeProperty[1]
+      throw new exports.ValidationError 'while validating media type', null, 'media type must be a mapping', mediaTypeProperty[0].start_mark
+
+    trackedProperties = {}
+    mediaTypeProperty[1].value?.forEach (property) =>
+      @trackRepeatedProperties(trackedProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating media type', 'property already used')
+
+      @validate_body_properties property, allowParameterKeys, isResponseBody, mediaTypeProperty[0].value, 'media type', trackedProperties
+
+    if @isWebFormMediaType mediaTypeProperty[0].value
+      unless 'formParameters' of trackedProperties
+        throw new exports.ValidationError 'while validating media type', null, 'media type must have \'formParameters\' property', mediaTypeProperty[0].start_mark
+
+  validate_body_properties: (property, allowParameterKeys, isResponseBody, mediaType, context, trackedProperties) ->
+    if @isParameterKey property
+      unless allowParameterKeys
+        throw new exports.ValidationError "while validating #{context}", null, "property '#{property[0].value}' is invalid", property[0].start_mark
+      return
+
+    name          = property[0].value
+    canonicalName = @canonicalizePropertyName name, allowParameterKeys
+
+    switch canonicalName
+      when 'formParameters'
+        if isResponseBody
+          throw new exports.ValidationError "while validating #{context}", null, 'formParameters cannot be used to describe response bodies', property[0].start_mark
+
+        unless @isWebFormMediaType mediaType
+          throw new exports.ValidationError "while validating #{context}", null, "formParameters property is incompatible with '#{mediaType}' media type", property[0].start_mark
+
+        for againstName in ['example', 'schema']
+          if againstName of trackedProperties
+            throw new exports.ValidationError "while validating #{context}", null, "#{againstName} property cannot be used together with #{againstName}", property[0].start_mark
+
+        @validate_form_params property, allowParameterKeys
+
+      when 'example'
+        if 'formParameters' of trackedProperties
+          throw new exports.ValidationError "while validating #{context}", null, "#{name} property cannot be used together with formParameters", property[0].start_mark
+
+        unless @isScalar property[1]
+          throw new exports.ValidationError "while validating #{context}", null, "#{name} must be a string", property[0].start_mark
+
+      when 'schema'
+        if 'formParameters' of trackedProperties
+          throw new exports.ValidationError "while validating #{context}", null, "#{name} property cannot be used together with formParameters", property[0].start_mark
+
+        unless @isScalar property[1]
+          throw new exports.ValidationError "while validating #{context}", null, "#{name} must be a string", property[0].start_mark
+
+      else
+        throw new exports.ValidationError "while validating #{context}", null, "property #{name} is invalid in #{context}", property[0].start_mark
 
   validate_common_properties: (property, allowParameterKeys, context) ->
     if @isParameterKey(property)

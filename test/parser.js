@@ -223,8 +223,8 @@ describe('Parser', function() {
       raml.load(definition).then(noop, function (error) {
         setTimeout(function () {
           expect(error.problem_mark).to.exist;
-          error.problem_mark.column.should.be.equal(0);
           error.problem_mark.line.should.be.equal(0);
+          error.problem_mark.column.should.be.equal(0);
           done();
         }, 0);
       });
@@ -243,8 +243,8 @@ describe('Parser', function() {
         setTimeout(function () {
           error.message.should.be.equal("body tries to use default Media Type, but mediaType is null");
           expect(error.problem_mark).to.exist;
-          error.problem_mark.column.should.be.equal(4);
           error.problem_mark.line.should.be.equal(3);
+          error.problem_mark.column.should.be.equal(4);
           done();
         }, 0);
       });
@@ -264,8 +264,8 @@ describe('Parser', function() {
           setTimeout(function () {
               error.message.should.be.equal("two resources share same URI /r1/r2");
               expect(error.problem_mark).to.exist;
-              error.problem_mark.column.should.be.equal(2);
               error.problem_mark.line.should.be.equal(6);
+              error.problem_mark.column.should.be.equal(2);
               done();
           }, 0);
       });
@@ -378,8 +378,8 @@ describe('Parser', function() {
               setTimeout(function () {
                   error.message.should.be.equal("invalid resourceType definition, it must be a mapping");
                   expect(error.problem_mark).to.exist;
-                  error.problem_mark.column.should.be.equal(9);
                   error.problem_mark.line.should.be.equal(5);
+                  error.problem_mark.column.should.be.equal(9);
                   done();
               }, 0);
           });
@@ -402,8 +402,8 @@ describe('Parser', function() {
               setTimeout(function () {
                   error.message.should.be.equal("circular reference of \"rt1\" has been detected: rt1 -> rt2 -> rt1");
                   expect(error.problem_mark).to.exist;
-                  error.problem_mark.column.should.be.equal(4);
                   error.problem_mark.line.should.be.equal(6);
+                  error.problem_mark.column.should.be.equal(4);
                   done();
               }, 0);
           });
@@ -1865,14 +1865,14 @@ describe('Parser', function() {
           'baseUri: http://myapi.org',
           '/resource:',
           '  post:',
-          '    responses: ',
+          '    responses:',
           '      200:',
           '        body:',
-          '          application/json:',
+          '          application/x-www-form-urlencoded:',
           '            formParameters:',
         ].join('\n');
 
-        raml.load(definition).should.be.rejected.with(/formParameters cannot be used to describe response bodies/).and.notify(done);
+        raml.load(definition).should.be.rejected.with('formParameters cannot be used to describe response bodies').and.notify(done);
       });
       it('should fail if formParameters is used together with schema', function(done){
         var definition = [
@@ -1883,11 +1883,11 @@ describe('Parser', function() {
             '/resource:',
             '  post:',
             '    body:',
-            '      application/json:',
+            '      application/x-www-form-urlencoded:',
             '        formParameters:',
             '        schema:',
         ].join('\n');
-        raml.load(definition).should.be.rejected.with(/formParameters cannot be used together with the example or schema properties/).and.notify(done);
+        raml.load(definition).should.be.rejected.with('schema property cannot be used together with formParameters').and.notify(done);
       });
       it('should fail if formParameters is used together with example', function(done){
         var definition = [
@@ -1898,18 +1898,18 @@ describe('Parser', function() {
             '/resource:',
             '  post:',
             '    body:',
-            '      application/json:',
+            '      application/x-www-form-urlencoded:',
             '        formParameters:',
             '        example:',
         ].join('\n');
-        raml.load(definition).should.be.rejected.with(/formParameters cannot be used together with the example or schema properties/).and.notify(done);
+        raml.load(definition).should.be.rejected.with('example property cannot be used together with formParameters').and.notify(done);
       });
-      it('should succeed null form parameters', function(done) {
+      it('should succeed null form parameters with default media type', function(done) {
         var definition = [
           '#%RAML 0.8',
           '---',
           'title: Test',
-          'mediaType: multipart/form-data',
+          'mediaType: application/x-www-form-urlencoded',
           'baseUri: http://myapi.org',
           '/resource:',
           '  post:',
@@ -1919,14 +1919,14 @@ describe('Parser', function() {
 
         raml.load(definition).should.become({
           title: 'Test',
-          mediaType: 'multipart/form-data',
+          mediaType: 'application/x-www-form-urlencoded',
           baseUri: 'http://myapi.org',
           resources: [
             {
               relativeUri: "/resource",
               methods: [{
                 body: {
-                  "multipart/form-data": {
+                  "application/x-www-form-urlencoded": {
                     formParameters: null
                   }
                 },
@@ -1936,12 +1936,13 @@ describe('Parser', function() {
           ]
         }).and.notify(done);
       });
-      it('should fail when a parameter uses array syntax with only one type', function(done) {
+      it('should fail when a parameter uses array syntax with only one type and defaut media type', function(done) {
         var definition = [
           '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
+          'mediaType: application/x-www-form-urlencoded',
           '/resource:',
           '  post:',
           '    body: ',
@@ -1951,12 +1952,13 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
       });
-      it('should fail when a parameter uses array syntax with only one type', function(done) {
+      it('should fail when a parameter uses array syntax with only one type and default media type', function(done) {
         var definition = [
           '#%RAML 0.8',
           '---',
           'title: Test',
           'baseUri: http://myapi.org',
+          'mediaType: application/x-www-form-urlencoded',
           '/resource:',
           '  post:',
           '    body: ',
@@ -1969,12 +1971,12 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
       });
-      it('should succeed when dealing with URI parameters with two types', function(done) {
+      it('should succeed when dealing with URI parameters with two types and default media type', function(done) {
         var definition = [
           '#%RAML 0.8',
           '---',
           'title: Test',
-          'mediaType: multipart/form-data',
+          'mediaType: application/x-www-form-urlencoded',
           'baseUri: http://myapi.org',
           '/resource:',
           '  post:',
@@ -1991,14 +1993,14 @@ describe('Parser', function() {
 
         raml.load(definition).should.become({
           title: 'Test',
-          mediaType: 'multipart/form-data',
+          mediaType: 'application/x-www-form-urlencoded',
           baseUri: 'http://myapi.org',
           resources: [
             {
               relativeUri: "/resource",
               methods: [{
                 body: {
-                  "multipart/form-data": {
+                  "application/x-www-form-urlencoded": {
                     formParameters: {
                       'a': [
                         {
@@ -6788,7 +6790,7 @@ describe('Parser', function() {
       }
       raml.load(definition).should.become(expected).and.notify(done);
     });
-    it('should fail if body is using implicit after explicit body', function(done) {
+    it('should fail if body is mixed of media types and properties', function(done) {
       var definition = [
         '#%RAML 0.8',
         'title: Test',
@@ -6798,62 +6800,14 @@ describe('Parser', function() {
         '      application/json:',
         '      schema: foo'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/not compatible with explicit Media Type/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/mixing media types and parameters within body is not allowed/).and.notify(done);
     });
-    it('should fail if body is using explicit after implicit body', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        'title: Test',
-        '/foo:',
-        '  get:',
-        '    body:',
-        '      schema: foo',
-        '      application/json:'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/not compatible with implicit default Media Type/).and.notify(done);
-    });
-    it('should fail if formParameters kicks implicit mode on', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        'title: Test',
-        '/foo:',
-        '  get:',
-        '    body:',
-        '      formParameters:',
-        '      application/json:'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/not compatible with implicit default Media Type/).and.notify(done);
-    });
-    it('should fail if schema kicks implicit mode on', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        'title: Test',
-        '/foo:',
-        '  get:',
-        '    body:',
-        '      schema: foo',
-        '      application/json:'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/not compatible with implicit default Media Type/).and.notify(done);
-    });
-    it('should fail if example kicks implicit mode on', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        'title: Test',
-        '/foo:',
-        '  get:',
-        '    body:',
-        '      example: foo',
-        '      application/json:'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/not compatible with implicit default Media Type/).and.notify(done);
-    });
-
-    it('should fail if formParameters is string', function(done) {
+    it('should fail if formParameters is string with default media type', function(done) {
       var definition = [
         '#%RAML 0.8',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
+        'mediaType: application/x-www-form-urlencoded',
         '/{hello}:',
         '  post:',
         '    body:',
@@ -6862,11 +6816,12 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/property: 'formParameters' must be a mapping/).and.notify(done);
     });
-    it('should fail if queryParameters is array', function(done) {
+    it('should fail if formParameters is array', function(done) {
       var definition = [
         '#%RAML 0.8',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
+        'mediaType: application/x-www-form-urlencoded',
         '/{hello}:',
         '  post:',
         '    body:',
@@ -6875,12 +6830,12 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/property: 'formParameters' must be a mapping/).and.notify(done);
     });
-    it('should succeed if queryParameters is null', function(done) {
+    it('should succeed if formParameters is null', function(done) {
       var definition = [
         '#%RAML 0.8',
         'title: Test',
-        'mediaType: application/json',
         'baseUri: http://{a}.myapi.org',
+        'mediaType: application/x-www-form-urlencoded',
         '/{hello}:',
         '  post:',
         '    body:',
@@ -6889,15 +6844,15 @@ describe('Parser', function() {
 
       var expected ={
         title: "Test",
-        mediaType: "application/json",
         baseUri: "http://{a}.myapi.org",
+        mediaType: "application/x-www-form-urlencoded",
         resources: [
           {
             relativeUri: "/{hello}",
             methods: [
               {
                 body:{
-                  "application/json": {
+                  "application/x-www-form-urlencoded": {
                     formParameters: null
                   }
                 },
@@ -6924,11 +6879,12 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
-    it('should fail if queryParameters use wrong property name', function(done) {
+    it('should fail if formParameters use wrong property name', function(done) {
       var definition = [
         '#%RAML 0.8',
         'title: Test',
         'baseUri: http://{a}.myapi.org',
+        'mediaType: application/x-www-form-urlencoded',
         '/{hello}:',
         '  post:',
         '    body:',
@@ -7960,8 +7916,8 @@ describe('Parser', function() {
       raml.load(definition).then(noop, function (error) {
         setTimeout(function () {
           expect(error.problem_mark).to.exist;
-          error.problem_mark.column.should.be.equal(8);
           error.problem_mark.line.should.be.equal(10);
+          error.problem_mark.column.should.be.equal(8);
           done();
         }, 0);
       });
@@ -7977,8 +7933,8 @@ describe('Parser', function() {
       raml.load(definition).then(noop, function (error) {
         setTimeout(function () {
           expect(error.problem_mark).to.exist;
-          error.problem_mark.column.should.be.equal(0);
           error.problem_mark.line.should.be.equal(2);
+          error.problem_mark.column.should.be.equal(0);
           done();
         }, 0);
       });

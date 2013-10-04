@@ -1336,9 +1336,9 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
-        'mediaType: application/json',
+        'mediaType: application/x-www-form-urlencoded',
         '/resource:',
-        '  get:',
+        '  post:',
         '    body:',
         '      formParameters:',
         '        param1:',
@@ -1352,6 +1352,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'traits:',
         '  - trait1:',
         '      body:',
@@ -1367,6 +1368,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'traits:',
         '  - trait1:',
         '      body:',
@@ -1382,6 +1384,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'traits:',
         '  - trait1:',
         '      body:',
@@ -1397,6 +1400,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'traits:',
         '  - trait1:',
         '      body:',
@@ -1412,6 +1416,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'traits:',
         '  - trait1:',
         '      body:',
@@ -1427,9 +1432,10 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'resourceTypes:',
         '  - type1:',
-        '      get?:',
+        '      post?:',
         '        body?:',
         '          formParameters?:',
         '            param1:',
@@ -1443,9 +1449,10 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'resourceTypes:',
         '  - type1:',
-        '      get?:',
+        '      post?:',
         '        body?:',
         '          formParameters?:',
         '            param1?:',
@@ -1459,9 +1466,10 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'resourceTypes:',
         '  - type1:',
-        '      get?:',
+        '      post?:',
         '        body?:',
         '          formParameters?:',
         '            param1:',
@@ -1475,9 +1483,10 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'resourceTypes:',
         '  - type1:',
-        '      get?:',
+        '      post?:',
         '        body?:',
         '          formParameters?:',
         '            param1?:',
@@ -1491,9 +1500,10 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'resourceTypes:',
         '  - type1:',
-        '      get?:',
+        '      post?:',
         '        body?:',
         '          formParameters?:',
         '            <<parameter>>:',
@@ -1508,9 +1518,9 @@ describe('Duplicated properties', function (){
         '---',
         'title: Test',
         '/resource:',
-        '  get:',
+        '  post:',
         '    body:',
-        '     application/json:',
+        '     application/x-www-form-urlencoded:',
         '      formParameters:',
         '        param1:',
         '        param1:'
@@ -1526,7 +1536,7 @@ describe('Duplicated properties', function (){
         'traits:',
         '  - trait1:',
         '      body:',
-        '       application/json:',
+        '       application/x-www-form-urlencoded:',
         '        formParameters:',
         '          param1:',
         '          param1:'
@@ -1542,7 +1552,7 @@ describe('Duplicated properties', function (){
         'traits:',
         '  - trait1:',
         '      body:',
-        '       application/json:',
+        '       application/x-www-form-urlencoded:',
         '        formParameters:',
         '          param1?:',
         '          param1:'
@@ -1558,7 +1568,7 @@ describe('Duplicated properties', function (){
         'traits:',
         '  - trait1:',
         '      body:',
-        '       application/json:',
+        '       application/x-www-form-urlencoded:',
         '        formParameters:',
         '          param1:',
         '          param1?:'
@@ -1574,7 +1584,7 @@ describe('Duplicated properties', function (){
         'traits:',
         '  - trait1:',
         '      body:',
-        '       application/json:',
+        '       application/x-www-form-urlencoded:',
         '        formParameters:',
         '          param1?:',
         '          param1?:'
@@ -1590,7 +1600,7 @@ describe('Duplicated properties', function (){
         'traits:',
         '  - trait1:',
         '      body:',
-        '       application/json:',
+        '       application/x-www-form-urlencoded:',
         '        formParameters:',
         '          <<parameter>>:',
         '          <<parameter>>:'
@@ -1607,7 +1617,7 @@ describe('Duplicated properties', function (){
         '  - type1:',
         '      get?:',
         '        body?:',
-        '         application/json:',
+        '         application/x-www-form-urlencoded:',
         '          formParameters?:',
         '            param1:',
         '            param1:'
@@ -1624,7 +1634,7 @@ describe('Duplicated properties', function (){
         '  - type1:',
         '      get?:',
         '        body?:',
-        '         application/json:',
+        '         application/x-www-form-urlencoded:',
         '          formParameters?:',
         '            param1?:',
         '            param1:'
@@ -1641,7 +1651,7 @@ describe('Duplicated properties', function (){
         '  - type1:',
         '      get?:',
         '        body?:',
-        '         application/json:',
+        '         application/x-www-form-urlencoded:',
         '          formParameters?:',
         '            param1:',
         '            param1?:'
@@ -1658,7 +1668,7 @@ describe('Duplicated properties', function (){
         '  - type1:',
         '      get?:',
         '        body?:',
-        '         application/json:',
+        '         application/x-www-form-urlencoded:',
         '          formParameters?:',
         '            param1?:',
         '            param1?:'
@@ -1675,7 +1685,7 @@ describe('Duplicated properties', function (){
         '  - type1:',
         '      get?:',
         '        body?:',
-        '         application/json:',
+        '         application/x-www-form-urlencoded:',
         '          formParameters?:',
         '            <<parameter>>:',
         '            <<parameter>>:'
@@ -1690,6 +1700,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         '/resource:',
         '  get:',
         '    body:',
@@ -1706,6 +1717,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'traits:',
         '  - trait1:',
         '      body:',
@@ -1722,6 +1734,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'traits:',
         '  - trait1:',
         '      body:',
@@ -1738,6 +1751,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'traits:',
         '  - trait1:',
         '      body:',
@@ -1754,6 +1768,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'traits:',
         '  - trait1:',
         '      body:',
@@ -1770,6 +1785,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'traits:',
         '  - trait1:',
         '      body:',
@@ -1786,6 +1802,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'resourceTypes:',
         '  - type1:',
         '      get?:',
@@ -1803,6 +1820,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'resourceTypes:',
         '  - type1:',
         '      get?:',
@@ -1820,6 +1838,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'resourceTypes:',
         '  - type1:',
         '      get?:',
@@ -1837,6 +1856,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'resourceTypes:',
         '  - type1:',
         '      get?:',
@@ -1854,6 +1874,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/x-www-form-urlencoded',
         'resourceTypes:',
         '  - type1:',
         '      get?:',
@@ -2069,8 +2090,8 @@ describe('Duplicated properties', function (){
         '/resource:',
         '  get:',
         '    body:',
-        '      application/x-www-form-urlencoded:',
-        '      application/x-www-form-urlencoded:'
+        '      application/x-www-form-urlencoded: {formParameters:}',
+        '      application/x-www-form-urlencoded: {formParameters:}'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded'/).and.notify(done);
@@ -2084,8 +2105,8 @@ describe('Duplicated properties', function (){
         '  - type1:',
         '      get?:',
         '        body:',
-        '         application/x-www-form-urlencoded:',
-        '         application/x-www-form-urlencoded:'
+        '         application/x-www-form-urlencoded: {formParameters:}',
+        '         application/x-www-form-urlencoded: {formParameters:}'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded/).and.notify(done);
@@ -2099,8 +2120,8 @@ describe('Duplicated properties', function (){
         '  - type1:',
         '      get?:',
         '        body:',
-        '         application/x-www-form-urlencoded?:',
-        '         application/x-www-form-urlencoded:'
+        '         application/x-www-form-urlencoded?: {formParameters:}',
+        '         application/x-www-form-urlencoded:  {formParameters:}'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded/).and.notify(done);
@@ -2114,8 +2135,8 @@ describe('Duplicated properties', function (){
         '  - type1:',
         '      get?:',
         '        body:',
-        '         application/x-www-form-urlencoded:',
-        '         application/x-www-form-urlencoded?:'
+        '         application/x-www-form-urlencoded:  {formParameters:}',
+        '         application/x-www-form-urlencoded?: {formParameters:}'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded/).and.notify(done);
@@ -2129,8 +2150,8 @@ describe('Duplicated properties', function (){
         '  - type1:',
         '      get?:',
         '        body:',
-        '         application/x-www-form-urlencoded?:',
-        '         application/x-www-form-urlencoded?:'
+        '         application/x-www-form-urlencoded?: {formParameters:}',
+        '         application/x-www-form-urlencoded?: {formParameters:}'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded/).and.notify(done);
@@ -2140,6 +2161,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/json',
         'resourceTypes:',
         '  - type1:',
         '      get?:',
@@ -2158,8 +2180,8 @@ describe('Duplicated properties', function (){
         'traits:',
         '  - trait1:',
         '      body:',
-        '       application/x-www-form-urlencoded:',
-        '       application/x-www-form-urlencoded:'
+        '       application/x-www-form-urlencoded: {formParameters:}',
+        '       application/x-www-form-urlencoded: {formParameters:}'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded/).and.notify(done);
@@ -2172,8 +2194,8 @@ describe('Duplicated properties', function (){
         'traits:',
         '  - trait1:',
         '      body:',
-        '       application/x-www-form-urlencoded?:',
-        '       application/x-www-form-urlencoded:'
+        '       application/x-www-form-urlencoded?: {formParameters:}',
+        '       application/x-www-form-urlencoded:  {formParameters:}'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded/).and.notify(done);
@@ -2186,8 +2208,8 @@ describe('Duplicated properties', function (){
         'traits:',
         '  - trait1:',
         '      body:',
-        '       application/x-www-form-urlencoded:',
-        '       application/x-www-form-urlencoded?:'
+        '       application/x-www-form-urlencoded:  {formParameters:}',
+        '       application/x-www-form-urlencoded?: {formParameters:}'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded/).and.notify(done);
@@ -2200,8 +2222,8 @@ describe('Duplicated properties', function (){
         'traits:',
         '  - trait1:',
         '      body:',
-        '       application/x-www-form-urlencoded?:',
-        '       application/x-www-form-urlencoded?:'
+        '       application/x-www-form-urlencoded?: {formParameters:}',
+        '       application/x-www-form-urlencoded?: {formParameters:}'
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded/).and.notify(done);
@@ -2211,6 +2233,7 @@ describe('Duplicated properties', function (){
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/json',
         'traits:',
         '  - trait1:',
         '      body:',
@@ -2220,14 +2243,14 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: '<<someContentType>>'/).and.notify(done);
     });
-
   });
   describe('in body properties', function(){
-    it('should fail if there are repeated properties in a body in a resource', function(done){
+    it('should fail if there are repeated properties in a body in a resource with default media type', function(done){
       var definition = [
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/json',
         '/resource:',
         '  get:',
         '    body:',
@@ -2237,11 +2260,12 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a resource type', function(done){
+    it('should fail if there are repeated properties in a body in a resource type with default media type', function(done){
       var definition = [
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/json',
         'resourceTypes:',
         '  - type1:',
         '      get?:',
@@ -2252,11 +2276,12 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a resource type first optional', function(done){
+    it('should fail if there are repeated properties in a body in a resource type first optional with default media type', function(done){
       var definition = [
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/json',
         'resourceTypes:',
         '  - type1:',
         '      get?:',
@@ -2267,11 +2292,12 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a resource type second optional', function(done){
+    it('should fail if there are repeated properties in a body in a resource type second optional with default media type', function(done){
       var definition = [
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/json',
         'resourceTypes:',
         '  - type1:',
         '      get?:',
@@ -2282,11 +2308,12 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a resource type both optional', function(done){
+    it('should fail if there are repeated properties in a body in a resource type both optional with default media type', function(done){
       var definition = [
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/json',
         'resourceTypes:',
         '  - type1:',
         '      get?:',
@@ -2297,11 +2324,12 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a resource type both parameters', function(done){
+    it('should fail if there are repeated properties in a body in a resource type both parameters with default media type', function(done){
       var definition = [
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/json',
         'resourceTypes:',
         '  - type1:',
         '      get?:',
@@ -2312,11 +2340,12 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: '<<someContentType>>'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a trait', function(done){
+    it('should fail if there are repeated properties in a body in a trait with default media type', function(done){
       var definition = [
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/json',
         'traits:',
         '  - trait1:',
         '      body:',
@@ -2326,11 +2355,12 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a trait first optional', function(done){
+    it('should fail if there are repeated properties in a body in a trait first optional with default media type', function(done){
       var definition = [
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/json',
         'traits:',
         '  - trait1:',
         '      body:',
@@ -2340,11 +2370,12 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a trait second optional', function(done){
+    it('should fail if there are repeated properties in a body in a trait second optional with default media type', function(done){
       var definition = [
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/json',
         'traits:',
         '  - trait1:',
         '      body:',
@@ -2354,11 +2385,12 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a trait both optional', function(done){
+    it('should fail if there are repeated properties in a body in a trait both optional with default media type', function(done){
       var definition = [
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/json',
         'traits:',
         '  - trait1:',
         '      body:',
@@ -2368,11 +2400,12 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a trait both parameters', function(done){
+    it('should fail if there are repeated properties in a body in a trait both parameters with default media type', function(done){
       var definition = [
         '#%RAML 0.8',
         '---',
         'title: Test',
+        'mediaType: application/json',
         'traits:',
         '  - trait1:',
         '      body:',

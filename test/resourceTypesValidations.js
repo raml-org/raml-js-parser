@@ -98,7 +98,8 @@ describe('Resource Types Validations', function() {
     return [
       '#%RAML 0.8',
       '---',
-      'title: Test'
+      'title: Test',
+      'mediaType: application/json'
 //      'baseUri: http://{apiSubdomain}.api.com/{someUriParameter}'
     ]
     .concat(topLevelRaml)
@@ -598,7 +599,8 @@ describe('Trait Validations', function() {
     return [
       '#%RAML 0.8',
       '---',
-      'title: Test'
+      'title: Test',
+      'mediaType: application/json'
     ]
     .concat(topLevelRaml)
     .concat([
