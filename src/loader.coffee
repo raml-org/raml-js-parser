@@ -10,11 +10,12 @@ joiner          = require './joiner'
 traits          = require './traits'
 types           = require './resourceTypes'
 schemas         = require './schemas'
+protocols       = require './protocols'
 securitySchemes = require './securitySchemes'
 transformations = require './transformations'
 
-@make_loader = (Reader = reader.Reader, Scanner = scanner.Scanner, Parser = parser.Parser, Composer = composer.Composer, Resolver = resolver.Resolver, Validator = validator.Validator,  ResourceTypes = types.ResourceTypes, Traits = traits.Traits, Schemas = schemas.Schemas, Joiner = joiner.Joiner, SecuritySchemes = securitySchemes.SecuritySchemes, Constructor = construct.Constructor, Transformations = transformations.Transformations) -> class
-  components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Schemas, Joiner, Constructor, SecuritySchemes, Transformations]
+@make_loader = (Reader = reader.Reader, Scanner = scanner.Scanner, Parser = parser.Parser, Composer = composer.Composer, Resolver = resolver.Resolver, Validator = validator.Validator,  ResourceTypes = types.ResourceTypes, Traits = traits.Traits, Schemas = schemas.Schemas, Protocols = protocols.Protocols, Joiner = joiner.Joiner, SecuritySchemes = securitySchemes.SecuritySchemes, Constructor = construct.Constructor, Transformations = transformations.Transformations) -> class
+  components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Schemas, Protocols, Joiner, Constructor, SecuritySchemes, Transformations]
   util.extend.apply util, [@::].concat (component.prototype for component in components)
 
   constructor: (stream, location, validate, @parent) ->

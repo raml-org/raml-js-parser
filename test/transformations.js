@@ -32,12 +32,18 @@ describe('Transformations', function () {
         var expected = {
             title: 'Title',
             baseUri: 'http://server/api',
+            protocols: [
+                'HTTP'
+            ],
             resources: [
                 {
                     relativeUri: '/',
                     methods: [
                         {
                             method: 'post',
+                            protocols: [
+                                'HTTP'
+                            ],
                             body: {
                                 'application/x-www-form-urlencoded': {
                                     formParameters: {
@@ -74,12 +80,18 @@ describe('Transformations', function () {
         var expected = {
             title: 'Title',
             baseUri: 'http://server/api',
+            protocols: [
+                'HTTP'
+            ],
             resources: [
                 {
                     relativeUri: '/',
                     methods: [
                         {
                             method: 'post',
+                            protocols: [
+                                'HTTP'
+                            ],
                             body: {
                                 'application/x-www-form-urlencoded': {
                                     formParameters: {
@@ -113,12 +125,18 @@ describe('Transformations', function () {
         var expected = {
             title: 'Title',
             baseUri: 'http://server/api',
+            protocols: [
+                'HTTP'
+            ],
             resources: [
                 {
                     relativeUri: '/',
                     methods: [
                         {
                             method: 'get',
+                            protocols: [
+                                'HTTP'
+                            ],
                             queryParameters: {
                                 parameter1: {
                                     displayName: 'parameter1',

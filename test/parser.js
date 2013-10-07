@@ -97,7 +97,10 @@ describe('Parser', function() {
             displayName: "version",
             enum: [ "v0.1" ]
           }
-        }
+        },
+        protocols: [
+            'HTTP'
+        ]
       }
       raml.load(definition).should.become(expected).and.notify(done);
     });
@@ -431,7 +434,9 @@ describe('Parser', function() {
         '  displayName: Root'
       ].join('\n');
 
-      raml.load(definition).should.become({ title: 'MyApi', baseUri: 'http://myapi.com', resources: [ { relativeUri: '/', displayName: 'Root' } ] }).and.notify(done);
+      raml.load(definition).should.become({
+        title: 'MyApi', baseUri: 'http://myapi.com', resources: [ { relativeUri: '/', displayName: 'Root' } ], protocols: ['HTTP']
+      }).and.notify(done);
     });
     it('should fail if no title', function(done) {
     var definition = [
@@ -470,7 +475,13 @@ describe('Parser', function() {
             'baseUri: http://myapi.com'
         ].join('\n');
 
-        raml.load(definition).should.become({title:"this is a very long title, it should fail the length validation for titles with an exception clearly marking it so", baseUri: "http://myapi.com"}).and.notify(done);
+        raml.load(definition).should.become({
+            title:"this is a very long title, it should fail the length validation for titles with an exception clearly marking it so",
+            baseUri: "http://myapi.com",
+            protocols: [
+                'HTTP'
+            ]
+        }).and.notify(done);
     });
     it('should allow number title', function(done) {
       var definition = [
@@ -480,7 +491,7 @@ describe('Parser', function() {
           'baseUri: http://myapi.com'
       ].join('\n');
 
-      raml.load(definition).should.become({ title: 54, baseUri: 'http://myapi.com' }).and.notify(done);
+      raml.load(definition).should.become({ title: 54, baseUri: 'http://myapi.com', protocols: ['HTTP'] }).and.notify(done);
     });
     it('should fail if there is a root property with wrong displayName', function(done) {
       var definition = [
@@ -596,7 +607,10 @@ describe('Parser', function() {
             required: true,
             type: "string"
           }
-        }
+        },
+        protocols: [
+          'HTTP'
+        ]
       }).and.notify(done);
     });
     it('should fail when a parameter uses array syntax with only one type', function(done) {
@@ -648,7 +662,10 @@ describe('Parser', function() {
               required: true
             },
           ]
-        }
+        },
+        protocols: [
+          'HTTP'
+        ]
       }).and.notify(done);
     });
 
@@ -1045,7 +1062,10 @@ describe('Parser', function() {
             displayName: "version",
             enum: [ "v1" ]
           }
-        }
+        },
+        protocols: [
+          'HTTP'
+        ]
       };
       promise.should.eventually.deep.equal(expected).and.notify(done);
     });
@@ -1333,7 +1353,10 @@ describe('Parser', function() {
         var expected= {
           title: "Test",
           baseUri: "http://myapi.org",
-          baseUriParameters: null
+          baseUriParameters: null,
+          protocols: [
+            'HTTP'
+          ]
         };
         raml.load(definition).should.become(expected).and.notify(done);
       });
@@ -1398,7 +1421,10 @@ describe('Parser', function() {
                 required: true
               },
             ]
-          }
+          },
+          protocols: [
+            'HTTP'
+          ]
         }).and.notify(done);
       });
     });
@@ -1423,6 +1449,9 @@ describe('Parser', function() {
               required: true
             }
           },
+          protocols: [
+            'HTTP'
+          ],
           resources: [
             {
               relativeUri: "/resource",
@@ -1507,7 +1536,10 @@ describe('Parser', function() {
               required: true,
               displayName: 'a'
             }
-          }
+          },
+          protocols: [
+            'HTTP'
+          ]
         }).and.notify(done);
       });
     });
@@ -1525,6 +1557,9 @@ describe('Parser', function() {
         raml.load(definition).should.become({
           title: 'Test',
           baseUri: 'http://myapi.org',
+          protocols: [
+            'HTTP'
+          ],
           resources: [
             {
               relativeUri: "/{a}resource",
@@ -1590,6 +1625,9 @@ describe('Parser', function() {
         raml.load(definition).should.become({
           title: 'Test',
           baseUri: 'http://myapi.org',
+          protocols: [
+            'HTTP'
+          ],
           resources: [
             {
               relativeUri: "/{a}resource",
@@ -1630,11 +1668,17 @@ describe('Parser', function() {
         raml.load(definition).should.become({
           title: 'Test',
           baseUri: 'http://myapi.org',
+          protocols: [
+            'HTTP'
+          ],
           resources: [
             {
               relativeUri: "/resource",
               methods: [{
                 method: "get",
+                protocols: [
+                  'HTTP'
+                ],
                 headers: null
               }]
             }
@@ -1693,11 +1737,17 @@ describe('Parser', function() {
         raml.load(definition).should.become({
           title: 'Test',
           baseUri: 'http://myapi.org',
+          protocols: [
+            'HTTP'
+          ],
           resources: [
             {
               relativeUri: "/resource",
               methods: [{
                 method: "get",
+                protocols: [
+                  'HTTP'
+                ],
                 headers: {
                   'a': [
                     {
@@ -1735,11 +1785,17 @@ describe('Parser', function() {
         raml.load(definition).should.become({
           title: 'Test',
           baseUri: 'http://myapi.org',
+          protocols: [
+            'HTTP'
+          ],
           resources: [
             {
               relativeUri: "/resource",
               methods: [{
                 method: "get",
+                protocols: [
+                  'HTTP'
+                ],
                 queryParameters: null
               }]
             }
@@ -1762,11 +1818,17 @@ describe('Parser', function() {
         raml.load(definition).should.become({
           title: 'Test',
           baseUri: 'http://myapi.org',
+          protocols: [
+            'HTTP'
+          ],
           resources: [
             {
               relativeUri: "/resource",
               methods: [{
                 method: "get",
+                protocols: [
+                  'HTTP'
+                ],
                 queryParameters: {
                   notRequired: {
                     displayName: 'notRequired',
@@ -1831,11 +1893,17 @@ describe('Parser', function() {
         raml.load(definition).should.become({
           title: 'Test',
           baseUri: 'http://myapi.org',
+          protocols: [
+            'HTTP'
+          ],
           resources: [
             {
               relativeUri: "/resource",
               methods: [{
                 method: "get",
+                protocols: [
+                  'HTTP'
+                ],
                 queryParameters: {
                   'a': [
                     {
@@ -1921,6 +1989,9 @@ describe('Parser', function() {
           title: 'Test',
           mediaType: 'multipart/form-data',
           baseUri: 'http://myapi.org',
+          protocols: [
+            'HTTP'
+          ],
           resources: [
             {
               relativeUri: "/resource",
@@ -1930,7 +2001,10 @@ describe('Parser', function() {
                     formParameters: null
                   }
                 },
-                method: "post"
+                method: "post",
+                protocols: [
+                  'HTTP'
+                ]
               }]
             }
           ]
@@ -1993,6 +2067,9 @@ describe('Parser', function() {
           title: 'Test',
           mediaType: 'multipart/form-data',
           baseUri: 'http://myapi.org',
+          protocols: [
+            'HTTP'
+          ],
           resources: [
             {
               relativeUri: "/resource",
@@ -2015,7 +2092,10 @@ describe('Parser', function() {
                     }
                   }
                 },
-                method: "post"
+                method: "post",
+                protocols: [
+                  'HTTP'
+                ]
               }]
             }
           ]
@@ -2039,11 +2119,17 @@ describe('Parser', function() {
         raml.load(definition).should.become({
           title: 'Test',
           baseUri: 'http://myapi.org',
+          protocols: [
+            'HTTP'
+          ],
           resources: [
             {
               relativeUri: "/resource",
               methods: [{
                 method: "get",
+                protocols: [
+                  'HTTP'
+                ],
                 responses: {
                   200: {
                     headers: null
@@ -2112,11 +2198,17 @@ describe('Parser', function() {
         raml.load(definition).should.become({
           title: 'Test',
           baseUri: 'http://myapi.org',
+          protocols: [
+            'HTTP'
+          ],
           resources: [
             {
               relativeUri: "/resource",
               methods: [{
                 method: "get",
+                protocols: [
+                  'HTTP'
+                ],
                 responses: {
                   200: {
                     headers: {
@@ -2998,6 +3090,9 @@ describe('Parser', function() {
       var expected = {
         title: 'Test',
         baseUri: 'http://www.api.com/{version}/{company}',
+        protocols: [
+          'HTTP'
+        ],
         version: 'v1.1',
         baseUriParameters: {
           company: {
@@ -3018,12 +3113,16 @@ describe('Parser', function() {
             relativeUri: '/users',
             methods: [
               {
-                method: 'get'
-
+                method: 'get',
+                protocols: [
+                  'HTTP'
+                ]
               },
               {
-                method: 'post'
-
+                method: 'post',
+                protocols: [
+                  'HTTP'
+                ]
               }
             ],
             resources: [{
@@ -6891,6 +6990,9 @@ describe('Parser', function() {
         title: "Test",
         mediaType: "application/json",
         baseUri: "http://{a}.myapi.org",
+        protocols: [
+          'HTTP'
+        ],
         resources: [
           {
             relativeUri: "/{hello}",
@@ -6901,7 +7003,10 @@ describe('Parser', function() {
                     formParameters: null
                   }
                 },
-                method: "post"
+                method: "post",
+                protocols: [
+                  'HTTP'
+                ],
               }
             ],
             uriParameters: {
@@ -7055,8 +7160,11 @@ describe('Parser', function() {
         '     example: your-bucket'
       ].join('\n');
       var expected = {
-        "baseUri": "https://{domainName}.myapi.com",
-        "title": "Test",
+        baseUri: "https://{domainName}.myapi.com",
+        protocols: [
+          'HTTPS'
+        ],
+        title: "Test",
         baseUriParameters: {
           domainName: {
             type: "string",
@@ -7064,7 +7172,7 @@ describe('Parser', function() {
             displayName: "domainName"
           }
         },
-        "resources": [
+        resources: [
           {
             "baseUriParameters": {
               "domainName": {
@@ -7093,9 +7201,12 @@ describe('Parser', function() {
           '         example: your-bucket'
       ].join('\n');
       var expected = {
-          "baseUri": "https://{domainName}.myapi.com",
-          "title": "Test",
-          "resources": [
+          baseUri: "https://{domainName}.myapi.com",
+          protocols: [
+            'HTTPS'
+          ],
+          title: "Test",
+          resources: [
             {
               "relativeUri": "/resource",
               methods: [
@@ -7108,7 +7219,10 @@ describe('Parser', function() {
                             displayName: "domainName"
                         }
                     },
-                    method: "get"
+                    method: "get",
+                    protocols: [
+                      'HTTPS'
+                    ],
                 }
               ],
             }
@@ -7137,8 +7251,11 @@ describe('Parser', function() {
         '         example: your-bucket'
       ].join('\n');
       var expected = {
-        "baseUri": "https://{domainName}.myapi.com",
-        "title": "Test",
+        baseUri: "https://{domainName}.myapi.com",
+        protocols: [
+          'HTTPS'
+        ],
+        title: "Test",
         baseUriParameters: {
           domainName: {
             type: "string",
@@ -7146,7 +7263,7 @@ describe('Parser', function() {
             displayName: "domainName"
           }
         },
-        "resources": [
+        resources: [
           {
             "relativeUri": "/resource",
             "resources": [
@@ -8006,12 +8123,18 @@ describe('Parser', function() {
       var expected = {
         title: 'Title',
         baseUri: 'http://server/api',
+        protocols: [
+          'HTTP'
+        ],
         resources: [
           {
             relativeUri: '/',
             methods: [
               {
                 method: 'get',
+                protocols: [
+                  'HTTP'
+                ],
                 queryParameters: {
                   notRequired: {
                     type: 'integer',
@@ -8041,12 +8164,18 @@ describe('Parser', function() {
       var expected = {
         title: 'Title',
         baseUri: 'http://server/api',
+        protocols: [
+          'HTTP'
+        ],
         resources: [
           {
             relativeUri: '/',
             methods: [
               {
                 method: 'get',
+                protocols: [
+                  'HTTP'
+                ],
                 queryParameters: {
                   mustBeRequired: {
                     type: 'integer',

@@ -329,55 +329,73 @@ class @Validator
     return node.map (item) => item.value
 
   validate_root_properties: (node) ->
-    checkVersion = false
+    checkVersion   = false
     rootProperties = {}
+
     if node?.value
       node.value.forEach (property) =>
         unless @isString property[0]
           throw new exports.ValidationError 'while validating root properties', null, 'keys can only be strings', property[0].start_mark
+
         if property[0].value.match(/^\//)
           @trackRepeatedProperties(rootProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating root properties', "resource already declared")
         else
-          @trackRepeatedProperties(rootProperties, property[0].value, property[0].start_mark, 'while validating root properties', "root property already used")
+          @trackRepeatedProperties(rootProperties, property[0].value, property[0].start_mark, 'while validating root properties', 'root property already used')
 
         switch property[0].value
-          when "title"
+          when 'title'
             unless @isScalar(property[1])
               throw new exports.ValidationError 'while validating root properties', null, 'title must be a string', property[0].start_mark
-          when "baseUri"
+
+          when 'baseUri'
             unless @isScalar(property[1])
               throw new exports.ValidationError 'while validating root properties', null, 'baseUri must be a string', property[0].start_mark
             checkVersion = @validate_base_uri property[1]
-          when "securitySchemes"
+
+          when 'securitySchemes'
             @validate_security_schemes property[1]
-          when "schemas"
+
+          when 'schemas'
             @validate_root_schemas property[1]
-          when "version"
+
+          when 'version'
             unless @isScalar(property[1])
               throw new exports.ValidationError 'while validating root properties', null, 'version must be a string', property[0].start_mark
-          when "traits"
+
+          when 'traits'
             @validate_traits property[1]
-          when "documentation"
+
+          when 'documentation'
             unless @isSequence property[1]
               throw new exports.ValidationError 'while validating root properties', null, 'documentation must be an array', property[0].start_mark
             @validate_documentation property[1]
-          when "mediaType"
+
+          when 'mediaType'
             unless @isString property[1]
               throw new exports.ValidationError 'while validating root properties', null, 'mediaType must be a scalar', property[0].start_mark
-          when "baseUriParameters"
+
+          when 'baseUriParameters'
             @isNoop property[1]
-          when "resourceTypes"
+
+          when 'resourceTypes'
             @validate_types property[1]
-          when "securedBy"
+
+          when 'securedBy'
             @validate_secured_by property
+
+          when 'protocols'
+            @validate_protocols_property property
+
           else
             if property[0].value.match(/^\//)
               @validate_resource property
             else
-              throw new exports.ValidationError 'while validating root properties', null, 'unknown property ' + property[0].value, property[0].start_mark
-    unless "title" of rootProperties
+              throw new exports.ValidationError 'while validating root properties', null, "unknown property #{property[0].value}", property[0].start_mark
+
+    unless 'title' of rootProperties
       throw new exports.ValidationError 'while validating root properties', null, 'missing title', node.start_mark
-    if checkVersion and not ("version" of rootProperties)
+
+    if checkVersion and not ('version' of rootProperties)
       throw new exports.ValidationError 'while validating version', null, 'missing version', node.start_mark
 
   validate_documentation: (documentation_property) ->
@@ -493,6 +511,17 @@ class @Validator
         unless @get_security_scheme securitySchemeName
           throw new exports.ValidationError 'while validating securityScheme consumption', null, 'there is no securityScheme named ' + securitySchemeName, secScheme.start_mark
 
+  validate_protocols_property: (property) ->
+    unless @isSequence property[1]
+      throw new exports.ValidationError 'while validating protocols', null, 'property must be a sequence', property[0].start_mark
+
+    property[1].value.forEach (protocol) =>
+        unless @isString protocol
+            throw new exports.ValidationError 'while validating protocols', null, 'value must be a string', protocol.start_mark
+
+        unless protocol.value in ['HTTP', 'HTTPS']
+            throw new exports.ValidationError 'while validating protocols', null, 'only HTTP and HTTPS values are allowed', protocol.start_mark
+
   validate_type_property: (property, allowParameterKeys) ->
     unless @isMapping(property[1]) or @isString(property[1])
       throw new exports.ValidationError 'while validating resources', null, "property 'type' must be a string or a mapping", property[0].start_mark
@@ -512,46 +541,60 @@ class @Validator
   validate_method: (method, allowParameterKeys, context = 'method') ->
     if @isNull method[1]
       return
+
     unless @isMapping method[1]
       throw new exports.ValidationError 'while validating methods', null, "method must be a mapping", method[0].start_mark
+
     methodProperties = {}
     method[1].value.forEach (property) =>
       @trackRepeatedProperties(methodProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating method', "property already used")
       return if @validate_common_properties property, allowParameterKeys, context
 
-      key = property[0].value
+      key          = property[0].value
       canonicalKey = @canonicalizePropertyName(key, allowParameterKeys)
-      valid = true
+      valid        = true
 
       # these properties are allowed in resources and traits
       switch canonicalKey
-        when "headers"
+        when 'headers'
           @validate_headers property, allowParameterKeys
-        when "queryParameters"
+
+        when 'queryParameters'
           @validate_query_params property, allowParameterKeys
-        when "body"
+
+        when 'body'
           @validate_body property, allowParameterKeys, null, false
-        when "responses"
+
+        when 'responses'
           @validate_responses property, allowParameterKeys
+
         else
           valid = false
 
       # property securedBy in a trait/type does not get passed to the resource
       switch key
-        when "securedBy"
+        when 'securedBy'
           @validate_secured_by property
-        when "baseUriParameters"
+
+        when 'baseUriParameters'
           unless @baseUri
             throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
+
           unless @isNullableMapping(property[1])
             throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a mapping', property[0].start_mark
+
           @validate_uri_parameters @baseUri, property[1], allowParameterKeys
-        when "usage"
-          unless allowParameterKeys and context is "trait"
+
+        when 'usage'
+          unless allowParameterKeys and context is 'trait'
             throw new exports.ValidationError 'while validating resources', null, "property: 'usage' is invalid in a #{context}", property[0].start_mark
+
+        when 'protocols'
+            @validate_protocols_property property
+
         else
           unless valid
-            throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a #{context}", property[0].start_mark
+            throw new exports.ValidationError 'while validating resources', null, "property: '#{property[0].value}' is invalid in a #{context}", property[0].start_mark
 
   validate_responses: (responses, allowParameterKeys) ->
     if @isNull responses[1]

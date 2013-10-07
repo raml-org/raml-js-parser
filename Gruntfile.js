@@ -21,6 +21,7 @@ module.exports = function(grunt) {
             'lib/traits.js': 'src/traits.coffee',
             'lib/resourceTypes.js': 'src/resourceTypes.coffee',
             'lib/schemas.js': 'src/schemas.coffee',
+            'lib/protocols.js': 'src/protocols.coffee',
             'lib/securitySchemes.js': 'src/securitySchemes.coffee',
             'lib/transformations.js': 'src/transformations.coffee',
             'lib/joiner.js': 'src/joiner.coffee',
@@ -75,7 +76,7 @@ module.exports = function(grunt) {
         options: {
             require: ['chai', 'chai-as-promised'],
             reporter: 'dot',
-            bail: false
+            bail: true
         },
         all: ['test/*.js']
     }

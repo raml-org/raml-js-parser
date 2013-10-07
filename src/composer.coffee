@@ -53,6 +53,7 @@ class @Composer
       @apply_types document
       @apply_traits document
       @apply_schemas document
+      @apply_protocols document
 
     if join
       @join_resources document

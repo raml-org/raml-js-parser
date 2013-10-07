@@ -1,5 +1,5 @@
-nodes             = require './nodes'
-uritemplate       = require 'uritemplate'
+uritemplate = require 'uritemplate'
+nodes       = require './nodes'
 
 ###
    Applies transformations to the RAML
@@ -225,7 +225,6 @@ class @Transformations
   transform_responses: (responses, allowParameterKeys) ->
     return if @isNull responses[1]
     responses[1].value.forEach (response) => @transform_response response, allowParameterKeys
-
 
   transform_response: (response, allowParameterKeys) ->
     if @isMapping response[1]
