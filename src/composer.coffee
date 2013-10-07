@@ -114,6 +114,9 @@ class @Composer
       tag = @resolve nodes.ScalarNode, event.value, event.implicit
 
     if event.tag is '!include'
+      if event.value.match(/^\s*$/)
+        throw new exports.ComposerError 'while composing scalar out of !include', null, "file name/URL cannot be null", event.start_mark
+
       if @src?
         event.value = require('url').resolve(@src, event.value)
 
