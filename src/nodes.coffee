@@ -130,8 +130,14 @@ class @MappingNode extends @CollectionNode
       if node_has_property
         @value.forEach (ownNodeProperty) ->
           ownNodePropertyName = ownNodeProperty[0].value
+
           if (ownNodePropertyName == name) or
              ((ownNodePropertyName + '?') == name) or (ownNodePropertyName == (name + '?'))
+
+            if (ownNodeProperty[1].tag is "tag:yaml.org,2002:null") && (resourceProperty[1].tag is "tag:yaml.org,2002:map")
+              nonNullNode = new exports.MappingNode 'tag:yaml.org,2002:map', [], ownNodeProperty[1].start_mark, ownNodeProperty[1].end_mark
+              ownNodeProperty[1] = nonNullNode
+
             ownNodeProperty[1].combine resourceProperty[1]
             # remove the '?' at the end of the property name
             ownNodeProperty[0].value = ownNodeProperty[0].value.replace /\?$/, ''
