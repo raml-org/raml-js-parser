@@ -69,11 +69,16 @@ class @Traits
     @apply_traits resource, resourceUri, removeQs
 
   apply_trait: (resourceUri, method, useKey) ->
-    trait = @get_trait @key_or_value useKey
+    traitName = @key_or_value useKey
+    unless trait = @get_trait traitName
+      throw new exports.TraitError 'while aplying trait', null, "there is no trait named #{traitName}", useKey.start_mark
+
     plainParameters = @get_parameters_from_is_key resourceUri, method[0].value, useKey
     temp = trait.cloneForTrait()
+
     # by aplying the parameter mapping first, we allow users to rename things in the trait,
     # and then merge it with the resource
+
     @apply_parameters temp, plainParameters, useKey
     @apply_default_media_type_to_method temp
     temp.combine method[1]

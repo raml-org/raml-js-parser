@@ -216,9 +216,12 @@ class @Validator
         throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
 
       type_entry.value.forEach (type) =>
-        #@trackRepeatedProperties(typesNamesTrack, type[0].value, type[0].start_mark, 'while validating resource types', "Resource type with the same name already exists")
+        if @isParameterKey type
+          throw new exports.ValidationError 'while validating resource types', null, 'parameter key cannot be used as a resource type name', type[0].start_mark
+
         unless @isMapping type[1]
           throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type[1].start_mark
+
         @validate_resource type, true, 'resource type'
 
   validate_traits: (traitProperty) ->
@@ -232,9 +235,12 @@ class @Validator
         throw new exports.ValidationError 'while validating traits', null, 'invalid traits definition, it must be an array', traitProperty.start_mark
 
       trait_entry.value.forEach (trait) =>
-        #@trackRepeatedProperties(traitNamesTrack, trait[0].value, trait[0].start_mark, 'while validating traits', "Trait with the same name already exists")
+        if @isParameterKey trait
+          throw new exports.ValidationError 'while validating traits', null, 'parameter key cannot be used as a trait name', trait[0].start_mark
+
         unless @isMapping trait[1]
           throw new exports.ValidationError 'while validating traits', null, 'invalid trait definition, it must be a mapping', trait[1].start_mark
+
         @valid_traits_properties trait
 
   valid_traits_properties: (node) ->
@@ -635,11 +641,18 @@ class @Validator
   isParameterKey: (property) ->
     unless @isScalar(property[0])
       return false
-    if property[0].value.match(/<<\s*([^\|\s>]+)\s*>>/g) \
-        or property[0].value.match(/<<\s*([^\|\s>]+)\s*(\|\s*\!\s*(singularize|pluralize))?\s*>>/g)
+
+    if @isParameterKeyValue property[0].value
       return true
     else if property[0].value.match(/<<\s*([^\|\s>]+)\s*\|.*\s*>>/g)
       throw new exports.ValidationError 'while validating parameter', null, "unknown function applied to property name" , property[0].start_mark
+
+    return false
+
+  isParameterKeyValue: (value) ->
+    if value.match(/<<\s*([^\|\s>]+)\s*>>/g) \
+        or value.match(/<<\s*([^\|\s>]+)\s*(\|\s*\!\s*(singularize|pluralize))?\s*>>/g)
+      return true
     return false
 
   validate_body: (property, allowParameterKeys, bodyMode = null, isResponseBody) ->
@@ -709,6 +722,7 @@ class @Validator
             throw new exports.ValidationError 'while validating resources', null, "property 'displayName' must be a string", property[0].start_mark
 
           return true
+
         when "description"
           unless @isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'description' must be a string", property[0].start_mark
@@ -718,16 +732,20 @@ class @Validator
         when "is"
           unless @isSequence property[1]
             throw new exports.ValidationError 'while validating resources', null, "property 'is' must be a list", property[0].start_mark
+
           unless (property[1].value instanceof Array)
             throw new exports.ValidationError 'while validating trait consumption', null, 'is property must be an array', property[0].start_mark
+
           property[1].value.forEach (use) =>
             traitName = @key_or_value use
-            unless @get_trait traitName
+            if not @isParameterKeyValue(traitName) and not @get_trait(traitName)
               throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + traitName, use.start_mark
+
             if @isMapping use[1]
               property[1].value.forEach (parameter) =>
                 unless @isNull(parameter[1]) or @isMapping(parameter[1])
                   throw new exports.ValidationError 'while validating resource consumption', null, 'type parameters must be in a mapping', parameter[1].start_mark
+
           return true
     return false
 
