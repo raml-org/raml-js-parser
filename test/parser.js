@@ -2139,7 +2139,7 @@ describe('Parser', function() {
       }).and.notify(done);
     });
 
-    it('it should not fail when resource is null', function(done) {
+    it('should not fail when resource is null', function(done) {
       var definition = [
         '#%RAML 0.8',
         '---',
