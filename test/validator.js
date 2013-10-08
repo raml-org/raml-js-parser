@@ -199,4 +199,24 @@ describe('Validator', function () {
             '       - HTTP'
         ].join('\n')).should.be.rejected.with('property: \'protocols\' is invalid in a resource').and.notify(done);
     });
+
+    it('should not allow parameters to be used as a name for resource type', function (done) {
+        raml.load([
+            '#%RAML 0.8',
+            '---',
+            'title: Example',
+            'resourceTypes:',
+            '   - <<resourceTypeName>>: {}'
+        ].join('\n')).should.be.rejected.with('parameter key cannot be used as a resource type name').and.notify(done);
+    });
+
+    it('should not allow parameters to be used as a name for trait', function (done) {
+        raml.load([
+            '#%RAML 0.8',
+            '---',
+            'title: Example',
+            'traits:',
+            '   - <<traitName>>: {}'
+        ].join('\n')).should.be.rejected.with('parameter key cannot be used as a trait name').and.notify(done);
+    });
 });

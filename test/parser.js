@@ -1,417 +1,20 @@
-"use strict";
+/* global RAML, describe, it */
+
+'use strict';
 
 if (typeof window === 'undefined') {
-  var raml = require('../lib/raml.js')
-  var chai = require('chai')
-    , expect = chai.expect
-    , should = chai.should();
-  var chaiAsPromised = require("chai-as-promised");
-  chai.use(chaiAsPromised);
+    var raml           = require('../lib/raml.js');
+    var chai           = require('chai');
+    var expect         = chai.expect;
+    var should         = chai.should();
+    var chaiAsPromised = require('chai-as-promised');
+    chai.use(chaiAsPromised);
 } else {
-  var raml = RAML.Parser;
-  chai.should();
+    var raml           = RAML.Parser;
+    chai.should();
 }
 
 describe('Parser', function() {
-  describe('Reported Bugs', function () {
-    it('should fail unsupported raml version:RT-180', function(done) {
-      var definition = [
-        '#%RAML 0.1'
-      ].join('\n');
-
-      raml.load(definition).should.be.rejected.with(/Unsupported RAML version: \'#%RAML 0.1\'/).and.notify(done);
-    });
-    it('should fail if baseUriParameter is not a mapping', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        'title: Test',
-        'baseUri: http://www.api.com/{version}/{company}',
-        'version: v1.1',
-        '/jobs:',
-        '  baseUriParameters:',
-        '    company:',
-        '      description'
-      ].join('\n');
-
-      raml.load(definition).should.be.rejected.with(/parameter must be a mapping/).and.notify(done);
-    });
-    it('it should not fail to parse an empty trait', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        'title: MyApi',
-        'traits:',
-        '  - emptyTrait:',
-        '    otherTrait:',
-        '      description: Some description',
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/invalid trait definition, it must be a mapping/).and.notify(done);
-    });
-    it('it should not fail to parse an empty trait list', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: Test',
-        'baseUri: http://www.api.com/{version}/{company}',
-        'version: v1.1',
-        'traits:'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/invalid traits definition, it must be an array/).and.notify(done);
-    });
-    it('it should fail to parse a RAML header ', function(done) {
-      var noop = function () {};
-      var definition = [
-        '#%RAML 0.8'
-      ].join('\n');
-
-      raml.load(definition).then(noop, function (error) {
-        setTimeout(function () {
-          error.message.should.match(/empty document/);
-          done();
-        }, 0);
-      });
-    });
-    it('it should not fail to parse a RAML file only with headers', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        '---'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/document must be a mapping/).and.notify(done);
-    });
-    it('it should not fail to parse a RAML null uriParameters. RT-178', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: hola',
-        'version: v0.1',
-        'baseUri: http://server/api/{version}',
-        'baseUriParameters:'
-      ].join('\n');
-      var expected = {
-        title: "hola",
-        version: "v0.1",
-        baseUri: "http://server/api/{version}",
-        baseUriParameters: {
-          version: {
-            type: "string",
-            required: true,
-            displayName: "version",
-            enum: [ "v0.1" ]
-          }
-        },
-        protocols: [
-            'HTTP'
-        ]
-      }
-      raml.load(definition).should.become(expected).and.notify(done);
-    });
-    it('it should fail if baseUriParamters has a version parameter. RT-199', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: hola',
-        'version: v0.1',
-        'baseUri: http://server/api/{version}',
-        'baseUriParameters:',
-        ' version:'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/version parameter not allowed here/).and.notify(done);
-    });
-    it('it should fail if resource URI is invalid', function(done){
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: hola',
-        'version: v0.1',
-        '/resourceName{}:'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/Resource name is invalid:/).and.notify(done);
-    });
-    it('it should fail if resource URI is invalid', function(done){
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: hola',
-        'version: v0.1',
-        '/resourceName{}:'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/Resource name is invalid:/).and.notify(done);
-    });
-    it('it should reject RAML with more than one YAML document', function(done){
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: hola',
-        'version: v0.1',
-        '---'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/expected a single document in the stream but found another document/).and.notify(done);
-    });
-    it('it should inject exception coontext into message when message is null', function(done){
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: hola',
-        'version: v0.1',
-        '...',
-        'somepropertyName'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/expected '<document start>', but found <scalar>/).and.notify(done);
-    });
-    it('it should fail if baseUriParameters is a string - RT-274', function(done){
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: hola',
-        'version: v0.1',
-        'baseUri: http://example.com',
-        'baseUriParameters:',
-        '  someparam'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/base uri parameters must be a mapping/).and.notify(done);
-    });
-    it('it should fail if baseUriParameters is a string - RT-274 - with proper line numbering', function(done){
-      var noop       = function () {};
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: hola',
-        'version: v0.1',
-        'baseUri: http://example.com',
-        'baseUriParameters:',
-        '  someparam'
-      ].join('\n');
-      raml.load(definition).then(noop, function (error) {
-        setTimeout(function () {
-          error.message.should.be.equal("base uri parameters must be a mapping");
-          expect(error.problem_mark).to.exist;
-          error.problem_mark.line.should.be.equal(6);
-          error.problem_mark.column.should.be.equal(2);
-          done();
-        }, 0);
-      });
-    });
-    it('it should fail if baseUriParameters in a resource is a string - RT-274', function(done){
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: hola',
-        'version: v0.1',
-        'baseUri: http://localhost',
-        '/resource:',
-        '  baseUriParameters:',
-        '    someparam'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/base uri parameters must be a mapping/).and.notify(done);
-    });
-    it('it should fail if baseUriParameters in a resource is a string - RT-274', function(done){
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: hola',
-        'version: v0.1',
-        'baseUri: http://localhost',
-        '/resource:',
-        '  uriParameters:',
-        '    someparam'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/uri parameters must be a mapping/).and.notify(done);
-    });
-    it('should report correct line (RT-244)', function (done) {
-      var noop       = function () {};
-      var definition = [
-        '',
-        ''
-      ].join('\n');
-
-      raml.load(definition).then(noop, function (error) {
-        setTimeout(function () {
-          expect(error.problem_mark).to.exist;
-          error.problem_mark.column.should.be.equal(0);
-          error.problem_mark.line.should.be.equal(0);
-          done();
-        }, 0);
-      });
-    })
-    it('should report correct line for null media type in implicit mode', function (done) {
-      var noop       = function () {};
-      var definition = [
-        '#%RAML 0.8',
-        '/resource:',
-        '  post:',
-        '    body:',
-        '      schema: someSchema',
-      ].join('\n');
-
-      raml.load(definition).then(noop, function (error) {
-        setTimeout(function () {
-          error.message.should.be.equal("body tries to use default Media Type, but mediaType is null");
-          expect(error.problem_mark).to.exist;
-          error.problem_mark.column.should.be.equal(4);
-          error.problem_mark.line.should.be.equal(3);
-          done();
-        }, 0);
-      });
-    });
-    it('it should report repeated URI\'s in the second uri\'s line - RT-279', function(done){
-      var noop       = function () {};
-      var definition = [
-          '#%RAML 0.8',
-          '---',
-          'title: "muse:"',
-          'baseUri: http://ces.com/muse',
-          '/r1/r2:',
-          '/r1:',
-          '  /r2:'
-      ].join('\n');
-      raml.load(definition).then(noop, function (error) {
-          setTimeout(function () {
-              error.message.should.be.equal("two resources share same URI /r1/r2");
-              expect(error.problem_mark).to.exist;
-              error.problem_mark.column.should.be.equal(2);
-              error.problem_mark.line.should.be.equal(6);
-              done();
-          }, 0);
-      });
-    });
-    it('it should allow a trait parameter with an integer value - RT-279', function(done){
-      var definition = [
-          '#%RAML 0.8',
-          '---',
-          'traits:',
-          '  - getMethod:',
-          '     description: <<description>>',
-          'title: title',
-          '/test:',
-          ' is: [ getMethod: { description: 1 }]'
-      ].join('\n');
-      raml.load(definition).should.be.fulfilled.and.notify(done);
-    });
-    it('it should allow a resource type parameter with an integer value - RT-279', function(done){
-          var definition = [
-              '#%RAML 0.8',
-              '---',
-              'resourceTypes:',
-              '  - someType:',
-              '     description: <<description>>',
-              'title: title',
-              '/test:',
-              ' type: { someType: { description: 1 }}'
-          ].join('\n');
-          raml.load(definition).should.be.fulfilled.and.notify(done);
-    });
-    it('should apply a resourceType that inherits from another type that uses parameters', function(done){
-        var definition = [
-              '#%RAML 0.8',
-              '---',
-              'title: My API',
-              'resourceTypes:',
-              '  - base:',
-              '      get:',
-              '         description: <<description>>',
-              '  - collection:',
-              '      type: { base: { description: hola } }',
-              '      get:',
-              '  - typedCollection:',
-              '      type: collection',
-              '      get:',
-              '         description: <<description>>',
-              '/presentations:',
-              '  type: { typedCollection: { description: description } }'
-        ].join('\n');
-
-        var expected = {
-              "title": "My API",
-              "resourceTypes": [
-                  {
-                      "base": {
-                          "get": {
-                            "description": "<<description>>"
-                          }
-                      }
-                  },
-                  {
-                      "collection": {
-                          "type": {
-                              "base": {
-                                  "description": "hola"
-                              }
-                          },
-                          "get": null
-                      }
-                  },
-                  {
-                      "typedCollection": {
-                          "type": "collection",
-                          "get": {
-                            "description": '<<description>>'
-                          }
-                      }
-                  }
-              ],
-              "resources": [
-                  {
-                      "type": {
-                          "typedCollection": {
-                              "description": "description"
-                          }
-                      },
-                      "relativeUri": "/presentations",
-                      "methods": [
-                          {
-                              "method": "get",
-                              "description": "description"
-                          }
-                      ]
-                  }
-              ]
-        };
-        raml.load(definition).should.become(expected).and.notify(done);
-      });
-      it('it should report correct line for resourceType not map error - RT-283', function(done){
-          var noop       = function () {};
-          var definition = [
-              '#%RAML 0.8',
-              '---',
-              'title: "muse:"',
-              'resourceTypes:',
-              '  - type1: {}',
-              '    type:'
-          ].join('\n');
-          raml.load(definition).then(noop, function (error) {
-              setTimeout(function () {
-                  error.message.should.be.equal("invalid resourceType definition, it must be a mapping");
-                  expect(error.problem_mark).to.exist;
-                  error.problem_mark.column.should.be.equal(9);
-                  error.problem_mark.line.should.be.equal(5);
-                  done();
-              }, 0);
-          });
-      });
-      it('it should report correct line for resourceType circular reference - RT-257', function(done){
-          var noop       = function () {};
-          var definition = [
-              '#%RAML 0.8',
-              '---',
-              'title: "muse:"',
-              'resourceTypes:',
-              '  - rt1:',
-              '      type: rt2',
-              '  - rt2:',
-              '      type: rt1',
-              '/resource:',
-              '  type: rt1'
-          ].join('\n');
-          raml.load(definition).then(noop, function (error) {
-              setTimeout(function () {
-                  error.message.should.be.equal("circular reference of \"rt1\" has been detected: rt1 -> rt2 -> rt1");
-                  expect(error.problem_mark).to.exist;
-                  error.problem_mark.column.should.be.equal(4);
-                  error.problem_mark.line.should.be.equal(6);
-                  done();
-              }, 0);
-          });
-      });
-  });
   describe('Basic Information', function() {
     it('should fail unsupported yaml version', function(done) {
       var definition = [
@@ -423,6 +26,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/found incompatible YAML document \(version 1.2 is required\)/).and.notify(done);
     });
+
     it('should succeed', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -438,6 +42,7 @@ describe('Parser', function() {
         title: 'MyApi', baseUri: 'http://myapi.com', resources: [ { relativeUri: '/', displayName: 'Root' } ], protocols: ['HTTP']
       }).and.notify(done);
     });
+
     it('should fail if no title', function(done) {
     var definition = [
       '#%RAML 0.8',
@@ -446,7 +51,8 @@ describe('Parser', function() {
     ].join('\n');
 
     raml.load(definition).should.be.rejected.with(/missing title/).and.notify(done);
-  });
+    });
+
     it('should fail if title is array', function(done) {
         var definition = [
             '#%RAML 0.8',
@@ -457,6 +63,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/title must be a string/).and.notify(done);
     });
+
     it('should fail if title is mapping', function(done) {
         var definition = [
             '#%RAML 0.8',
@@ -467,6 +74,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/title must be a string/).and.notify(done);
     });
+
     it('should succeed if title is longer than 48 chars', function(done) {
         var definition = [
             '#%RAML 0.8',
@@ -483,6 +91,7 @@ describe('Parser', function() {
             ]
         }).and.notify(done);
     });
+
     it('should allow number title', function(done) {
       var definition = [
           '#%RAML 0.8',
@@ -493,6 +102,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become({ title: 54, baseUri: 'http://myapi.com', protocols: ['HTTP'] }).and.notify(done);
     });
+
     it('should fail if there is a root property with wrong displayName', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -503,7 +113,8 @@ describe('Parser', function() {
       ].join('\n');
 
       raml.load(definition).should.be.rejected.with(/unknown property/).and.notify(done);
-  });
+    });
+
     it('should fail if there is a root property with array', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -516,6 +127,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.with(/keys can only be strings/).and.notify(done);
     });
   });
+
   describe('Include', function() {
     it('should fail if include not found', function(done) {
       var definition = [
@@ -526,6 +138,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/cannot (read|fetch) relative\.md/).and.notify(done);
     });
+
     it('should succeed on including another YAML file with .yml extension', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -535,6 +148,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
     });
+
     it('should succeed on including another YAML file with .yaml extension', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -544,6 +158,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
     });
+
     it('should succeed on including another YAML file mid-document', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -583,6 +198,7 @@ describe('Parser', function() {
       }).and.notify(done);
     });
   });
+
   describe('URI Parameters', function() {
     it('should succeed when dealing with URI parameters', function(done) {
       var definition = [
@@ -613,6 +229,7 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
+
     it('should fail when a parameter uses array syntax with only one type', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -628,6 +245,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
     });
+
     it('should succeed when dealing with URI parameters with two types', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -684,6 +302,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/uri parameter unused/).and.notify(done);
     });
+
     it('should fail when declaring a URI parameter not on the resource URI', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -703,6 +322,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/uri parameter unused/).and.notify(done);
     });
+
     it('should fail when declaring a property inside a URI parameter that is not valid', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -718,6 +338,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/unknown property wrongPropertyName/).and.notify(done);
     });
+
     it('should succeed when declaring a minLength validation as a number', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -733,6 +354,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should fail when declaring an enum with duplicated values', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -749,6 +371,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/enum contains duplicated values/).and.notify(done);
     });
+
     it('should fail when declaring an enum with no values', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -765,6 +388,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/enum is empty/).and.notify(done);
     });
+
     it('should succeed when declaring an enum with null value', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -781,6 +405,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/enum is empty/).and.notify(done);
     });
+
     it('should fail when declaring an enum with mapping value', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -797,6 +422,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/the value of enum must be an array/).and.notify(done);
     });
+
     it('should succeed when declaring a maxLength validation as a number', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -812,6 +438,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should succeed when declaring a minimum validation as a number', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -827,6 +454,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should succeed when declaring a maximum validation as a number', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -842,6 +470,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should fail when declaring a minLength validation as anything other than a number', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -857,6 +486,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/the value of minLength must be a number/).and.notify(done);
     });
+
     it('should fail when declaring a maxLength validation as anything other than a number', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -872,6 +502,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/the value of maxLength must be a number/).and.notify(done);
     });
+
     it('should fail when declaring a minimum validation as anything other than a number', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -887,6 +518,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/the value of minimum must be a number/).and.notify(done);
     });
+
     it('should fail when declaring a maximum validation as anything other than a number', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -902,6 +534,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/the value of maximum must be a number/).and.notify(done);
     });
+
     it('should fail when declaring a URI parameter with an invalid type', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -917,6 +550,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/type can be either of: string, number, integer, file, date or boolean/).and.notify(done);
     });
+
     it('should succeed when declaring a URI parameter with a string type', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -932,6 +566,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should succeed when declaring a URI parameter with a number type', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -947,6 +582,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should succeed when declaring a URI parameter with a integer type', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -962,6 +598,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should succeed when declaring a URI parameter with a date type', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -977,6 +614,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should succeed when declaring a URI parameter with a file type', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -992,6 +630,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should succeed when declaring a URI parameter with a boolean type', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -1007,6 +646,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should succeed when declaring a URI parameter with an example', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -1021,6 +661,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.fulfilled.and.notify(done);
     });
+
     it('should fail if baseUri value its not really a URI', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -1031,6 +672,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/unclosed brace/).and.notify(done);
     });
+
     it('should fail if baseUri uses version but there is no version defined', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -1041,6 +683,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/missing version/).and.notify(done);
     });
+
     it('should succeed if baseUri uses version and there is a version defined', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -1069,6 +712,7 @@ describe('Parser', function() {
       };
       promise.should.eventually.deep.equal(expected).and.notify(done);
     });
+
     it('should fail when a URI parameter has required "y"', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -1085,6 +729,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.and.notify(done);
     });
+
     it('should fail when a URI parameter has required "yes"', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -1340,6 +985,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.and.notify(done);
     });
   });
+
   describe('MultiType Named Parameters', function() {
     describe('Named parameters in baseUriParameters at root level', function(){
       it('should succeed with null baseUriParameters', function(done) {
@@ -1360,6 +1006,7 @@ describe('Parser', function() {
         };
         raml.load(definition).should.become(expected).and.notify(done);
       });
+
       it('should fail when a parameter uses array syntax with no types', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -1372,6 +1019,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
       });
+
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -1387,6 +1035,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
       });
+
       it('should succeed when dealing with URI parameters with two types', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -1428,6 +1077,7 @@ describe('Parser', function() {
         }).and.notify(done);
       });
     });
+
     describe('Named parameters in baseUriParameters at a resource level', function(){
       it('should succeed with null baseUriParameters', function(done) {
         var definition = [
@@ -1460,6 +1110,7 @@ describe('Parser', function() {
           ]
         }).and.notify(done);
       });
+
       it('should fail when a parameter uses array syntax with no types', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -1473,6 +1124,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
       });
+
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -1489,6 +1141,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
       });
+
       it('should succeed when dealing with URI parameters with two types', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -1543,6 +1196,7 @@ describe('Parser', function() {
         }).and.notify(done);
       });
     });
+
     describe('Named parameters in uriParameters', function(){
       it('should succeed with null uriParameters', function(done) {
         var definition = [
@@ -1576,6 +1230,7 @@ describe('Parser', function() {
           ]
         }).and.notify(done);
       });
+
       it('should fail when a parameter uses array syntax with no types', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -1589,6 +1244,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
       });
+
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -1605,6 +1261,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
       });
+
       it('should succeed when dealing with URI parameters with two types', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -1653,6 +1310,7 @@ describe('Parser', function() {
         }).and.notify(done);
       });
     });
+
     describe('Named parameters in request headers', function(){
       it('should succeed with null headers', function(done) {
         var definition = [
@@ -1685,6 +1343,7 @@ describe('Parser', function() {
           ]
         }).and.notify(done);
       });
+
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -1699,6 +1358,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
       });
+
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -1716,6 +1376,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
       });
+
       it('should succeed when dealing with URI parameters with two types', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -1770,6 +1431,7 @@ describe('Parser', function() {
         }).and.notify(done);
       });
     });
+
     describe('Named parameters in query string parameter', function(){
       it('should succeed with null URI parameters', function(done) {
         var definition = [
@@ -1802,6 +1464,7 @@ describe('Parser', function() {
           ]
         }).and.notify(done);
       });
+
       it('defaults query parameters requiredness to falsy', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -1855,6 +1518,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
       });
+
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -1872,6 +1536,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
       });
+
       it('should succeed when dealing with URI parameters with two types', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -1924,6 +1589,7 @@ describe('Parser', function() {
         }).and.notify(done);
       });
     });
+
     describe('Named parameters in form parameters', function(){
       it('should fail if formParameters is used in a response', function(done){
         var definition = [
@@ -1942,6 +1608,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/formParameters cannot be used to describe response bodies/).and.notify(done);
       });
+
       it('should fail if formParameters is used together with schema', function(done){
         var definition = [
             '#%RAML 0.8',
@@ -1957,6 +1624,7 @@ describe('Parser', function() {
         ].join('\n');
         raml.load(definition).should.be.rejected.with(/formParameters cannot be used together with the example or schema properties/).and.notify(done);
       });
+
       it('should fail if formParameters is used together with example', function(done){
         var definition = [
             '#%RAML 0.8',
@@ -1972,6 +1640,7 @@ describe('Parser', function() {
         ].join('\n');
         raml.load(definition).should.be.rejected.with(/formParameters cannot be used together with the example or schema properties/).and.notify(done);
       });
+
       it('should succeed null form parameters', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -2010,6 +1679,7 @@ describe('Parser', function() {
           ]
         }).and.notify(done);
       });
+
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -2025,6 +1695,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
       });
+
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -2043,6 +1714,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
       });
+
       it('should succeed when dealing with URI parameters with two types', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -2102,6 +1774,7 @@ describe('Parser', function() {
         }).and.notify(done);
       });
     });
+
     describe('Named parameters in response headers', function(){
       it('should succeed with null header', function(done) {
         var definition = [
@@ -2140,6 +1813,7 @@ describe('Parser', function() {
           ]
         }).and.notify(done);
       });
+
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -2156,6 +1830,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
       });
+
       it('should fail when a parameter uses array syntax with only one type', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -2175,6 +1850,7 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/single type for variably typed parameter/).and.notify(done);
       });
+
       it('should succeed when a parameter uses array syntax with two types', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -2235,8 +1911,8 @@ describe('Parser', function() {
         }).and.notify(done);
       });
     });
-
   });
+
   describe('Resources', function() {
     it('should succeed extracting resource information', function(done) {
       var definition = [
@@ -2287,6 +1963,7 @@ describe('Parser', function() {
         }
       ]).and.notify(done);
     });
+
     it('should fail on duplicate absolute URIs', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -2302,6 +1979,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/two resources share same URI \/a\/b/).and.notify(done);
     });
+
     it('should succeed', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -2335,6 +2013,7 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
+
     it('should succeed when a method is null', function(done) {
       var definition = [
           '#%RAML 0.8',
@@ -2361,6 +2040,7 @@ describe('Parser', function() {
           ]
       }).and.notify(done);
     });
+
     it('should allow resources named like HTTP verbs', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -2458,6 +2138,7 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
+
     it('it should not fail when resource is null', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -2477,6 +2158,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('is should fail when resource is a scalar', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -2487,6 +2169,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/resource is not a mapping/).and.notify(done);
     });
+
     it('is should fail when resource is a sequence', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -2498,6 +2181,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.with(/resource is not a mapping/).and.notify(done);
     });
   });
+
   describe('Resource Responses', function() {
     it('should succeed with arrays as keys', function(done) {
       var definition = [
@@ -2563,6 +2247,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail if status code is string', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -2669,6 +2354,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.with(/each response key must be an integer/).and.notify(done);
     });
   });
+
   describe('Traits at resource level', function() {
     it('should succeed when applying traits across !include boundaries', function(done) {
       var definition = [
@@ -2731,6 +2417,7 @@ describe('Parser', function() {
           ]
       }).and.notify(done);
     });
+
     it('should succeed when applying multiple traits', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -2805,6 +2492,7 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
+
     it('should succeed when applying a trait to a null method', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -2854,6 +2542,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should succeed when applying multiple traits in a single array entry', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -2926,6 +2615,7 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
+
     it('should remove nodes with question mark that are not used', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -2977,6 +2667,7 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
+
     it('should succeed if trait is missing displayName property', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3018,9 +2709,9 @@ describe('Parser', function() {
         ]
       };
 
-
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail if traits value is scalar', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3032,6 +2723,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid traits definition, it must be an array/).and.notify(done);
     });
+
     it('should fail if traits value is dictionary', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3045,6 +2737,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid traits definition, it must be an array/).and.notify(done);
     });
+
     it('should fail if use property is not an array', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3055,6 +2748,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/property 'is' must be a list/).and.notify(done);
     });
+
     it('should fail on invalid trait name', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3072,6 +2766,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/there is no trait named throttled/).and.notify(done);
     });
+
     it('should allow using "use" as a resource name', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3142,6 +2837,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should not add intermediate structures in optional keys for missing properties', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3212,6 +2908,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should allow dictionary keys as names of traits', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3281,6 +2978,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should allow parameters in a trait usage', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3372,6 +3070,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should reject parameters whose value is an array', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3401,6 +3100,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
     });
+
     it('should reject parameters whose value is a mapping', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3450,6 +3150,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
     });
+
     it('should reject trait with missing provided parameters', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3471,6 +3172,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/value was not provided for parameter: lalalalala/).and.notify(done);
     });
+
     it('should apply parameters in traits', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3533,6 +3235,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should apply parameters in traits in each occurrence', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3623,6 +3326,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should apply parameters in keys in traits', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3685,6 +3389,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should apply traits in all methods', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3768,6 +3473,7 @@ describe('Parser', function() {
       raml.load(definition).should.become(expected).and.notify(done);
     });
   });
+
   describe('Traits at method level', function() {
     it('should succeed when applying traits across !include boundaries', function(done) {
       var definition = [
@@ -3830,6 +3536,7 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
+
     it('should succeed when applying multiple traits', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3902,6 +3609,7 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
+
     it('should remove nodes with question mark that are not used', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3953,6 +3661,7 @@ describe('Parser', function() {
         ]
       }).and.notify(done);
     });
+
     it('should succeed if trait is missing displayName property', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3982,6 +3691,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail if use property is not an array', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -3994,6 +3704,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/property 'is' must be a list/).and.notify(done);
     });
+
     it('should fail on invalid trait name', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4012,6 +3723,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/there is no trait named throttled/).and.notify(done);
     });
+
     it('should not add intermediate structures in optional keys for missing properties', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4082,6 +3794,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should allow dictionary keys as names of traits', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4151,6 +3864,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should allow parameters in a trait usage', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4243,6 +3957,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should reject parameters whose value is an array', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4291,6 +4006,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
     });
+
     it('should reject trait with missing provided parameters', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4312,6 +4028,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/value was not provided for parameter: lalalalala/).and.notify(done);
     });
+
     it('should apply parameters in traits', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4374,6 +4091,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should apply parameters in keys in traits', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4437,6 +4155,7 @@ describe('Parser', function() {
       raml.load(definition).should.become(expected).and.notify(done);
     });
   });
+
   describe('Resource Types', function () {
     it('should allow resourceTypes key at root level', function(done) {
       var definition = [
@@ -4480,6 +4199,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.eventually.deep.equal(expected).and.notify(done);
     });
+
     it('should allow resourceTypes array', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4554,6 +4274,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.eventually.deep.equal(expected).and.notify(done);
     });
+
     it('should fail if resourceTypes value is scalar', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4564,6 +4285,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid resourceTypes definition, it must be an array/).and.notify(done);
     });
+
     it('should fail if resourceTypes value is dictionary', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4576,6 +4298,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid resourceTypes definition, it must be an array/).and.notify(done);
     });
+
     it('should fail if type is an array', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4594,6 +4317,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/property 'type' must be a string or a mapping/).and.notify(done);
     });
+
     it('should fail if resource is of a missing type', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4612,6 +4336,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/there is no type named invalidType/).and.notify(done);
     });
+
     it('should succeed if resource type is missing displayName', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4644,6 +4369,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail if resource type is null', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4656,6 +4382,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid resourceType definition, it must be a mapping/).and.notify(done);
     });
+
     it('should fail if resource type is null', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4667,6 +4394,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid resourceType definition, it must be a mapping/).and.notify(done);
     });
+
     it('should fail if resource type is not mapping', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4678,6 +4406,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid resourceType definition, it must be a mapping/).and.notify(done);
     });
+
     it('should fail if resource type declares a sub resource', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4693,6 +4422,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/resource type cannot define child resources/).and.notify(done);
     });
+
     it('should fail if type dictionary has no keys', function(done){
       var definition = [
       '#%RAML 0.8',
@@ -4703,6 +4433,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/missing type name in type property/).and.notify(done);
     });
+
     it('should fail if a resource type inherits from a missing type', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4718,6 +4449,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/there is no type named missing/).and.notify(done);
     });
+
     it('should fail if a resource type applies a missing trait', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4736,6 +4468,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
     });
+
     it('should fail if a resource type\'s method applies a missing trait', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4755,6 +4488,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
     });
+
     it('should apply a resource type', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4802,6 +4536,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it.skip('should fail if names collide', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4825,6 +4560,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/Resource type with the same name already exists/).and.notify(done);
     });
+
     it('should apply a resource type if type key is mapping', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4874,6 +4610,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should apply a resource type if type key is mapping and type name is mapping', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4925,6 +4662,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail if type property has more than one key', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -4941,6 +4679,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/a resource or resourceType can inherit from a single resourceType/).and.notify(done);
     });
+
     it('should apply a resource type to a type', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5010,6 +4749,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should resolve a 3 level deep inheritance chain', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5102,6 +4842,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should apply parameters to a resource type', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5157,6 +4898,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail if parameters are missing', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5175,6 +4917,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/value was not provided for parameter: bar/).and.notify(done);
     });
+
     it('should fail if resourceType uses a missing trait', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5198,6 +4941,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/there is no trait named blah/).and.notify(done);
     });
+
     it('should apply a trait to a resource type', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5274,6 +5018,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should apply a resource type skipping missing optional parameter', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5326,6 +5071,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should apply a resource type adding optional parameter', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5374,6 +5120,7 @@ describe('Parser', function() {
       raml.load(definition).should.become(expected).and.notify(done);
     });
   });
+
   describe('Parameter methods', function(){
     describe('- Unknown methods', function(){
       describe('- In resources', function(){
@@ -5390,6 +5137,7 @@ describe('Parser', function() {
           ].join('\n');
           raml.load(definition).should.be.rejected.with(/unknown function applied to property name/).and.notify(done);
         });
+
         it('should fail if calling an unknown method in a value in an applied type', function(done){
           var definition = [
             '#%RAML 0.8',
@@ -5404,6 +5152,7 @@ describe('Parser', function() {
           ].join('\n');
           raml.load(definition).should.be.rejected.with(/unknown function applied to parameter/).and.notify(done);
         });
+
         it.skip('should fail if calling an unknown method in a value in an unapplied type', function(done){
           var definition = [
             '#%RAML 0.8',
@@ -5418,6 +5167,7 @@ describe('Parser', function() {
           raml.load(definition).should.be.rejected.with(/unknown function applied to parameter/).and.notify(done);
         });
       });
+
       describe('- In traits', function(){
         it('should fail if calling an unknown method in a property', function(done){
           var definition = [
@@ -5432,6 +5182,7 @@ describe('Parser', function() {
           ].join('\n');
           raml.load(definition).should.be.rejected.with(/unknown function applied to property name/).and.notify(done);
         });
+
         it('should fail if calling an unknown method in a value in an applied trait', function(done){
           var definition = [
             '#%RAML 0.8',
@@ -5447,6 +5198,7 @@ describe('Parser', function() {
           ].join('\n');
           raml.load(definition).should.be.rejected.with(/unknown function applied to parameter/).and.notify(done);
         });
+
         it.skip('should fail if calling an unknown method in a value in an unapplied trait', function(done){
           var definition = [
             '#%RAML 0.8',
@@ -5460,6 +5212,7 @@ describe('Parser', function() {
           ].join('\n');
           raml.load(definition).should.be.rejected.with(/unknown function applied to parameter/).and.notify(done);
         });
+
         it.skip('should fail if calling an unknown method in a value in a trait without methods', function(done){
           var definition = [
             '#%RAML 0.8',
@@ -5476,6 +5229,7 @@ describe('Parser', function() {
         });
       });
     });
+
     describe('- Singuralize', function(){
       describe('- In resources', function(){
         it('should fail if calling an unknown method in a value in an applied type', function(done){
@@ -5515,6 +5269,7 @@ describe('Parser', function() {
           raml.load(definition).should.become(expected).and.notify(done);
         });
       });
+
       describe('- In traits', function(){
         it('should fail if calling an unknown method in a value in an applied trait', function(done){
           var definition = [
@@ -5562,6 +5317,7 @@ describe('Parser', function() {
         });
       });
     });
+
     describe('Pluralize', function(){
       describe('- In resources', function(){
         it('should fail if calling an unknown method in a value in an applied type', function(done){
@@ -5601,6 +5357,7 @@ describe('Parser', function() {
           raml.load(definition).should.become(expected).and.notify(done);
         });
       });
+
       describe('- In traits', function(){
         it('should fail if calling an unknown method in a value in an applied trait', function(done){
           var definition = [
@@ -5649,6 +5406,7 @@ describe('Parser', function() {
       });
     });
   });
+
   describe('Schema support', function(){
     it('should not fail when specifying schemas at the root level', function(done) {
       var definition = [
@@ -5677,6 +5435,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail when specifying schemas is scalar', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5687,6 +5446,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/schemas property must be an array/).and.notify(done);
     });
+
     it('should fail when specifying schemas is scalar', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5697,6 +5457,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/schemas property must be an array/).and.notify(done);
     });
+
     it('should fail when schema is null', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5708,6 +5469,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/schema foo must be a string/).and.notify(done);
     });
+
     it('should fail when schema is sequence', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5719,6 +5481,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/schema foo must be a string/).and.notify(done);
     });
+
     it('should fail if a schema is a mapping', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5746,6 +5509,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/schema must be a string/).notify(done);
     });
+
     it('should fail if a schema is an array', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5773,6 +5537,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/schema must be a string/).notify(done);
     });
+
     it('should apply trait', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5840,6 +5605,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should apply trait multiple times', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5904,6 +5670,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should apply multiple schemas', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -5977,6 +5744,7 @@ describe('Parser', function() {
       raml.load(definition).should.become(expected).and.notify(done);
     });
   });
+
   describe('Security schemes', function(){
     it('should fail when schemes is mapping', function(done) {
       var definition = [
@@ -5990,6 +5758,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid security schemes property, it must be an array/).and.notify(done);
     });
+
     it('should fail when schemes is scalar', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6000,6 +5769,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid security schemes property, it must be an array/).and.notify(done);
     });
+
     it('should fail when schemes is null', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6010,6 +5780,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid security schemes property, it must be an array/).and.notify(done);
     });
+
     it('should succeed when schemes is empty', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6029,6 +5800,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail when schemes has a null scheme', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6040,6 +5812,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid security scheme property, it must be a map/).and.notify(done);
     });
+
     it('should fail when scheme is scalar', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6051,6 +5824,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid security scheme property, it must be a map/).and.notify(done);
     });
+
     it('should fail when scheme is array', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6062,6 +5836,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/invalid security scheme property, it must be a map/).and.notify(done);
     });
+
     it('should fail when scheme contains a wrong property', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6074,6 +5849,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/property: 'property' is invalid in a security scheme/).and.notify(done);
     });
+
     it('should fail when scheme does not have type', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6086,6 +5862,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-{.+}"/).and.notify(done);
     });
+
     it('should succeed when type is "OAuth 2.0"', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6124,6 +5901,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail when type is "OAuth 2.0" and authorizationUrl is missing in settings', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6140,6 +5918,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/authorizationUrl must be a URL/).and.notify(done);
     });
+
     it('should fail when type is "OAuth 2.0" and accessTokenUrl is missing in settings', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6156,6 +5935,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/accessTokenUrl must be a URL/).and.notify(done);
     });
+
     it('should succeed when type is "OAuth 1.0"', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6194,6 +5974,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail when type is "OAuth 1.0" and requestTokenUri is missing in settings', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6210,6 +5991,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/requestTokenUri must be a URL/).and.notify(done);
     });
+
     it('should fail when type is "OAuth 1.0" and authorizationUri is missing in settings', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6226,6 +6008,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/authorizationUri must be a URL/).and.notify(done);
     });
+
     it('should fail when type is "OAuth 1.0" and tokenCredentialsUri is missing in settings', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6242,6 +6025,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/tokenCredentialsUri must be a URL/).and.notify(done);
     });
+
     it('should succeed when type is "Basic Authentication"', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6271,6 +6055,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should succeed when type is "Digest Authentication"', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6300,6 +6085,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should succeed when type is "x-other-something"', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6329,6 +6115,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should succeed when using null securityScheme', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6360,6 +6147,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should succeed when using a securityScheme', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6391,6 +6179,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should succeed when using a securityScheme', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6422,6 +6211,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should succeed when using a securityScheme', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6459,6 +6249,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail when using a securityScheme twice in the same property', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6474,6 +6265,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/securitySchemes can only be referenced once in a securedBy property/).and.notify(done);
     });
+
     it('should fail when type is null', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6487,6 +6279,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-{.+}"/).and.notify(done);
     });
+
     it('should fail when type is array', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6500,6 +6293,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-{.+}"/).and.notify(done);
     });
+
     it('should fail when type is map', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6514,6 +6308,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.with(/schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-{.+}"/).and.notify(done);
     });
   });
+
   describe('Resource Validations', function() {
     it('should fail if using parametric property name in a resource', function(done) {
       var definition = [
@@ -6529,6 +6324,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/property '<<property>>' is invalid in a resource/).and.notify(done);
     });
+
     it('should fail if displayName is map', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6542,6 +6338,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/property 'displayName' must be a string/).and.notify(done);
     });
+
     it('should fail if displayName is sequence', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6555,6 +6352,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/property 'displayName' must be a string/).and.notify(done);
     });
+
     it('should fail if description is map', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6568,6 +6366,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/property 'description' must be a string/).and.notify(done);
     });
+
     it('should fail if description is sequence', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6581,6 +6380,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/property 'description' must be a string/).and.notify(done);
     });
+
     it('should fail if method is sequence', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6592,6 +6392,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/method must be a mapping/).and.notify(done);
     });
+
     it('should fail if method is scalar', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6603,6 +6404,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/method must be a mapping/).and.notify(done);
     });
+
     it('should fail if displayName is defined within methods', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6615,6 +6417,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with('property: \'displayName\' is invalid in a method').and.notify(done);
     });
+
     it('should fail if methods description is map', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6627,6 +6430,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/property 'description' must be a string/).and.notify(done);
     });
+
     it('should fail if methods description is sequence', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6639,6 +6443,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/property 'description' must be a string/).and.notify(done);
     });
+
     it('should fail when declaring a URI parameter in a resource with a wrong property', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6658,6 +6463,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/unknown property blah/).and.notify(done);
     });
+
     it('should fail when declaring a URI parameter in a nested resource with a wrong property', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6681,6 +6487,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/unknown property blah/).and.notify(done);
     });
+
     it('should fail when not using a declared URI parameter in a nested resource', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6703,6 +6510,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/not-used uri parameter unused/).and.notify(done);
     });
+
     it('should fail if headers is string', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6720,6 +6528,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/property: 'headers' must be a mapping/).and.notify(done);
     });
+
     it('should fail if headers is array', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6732,6 +6541,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/property: 'headers' must be a mapping/).and.notify(done);
     });
+
     it('should succeed if headers is null', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6757,6 +6567,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail if header is scalar', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6768,6 +6579,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/each header must be a mapping/).and.notify(done);
     });
+
     it('should fail if header is empty sequence', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6779,6 +6591,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/named parameter needs at least one type/).and.notify(done);
     });
+
     it('should fail if header uses unknown property', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6791,6 +6604,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/unknown property foo/).and.notify(done);
     });
+
     it('should fail if queryParams is string', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6803,6 +6617,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/property: 'queryParameters' must be a mapping/).and.notify(done);
     });
+
     it('should fail if queryParameters is array', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6815,6 +6630,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/property: 'queryParameters' must be a mapping/).and.notify(done);
     });
+
     it('should succeed if queryParameters is null', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6841,6 +6657,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail if queryParameters use wrong property name', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6853,6 +6670,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/unknown property bar/).and.notify(done);
     });
+
     it('should fail if body is a scalar', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6863,6 +6681,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/property: body specification must be a mapping/).and.notify(done);
     });
+
     it('should succeed if body is null', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6887,6 +6706,7 @@ describe('Parser', function() {
       }
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail if body is using implicit after explicit body', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6899,6 +6719,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/not compatible with explicit Media Type/).and.notify(done);
     });
+
     it('should fail if body is using explicit after implicit body', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6911,6 +6732,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/not compatible with implicit default Media Type/).and.notify(done);
     });
+
     it('should fail if formParameters kicks implicit mode on', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6923,6 +6745,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/not compatible with implicit default Media Type/).and.notify(done);
     });
+
     it('should fail if schema kicks implicit mode on', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6935,6 +6758,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/not compatible with implicit default Media Type/).and.notify(done);
     });
+
     it('should fail if example kicks implicit mode on', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6961,6 +6785,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/property: 'formParameters' must be a mapping/).and.notify(done);
     });
+
     it('should fail if queryParameters is array', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -6974,6 +6799,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/property: 'formParameters' must be a mapping/).and.notify(done);
     });
+
     it('should succeed if queryParameters is null', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7029,6 +6855,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail if queryParameters use wrong property name', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7043,6 +6870,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/unknown property foo/).and.notify(done);
     });
+
     it('should fail if responses is scalar', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7053,6 +6881,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/property: 'responses' must be a mapping/).and.notify(done);
     });
+
     it('should fail if responses is array', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7063,6 +6892,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/property: 'responses' must be a mapping/).and.notify(done);
     });
+
     it('should succeed if responses is null', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7088,6 +6918,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail if response code is string', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7099,6 +6930,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/each response key must be an integer/).and.notify(done);
     });
+
     it('should fail if response code is null', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7110,6 +6942,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/each response key must be an integer/).and.notify(done);
     });
+
     it('should fail if response code in list is null', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7122,6 +6955,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.with(/each response key must be an integer/).and.notify(done);
     });
   });
+
   describe('Base Uri Parameters', function(){
     it('should fail when a resource specified baseUriParams and baseuri is null', function(done) {
       var definition = [
@@ -7135,6 +6969,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/base uri parameters defined when there is no baseUri/).and.notify(done);
     });
+
     it('should fail when a resource specified baseUriParams unused in the URI', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7148,6 +6983,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/domainName uri parameter unused/).and.notify(done);
     });
+
     it('should succeed when a overriding baseUriParams in a resource', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7188,6 +7024,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should succeed when a overriding baseUriParams in a method', function(done) {
       var definition = [
           '#%RAML 0.8',
@@ -7237,6 +7074,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should succeed when a overriding baseUriParams in a resource 3 levels deep', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7291,6 +7129,7 @@ describe('Parser', function() {
       raml.load(definition).should.become(expected).and.notify(done);
     });
   });
+
   describe('Documentation section', function() {
     it('should fail if docsection is empty array', function(done) {
       var definition = [
@@ -7302,6 +7141,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/there must be at least one document in the documentation section/).and.notify(done);
     });
+
     it('should fail if docsection is missing title', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7313,6 +7153,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/a documentation entry must have title property/).and.notify(done);
     });
+
     it('should fail if docsection is missing content', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7324,6 +7165,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/a documentation entry must have content property/).and.notify(done);
     });
+
     it('should fail if docsection is mapping', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7334,6 +7176,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/documentation must be an array/).and.notify(done);
     });
+
     it('should fail if docsection is scalar', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7344,6 +7187,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/documentation must be an array/).and.notify(done);
     });
+
     it('should fail if docentry is scalar', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7354,6 +7198,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/each documentation section must be a mapping/).and.notify(done);
     });
+
     it('should fail if docentry is array', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7364,6 +7209,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/each documentation section must be a mapping/).and.notify(done);
     });
+
     it('should fail if docentry uses wrong property name', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7377,6 +7223,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/unknown property wrongPropertyName/).and.notify(done);
     });
+
     it('should fail if has null title', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7389,6 +7236,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(/title must be a string/).and.notify(done);
     });
+
     it('should fail if has null content', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7402,6 +7250,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.with(/content must be a string/).and.notify(done);
     });
   });
+
   describe('Default Media Type', function() {
     it('should fail if mediaType property is null', function(done) {
       var definition = [
@@ -7412,6 +7261,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/mediaType must be a scalar/).and.notify(done);
     });
+
     it('should fail if mediaType property is array', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7421,6 +7271,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/mediaType must be a scalar/).and.notify(done);
     });
+
     it('should fail if mediaType property is mapping', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7430,6 +7281,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/mediaType must be a scalar/).and.notify(done);
     });
+
     it('should not fail if mediaType property is used in root', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7443,6 +7295,7 @@ describe('Parser', function() {
       };
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should fail if mediaType property is not present and implicit mode is detected in a resource', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7455,6 +7308,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/body tries to use default Media Type, but mediaType is null/).and.notify(done);
     });
+
     it('should fail if mediaType property is not present and implicit mode is detected in a trait', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7469,6 +7323,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/body tries to use default Media Type, but mediaType is null/).and.notify(done);
     });
+
     it('should fail if mediaType property is not present and implicit mode is detected in a resourceType', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -7484,6 +7339,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/body tries to use default Media Type, but mediaType is null/).and.notify(done);
     });
+
     describe('Default Media Type in request body', function(){
       it('should apply mediaType property in a resource', function(done) {
         var definition = [
@@ -7517,6 +7373,7 @@ describe('Parser', function() {
         };
         raml.load(definition).should.become(expected).and.notify(done);
       });
+
       it('should apply mediaType property in a resourceType', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -7564,6 +7421,7 @@ describe('Parser', function() {
         };
         raml.load(definition).should.become(expected).and.notify(done);
       });
+
       it('should apply mediaType property in a trait composed with a resourceType', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -7619,6 +7477,7 @@ describe('Parser', function() {
         };
         raml.load(definition).should.become(expected).and.notify(done);
       });
+
       it('should apply mediaType property in a trait composed resource', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -7675,6 +7534,7 @@ describe('Parser', function() {
         };
         raml.load(definition).should.become(expected).and.notify(done);
       });
+
       it('should apply mediaType property in a trait composed with a resourceType which inherits from another RT and applies a trait', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -7744,6 +7604,7 @@ describe('Parser', function() {
         raml.load(definition).should.become(expected).and.notify(done);
       });
     });
+
     describe('Default Media Type in response body', function(){
       it('should apply mediaType property in a resource', function(done) {
         var definition = [
@@ -7783,6 +7644,7 @@ describe('Parser', function() {
         };
         raml.load(definition).should.become(expected).and.notify(done);
       });
+
       it('should apply mediaType property in a resourceType', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -7840,6 +7702,7 @@ describe('Parser', function() {
         };
         raml.load(definition).should.become(expected).and.notify(done);
       });
+
       it('should apply mediaType property in a trait composed with a resourceType', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -7905,6 +7768,7 @@ describe('Parser', function() {
         };
         raml.load(definition).should.become(expected).and.notify(done);
       });
+
       it('should apply mediaType property in a trait composed resource', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -7971,6 +7835,7 @@ describe('Parser', function() {
         };
         raml.load(definition).should.become(expected).and.notify(done);
       });
+
       it('should apply mediaType property in a trait composed with a resourceType which inherits from another RT and applies a trait', function(done) {
         var definition = [
           '#%RAML 0.8',
@@ -8057,6 +7922,7 @@ describe('Parser', function() {
       });
     });
   });
+
   describe('Error reporting', function () {
     it('should report correct line/column for invalid trait error', function(done) {
       var noop = function () {};
@@ -8083,6 +7949,7 @@ describe('Parser', function() {
         }, 0);
       });
     });
+
     it('should report correct line/column for missing title', function(done) {
       var noop = function () {};
       var definition = [
@@ -8100,6 +7967,7 @@ describe('Parser', function() {
         }, 0);
       });
     });
+
     it('should report correct line/column for missing title', function(done) {
       var noop = function () {};
       var definition = [
@@ -8108,6 +7976,7 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/document must be a mapping/).and.notify(done);
     });
+
     it('should not mark query parameters as required by default', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -8148,6 +8017,7 @@ describe('Parser', function() {
       }
       raml.load(definition).should.become(expected).and.notify(done);
     })
+
     it('should mark query parameters as required when explicitly requested', function(done) {
       var definition = [
         '#%RAML 0.8',
@@ -8190,6 +8060,7 @@ describe('Parser', function() {
       }
       raml.load(definition).should.become(expected).and.notify(done);
     });
+
     it('should report error that contains URI inside', function(done) {
       var uri        = 'http://localhost:9001/invalid/url';
       var definition = [
@@ -8200,6 +8071,7 @@ describe('Parser', function() {
 
       raml.load(definition).should.be.rejected.with(uri).and.notify(done);
     });
+
     it('should report correct line/column for unavailable file in !include', function(done) {
       var noop       = function () {};
       var definition = [
@@ -8217,6 +8089,7 @@ describe('Parser', function() {
         }, 0);
       });
     });
+
     it('should report correct line/column for unavailable URI in !include', function(done) {
       var noop       = function () {};
       var definition = [
@@ -8234,6 +8107,7 @@ describe('Parser', function() {
         }, 0);
       });
     });
+
     it('should detect circular !include of the same resource', function (done) {
       var file = 'http://localhost:9001/test/RT-261.raml';
       raml.loadFile(file).should.be.rejected.with('detected circular !include of').and.notify(done);
