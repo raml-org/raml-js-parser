@@ -52,4 +52,61 @@ describe('Traits', function () {
             '           param2: value2'
         ].join('\n')).should.be.rejected.with('unused parameter: param2').and.notify(done);
     });
+
+    it('should be applied via resource type and parameter key', function (done) {
+        raml.load([
+            '#%RAML 0.8',
+            '---',
+            'title: Test',
+            'baseUri: http://www.api.com',
+            'resourceTypes:',
+            '  - base:',
+            '      is: [<<trait>>]',
+            '      get:',
+            'traits:',
+            '  - trait1:',
+            '      description: This is the description of HOL trait.',
+            '/tags:',
+            '  type:',
+            '    base:',
+            '      trait: trait1',
+            '  get:'
+        ].join('\n')).should.become({
+            title: 'Test',
+            baseUri: 'http://www.api.com',
+            resourceTypes: [
+                {
+                    base: {
+                        is: [
+                            '<<trait>>'
+                        ],
+                        get: null
+                    }
+                }
+            ],
+            traits: [
+                {
+                    trait1: {
+                        description: 'This is the description of HOL trait.'
+                    }
+                }
+            ],
+            resources: [
+                {
+                    type: {
+                        base: {
+                            trait: 'trait1'
+                        }
+                    },
+                    relativeUri: '/tags',
+                    methods: [
+                        {
+                            description: 'This is the description of HOL trait.',
+                            method: 'get'
+                        }
+                    ]
+                }
+            ]
+        }).and.notify(done);
+    });
 });
