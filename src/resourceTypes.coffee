@@ -32,16 +32,6 @@ class @ResourceTypes
   get_type: (typeName) =>
     return @declaredTypes[typeName]
 
-  get_parent_type_name: (typeName) ->
-    type = (@get_type typeName)[1]
-    if type and @has_property type, "type"
-      property = @property_value type, "type"
-      if typeof property is "object"
-          return property[0][0].value
-      else
-        return property
-    return null
-
   apply_types: (node, resourceUri = "") =>
     return unless @isMapping(node)
     if @has_types node
@@ -67,39 +57,48 @@ class @ResourceTypes
   # calculates and resolve the inheritance chain from a starting type to the root_parent, applies parameters and traits
   # in all steps in the middle
   resolve_inheritance_chain: (resourceUri, typeKey) ->
-    typeName = @key_or_value typeKey
-    compiledTypes = {}
-    type = @apply_parameters_to_type resourceUri, typeName, typeKey
-    @apply_default_media_type_to_resource type
-    @apply_traits_to_resource resourceUri, type, false
-    compiledTypes[ typeName ] = type
-    typesToApply = [ typeName ]
-    childTypeName = typeName
-    parentTypeName = null
+    childTypeName = @key_or_value typeKey
+    childType     = @apply_parameters_to_type resourceUri, childTypeName, typeKey
 
-    # Unwind the inheritance chain and check for circular references, while resolving final type shape
-    while parentTypeName = @get_parent_type_name childTypeName
+    typesToApply  = [childTypeName]
+    compiledTypes = {}
+    compiledTypes[childTypeName] = childType
+
+    @apply_default_media_type_to_resource childType
+    @apply_traits_to_resource resourceUri, childType, false
+
+    # unwind the inheritance chain and check for circular references, while resolving final type shape
+    while @has_property childType, 'type'
+      typeKey        = @get_property childType, 'type'
+      parentTypeName = @key_or_value typeKey
+
       if parentTypeName of compiledTypes
         pathToCircularRef = typesToApply.concat(parentTypeName).join(' -> ')
         childTypeProperty = @get_type(childTypeName)[0]
         throw new exports.ResourceTypeError 'while aplying resourceTypes', null, "circular reference of \"#{parentTypeName}\" has been detected: #{pathToCircularRef}", childTypeProperty.start_mark
+
       # apply parameters
-      child_type_key = @get_property @get_type(childTypeName)[1], "type"
-      parentTypeMapping = @apply_parameters_to_type resourceUri, parentTypeName, child_type_key
-      compiledTypes[parentTypeName] = parentTypeMapping
-      @apply_default_media_type_to_resource parentTypeMapping
+      parentType = @apply_parameters_to_type resourceUri, parentTypeName, typeKey
+      @apply_default_media_type_to_resource parentType
+
       # apply traits
-      @apply_traits_to_resource resourceUri, parentTypeMapping, false
-      typesToApply.push parentTypeName
+      @apply_traits_to_resource resourceUri, parentType, false
+
+      # go to the next level in inheritance chain
       childTypeName = parentTypeName
+      childType     = parentType
 
-    root_type = typesToApply.pop()
-    baseType = compiledTypes[root_type].cloneForResourceType()
-    result = baseType
+      compiledTypes[childTypeName] = childType
+      typesToApply.push childTypeName
 
-    while inherits_from = typesToApply.pop()
-      baseType = compiledTypes[inherits_from].cloneForResourceType()
+    rootType = typesToApply.pop()
+    baseType = compiledTypes[rootType].cloneForResourceType()
+    result   = baseType
+
+    while inheritsFrom = typesToApply.pop()
+      baseType = compiledTypes[inheritsFrom].cloneForResourceType()
       result.combine baseType
+
     return result
 
   apply_parameters_to_type: (resourceUri, typeName, typeKey) =>
