@@ -193,7 +193,7 @@ class @Transformations
       resource.value.forEach (property) =>
         isKnownCommonProperty = @transform_common_properties property, allowParameterKeys
         unless isKnownCommonProperty
-          if property[0].value.match(new RegExp("^(get|post|put|delete|head|patch|options)#{ if allowParameterKeys then '\\??' else '' }$"))
+          if @isHttpMethod property[0].value, allowParameterKeys
             @transform_method property[1], allowParameterKeys
           else
             canonicalKey = @canonicalizePropertyName(property[0].value, allowParameterKeys)
