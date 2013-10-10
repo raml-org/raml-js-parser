@@ -456,7 +456,7 @@ class @Validator
       resource[1].value.forEach (property) =>
         if property[0].value.match(/^\//)
           @trackRepeatedProperties(resourceProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating resource', "resource already declared")
-        else if property[0].value.match(/^(get|post|put|delete|head|patch|options)\??$/)
+        else if @isHttpMethod property[0].value, allowParameterKeys
           @trackRepeatedProperties(resourceProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating resource', "method already declared")
         else
           @trackRepeatedProperties(resourceProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating resource', "property already used")
@@ -466,7 +466,7 @@ class @Validator
             if allowParameterKeys
               throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', property[0].start_mark
             @validate_resource property, allowParameterKeys
-          else if property[0].value.match(new RegExp("^(get|post|put|delete|head|patch|options)#{ if allowParameterKeys then '\\??' else '' }$"))
+          else if @isHttpMethod property[0].value, allowParameterKeys
             @validate_method property, allowParameterKeys, 'method'
           else
             key = property[0].value
@@ -685,6 +685,12 @@ class @Validator
             else
               throw new exports.ValidationError 'while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
 
+  isHttpMethod: (value, allowParameterKeys = false) ->
+    if value
+      value = @canonicalizePropertyName value, allowParameterKeys
+      return value.toLowerCase() in ['get', 'post', 'put', 'delete', 'head', 'patch', 'options', 'update']
+    return false
+
   isParameterKey: (property) ->
     unless @isScalar(property[0])
       return false
@@ -799,7 +805,7 @@ class @Validator
   child_methods: (node) ->
     unless node and @isMapping node
       return []
-    return node.value.filter (childNode) -> return childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/);
+    return node.value.filter (childNode) => return @isHttpMethod childNode[0].value
 
   has_property: (node, property) ->
     if node and @isMapping node
