@@ -1914,56 +1914,6 @@ describe('Parser', function() {
   });
 
   describe('Resources', function() {
-    it('should succeed extracting resource information', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: Test',
-        '/a:',
-        '  displayName: A',
-        '  get:',
-        '  /b:',
-        '    displayName: AB',
-        '    get:',
-        '    put:',
-        '/a/c:',
-        '  displayName: AC',
-        '  post:',
-        ''
-      ].join('\n');
-
-      raml.resources(definition).should.become([
-        {
-          "methods": [
-            "get"
-          ],
-          "uri": "/a",
-          "displayName": "A",
-          "line": 4,
-          "column": 1
-        },
-        {
-          "methods": [
-            "get",
-            "put"
-          ],
-          "uri": "/a/b",
-          "displayName": "AB",
-          "line": 7,
-          "column": 3
-        },
-        {
-          "methods": [
-            "post"
-          ],
-          "uri": "/a/c",
-          "displayName": "AC",
-          "line": 11,
-          "column": 1
-        }
-      ]).and.notify(done);
-    });
-
     it('should fail on duplicate absolute URIs', function(done) {
       var definition = [
         '#%RAML 0.8',

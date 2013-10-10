@@ -14,53 +14,30 @@
 class @FileError extends @errors.MarkedYAMLError
 
 ###
-Scan a RAML stream and produce scanning tokens.
-###
-@scan = (stream, location) ->
-  loader = new exports.loader.Loader stream, location, false
-  loader.get_token() while loader.check_token()
-
-###
-Parse a RAML stream and produce parsing events.
-###
-@parse = (stream, location) ->
-  loader = new exports.loader.Loader stream, location, false
-  loader.get_event() while loader.check_event()
-
-###
 Parse the first RAML document in a stream and produce the corresponding
 representation tree.
 ###
 @compose = (stream, validate = true, apply = true, join = true, location, parent) ->
-  loader = new exports.loader.Loader stream, location, validate, parent
+  loader = new exports.loader.Loader stream, location, validate, apply, join, parent
   return loader.get_single_node(validate, apply, join)
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
 Javascript object.
 ###
-@load = (stream, validate = true, location) ->
+@load = (stream, location, validate = true, apply = true, join = true) ->
   @q.fcall =>
-    loader = new exports.loader.Loader stream, location, validate
-    return loader.get_single_data()
-
-###
-Parse the first RAML document in a stream and produce a list of
-all the absolute URIs for all resources.
-###
-@resources = (stream, validate = true, location) ->
-  @q.fcall =>
-    loader = new exports.loader.Loader stream, location, validate
-    return loader.resources()
+    loader = new exports.loader.Loader stream, location, validate, apply, join
+    return loader.get_single_data(validate, apply, join)
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
 Javascript object.
 ###
-@loadFile = (file, validate = true) ->
+@loadFile = (file, validate = true, apply = true, join = true) ->
   @q.fcall =>
     stream = @readFile file
-    return @load stream, validate, file
+    return @load stream, file, validate, apply, join
 
 ###
 Parse the first RAML document in a file and produce the corresponding
@@ -71,19 +48,10 @@ representation tree.
   return @compose stream, validate, apply, join, file, parent
 
 ###
-Parse the first RAML document in a file and produce a list of
-all the absolute URIs for all resources.
-###
-@resourcesFile = (file, validate = true) ->
-  stream = @readFile file
-  return @resources stream, validate, file
-
-###
 Read file either locally or from the network.
 ###
 @readFile = (file) ->
   url = require('url').parse(file)
-
   if url.protocol?
     unless url.protocol.match(/^https?/i)
       throw new exports.FileError "while reading #{file}", null, "unknown protocol #{url.protocol}", @start_mark

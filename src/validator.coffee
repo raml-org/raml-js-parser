@@ -827,44 +827,6 @@ class @Validator
           properties = properties.concat @get_properties prop[1], property
     return properties
 
-  resources: ( node = @get_single_node(true, true, false), parentPath ) ->
-    response = []
-    child_resources = @child_resources node
-    child_resources.forEach (childResource) =>
-      resourceResponse = {}
-      resourceResponse.methods = []
-
-      if parentPath?
-        resourceResponse.uri = parentPath + childResource[0].value
-      else
-        resourceResponse.uri = childResource[0].value
-
-      if @has_property childResource[1], "displayName"
-        resourceResponse.displayName = @property_value childResource[1], "displayName"
-
-      if @has_property childResource[1], "get"
-        resourceResponse.methods.push 'get'
-      if @has_property childResource[1], "post"
-        resourceResponse.methods.push 'post'
-      if @has_property childResource[1], "put"
-        resourceResponse.methods.push 'put'
-      if @has_property childResource[1], "patch"
-        resourceResponse.methods.push 'patch'
-      if @has_property childResource[1], "delete"
-        resourceResponse.methods.push 'delete'
-      if @has_property childResource[1], "head"
-        resourceResponse.methods.push 'head'
-      if @has_property childResource[1], "options"
-        resourceResponse.methods.push 'options'
-
-      resourceResponse.line = childResource[0].start_mark.line + 1
-      resourceResponse.column = childResource[0].start_mark.column + 1
-      if childResource[0].start_mark.name?
-        resourceResponse.src = childResource[0].start_mark.name
-      response.push resourceResponse
-      response = response.concat( @resources(childResource[1], resourceResponse.uri) )
-    return response
-
   valid_absolute_uris: (node ) ->
     uris = @get_absolute_uris node
     if repeatedUri = uris.hasDuplicatesUris()

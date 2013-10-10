@@ -7,7 +7,7 @@ class @ComposerError extends MarkedYAMLError
 
 class @Composer
 
-  constructor: ->
+  constructor: (@validate = true, @apply = true, @join = true) ->
     @anchors = {}
 
   check_node: ->
@@ -23,7 +23,7 @@ class @Composer
   get_node: ->
     return @compose_document() unless @check_event events.StreamEndEvent
 
-  get_single_node: (validate = true, apply = true, join = true) ->
+  get_single_node: (validate = @validate, apply = @apply, join = @join) ->
     # Drop the STREAM-START event.
     @get_event()
 
@@ -91,7 +91,7 @@ class @Composer
 
     @descend_resolver parent, index
     if @check_event events.ScalarEvent
-      node = @compose_scalar_node anchor
+      node = @compose_scalar_node anchor, index
     else if @check_event events.SequenceStartEvent
       node = @compose_sequence_node anchor
     else if @check_event events.MappingStartEvent
@@ -173,9 +173,7 @@ class @Composer
 
   isInIncludeTagsStack: (include) ->
     parent = @
-
     while parent = parent.parent
       if parent.src is include
         return true
-
     return false

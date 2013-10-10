@@ -5,14 +5,16 @@ nodes       = require './nodes'
    Applies transformations to the RAML
 ###
 class @Transformations
-  constructor: ->
+  constructor: (@apply = true) ->
     @declaredSchemas = {}
 
   applyTransformations: (rootObject) =>
-    @findAndInsertUriParameters(rootObject)
+    if @apply
+      @findAndInsertUriParameters(rootObject)
 
   applyAstTransformations: (document) =>
-    @transform_document(document)
+    if @apply
+      @transform_document(document)
 
   load_default_media_type: (node) =>
     return unless @isMapping node or node?.value
