@@ -3088,235 +3088,6 @@ window.RAML = {}
 
 window.RAML.Parser = require('../lib/raml')
 },{"../lib/raml":11}],12:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, events, nodes, raml, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  events = require('./events');
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  raml = require('./raml');
-
-  this.ComposerError = (function(_super) {
-    __extends(ComposerError, _super);
-
-    function ComposerError() {
-      _ref = ComposerError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return ComposerError;
-
-  })(MarkedYAMLError);
-
-  this.Composer = (function() {
-    function Composer() {
-      this.anchors = {};
-    }
-
-    Composer.prototype.check_node = function() {
-      if (this.check_event(events.StreamStartEvent)) {
-        this.get_event();
-      }
-      return !this.check_event(events.StreamEndEvent);
-    };
-
-    /*
-    Get the root node of the next document.
-    */
-
-
-    Composer.prototype.get_node = function() {
-      if (!this.check_event(events.StreamEndEvent)) {
-        return this.compose_document();
-      }
-    };
-
-    Composer.prototype.get_single_node = function(validate, apply, join) {
-      var document, event;
-      if (validate == null) {
-        validate = true;
-      }
-      if (apply == null) {
-        apply = true;
-      }
-      if (join == null) {
-        join = true;
-      }
-      this.get_event();
-      document = null;
-      if (!this.check_event(events.StreamEndEvent)) {
-        document = this.compose_document();
-      }
-      if (!this.check_event(events.StreamEndEvent)) {
-        event = this.get_event();
-        throw new exports.ComposerError('document scan', document.start_mark, 'expected a single document in the stream but found another document', event.start_mark);
-      }
-      this.get_event();
-      if (validate || apply) {
-        this.load_schemas(document);
-        this.load_traits(document);
-        this.load_types(document);
-        this.load_security_schemes(document);
-      }
-      if (validate) {
-        this.validate_document(document);
-      }
-      if (apply) {
-        this.apply_types(document);
-        this.apply_traits(document);
-        this.apply_schemas(document);
-        this.apply_protocols(document);
-      }
-      if (join) {
-        this.join_resources(document);
-      }
-      return document;
-    };
-
-    Composer.prototype.compose_document = function() {
-      var node;
-      this.get_event();
-      node = this.compose_node();
-      this.get_event();
-      this.anchors = {};
-      return node;
-    };
-
-    Composer.prototype.compose_node = function(parent, index) {
-      var anchor, event, node;
-      if (this.check_event(events.AliasEvent)) {
-        event = this.get_event();
-        anchor = event.anchor;
-        if (!(anchor in this.anchors)) {
-          throw new exports.ComposerError(null, null, "found undefined alias " + anchor, event.start_mark);
-        }
-        return this.anchors[anchor];
-      }
-      event = this.peek_event();
-      anchor = event.anchor;
-      if (anchor !== null && anchor in this.anchors) {
-        throw new exports.ComposerError("found duplicate anchor " + anchor + "; first occurence", this.anchors[anchor].start_mark, 'second occurrence', event.start_mark);
-      }
-      this.descend_resolver(parent, index);
-      if (this.check_event(events.ScalarEvent)) {
-        node = this.compose_scalar_node(anchor);
-      } else if (this.check_event(events.SequenceStartEvent)) {
-        node = this.compose_sequence_node(anchor);
-      } else if (this.check_event(events.MappingStartEvent)) {
-        node = this.compose_mapping_node(anchor);
-      }
-      this.ascend_resolver();
-      return node;
-    };
-
-    Composer.prototype.compose_fixed_scalar_node = function(anchor, value) {
-      var event, node;
-      event = this.get_event();
-      node = new nodes.ScalarNode('tag:yaml.org,2002:str', value, event.start_mark, event.end_mark, event.style);
-      if (anchor !== null) {
-        this.anchors[anchor] = node;
-      }
-      return node;
-    };
-
-    Composer.prototype.compose_scalar_node = function(anchor) {
-      var event, extension, node, tag;
-      event = this.get_event();
-      tag = event.tag;
-      if (tag === null || tag === '!') {
-        tag = this.resolve(nodes.ScalarNode, event.value, event.implicit);
-      }
-      if (event.tag === '!include') {
-        if (event.value.match(/^\s*$/)) {
-          throw new exports.ComposerError('while composing scalar out of !include', null, "file name/URL cannot be null", event.start_mark);
-        }
-        if (this.src != null) {
-          event.value = require('url').resolve(this.src, event.value);
-        }
-        if (this.isInIncludeTagsStack(event.value)) {
-          throw new exports.ComposerError('while composing scalar out of !include', null, "detected circular !include of " + event.value, event.start_mark);
-        }
-        extension = event.value.split(".").pop();
-        if (extension === 'yaml' || extension === 'yml' || extension === 'raml') {
-          raml.start_mark = event.start_mark;
-          return raml.composeFile(event.value, false, false, false, this);
-        }
-        raml.start_mark = event.start_mark;
-        node = new nodes.ScalarNode('tag:yaml.org,2002:str', raml.readFile(event.value), event.start_mark, event.end_mark, event.style);
-      } else {
-        node = new nodes.ScalarNode(tag, event.value, event.start_mark, event.end_mark, event.style);
-      }
-      if (anchor !== null) {
-        this.anchors[anchor] = node;
-      }
-      return node;
-    };
-
-    Composer.prototype.compose_sequence_node = function(anchor) {
-      var end_event, index, node, start_event, tag;
-      start_event = this.get_event();
-      tag = start_event.tag;
-      if (tag === null || tag === '!') {
-        tag = this.resolve(nodes.SequenceNode, null, start_event.implicit);
-      }
-      node = new nodes.SequenceNode(tag, [], start_event.start_mark, null, start_event.flow_style);
-      if (anchor !== null) {
-        this.anchors[anchor] = node;
-      }
-      index = 0;
-      while (!this.check_event(events.SequenceEndEvent)) {
-        node.value.push(this.compose_node(node, index));
-        index++;
-      }
-      end_event = this.get_event();
-      node.end_mark = end_event.end_mark;
-      return node;
-    };
-
-    Composer.prototype.compose_mapping_node = function(anchor) {
-      var end_event, item_key, item_value, node, start_event, tag;
-      start_event = this.get_event();
-      tag = start_event.tag;
-      if (tag === null || tag === '!') {
-        tag = this.resolve(nodes.MappingNode, null, start_event.implicit);
-      }
-      node = new nodes.MappingNode(tag, [], start_event.start_mark, null, start_event.flow_style);
-      if (anchor !== null) {
-        this.anchors[anchor] = node;
-      }
-      while (!this.check_event(events.MappingEndEvent)) {
-        item_key = this.compose_node(node);
-        item_value = this.compose_node(node, item_key);
-        node.value.push([item_key, item_value]);
-      }
-      end_event = this.get_event();
-      node.end_mark = end_event.end_mark;
-      return node;
-    };
-
-    Composer.prototype.isInIncludeTagsStack = function(include) {
-      var parent;
-      parent = this;
-      while (parent = parent.parent) {
-        if (parent.src === include) {
-          return true;
-        }
-      }
-      return false;
-    };
-
-    return Composer;
-
-  })();
-
-}).call(this);
-
-},{"./errors":1,"./events":2,"./nodes":13,"./raml":11,"url":7}],14:[function(require,module,exports){
 require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{1:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
@@ -7181,7 +6952,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 },{}]},{},[])
 ;;module.exports=require("buffer-browserify")
 
-},{}],15:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function(Buffer){(function() {
   var MarkedYAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -7341,7 +7112,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
     BaseConstructor.prototype.construct_sequence = function(node) {
       var child, _i, _len, _ref1, _results;
       if (!(node instanceof nodes.SequenceNode)) {
-        throw new exports.ConstructorError(null, null, "expected a sequence node but found " + node.id, node.start_mark);
+        throw new exports.ConstructorError(null, null, "expected an array node but found " + node.id, node.start_mark);
       }
       _ref1 = node.value;
       _results = [];
@@ -7355,7 +7126,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
     BaseConstructor.prototype.construct_mapping = function(node) {
       var key, key_item, key_item_value, key_node, mapping, value, value_node, _i, _j, _len, _len1, _ref1, _ref2, _ref3;
       if (!(node instanceof nodes.MappingNode)) {
-        throw new exports.ConstructorError(null, null, "expected a mapping node but found " + node.id, node.start_mark);
+        throw new exports.ConstructorError(null, null, "expected a map node but found " + node.id, node.start_mark);
       }
       mapping = {};
       _ref1 = node.value;
@@ -7371,7 +7142,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
             mapping[key_item_value] = value;
           }
         } else if (typeof key === 'object') {
-          throw new exports.ConstructorError('while constructing a mapping', node.start_mark, 'found unhashable key', key_node.start_mark);
+          throw new exports.ConstructorError('while constructing a map', node.start_mark, 'found unhashable key', key_node.start_mark);
         } else {
           mapping[key] = value;
         }
@@ -7382,7 +7153,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
     BaseConstructor.prototype.construct_pairs = function(node) {
       var key, key_node, pairs, value, value_node, _i, _len, _ref1, _ref2;
       if (!(node instanceof nodes.MappingNode)) {
-        throw new exports.ConstructorError(null, null, "expected a mapping node but found " + node.id, node.start_mark);
+        throw new exports.ConstructorError(null, null, "expected a map node but found " + node.id, node.start_mark);
       }
       pairs = [];
       _ref1 = node.value;
@@ -7469,7 +7240,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
             for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
               subnode = _ref3[_i];
               if (!(subnode instanceof nodes.MappingNode)) {
-                throw new exports.ConstructorError('while constructing a mapping', node.start_mark, "expected a mapping for merging, but found " + subnode.id, subnode.start_mark);
+                throw new exports.ConstructorError('while constructing a map', node.start_mark, "expected a map for merging, but found " + subnode.id, subnode.start_mark);
               }
               this.flatten_mapping(subnode);
               submerge.push(subnode.value);
@@ -7480,7 +7251,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
               merge = merge.concat(value);
             }
           } else {
-            throw new exports.ConstructorError('while constructing a mapping', node.start_mark, "expected a mapping or list of mappings for            merging but found " + value_node.id, value_node.start_mark);
+            throw new exports.ConstructorError('while constructing a map', node.start_mark, "expected a map or an array of maps for            merging but found " + value_node.id, value_node.start_mark);
           }
         } else if (key_node.tag === 'tag:yaml.org,2002:value') {
           key_node.tag = 'tag:yaml.org,2002:str';
@@ -7651,7 +7422,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
         _this = this;
       list = [];
       if (!(node instanceof nodes.SequenceNode)) {
-        throw new exports.ConstructorError("while constructing " + type, node.start_mark, "expected a sequence but found " + node.id, node.start_mark);
+        throw new exports.ConstructorError("while constructing " + type, node.start_mark, "expected an array but found " + node.id, node.start_mark);
       }
       this.defer(function() {
         var key, key_node, subnode, value, value_node, _i, _len, _ref2, _ref3, _results;
@@ -7660,10 +7431,10 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
         for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
           subnode = _ref2[_i];
           if (!(subnode instanceof nodes.MappingNode)) {
-            throw new exports.ConstructorError("while constructing " + type, node.start_mark, "expected a mapping of length 1 but found " + subnode.id, subnode.start_mark);
+            throw new exports.ConstructorError("while constructing " + type, node.start_mark, "expected a map of length 1 but found " + subnode.id, subnode.start_mark);
           }
           if (subnode.value.length !== 1) {
-            throw new exports.ConstructorError("while constructing " + type, node.start_mark, "expected a mapping of length 1 but found " + subnode.id, subnode.start_mark);
+            throw new exports.ConstructorError("while constructing " + type, node.start_mark, "expected a map of length 1 but found " + subnode.id, subnode.start_mark);
           }
           _ref3 = subnode.value[0], key_node = _ref3[0], value_node = _ref3[1];
           key = _this.construct_object(key_node);
@@ -7794,7 +7565,236 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 }).call(this);
 
 })(require("__browserify_buffer").Buffer)
-},{"./errors":1,"./nodes":13,"./util":4,"__browserify_buffer":14}],16:[function(require,module,exports){
+},{"./errors":1,"./nodes":14,"./util":4,"__browserify_buffer":12}],15:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, events, nodes, raml, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  events = require('./events');
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  raml = require('./raml');
+
+  this.ComposerError = (function(_super) {
+    __extends(ComposerError, _super);
+
+    function ComposerError() {
+      _ref = ComposerError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return ComposerError;
+
+  })(MarkedYAMLError);
+
+  this.Composer = (function() {
+    function Composer() {
+      this.anchors = {};
+    }
+
+    Composer.prototype.check_node = function() {
+      if (this.check_event(events.StreamStartEvent)) {
+        this.get_event();
+      }
+      return !this.check_event(events.StreamEndEvent);
+    };
+
+    /*
+    Get the root node of the next document.
+    */
+
+
+    Composer.prototype.get_node = function() {
+      if (!this.check_event(events.StreamEndEvent)) {
+        return this.compose_document();
+      }
+    };
+
+    Composer.prototype.get_single_node = function(validate, apply, join) {
+      var document, event;
+      if (validate == null) {
+        validate = true;
+      }
+      if (apply == null) {
+        apply = true;
+      }
+      if (join == null) {
+        join = true;
+      }
+      this.get_event();
+      document = null;
+      if (!this.check_event(events.StreamEndEvent)) {
+        document = this.compose_document();
+      }
+      if (!this.check_event(events.StreamEndEvent)) {
+        event = this.get_event();
+        throw new exports.ComposerError('document scan', document.start_mark, 'expected a single document in the stream but found another document', event.start_mark);
+      }
+      this.get_event();
+      if (validate || apply) {
+        this.load_schemas(document);
+        this.load_traits(document);
+        this.load_types(document);
+        this.load_security_schemes(document);
+      }
+      if (validate) {
+        this.validate_document(document);
+      }
+      if (apply) {
+        this.apply_types(document);
+        this.apply_traits(document);
+        this.apply_schemas(document);
+        this.apply_protocols(document);
+      }
+      if (join) {
+        this.join_resources(document);
+      }
+      return document;
+    };
+
+    Composer.prototype.compose_document = function() {
+      var node;
+      this.get_event();
+      node = this.compose_node();
+      this.get_event();
+      this.anchors = {};
+      return node;
+    };
+
+    Composer.prototype.compose_node = function(parent, index) {
+      var anchor, event, node;
+      if (this.check_event(events.AliasEvent)) {
+        event = this.get_event();
+        anchor = event.anchor;
+        if (!(anchor in this.anchors)) {
+          throw new exports.ComposerError(null, null, "found undefined alias " + anchor, event.start_mark);
+        }
+        return this.anchors[anchor];
+      }
+      event = this.peek_event();
+      anchor = event.anchor;
+      if (anchor !== null && anchor in this.anchors) {
+        throw new exports.ComposerError("found duplicate anchor " + anchor + "; first occurence", this.anchors[anchor].start_mark, 'second occurrence', event.start_mark);
+      }
+      this.descend_resolver(parent, index);
+      if (this.check_event(events.ScalarEvent)) {
+        node = this.compose_scalar_node(anchor);
+      } else if (this.check_event(events.SequenceStartEvent)) {
+        node = this.compose_sequence_node(anchor);
+      } else if (this.check_event(events.MappingStartEvent)) {
+        node = this.compose_mapping_node(anchor);
+      }
+      this.ascend_resolver();
+      return node;
+    };
+
+    Composer.prototype.compose_fixed_scalar_node = function(anchor, value) {
+      var event, node;
+      event = this.get_event();
+      node = new nodes.ScalarNode('tag:yaml.org,2002:str', value, event.start_mark, event.end_mark, event.style);
+      if (anchor !== null) {
+        this.anchors[anchor] = node;
+      }
+      return node;
+    };
+
+    Composer.prototype.compose_scalar_node = function(anchor) {
+      var event, extension, node, tag;
+      event = this.get_event();
+      tag = event.tag;
+      if (tag === null || tag === '!') {
+        tag = this.resolve(nodes.ScalarNode, event.value, event.implicit);
+      }
+      if (event.tag === '!include') {
+        if (event.value.match(/^\s*$/)) {
+          throw new exports.ComposerError('while composing scalar out of !include', null, "file name/URL cannot be null", event.start_mark);
+        }
+        if (this.src != null) {
+          event.value = require('url').resolve(this.src, event.value);
+        }
+        if (this.isInIncludeTagsStack(event.value)) {
+          throw new exports.ComposerError('while composing scalar out of !include', null, "detected circular !include of " + event.value, event.start_mark);
+        }
+        extension = event.value.split(".").pop();
+        if (extension === 'yaml' || extension === 'yml' || extension === 'raml') {
+          raml.start_mark = event.start_mark;
+          return raml.composeFile(event.value, false, false, false, this);
+        }
+        raml.start_mark = event.start_mark;
+        node = new nodes.ScalarNode('tag:yaml.org,2002:str', raml.readFile(event.value), event.start_mark, event.end_mark, event.style);
+      } else {
+        node = new nodes.ScalarNode(tag, event.value, event.start_mark, event.end_mark, event.style);
+      }
+      if (anchor !== null) {
+        this.anchors[anchor] = node;
+      }
+      return node;
+    };
+
+    Composer.prototype.compose_sequence_node = function(anchor) {
+      var end_event, index, node, start_event, tag;
+      start_event = this.get_event();
+      tag = start_event.tag;
+      if (tag === null || tag === '!') {
+        tag = this.resolve(nodes.SequenceNode, null, start_event.implicit);
+      }
+      node = new nodes.SequenceNode(tag, [], start_event.start_mark, null, start_event.flow_style);
+      if (anchor !== null) {
+        this.anchors[anchor] = node;
+      }
+      index = 0;
+      while (!this.check_event(events.SequenceEndEvent)) {
+        node.value.push(this.compose_node(node, index));
+        index++;
+      }
+      end_event = this.get_event();
+      node.end_mark = end_event.end_mark;
+      return node;
+    };
+
+    Composer.prototype.compose_mapping_node = function(anchor) {
+      var end_event, item_key, item_value, node, start_event, tag;
+      start_event = this.get_event();
+      tag = start_event.tag;
+      if (tag === null || tag === '!') {
+        tag = this.resolve(nodes.MappingNode, null, start_event.implicit);
+      }
+      node = new nodes.MappingNode(tag, [], start_event.start_mark, null, start_event.flow_style);
+      if (anchor !== null) {
+        this.anchors[anchor] = node;
+      }
+      while (!this.check_event(events.MappingEndEvent)) {
+        item_key = this.compose_node(node);
+        item_value = this.compose_node(node, item_key);
+        node.value.push([item_key, item_value]);
+      }
+      end_event = this.get_event();
+      node.end_mark = end_event.end_mark;
+      return node;
+    };
+
+    Composer.prototype.isInIncludeTagsStack = function(include) {
+      var parent;
+      parent = this;
+      while (parent = parent.parent) {
+        if (parent.src === include) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    return Composer;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./events":2,"./nodes":14,"./raml":11,"url":7}],16:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -7903,7 +7903,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],17:[function(require,module,exports){
+},{"./errors":1,"./nodes":14}],17:[function(require,module,exports){
 (function() {
   var composer, construct, joiner, parser, protocols, reader, resolver, scanner, schemas, securitySchemes, traits, transformations, types, util, validator;
 
@@ -8016,7 +8016,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./protocols":26,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./securitySchemes":27,"./traits":23,"./transformations":28,"./util":4,"./validator":22}],13:[function(require,module,exports){
+},{"./composer":15,"./construct":13,"./joiner":16,"./parser":20,"./protocols":26,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./securitySchemes":27,"./traits":23,"./transformations":28,"./util":4,"./validator":22}],14:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -8992,216 +8992,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"url":7}],21:[function(require,module,exports){
-(function() {
-  var YAMLError, nodes, util, _ref, _ref1,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-  nodes = require('./nodes');
-
-  util = require('./util');
-
-  YAMLError = require('./errors').YAMLError;
-
-  this.ResolverError = (function(_super) {
-    __extends(ResolverError, _super);
-
-    function ResolverError() {
-      _ref = ResolverError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return ResolverError;
-
-  })(YAMLError);
-
-  this.BaseResolver = (function() {
-    var DEFAULT_MAPPING_TAG, DEFAULT_SCALAR_TAG, DEFAULT_SEQUENCE_TAG;
-
-    DEFAULT_SCALAR_TAG = 'tag:yaml.org,2002:str';
-
-    DEFAULT_SEQUENCE_TAG = 'tag:yaml.org,2002:seq';
-
-    DEFAULT_MAPPING_TAG = 'tag:yaml.org,2002:map';
-
-    BaseResolver.prototype.yaml_implicit_resolvers = {};
-
-    BaseResolver.prototype.yaml_path_resolvers = {};
-
-    BaseResolver.add_implicit_resolver = function(tag, regexp, first) {
-      var char, _base, _i, _len, _results;
-      if (first == null) {
-        first = [null];
-      }
-      if (!this.prototype.hasOwnProperty('yaml_implicit_resolvers')) {
-        this.prototype.yaml_implicit_resolvers = util.extend({}, this.prototype.yaml_implicit_resolvers);
-      }
-      _results = [];
-      for (_i = 0, _len = first.length; _i < _len; _i++) {
-        char = first[_i];
-        _results.push(((_base = this.prototype.yaml_implicit_resolvers)[char] != null ? (_base = this.prototype.yaml_implicit_resolvers)[char] : _base[char] = []).push([tag, regexp]));
-      }
-      return _results;
-    };
-
-    function BaseResolver() {
-      this.resolver_exact_paths = [];
-      this.resolver_prefix_paths = [];
-    }
-
-    BaseResolver.prototype.descend_resolver = function(current_node, current_index) {
-      var depth, exact_paths, kind, path, prefix_paths, _i, _j, _len, _len1, _ref1, _ref2, _ref3, _ref4;
-      if (util.is_empty(this.yaml_path_resolvers)) {
-        return;
-      }
-      exact_paths = {};
-      prefix_paths = [];
-      if (current_node) {
-        depth = this.resolver_prefix_paths.length;
-        _ref1 = this.resolver_prefix_paths.slice(-1)[0];
-        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-          _ref2 = _ref1[_i], path = _ref2[0], kind = _ref2[1];
-          if (this.check_resolver_prefix(depth, path, kind, current_node, current_index)) {
-            if (path.length > depth) {
-              prefix_paths.push([path, kind]);
-            } else {
-              exact_paths[kind] = this.yaml_path_resolvers[path][kind];
-            }
-          }
-        }
-      } else {
-        _ref3 = this.yaml_path_resolvers;
-        for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
-          _ref4 = _ref3[_j], path = _ref4[0], kind = _ref4[1];
-          if (!path) {
-            exact_paths[kind] = this.yaml_path_resolvers[path][kind];
-          } else {
-            prefix_paths.push([path, kind]);
-          }
-        }
-      }
-      this.resolver_exact_paths.push(exact_paths);
-      return this.resolver_prefix_paths.push(prefix_paths);
-    };
-
-    BaseResolver.prototype.ascend_resolver = function() {
-      if (util.is_empty(this.yaml_path_resolvers)) {
-        return;
-      }
-      this.resolver_exact_paths.pop();
-      return this.resolver_prefix_paths.pop();
-    };
-
-    BaseResolver.prototype.check_resolver_prefix = function(depth, path, kind, current_node, current_index) {
-      var index_check, node_check, _ref1;
-      _ref1 = path[depth - 1], node_check = _ref1[0], index_check = _ref1[1];
-      if (typeof node_check === 'string') {
-        if (current_node.tag !== node_check) {
-          return;
-        }
-      } else if (node_check !== null) {
-        if (!(current_node instanceof node_check)) {
-          return;
-        }
-      }
-      if (index_check === true && current_index !== null) {
-        return;
-      }
-      if ((index_check === false || index_check === null) && current_index === null) {
-        return;
-      }
-      if (typeof index_check === 'string') {
-        if (!(current_index instanceof nodes.ScalarNode) && index_check === current_index.value) {
-          return;
-        }
-      } else if (typeof index_check === 'number') {
-        if (index_check !== current_index) {
-          return;
-        }
-      }
-      return true;
-    };
-
-    BaseResolver.prototype.resolve = function(kind, value, implicit) {
-      var empty, exact_paths, k, regexp, resolvers, tag, _i, _len, _ref1, _ref2, _ref3, _ref4;
-      if (kind === nodes.ScalarNode && implicit[0]) {
-        if (value === '') {
-          resolvers = (_ref1 = this.yaml_implicit_resolvers['']) != null ? _ref1 : [];
-        } else {
-          resolvers = (_ref2 = this.yaml_implicit_resolvers[value[0]]) != null ? _ref2 : [];
-        }
-        resolvers = resolvers.concat((_ref3 = this.yaml_implicit_resolvers[null]) != null ? _ref3 : []);
-        for (_i = 0, _len = resolvers.length; _i < _len; _i++) {
-          _ref4 = resolvers[_i], tag = _ref4[0], regexp = _ref4[1];
-          if (value.match(regexp)) {
-            return tag;
-          }
-        }
-        implicit = implicit[1];
-      }
-      empty = true;
-      for (k in this.yaml_path_resolvers) {
-        if ({}[k] == null) {
-          empty = false;
-        }
-      }
-      if (!empty) {
-        exact_paths = this.resolver_exact_paths.slice(-1)[0];
-        if (__indexOf.call(exact_paths, kind) >= 0) {
-          return exact_paths[kind];
-        }
-        if (__indexOf.call(exact_paths, null) >= 0) {
-          return exact_paths[null];
-        }
-      }
-      if (kind === nodes.ScalarNode) {
-        return DEFAULT_SCALAR_TAG;
-      }
-      if (kind === nodes.SequenceNode) {
-        return DEFAULT_SEQUENCE_TAG;
-      }
-      if (kind === nodes.MappingNode) {
-        return DEFAULT_MAPPING_TAG;
-      }
-    };
-
-    return BaseResolver;
-
-  })();
-
-  this.Resolver = (function(_super) {
-    __extends(Resolver, _super);
-
-    function Resolver() {
-      _ref1 = Resolver.__super__.constructor.apply(this, arguments);
-      return _ref1;
-    }
-
-    return Resolver;
-
-  })(this.BaseResolver);
-
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:bool', /^(?:yes|Yes|YES|true|True|TRUE|on|On|ON|no|No|NO|false|False|FALSE|off|Off|OFF)$/, 'yYnNtTfFoO');
-
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:float', /^(?:[-+]?(?:[0-9][0-9_]*)\.[0-9_]*(?:[eE][-+][0-9]+)?|\.[0-9_]+(?:[eE][-+][0-9]+)?|[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*|[-+]?\.(?:inf|Inf|INF)|\.(?:nan|NaN|NAN))$/, '-+0123456789.');
-
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:int', /^(?:[-+]?0b[01_]+|[-+]?0[0-7_]+|[-+]?(?:0|[1-9][0-9_]*)|[-+]?0x[0-9a-fA-F_]+|[-+]?0o[0-7_]+|[-+]?[1-9][0-9_]*(?::[0-5]?[0-9])+)$/, '-+0123456789');
-
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:merge', /^(?:<<)$/, '<');
-
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:null', /^(?:~|null|Null|NULL|)$/, ['~', 'n', 'N', '']);
-
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:timestamp', /^(?:[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]|[0-9][0-9][0-9][0-9]-[0-9][0-9]?-[0-9][0-9]?(?:[Tt]|[\x20\t]+)[0-9][0-9]?:[0-9][0-9]:[0-9][0-9](?:\.[0-9]*)?(?:[\x20\t]*(?:Z|[-+][0-9][0-9]?(?::[0-9][0-9])?))?)$/, '0123456789');
-
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:value', /^(?:=)$/, '=');
-
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:yaml', /^(?:!|&|\*)$/, '!&*');
-
-}).call(this);
-
-},{"./errors":1,"./nodes":13,"./util":4}],18:[function(require,module,exports){
+},{"./errors":1,"./nodes":14,"url":7}],18:[function(require,module,exports){
 (function() {
   var Mark, YAMLError, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9498,7 +9289,216 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],19:[function(require,module,exports){
+},{"./errors":1,"./nodes":14}],21:[function(require,module,exports){
+(function() {
+  var YAMLError, nodes, util, _ref, _ref1,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+  nodes = require('./nodes');
+
+  util = require('./util');
+
+  YAMLError = require('./errors').YAMLError;
+
+  this.ResolverError = (function(_super) {
+    __extends(ResolverError, _super);
+
+    function ResolverError() {
+      _ref = ResolverError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return ResolverError;
+
+  })(YAMLError);
+
+  this.BaseResolver = (function() {
+    var DEFAULT_MAPPING_TAG, DEFAULT_SCALAR_TAG, DEFAULT_SEQUENCE_TAG;
+
+    DEFAULT_SCALAR_TAG = 'tag:yaml.org,2002:str';
+
+    DEFAULT_SEQUENCE_TAG = 'tag:yaml.org,2002:seq';
+
+    DEFAULT_MAPPING_TAG = 'tag:yaml.org,2002:map';
+
+    BaseResolver.prototype.yaml_implicit_resolvers = {};
+
+    BaseResolver.prototype.yaml_path_resolvers = {};
+
+    BaseResolver.add_implicit_resolver = function(tag, regexp, first) {
+      var char, _base, _i, _len, _results;
+      if (first == null) {
+        first = [null];
+      }
+      if (!this.prototype.hasOwnProperty('yaml_implicit_resolvers')) {
+        this.prototype.yaml_implicit_resolvers = util.extend({}, this.prototype.yaml_implicit_resolvers);
+      }
+      _results = [];
+      for (_i = 0, _len = first.length; _i < _len; _i++) {
+        char = first[_i];
+        _results.push(((_base = this.prototype.yaml_implicit_resolvers)[char] != null ? (_base = this.prototype.yaml_implicit_resolvers)[char] : _base[char] = []).push([tag, regexp]));
+      }
+      return _results;
+    };
+
+    function BaseResolver() {
+      this.resolver_exact_paths = [];
+      this.resolver_prefix_paths = [];
+    }
+
+    BaseResolver.prototype.descend_resolver = function(current_node, current_index) {
+      var depth, exact_paths, kind, path, prefix_paths, _i, _j, _len, _len1, _ref1, _ref2, _ref3, _ref4;
+      if (util.is_empty(this.yaml_path_resolvers)) {
+        return;
+      }
+      exact_paths = {};
+      prefix_paths = [];
+      if (current_node) {
+        depth = this.resolver_prefix_paths.length;
+        _ref1 = this.resolver_prefix_paths.slice(-1)[0];
+        for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+          _ref2 = _ref1[_i], path = _ref2[0], kind = _ref2[1];
+          if (this.check_resolver_prefix(depth, path, kind, current_node, current_index)) {
+            if (path.length > depth) {
+              prefix_paths.push([path, kind]);
+            } else {
+              exact_paths[kind] = this.yaml_path_resolvers[path][kind];
+            }
+          }
+        }
+      } else {
+        _ref3 = this.yaml_path_resolvers;
+        for (_j = 0, _len1 = _ref3.length; _j < _len1; _j++) {
+          _ref4 = _ref3[_j], path = _ref4[0], kind = _ref4[1];
+          if (!path) {
+            exact_paths[kind] = this.yaml_path_resolvers[path][kind];
+          } else {
+            prefix_paths.push([path, kind]);
+          }
+        }
+      }
+      this.resolver_exact_paths.push(exact_paths);
+      return this.resolver_prefix_paths.push(prefix_paths);
+    };
+
+    BaseResolver.prototype.ascend_resolver = function() {
+      if (util.is_empty(this.yaml_path_resolvers)) {
+        return;
+      }
+      this.resolver_exact_paths.pop();
+      return this.resolver_prefix_paths.pop();
+    };
+
+    BaseResolver.prototype.check_resolver_prefix = function(depth, path, kind, current_node, current_index) {
+      var index_check, node_check, _ref1;
+      _ref1 = path[depth - 1], node_check = _ref1[0], index_check = _ref1[1];
+      if (typeof node_check === 'string') {
+        if (current_node.tag !== node_check) {
+          return;
+        }
+      } else if (node_check !== null) {
+        if (!(current_node instanceof node_check)) {
+          return;
+        }
+      }
+      if (index_check === true && current_index !== null) {
+        return;
+      }
+      if ((index_check === false || index_check === null) && current_index === null) {
+        return;
+      }
+      if (typeof index_check === 'string') {
+        if (!(current_index instanceof nodes.ScalarNode) && index_check === current_index.value) {
+          return;
+        }
+      } else if (typeof index_check === 'number') {
+        if (index_check !== current_index) {
+          return;
+        }
+      }
+      return true;
+    };
+
+    BaseResolver.prototype.resolve = function(kind, value, implicit) {
+      var empty, exact_paths, k, regexp, resolvers, tag, _i, _len, _ref1, _ref2, _ref3, _ref4;
+      if (kind === nodes.ScalarNode && implicit[0]) {
+        if (value === '') {
+          resolvers = (_ref1 = this.yaml_implicit_resolvers['']) != null ? _ref1 : [];
+        } else {
+          resolvers = (_ref2 = this.yaml_implicit_resolvers[value[0]]) != null ? _ref2 : [];
+        }
+        resolvers = resolvers.concat((_ref3 = this.yaml_implicit_resolvers[null]) != null ? _ref3 : []);
+        for (_i = 0, _len = resolvers.length; _i < _len; _i++) {
+          _ref4 = resolvers[_i], tag = _ref4[0], regexp = _ref4[1];
+          if (value.match(regexp)) {
+            return tag;
+          }
+        }
+        implicit = implicit[1];
+      }
+      empty = true;
+      for (k in this.yaml_path_resolvers) {
+        if ({}[k] == null) {
+          empty = false;
+        }
+      }
+      if (!empty) {
+        exact_paths = this.resolver_exact_paths.slice(-1)[0];
+        if (__indexOf.call(exact_paths, kind) >= 0) {
+          return exact_paths[kind];
+        }
+        if (__indexOf.call(exact_paths, null) >= 0) {
+          return exact_paths[null];
+        }
+      }
+      if (kind === nodes.ScalarNode) {
+        return DEFAULT_SCALAR_TAG;
+      }
+      if (kind === nodes.SequenceNode) {
+        return DEFAULT_SEQUENCE_TAG;
+      }
+      if (kind === nodes.MappingNode) {
+        return DEFAULT_MAPPING_TAG;
+      }
+    };
+
+    return BaseResolver;
+
+  })();
+
+  this.Resolver = (function(_super) {
+    __extends(Resolver, _super);
+
+    function Resolver() {
+      _ref1 = Resolver.__super__.constructor.apply(this, arguments);
+      return _ref1;
+    }
+
+    return Resolver;
+
+  })(this.BaseResolver);
+
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:bool', /^(?:yes|Yes|YES|true|True|TRUE|on|On|ON|no|No|NO|false|False|FALSE|off|Off|OFF)$/, 'yYnNtTfFoO');
+
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:float', /^(?:[-+]?(?:[0-9][0-9_]*)\.[0-9_]*(?:[eE][-+][0-9]+)?|\.[0-9_]+(?:[eE][-+][0-9]+)?|[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*|[-+]?\.(?:inf|Inf|INF)|\.(?:nan|NaN|NAN))$/, '-+0123456789.');
+
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:int', /^(?:[-+]?0b[01_]+|[-+]?0[0-7_]+|[-+]?(?:0|[1-9][0-9_]*)|[-+]?0x[0-9a-fA-F_]+|[-+]?0o[0-7_]+|[-+]?[1-9][0-9_]*(?::[0-5]?[0-9])+)$/, '-+0123456789');
+
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:merge', /^(?:<<)$/, '<');
+
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:null', /^(?:~|null|Null|NULL|)$/, ['~', 'n', 'N', '']);
+
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:timestamp', /^(?:[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]|[0-9][0-9][0-9][0-9]-[0-9][0-9]?-[0-9][0-9]?(?:[Tt]|[\x20\t]+)[0-9][0-9]?:[0-9][0-9]:[0-9][0-9](?:\.[0-9]*)?(?:[\x20\t]*(?:Z|[-+][0-9][0-9]?(?::[0-9][0-9])?))?)$/, '0123456789');
+
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:value', /^(?:=)$/, '=');
+
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:yaml', /^(?:!|&|\*)$/, '!&*');
+
+}).call(this);
+
+},{"./errors":1,"./nodes":14,"./util":4}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11105,7 +11105,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],27:[function(require,module,exports){
+},{"./errors":1,"./nodes":14}],27:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11185,7 +11185,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],8:[function(require,module,exports){
+},{"./errors":1,"./nodes":14}],8:[function(require,module,exports){
 
 /**
  * Object#toString() ref for stringify().
@@ -11743,7 +11743,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":29}],28:[function(require,module,exports){
+},{"./composer":15,"./construct":13,"./errors":1,"./events":2,"./loader":17,"./nodes":14,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":29}],28:[function(require,module,exports){
 (function() {
   var nodes, uritemplate,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -12227,7 +12227,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./nodes":13,"uritemplate":30}],22:[function(require,module,exports){
+},{"./nodes":14,"uritemplate":30}],22:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, traits, uritemplate, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -12516,7 +12516,7 @@ function decode(str) {
         throw new exports.ValidationError('while validating root', null, 'empty document', node != null ? node.start_mark : void 0);
       }
       if (!this.isMapping(node)) {
-        throw new exports.ValidationError('while validating root', null, 'document must be a mapping', node.start_mark);
+        throw new exports.ValidationError('while validating root', null, 'document must be a map', node.start_mark);
       }
     };
 
@@ -12531,7 +12531,7 @@ function decode(str) {
         throw new exports.ValidationError('while validating uri parameters', null, 'uri parameters defined when there is no baseUri', baseUriParameters.start_mark);
       }
       if (!this.isNullableMapping(baseUriParameters)) {
-        throw new exports.ValidationError('while validating uri parameters', null, 'base uri parameters must be a mapping', baseUriParameters.start_mark);
+        throw new exports.ValidationError('while validating uri parameters', null, 'base uri parameters must be a map', baseUriParameters.start_mark);
       }
       return this.validate_uri_parameters(this.baseUri, baseUriParameters, false, false, ["version"]);
     };
@@ -12563,7 +12563,7 @@ function decode(str) {
             throw new exports.ValidationError('while validating baseUri', null, uriParameter[0].value + ' parameter not allowed here', uriParameter[0].start_mark);
           }
           if (!(_this.isNullableMapping(uriParameter[1], allowParameterKeys) || _this.isNullableSequence(uriParameter[1], allowParameterKeys))) {
-            throw new exports.ValidationError('while validating baseUri', null, 'URI parameter must be a mapping', uriParameter[0].start_mark);
+            throw new exports.ValidationError('while validating baseUri', null, 'URI parameter must be a map', uriParameter[0].start_mark);
           }
           if (!_this.isNull(uriParameter[1])) {
             _this.valid_common_parameter_properties(uriParameter[1], allowParameterKeys);
@@ -12585,14 +12585,14 @@ function decode(str) {
       }
       return types.forEach(function(type_entry) {
         if (!_this.isMapping(type_entry)) {
-          throw new exports.ValidationError('while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark);
+          throw new exports.ValidationError('while validating resource types', null, 'invalid resourceType definition, it must be a map', type_entry.start_mark);
         }
         return type_entry.value.forEach(function(type) {
           if (_this.isParameterKey(type)) {
             throw new exports.ValidationError('while validating resource types', null, 'parameter key cannot be used as a resource type name', type[0].start_mark);
           }
           if (!_this.isMapping(type[1])) {
-            throw new exports.ValidationError('while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type[1].start_mark);
+            throw new exports.ValidationError('while validating resource types', null, 'invalid resourceType definition, it must be a map', type[1].start_mark);
           }
           return _this.validate_resource(type, true, 'resource type');
         });
@@ -12616,7 +12616,7 @@ function decode(str) {
             throw new exports.ValidationError('while validating traits', null, 'parameter key cannot be used as a trait name', trait[0].start_mark);
           }
           if (!_this.isMapping(trait[1])) {
-            throw new exports.ValidationError('while validating traits', null, 'invalid trait definition, it must be a mapping', trait[1].start_mark);
+            throw new exports.ValidationError('while validating traits', null, 'invalid trait definition, it must be a map', trait[1].start_mark);
           }
           return _this.valid_traits_properties(trait);
         });
@@ -12854,7 +12854,7 @@ function decode(str) {
       var docProperties,
         _this = this;
       if (!this.isMapping(docSection)) {
-        throw new exports.ValidationError('while validating documentation section', null, 'each documentation section must be a mapping', docSection.start_mark);
+        throw new exports.ValidationError('while validating documentation section', null, 'each documentation section must be a map', docSection.start_mark);
       }
       docProperties = {};
       docSection.value.forEach(function(property) {
@@ -12905,7 +12905,7 @@ function decode(str) {
         context = "resource";
       }
       if (!(resource[1] && this.isNullableMapping(resource[1]))) {
-        throw new exports.ValidationError('while validating resources', null, 'resource is not a mapping', resource[1].start_mark);
+        throw new exports.ValidationError('while validating resources', null, 'resource is not a map', resource[1].start_mark);
       }
       if (resource[0].value) {
         try {
@@ -12944,7 +12944,7 @@ function decode(str) {
               switch (canonicalKey) {
                 case "uriParameters":
                   if (!_this.isNullableMapping(property[1])) {
-                    throw new exports.ValidationError('while validating uri parameters', null, 'uri parameters must be a mapping', property[0].start_mark);
+                    throw new exports.ValidationError('while validating uri parameters', null, 'uri parameters must be a map', property[0].start_mark);
                   }
                   _this.validate_uri_parameters(resource[0].value, property[1], allowParameterKeys, allowParameterKeys);
                   break;
@@ -12953,7 +12953,7 @@ function decode(str) {
                     throw new exports.ValidationError('while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark);
                   }
                   if (!_this.isNullableMapping(property[1])) {
-                    throw new exports.ValidationError('while validating uri parameters', null, 'base uri parameters must be a mapping', property[0].start_mark);
+                    throw new exports.ValidationError('while validating uri parameters', null, 'base uri parameters must be a map', property[0].start_mark);
                   }
                   _this.validate_uri_parameters(_this.baseUri, property[1], allowParameterKeys);
                   break;
@@ -12985,7 +12985,7 @@ function decode(str) {
       var secSchemes,
         _this = this;
       if (!this.isSequence(property[1])) {
-        throw new exports.ValidationError('while validating securityScheme', null, "property 'securedBy' must be a list", property[0].start_mark);
+        throw new exports.ValidationError('while validating securityScheme', null, "property 'securedBy' must be an array", property[0].start_mark);
       }
       secSchemes = this.get_list_values(property[1].value);
       if (secSchemes.hasDuplicates()) {
@@ -12994,7 +12994,7 @@ function decode(str) {
       return property[1].value.forEach(function(secScheme) {
         var securitySchemeName;
         if (_this.isSequence(secScheme)) {
-          throw new exports.ValidationError('while validating securityScheme consumption', null, 'securityScheme reference cannot be a list', secScheme.start_mark);
+          throw new exports.ValidationError('while validating securityScheme consumption', null, 'securityScheme reference cannot be an array', secScheme.start_mark);
         }
         if (!_this.isNull(secScheme)) {
           securitySchemeName = _this.key_or_value(secScheme);
@@ -13008,7 +13008,7 @@ function decode(str) {
     Validator.prototype.validate_protocols_property = function(property) {
       var _this = this;
       if (!this.isSequence(property[1])) {
-        throw new exports.ValidationError('while validating protocols', null, 'property must be a sequence', property[0].start_mark);
+        throw new exports.ValidationError('while validating protocols', null, 'property must be an array', property[0].start_mark);
       }
       return property[1].value.forEach(function(protocol) {
         var _ref1;
@@ -13025,7 +13025,7 @@ function decode(str) {
       var typeName,
         _this = this;
       if (!(this.isMapping(property[1]) || this.isString(property[1]))) {
-        throw new exports.ValidationError('while validating resource types', null, "property 'type' must be a string or a mapping", property[0].start_mark);
+        throw new exports.ValidationError('while validating resource types', null, "property 'type' must be a string or a map", property[0].start_mark);
       }
       if (this.isMapping(property[1])) {
         if (property[1].value.length > 1) {
@@ -13042,7 +13042,7 @@ function decode(str) {
       if (this.isMapping(property[1])) {
         return property[1].value.forEach(function(parameter) {
           if (!(_this.isNull(parameter[1]) || _this.isMapping(parameter[1]))) {
-            throw new exports.ValidationError('while validating resource consumption', null, 'resource type parameters must be in a mapping', parameter[1].start_mark);
+            throw new exports.ValidationError('while validating resource consumption', null, 'resource type parameters must be in a map', parameter[1].start_mark);
           }
         });
       }
@@ -13058,7 +13058,7 @@ function decode(str) {
         return;
       }
       if (!this.isMapping(method[1])) {
-        throw new exports.ValidationError('while validating methods', null, "method must be a mapping", method[0].start_mark);
+        throw new exports.ValidationError('while validating methods', null, "method must be a map", method[0].start_mark);
       }
       methodProperties = {};
       return method[1].value.forEach(function(property) {
@@ -13094,7 +13094,7 @@ function decode(str) {
               throw new exports.ValidationError('while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark);
             }
             if (!_this.isNullableMapping(property[1])) {
-              throw new exports.ValidationError('while validating uri parameters', null, 'base uri parameters must be a mapping', property[0].start_mark);
+              throw new exports.ValidationError('while validating uri parameters', null, 'base uri parameters must be a map', property[0].start_mark);
             }
             return _this.validate_uri_parameters(_this.baseUri, property[1], allowParameterKeys);
           case 'usage':
@@ -13119,12 +13119,12 @@ function decode(str) {
         return;
       }
       if (!this.isMapping(responses[1])) {
-        throw new exports.ValidationError('while validating responses', null, "property: 'responses' must be a mapping", responses[0].start_mark);
+        throw new exports.ValidationError('while validating responses', null, "property: 'responses' must be a map", responses[0].start_mark);
       }
       responseValues = {};
       return responses[1].value.forEach(function(response) {
         if (!_this.isNullableMapping(response[1])) {
-          throw new exports.ValidationError('while validating responses', null, "each response must be a mapping", response[1].start_mark);
+          throw new exports.ValidationError('while validating responses', null, 'each response must be a map', response[1].start_mark);
         }
         _this.trackRepeatedProperties(responseValues, _this.canonicalizePropertyName(response[0].value, true), response[0].start_mark, 'while validating responses', "response code already used");
         return _this.validate_response(response, allowParameterKeys);
@@ -13138,12 +13138,12 @@ function decode(str) {
         return;
       }
       if (!this.isMapping(property[1])) {
-        throw new exports.ValidationError('while validating query parameters', null, "property: 'queryParameters' must be a mapping", property[0].start_mark);
+        throw new exports.ValidationError('while validating query parameters', null, "property: 'queryParameters' must be a map", property[0].start_mark);
       }
       queryParameters = {};
       return property[1].value.forEach(function(param) {
         if (!(_this.isNullableMapping(param[1]) || _this.isNullableSequence(param[1]))) {
-          throw new exports.ValidationError('while validating query parameters', null, "each query parameter must be a mapping", param[1].start_mark);
+          throw new exports.ValidationError('while validating query parameters', null, "each query parameter must be a map", param[1].start_mark);
         }
         _this.trackRepeatedProperties(queryParameters, _this.canonicalizePropertyName(param[0].value, true), param[0].start_mark, 'while validating query parameter', "parameter name already used");
         return _this.valid_common_parameter_properties(param[1], allowParameterKeys);
@@ -13157,12 +13157,12 @@ function decode(str) {
         return;
       }
       if (!this.isMapping(property[1])) {
-        throw new exports.ValidationError('while validating query parameters', null, "property: 'formParameters' must be a mapping", property[0].start_mark);
+        throw new exports.ValidationError('while validating query parameters', null, "property: 'formParameters' must be a map", property[0].start_mark);
       }
       formParameters = {};
       return property[1].value.forEach(function(param) {
         if (!(_this.isNullableMapping(param[1]) || _this.isNullableSequence(param[1]))) {
-          throw new exports.ValidationError('while validating query parameters', null, "each form parameter must be a mapping", param[1].start_mark);
+          throw new exports.ValidationError('while validating query parameters', null, 'each form parameter must be a map', param[1].start_mark);
         }
         _this.trackRepeatedProperties(formParameters, _this.canonicalizePropertyName(param[0].value, true), param[0].start_mark, 'while validating form parameter', "parameter name already used");
         return _this.valid_common_parameter_properties(param[1], allowParameterKeys);
@@ -13176,12 +13176,12 @@ function decode(str) {
         return;
       }
       if (!this.isMapping(property[1])) {
-        throw new exports.ValidationError('while validating headers', null, "property: 'headers' must be a mapping", property[0].start_mark);
+        throw new exports.ValidationError('while validating headers', null, "property: 'headers' must be a map", property[0].start_mark);
       }
       headerNames = {};
       return property[1].value.forEach(function(param) {
         if (!(_this.isNullableMapping(param[1]) || _this.isNullableSequence(param[1]))) {
-          throw new exports.ValidationError('while validating query parameters', null, "each header must be a mapping", param[1].start_mark);
+          throw new exports.ValidationError('while validating query parameters', null, "each header must be a map", param[1].start_mark);
         }
         _this.trackRepeatedProperties(headerNames, _this.canonicalizePropertyName(param[0].value, true), param[0].start_mark, 'while validating headers', "header name already used");
         return _this.valid_common_parameter_properties(param[1], allowParameterKeys);
@@ -13193,7 +13193,7 @@ function decode(str) {
         _this = this;
       if (this.isSequence(response[0])) {
         if (!response[0].value.length) {
-          throw new exports.ValidationError('while validating responses', null, "there must be at least one response code", response[0].start_mark);
+          throw new exports.ValidationError('while validating responses', null, 'there must be at least one response code', response[0].start_mark);
         }
         response[0].value.forEach(function(responseCode) {
           if (!(_this.isParameterKey(responseCode) || _this.isInteger(responseCode) || !isNaN(_this.canonicalizePropertyName(responseCode, allowParameterKeys)))) {
@@ -13204,7 +13204,7 @@ function decode(str) {
         throw new exports.ValidationError('while validating responses', null, "each response key must be an integer", response[0].start_mark);
       }
       if (!this.isNullableMapping(response[1])) {
-        throw new exports.ValidationError('while validating responses', null, "each response property must be a mapping", response[0].start_mark);
+        throw new exports.ValidationError('while validating responses', null, "each response property must be a map", response[0].start_mark);
       }
       if (this.isMapping(response[1])) {
         responseProperties = {};
@@ -13218,12 +13218,12 @@ function decode(str) {
                 return _this.validate_body(property, allowParameterKeys, null, true);
               case "description":
                 if (!_this.isScalar(property[1])) {
-                  throw new exports.ValidationError('while validating responses', null, "property description must be a string", response[0].start_mark);
+                  throw new exports.ValidationError('while validating responses', null, 'property description must be a string', response[0].start_mark);
                 }
                 break;
               case "headers":
                 if (!_this.isNullableMapping(property[1])) {
-                  throw new exports.ValidationError('while validating resources', null, "property 'headers' must be a mapping", property[0].start_mark);
+                  throw new exports.ValidationError('while validating resources', null, "property 'headers' must be a map", property[0].start_mark);
                 }
                 return _this.validate_headers(property);
               default:
@@ -13263,7 +13263,7 @@ function decode(str) {
         return;
       }
       if (!this.isMapping(property[1])) {
-        throw new exports.ValidationError('while validating body', null, "property: body specification must be a mapping", property[0].start_mark);
+        throw new exports.ValidationError('while validating body', null, "property: body specification must be a map", property[0].start_mark);
       }
       implicitMode = ["implicit", "forcedImplicit"];
       bodyProperties = {};
@@ -13365,7 +13365,7 @@ function decode(str) {
         switch (key) {
           case "is":
             if (!this.isSequence(property[1])) {
-              throw new exports.ValidationError('while validating resources', null, "property 'is' must be a list", property[0].start_mark);
+              throw new exports.ValidationError('while validating resources', null, "property 'is' must be an array", property[0].start_mark);
             }
             if (!(property[1].value instanceof Array)) {
               throw new exports.ValidationError('while validating trait consumption', null, 'is property must be an array', property[0].start_mark);
@@ -13379,7 +13379,7 @@ function decode(str) {
               if (_this.isMapping(use[1])) {
                 return property[1].value.forEach(function(parameter) {
                   if (!(_this.isNull(parameter[1]) || _this.isMapping(parameter[1]))) {
-                    throw new exports.ValidationError('while validating resource consumption', null, 'type parameters must be in a mapping', parameter[1].start_mark);
+                    throw new exports.ValidationError('while validating resource consumption', null, 'type parameters must be in a map', parameter[1].start_mark);
                   }
                 });
               }
@@ -13519,7 +13519,7 @@ function decode(str) {
       }
       response = [];
       if (!this.isNullableMapping(node)) {
-        throw new exports.ValidationError('while validating resources', null, 'resource is not a mapping', node.start_mark);
+        throw new exports.ValidationError('while validating resources', null, 'resource is not a map', node.start_mark);
       }
       child_resources = this.child_resources(node);
       child_resources.forEach(function(childResource) {
@@ -13616,7 +13616,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./traits":23,"uritemplate":30}],23:[function(require,module,exports){
+},{"./errors":1,"./nodes":14,"./traits":23,"uritemplate":30}],23:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, inflection, nodes, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -13857,7 +13857,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"inflection":31}],29:[function(require,module,exports){
+},{"./errors":1,"./nodes":14,"inflection":31}],29:[function(require,module,exports){
 (function(process,Buffer){/**
  * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
  *
@@ -14423,7 +14423,7 @@ exports.XMLHttpRequest = function() {
 };
 
 })(require("__browserify_process"),require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":14,"__browserify_process":5,"child_process":32,"fs":9,"http":33,"https":34,"url":7}],30:[function(require,module,exports){
+},{"__browserify_buffer":12,"__browserify_process":5,"child_process":32,"fs":9,"http":33,"https":34,"url":7}],30:[function(require,module,exports){
 (function(global){/*global unescape, module, define, window, global*/
 
 /*
@@ -16986,13 +16986,6 @@ module.exports = function(buffer) {
   return buffer instanceof Uint8Array;
 }
 
-},{}],47:[function(require,module,exports){
-module.exports = subarray
-
-function subarray(buf, from, to) {
-  return buf.subarray(from || 0, to || buf.length)
-}
-
 },{}],48:[function(require,module,exports){
 module.exports = join
 
@@ -17029,6 +17022,13 @@ function get_length(targets) {
     size += targets[i].byteLength
   }
   return size
+}
+
+},{}],47:[function(require,module,exports){
+module.exports = subarray
+
+function subarray(buf, from, to) {
+  return buf.subarray(from || 0, to || buf.length)
 }
 
 },{}],49:[function(require,module,exports){
@@ -17548,5 +17548,5 @@ function reduced(list) {
   return out
 }
 
-},{}]},{},[10,12,15,1,2,16,17,13,20,26,11,18,21,24,19,25,27,3,23,28,4,22,6])
+},{}]},{},[10,15,13,1,16,2,17,14,20,26,11,18,21,24,19,25,27,3,23,28,4,22,6])
 ;

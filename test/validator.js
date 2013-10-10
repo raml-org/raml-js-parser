@@ -37,14 +37,14 @@ describe('Validator', function () {
         ].join('\n')).should.be.fulfilled.and.notify(done);
     });
 
-    it('should fail if protocols property is not a sequence at root level', function (done) {
+    it('should fail if protocols property is not an array at root level', function (done) {
         raml.load([
             '#%RAML 0.8',
             '---',
             'title: Example',
             'baseUri: http://api.com',
             'protocols: HTTP, HTTPS'
-        ].join('\n')).should.be.rejected.with('property must be a sequence').and.notify(done);
+        ].join('\n')).should.be.rejected.with('property must be an array').and.notify(done);
     });
 
     it('should fail if protocols property contains not-a-string values at root level', function (done) {
@@ -110,7 +110,7 @@ describe('Validator', function () {
         ].join('\n')).should.be.fulfilled.and.notify(done);
     });
 
-    it('should fail if protocols property is not a sequence at method level', function (done) {
+    it('should fail if protocols property is not an array at method level', function (done) {
         raml.load([
             '#%RAML 0.8',
             '---',
@@ -119,7 +119,7 @@ describe('Validator', function () {
             '/:',
             '   get:',
             '       protocols: HTTP, HTTPS'
-        ].join('\n')).should.be.rejected.with('property must be a sequence').and.notify(done);
+        ].join('\n')).should.be.rejected.with('property must be an array').and.notify(done);
     });
 
     it('should fail if protocols property contains not-a-string values at method level', function (done) {
