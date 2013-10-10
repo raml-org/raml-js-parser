@@ -4334,7 +4334,7 @@ describe('Parser', function() {
         '/:',
         '  type: invalidType'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/there is no type named invalidType/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/there is no resource type named invalidType/).and.notify(done);
     });
 
     it('should succeed if resource type is missing displayName', function(done) {
@@ -4431,7 +4431,7 @@ describe('Parser', function() {
       '/resource:',
       '  type: {}'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/missing type name in type property/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/missing resource type name in type property/).and.notify(done);
     });
 
     it('should fail if a resource type inherits from a missing type', function(done) {
@@ -4447,7 +4447,7 @@ describe('Parser', function() {
         '/:',
         '  type: collection'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/there is no type named missing/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/there is no resource type named missing/).and.notify(done);
     });
 
     it('should fail if a resource type applies a missing trait', function(done) {

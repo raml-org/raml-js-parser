@@ -530,19 +530,23 @@ class @Validator
 
   validate_type_property: (property, allowParameterKeys) ->
     unless @isMapping(property[1]) or @isString(property[1])
-      throw new exports.ValidationError 'while validating resources', null, "property 'type' must be a string or a mapping", property[0].start_mark
-    if @isMapping(property[1])
+      throw new exports.ValidationError 'while validating resource types', null, "property 'type' must be a string or a mapping", property[0].start_mark
+
+    if @isMapping property[1]
       if property[1].value.length > 1
-        throw new exports.ValidationError 'while validating resources', null, "a resource or resourceType can inherit from a single resourceType", property[0].start_mark
+        throw new exports.ValidationError 'while validating resource types', null, 'a resource or resourceType can inherit from a single resourceType', property[0].start_mark
+
     typeName = @key_or_value property[1]
     unless typeName
-      throw new exports.ValidationError 'while validating resource consumption', null, 'missing type name in type property', property[1].start_mark
-    unless @get_type typeName
-      throw new exports.ValidationError 'while validating resource consumption', null, 'there is no type named ' + typeName, property[1].start_mark
+      throw new exports.ValidationError 'while validating resource type consumption', null, 'missing resource type name in type property', property[1].start_mark
+
+    unless @isParameterKeyValue(typeName) or @get_type(typeName)
+      throw new exports.ValidationError 'while validating resource type consumption', null, "there is no resource type named #{typeName}", property[1].start_mark
+
     if @isMapping property[1]
       property[1].value.forEach (parameter) =>
         unless @isNull(parameter[1]) or @isMapping(parameter[1])
-          throw new exports.ValidationError 'while validating resource consumption', null, 'type parameters must be in a mapping', parameter[1].start_mark
+          throw new exports.ValidationError 'while validating resource consumption', null, 'resource type parameters must be in a mapping', parameter[1].start_mark
 
   validate_method: (method, allowParameterKeys, context = 'method') ->
     if @isNull method[1]
