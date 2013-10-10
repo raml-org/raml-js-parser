@@ -24,7 +24,7 @@ class @Joiner
       resources.forEach (resource) =>
         relativeUriName = new nodes.ScalarNode 'tag:yaml.org,2002:str', 'relativeUri', resource[0].start_mark, resource[1].end_mark
         relativeUriValue = new nodes.ScalarNode 'tag:yaml.org,2002:str', resource[0].value, resource[0].start_mark, resource[1].end_mark
-        # if the resource is null create a mapping in its place
+        # if the resource is null create a map in its place
         if resource[1].tag is "tag:yaml.org,2002:null"
           resource[1] = new nodes.MappingNode 'tag:yaml.org,2002:map', [], resource[0].start_mark, resource[1].end_mark
         resource[1].value.push [ relativeUriName, relativeUriValue ]

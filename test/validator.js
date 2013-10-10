@@ -5,12 +5,13 @@
 if (typeof window === 'undefined') {
     var raml           = require('../lib/raml.js');
     var chai           = require('chai');
-    var expect         = chai.expect;
-    var should         = chai.should();
     var chaiAsPromised = require('chai-as-promised');
+
+    chai.should();
     chai.use(chaiAsPromised);
 } else {
     var raml           = RAML.Parser;
+
     chai.should();
 }
 
@@ -36,14 +37,14 @@ describe('Validator', function () {
         ].join('\n')).should.be.fulfilled.and.notify(done);
     });
 
-    it('should fail if protocols property is not a sequence at root level', function (done) {
+    it('should fail if protocols property is not an array at root level', function (done) {
         raml.load([
             '#%RAML 0.8',
             '---',
             'title: Example',
             'baseUri: http://api.com',
             'protocols: HTTP, HTTPS'
-        ].join('\n')).should.be.rejected.with('property must be a sequence').and.notify(done);
+        ].join('\n')).should.be.rejected.with('property must be an array').and.notify(done);
     });
 
     it('should fail if protocols property contains not-a-string values at root level', function (done) {
@@ -109,7 +110,7 @@ describe('Validator', function () {
         ].join('\n')).should.be.fulfilled.and.notify(done);
     });
 
-    it('should fail if protocols property is not a sequence at method level', function (done) {
+    it('should fail if protocols property is not an array at method level', function (done) {
         raml.load([
             '#%RAML 0.8',
             '---',
@@ -118,7 +119,7 @@ describe('Validator', function () {
             '/:',
             '   get:',
             '       protocols: HTTP, HTTPS'
-        ].join('\n')).should.be.rejected.with('property must be a sequence').and.notify(done);
+        ].join('\n')).should.be.rejected.with('property must be an array').and.notify(done);
     });
 
     it('should fail if protocols property contains not-a-string values at method level', function (done) {
@@ -200,7 +201,7 @@ describe('Validator', function () {
         ].join('\n')).should.be.rejected.with('property: \'protocols\' is invalid in a resource').and.notify(done);
     });
 
-    it('should not allow parameters to be used as a name for resource type', function (done) {
+    it('should not allow parameter key to be used as a name for resource type', function (done) {
         raml.load([
             '#%RAML 0.8',
             '---',
@@ -210,7 +211,7 @@ describe('Validator', function () {
         ].join('\n')).should.be.rejected.with('parameter key cannot be used as a resource type name').and.notify(done);
     });
 
-    it('should not allow parameters to be used as a name for trait', function (done) {
+    it('should not allow parameter key to be used as a name for trait', function (done) {
         raml.load([
             '#%RAML 0.8',
             '---',
@@ -218,5 +219,28 @@ describe('Validator', function () {
             'traits:',
             '   - <<traitName>>: {}'
         ].join('\n')).should.be.rejected.with('parameter key cannot be used as a trait name').and.notify(done);
+    });
+
+    it('should allow use parameter key as a trait name within resource type', function (done) {
+        raml.load([
+            '#%RAML 0.8',
+            '---',
+            'title: Example',
+            'resourceTypes:',
+            '   - resourceType1:',
+            '       is:',
+            '           - <<traitName>>'
+        ].join('\n')).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should allow use parameter key as a resource type name within resource type', function (done) {
+        raml.load([
+            '#%RAML 0.8',
+            '---',
+            'title: Example',
+            'resourceTypes:',
+            '   - resourceType1:',
+            '       type: <<resourceTypeName>>'
+        ].join('\n')).should.be.fulfilled.and.notify(done);
     });
 });
