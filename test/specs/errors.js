@@ -3,7 +3,7 @@
 'use strict';
 
 if (typeof window === 'undefined') {
-    var raml           = require('../lib/raml.js');
+    var raml           = require('../../lib/raml.js')
     var chai           = require('chai');
     var expect         = chai.expect;
     var should         = chai.should();

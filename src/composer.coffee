@@ -165,6 +165,8 @@ class @Composer
     @anchors[anchor] = node if anchor isnt null
     while not @check_event events.MappingEndEvent
       item_key   = @compose_node node
+      unless @isScalar(item_key)
+        throw new exports.ComposerError 'while composing mapping key', null, "only scalar map keys are allowed in RAML" , item_key.start_mark
       item_value = @compose_node node, item_key
       node.value.push [item_key, item_value]
     end_event = @get_event()

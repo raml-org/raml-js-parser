@@ -1,7 +1,7 @@
 "use strict";
 
 if (typeof window === 'undefined') {
-  var raml = require('../lib/raml.js')
+  var raml = require('../../lib/raml.js')
   var chai = require('chai')
     , expect = chai.expect
     , should = chai.should();

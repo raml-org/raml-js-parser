@@ -66,7 +66,7 @@ module.exports = function(grunt) {
       all: {
         options: {
           urls: [
-            'http://localhost:9001/test/parser.html'
+            'http://localhost:9001/test/specs/parser.html'
           ],
         reporter: 'dot'
         }
@@ -78,7 +78,7 @@ module.exports = function(grunt) {
             reporter: 'dot',
             bail: true
         },
-        all: ['test/*.js']
+        all: ['test/specs/*.js']
     }
   });
 
