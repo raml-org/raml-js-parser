@@ -37,6 +37,7 @@ describe('Transformations', function () {
             ],
             resources: [
                 {
+                    relativeUriPathSegments: [ ],
                     relativeUri: '/',
                     methods: [
                         {
@@ -85,6 +86,7 @@ describe('Transformations', function () {
             ],
             resources: [
                 {
+                    relativeUriPathSegments: [ ],
                     relativeUri: '/',
                     methods: [
                         {
@@ -130,6 +132,7 @@ describe('Transformations', function () {
             ],
             resources: [
                 {
+                    relativeUriPathSegments: [ ],
                     relativeUri: '/',
                     methods: [
                         {

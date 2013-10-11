@@ -101,6 +101,7 @@ describe('Traits', function () {
                             trait: 'trait1'
                         }
                     },
+                    relativeUriPathSegments: [ "tags" ],
                     relativeUri: '/tags',
                     methods: [
                         {
