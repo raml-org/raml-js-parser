@@ -20,7 +20,32 @@ describe('Regressions', function () {
 
         raml.load(definition).should.be.rejected.with(/Unsupported RAML version: \'#%RAML 0.1\'/).and.notify(done);
     });
+    it('should fail with correct error message on hex values', function(done) {
+        var definition = [
+            '#%RAML 0.8',
+            'some_key: "some value \\x0t"'
+        ].join('\n');
 
+        raml.load(definition).should.be.rejected.with(/expected escape sequence of 2 hexadecimal numbers, but found t/).and.notify(done);
+    });
+    it('should fail with correct error message on hex values', function(done) {
+        var definition = [
+            '#%RAML 0.8',
+            'some_key: ? something : something'
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/mapping keys are not allowed here/).and.notify(done);
+    });
+    it('should fail with correct error message on hex values', function(done) {
+        var definition = [
+            '#%RAML 0.8',
+            'some_key: "',
+            '...',
+            '---'
+        ].join('\n');
+
+        raml.load(definition).should.be.rejected.with(/found unexpected document separator/).and.notify(done);
+    });
     it('should fail if baseUriParameter is not a map', function(done) {
         var definition = [
             '#%RAML 0.8',
@@ -35,7 +60,6 @@ describe('Regressions', function () {
 
         raml.load(definition).should.be.rejected.with(/parameter must be a map/).and.notify(done);
     });
-
     it('should not fail to parse an empty trait', function(done) {
         var definition = [
             '#%RAML 0.8',
