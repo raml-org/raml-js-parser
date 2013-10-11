@@ -91,7 +91,7 @@ class @Composer
 
     @descend_resolver parent, index
     if @check_event events.ScalarEvent
-      node = @compose_scalar_node anchor, index
+      node = @compose_scalar_node anchor
     else if @check_event events.SequenceStartEvent
       node = @compose_sequence_node anchor
     else if @check_event events.MappingStartEvent
