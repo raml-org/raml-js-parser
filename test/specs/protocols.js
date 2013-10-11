@@ -46,6 +46,7 @@ describe('Protocols', function () {
             ],
             resources: [
                 {
+                    relativeUriPathSegments: [ ],
                     relativeUri: '/',
                     methods: [
                         {
@@ -93,6 +94,7 @@ describe('Protocols', function () {
             ],
             resources: [
                 {
+                    relativeUriPathSegments: [ ],
                     relativeUri: '/',
                     methods: [
                         {

@@ -1,5 +1,6 @@
 uritemplate = require 'uritemplate'
 nodes       = require './nodes'
+url         = require 'url'
 
 ###
    Applies transformations to the RAML
@@ -49,14 +50,19 @@ class @Transformations
 
   findAndInsertMissinngBaseUriParameters: (resources) ->
     if resources?.length
-      resources.forEach (resource) =>
+      for resource in resources
+        relativeUri = url.parse resource.relativeUri
+        pathParts = relativeUri.path.split('\/')
+        pathParts.shift() while !pathParts[0] and pathParts.length
+        resource.relativeUriPathSegments = pathParts
+
         template = uritemplate.parse resource.relativeUri
         expressions = template.expressions.filter((expr) -> return 'templateText' of expr).map (expression) -> expression.templateText
 
         if expressions.length
           resource.uriParameters = {} unless resource.uriParameters
 
-        expressions.forEach (parameterName) ->
+        for parameterName in expressions
           unless parameterName of resource.uriParameters
             resource.uriParameters[parameterName] =
             {
@@ -64,6 +70,7 @@ class @Transformations
               required: true,
               displayName: parameterName
             }
+
         @findAndInsertMissinngBaseUriParameters resource.resources
 
   ###

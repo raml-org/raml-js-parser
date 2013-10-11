@@ -78,6 +78,7 @@ describe('Resource Types', function () {
                 {
                     type: 'b',
                     relativeUri: '/',
+                    relativeUriPathSegments: [ ],
                     methods: [
                         {
                             method: 'get',
@@ -123,6 +124,7 @@ describe('Resource Types', function () {
             ],
             resources: [
                 {
+                    relativeUriPathSegments: [ ],
                     relativeUri: '/',
                     type: {
                         resourceType1: {
