@@ -124,7 +124,7 @@ describe('Parser', function() {
         '[1,2]: v1'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/keys can only be strings/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/only scalar map keys are allowed in RAML/).and.notify(done);
     });
   });
 
@@ -2198,23 +2198,7 @@ describe('Parser', function() {
         ''
       ].join('\n');
 
-      var expected = {
-        title: 'Test',
-        resources: [{
-          displayName: 'A',
-          relativeUri: '/foo',
-          methods:[{
-            description: 'Blah',
-            responses: {
-              200: { description: 'Blah Blah'},
-              210: { description: 'Blah Blah'}
-            },
-            method: 'get'
-          }]
-        }]
-      };
-
-      raml.load(definition).should.become(expected).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/only scalar map keys are allowed in RAML/).and.notify(done);
     });
 
     it('should succeed with null response', function(done) {
@@ -2281,23 +2265,7 @@ describe('Parser', function() {
         ''
       ].join('\n');
 
-      var expected = {
-        title: 'Test',
-        resources: [{
-          displayName: 'A',
-          relativeUri: '/foo',
-          methods:[{
-            description: 'Blah',
-            responses: {
-              200: { description: 'Blah Blah'},
-              210: { description: 'Blah Blah'}
-            },
-            method: 'get'
-          }]
-        }]
-      };
-
-      raml.load(definition).should.become(expected).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/only scalar map keys are allowed in RAML/).and.notify(done);
     });
 
     it('should overwrite arrays as keys with new single node', function(done) {
@@ -2317,23 +2285,7 @@ describe('Parser', function() {
         ''
       ].join('\n');
 
-      var expected = {
-        title: 'Test',
-        resources: [{
-          displayName: 'A',
-          relativeUri: '/foo',
-          methods:[{
-            description: 'Blah',
-            responses: {
-              200: { description: 'Foo Foo'},
-              210: { description: 'Blah Blah'}
-            },
-            method: 'get'
-          }]
-        }]
-      };
-
-      raml.load(definition).should.become(expected).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/only scalar map keys are allowed in RAML/).and.notify(done);
     });
 
     it('should fail to load a yaml with hash as key', function(done) {
@@ -2351,7 +2303,7 @@ describe('Parser', function() {
         ''
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/each response key must be an integer/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/only scalar map keys are allowed in RAML/).and.notify(done);
     });
   });
 
@@ -6952,7 +6904,7 @@ describe('Parser', function() {
         '    responses:',
         '     [string]:'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/each response key must be an integer/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/only scalar map keys are allowed in RAML/).and.notify(done);
     });
   });
 

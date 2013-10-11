@@ -340,9 +340,6 @@ class @Validator
 
     if node?.value
       node.value.forEach (property) =>
-        unless @isString property[0]
-          throw new exports.ValidationError 'while validating root properties', null, 'keys can only be strings', property[0].start_mark
-
         if property[0].value.match(/^\//)
           @trackRepeatedProperties(rootProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating root properties', "resource already declared")
         else
@@ -416,9 +413,6 @@ class @Validator
     docProperties = {}
     docSection.value.forEach (property) =>
       @trackRepeatedProperties(docProperties, property[0].value, property[0].start_mark, 'while validating documentation section', "property already used")
-
-      unless @isScalar(property[0])
-        throw new exports.ValidationError 'while validating documentation section', null, 'keys can only be strings', property[0].start_mark
       switch property[0].value
         when "title"
           unless @isScalar(property[1]) and not @isNull(property[1])
