@@ -58,11 +58,11 @@ class @BaseConstructor
   construct_object: (node) ->
     if node.unique_id of @constructed_objects
       return @constructed_objects[node.unique_id]
-        
+
     if node.unique_id in @constructing_nodes
       throw new exports.ConstructorError null, null, \
         'found unconstructable recursive node', node.start_mark
-      
+
     @constructing_nodes.push node.unique_id
 
     constructor = null
@@ -101,13 +101,13 @@ class @BaseConstructor
   construct_sequence: (node) ->
     if not ( node instanceof nodes.SequenceNode )
       throw new exports.ConstructorError null, null, \
-        "expected a sequence node but found #{node.id}", node.start_mark
+        "expected an array node but found #{node.id}", node.start_mark
     @construct_object child for child in node.value
 
   construct_mapping: (node) ->
     if not ( node instanceof nodes.MappingNode )
       throw new exports.ConstructorError null, null, \
-        "expected a mapping node but found #{node.id}", node.start_mark
+        "expected a map node but found #{node.id}", node.start_mark
     mapping = {}
     for [key_node, value_node] in node.value
       key = @construct_object key_node
@@ -123,7 +123,7 @@ class @BaseConstructor
           key_item_value = @construct_object key_item
           mapping[key_item_value] = value
       else if typeof key is 'object'
-        throw new exports.ConstructorError 'while constructing a mapping', \
+        throw new exports.ConstructorError 'while constructing a map', \
           node.start_mark, 'found unhashable key', key_node.start_mark
       else
         mapping[key] = value
@@ -132,7 +132,7 @@ class @BaseConstructor
   construct_pairs: (node) ->
     if not ( node instanceof nodes.MappingNode )
       throw new exports.ConstructorError null, null, \
-        "expected a mapping node but found #{node.id}", node.start_mark
+        "expected a map node but found #{node.id}", node.start_mark
     pairs = []
     for [key_node, value_node] in node.value
       key = @construct_object key_node
@@ -218,15 +218,15 @@ class @Constructor extends @BaseConstructor
           for subnode in value_node.value
             if not (subnode instanceof nodes.MappingNode)
               throw new exports.ConstructorError \
-                'while constructing a mapping', node.start_mark,
-                "expected a mapping for merging, but found #{subnode.id}", subnode.start_mark 
+                'while constructing a map', node.start_mark,
+                "expected a map for merging, but found #{subnode.id}", subnode.start_mark
             @flatten_mapping subnode
             submerge.push subnode.value
           submerge.reverse()
           merge = merge.concat value for value in submerge
         else
-          throw new exports.ConstructorError 'while constructing a mapping',
-            node.start_mark, "expected a mapping or list of mappings for
+          throw new exports.ConstructorError 'while constructing a map',
+            node.start_mark, "expected a map or an array of maps for
             merging but found #{value_node.id}", value_node.start_mark
       else if key_node.tag == 'tag:yaml.org,2002:value'
         key_node.tag = 'tag:yaml.org,2002:str'
@@ -337,19 +337,19 @@ class @Constructor extends @BaseConstructor
   construct_yaml_pair_list: (type, node) ->
     list = []
     throw new exports.ConstructorError "while constructing #{type}", \
-      node.start_mark, "expected a sequence but found #{node.id}", \
+      node.start_mark, "expected an array but found #{node.id}", \
       node.start_mark unless node instanceof nodes.SequenceNode
 
     @defer =>
       for subnode in node.value
         throw new exports.ConstructorError "while constructing #{type}", \
           node.start_mark, \
-          "expected a mapping of length 1 but found #{subnode.id}", \
+          "expected a map of length 1 but found #{subnode.id}", \
           subnode.start_mark unless subnode instanceof nodes.MappingNode
 
         throw new exports.ConstructorError "while constructing #{type}", \
           node.start_mark, \
-          "expected a mapping of length 1 but found #{subnode.id}", \
+          "expected a map of length 1 but found #{subnode.id}", \
           subnode.start_mark unless subnode.value.length is 1
 
         [key_node, value_node] = subnode.value[0]
@@ -387,7 +387,7 @@ class @Constructor extends @BaseConstructor
     @defer =>
       data[key] = value for key, value of @construct_mapping node, true
     return data
-    
+
   construct_undefined: (node) ->
     throw new exports.ConstructorError null, null,
       "could not determine a constructor for the tag #{node.tag}",
@@ -431,7 +431,7 @@ class @Constructor extends @BaseConstructor
 
 @Constructor.add_constructor null,
   @Constructor::construct_undefined
-  
+
 module.exports.Constructor = @Constructor
 
 module.exports.ConstructorError = @ConstructorError

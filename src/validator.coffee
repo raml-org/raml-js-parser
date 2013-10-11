@@ -167,7 +167,7 @@ class @Validator
       throw new exports.ValidationError 'while validating root', null, 'empty document', node?.start_mark
 
     unless @isMapping node
-      throw new exports.ValidationError 'while validating root', null, 'document must be a mapping', node.start_mark
+      throw new exports.ValidationError 'while validating root', null, 'document must be a map', node.start_mark
 
   validate_base_uri_parameters: (node) ->
     baseUri           = @get_property node, /^baseUri$/
@@ -180,7 +180,7 @@ class @Validator
       throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', baseUriParameters.start_mark
 
     unless @isNullableMapping baseUriParameters
-      throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a mapping', baseUriParameters.start_mark
+      throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a map', baseUriParameters.start_mark
 
     @validate_uri_parameters @baseUri, baseUriParameters, false, false, [ "version" ]
 
@@ -199,7 +199,7 @@ class @Validator
         if parameterName in reservedNames
           throw new exports.ValidationError 'while validating baseUri', null, uriParameter[0].value + ' parameter not allowed here', uriParameter[0].start_mark
         unless @isNullableMapping(uriParameter[1], allowParameterKeys) or @isNullableSequence(uriParameter[1], allowParameterKeys)
-          throw new exports.ValidationError 'while validating baseUri', null, 'URI parameter must be a mapping', uriParameter[0].start_mark
+          throw new exports.ValidationError 'while validating baseUri', null, 'URI parameter must be a map', uriParameter[0].start_mark
         unless @isNull(uriParameter[1])
           @valid_common_parameter_properties uriParameter[1], allowParameterKeys
         unless skipParameterUseCheck or @isParameterKey(uriParameter) or parameterName in expressions
@@ -213,14 +213,14 @@ class @Validator
 
     types.forEach (type_entry) =>
       unless @isMapping type_entry
-        throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type_entry.start_mark
+        throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a map', type_entry.start_mark
 
       type_entry.value.forEach (type) =>
         if @isParameterKey type
           throw new exports.ValidationError 'while validating resource types', null, 'parameter key cannot be used as a resource type name', type[0].start_mark
 
         unless @isMapping type[1]
-          throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a mapping', type[1].start_mark
+          throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a map', type[1].start_mark
 
         @validate_resource type, true, 'resource type'
 
@@ -239,7 +239,7 @@ class @Validator
           throw new exports.ValidationError 'while validating traits', null, 'parameter key cannot be used as a trait name', trait[0].start_mark
 
         unless @isMapping trait[1]
-          throw new exports.ValidationError 'while validating traits', null, 'invalid trait definition, it must be a mapping', trait[1].start_mark
+          throw new exports.ValidationError 'while validating traits', null, 'invalid trait definition, it must be a map', trait[1].start_mark
 
         @valid_traits_properties trait
 
@@ -412,7 +412,7 @@ class @Validator
 
   validate_doc_section: (docSection) ->
     unless @isMapping docSection
-      throw new exports.ValidationError 'while validating documentation section', null, 'each documentation section must be a mapping', docSection.start_mark
+      throw new exports.ValidationError 'while validating documentation section', null, 'each documentation section must be a map', docSection.start_mark
     docProperties = {}
     docSection.value.forEach (property) =>
       @trackRepeatedProperties(docProperties, property[0].value, property[0].start_mark, 'while validating documentation section', "property already used")
@@ -442,7 +442,7 @@ class @Validator
 
   validate_resource: (resource, allowParameterKeys = false, context = "resource") ->
     unless resource[1] and @isNullableMapping(resource[1])
-      throw new exports.ValidationError 'while validating resources', null, 'resource is not a mapping', resource[1].start_mark
+      throw new exports.ValidationError 'while validating resources', null, 'resource is not a map', resource[1].start_mark
     if resource[0].value
       try
         template = uritemplate.parse resource[0].value
@@ -456,7 +456,7 @@ class @Validator
       resource[1].value.forEach (property) =>
         if property[0].value.match(/^\//)
           @trackRepeatedProperties(resourceProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating resource', "resource already declared")
-        else if property[0].value.match(/^(get|post|put|delete|head|patch|options)\??$/)
+        else if @isHttpMethod property[0].value, allowParameterKeys
           @trackRepeatedProperties(resourceProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating resource', "method already declared")
         else
           @trackRepeatedProperties(resourceProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating resource', "property already used")
@@ -466,7 +466,7 @@ class @Validator
             if allowParameterKeys
               throw new exports.ValidationError 'while validating trait properties', null, 'resource type cannot define child resources', property[0].start_mark
             @validate_resource property, allowParameterKeys
-          else if property[0].value.match(new RegExp("^(get|post|put|delete|head|patch|options)#{ if allowParameterKeys then '\\??' else '' }$"))
+          else if @isHttpMethod property[0].value, allowParameterKeys
             @validate_method property, allowParameterKeys, 'method'
           else
             key = property[0].value
@@ -477,13 +477,13 @@ class @Validator
             switch canonicalKey
               when "uriParameters"
                 unless @isNullableMapping(property[1])
-                  throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters must be a mapping', property[0].start_mark
+                  throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters must be a map', property[0].start_mark
                 @validate_uri_parameters resource[0].value, property[1], allowParameterKeys, allowParameterKeys
               when "baseUriParameters"
                 unless @baseUri
                   throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
                 unless @isNullableMapping(property[1])
-                  throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a mapping', property[0].start_mark
+                  throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a map', property[0].start_mark
                 @validate_uri_parameters @baseUri, property[1], allowParameterKeys
               else
                 valid = false
@@ -503,7 +503,7 @@ class @Validator
 
   validate_secured_by: (property) ->
     unless @isSequence property[1]
-      throw new exports.ValidationError 'while validating securityScheme', null, "property 'securedBy' must be a list", property[0].start_mark
+      throw new exports.ValidationError 'while validating securityScheme', null, "property 'securedBy' must be an array", property[0].start_mark
 
     secSchemes = @get_list_values (property[1].value)
     if secSchemes.hasDuplicates()
@@ -511,7 +511,7 @@ class @Validator
 
     property[1].value.forEach (secScheme) =>
       if @isSequence secScheme
-        throw new exports.ValidationError 'while validating securityScheme consumption', null, 'securityScheme reference cannot be a list', secScheme.start_mark
+        throw new exports.ValidationError 'while validating securityScheme consumption', null, 'securityScheme reference cannot be an array', secScheme.start_mark
       unless @isNull secScheme
         securitySchemeName = @key_or_value secScheme
         unless @get_security_scheme securitySchemeName
@@ -519,7 +519,7 @@ class @Validator
 
   validate_protocols_property: (property) ->
     unless @isSequence property[1]
-      throw new exports.ValidationError 'while validating protocols', null, 'property must be a sequence', property[0].start_mark
+      throw new exports.ValidationError 'while validating protocols', null, 'property must be an array', property[0].start_mark
 
     property[1].value.forEach (protocol) =>
         unless @isString protocol
@@ -530,26 +530,30 @@ class @Validator
 
   validate_type_property: (property, allowParameterKeys) ->
     unless @isMapping(property[1]) or @isString(property[1])
-      throw new exports.ValidationError 'while validating resources', null, "property 'type' must be a string or a mapping", property[0].start_mark
-    if @isMapping(property[1])
+      throw new exports.ValidationError 'while validating resource types', null, "property 'type' must be a string or a map", property[0].start_mark
+
+    if @isMapping property[1]
       if property[1].value.length > 1
-        throw new exports.ValidationError 'while validating resources', null, "a resource or resourceType can inherit from a single resourceType", property[0].start_mark
+        throw new exports.ValidationError 'while validating resource types', null, 'a resource or resourceType can inherit from a single resourceType', property[0].start_mark
+
     typeName = @key_or_value property[1]
     unless typeName
-      throw new exports.ValidationError 'while validating resource consumption', null, 'missing type name in type property', property[1].start_mark
-    unless @get_type typeName
-      throw new exports.ValidationError 'while validating resource consumption', null, 'there is no type named ' + typeName, property[1].start_mark
+      throw new exports.ValidationError 'while validating resource type consumption', null, 'missing resource type name in type property', property[1].start_mark
+
+    unless @isParameterKeyValue(typeName) or @get_type(typeName)
+      throw new exports.ValidationError 'while validating resource type consumption', null, "there is no resource type named #{typeName}", property[1].start_mark
+
     if @isMapping property[1]
       property[1].value.forEach (parameter) =>
         unless @isNull(parameter[1]) or @isMapping(parameter[1])
-          throw new exports.ValidationError 'while validating resource consumption', null, 'type parameters must be in a mapping', parameter[1].start_mark
+          throw new exports.ValidationError 'while validating resource consumption', null, 'resource type parameters must be in a map', parameter[1].start_mark
 
   validate_method: (method, allowParameterKeys, context = 'method') ->
     if @isNull method[1]
       return
 
     unless @isMapping method[1]
-      throw new exports.ValidationError 'while validating methods', null, "method must be a mapping", method[0].start_mark
+      throw new exports.ValidationError 'while validating methods', null, "method must be a map", method[0].start_mark
 
     methodProperties = {}
     method[1].value.forEach (property) =>
@@ -587,7 +591,7 @@ class @Validator
             throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
 
           unless @isNullableMapping(property[1])
-            throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a mapping', property[0].start_mark
+            throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a map', property[0].start_mark
 
           @validate_uri_parameters @baseUri, property[1], allowParameterKeys
 
@@ -606,11 +610,11 @@ class @Validator
     if @isNull responses[1]
       return
     unless @isMapping responses[1]
-      throw new exports.ValidationError 'while validating responses', null, "property: 'responses' must be a mapping", responses[0].start_mark
+      throw new exports.ValidationError 'while validating responses', null, "property: 'responses' must be a map", responses[0].start_mark
     responseValues = {}
     responses[1].value.forEach (response) =>
       unless @isNullableMapping response[1]
-        throw new exports.ValidationError 'while validating responses', null, "each response must be a mapping", response[1].start_mark
+        throw new exports.ValidationError 'while validating responses', null, 'each response must be a map', response[1].start_mark
       @trackRepeatedProperties(responseValues, @canonicalizePropertyName(response[0].value, true), response[0].start_mark, 'while validating responses', "response code already used")
       @validate_response response, allowParameterKeys
 
@@ -618,11 +622,11 @@ class @Validator
     if @isNull property[1]
       return
     unless @isMapping property[1]
-      throw new exports.ValidationError 'while validating query parameters', null, "property: 'queryParameters' must be a mapping", property[0].start_mark
+      throw new exports.ValidationError 'while validating query parameters', null, "property: 'queryParameters' must be a map", property[0].start_mark
     queryParameters = {}
     property[1].value.forEach (param) =>
       unless @isNullableMapping(param[1]) or @isNullableSequence(param[1])
-        throw new exports.ValidationError 'while validating query parameters', null, "each query parameter must be a mapping", param[1].start_mark
+        throw new exports.ValidationError 'while validating query parameters', null, "each query parameter must be a map", param[1].start_mark
       @trackRepeatedProperties(queryParameters, @canonicalizePropertyName(param[0].value, true), param[0].start_mark, 'while validating query parameter', "parameter name already used")
       @valid_common_parameter_properties param[1], allowParameterKeys
 
@@ -630,11 +634,11 @@ class @Validator
     if @isNull property[1]
       return
     unless @isMapping property[1]
-      throw new exports.ValidationError 'while validating query parameters', null, "property: 'formParameters' must be a mapping", property[0].start_mark
+      throw new exports.ValidationError 'while validating query parameters', null, "property: 'formParameters' must be a map", property[0].start_mark
     formParameters = {}
     property[1].value.forEach (param) =>
       unless @isNullableMapping(param[1]) or @isNullableSequence(param[1])
-        throw new exports.ValidationError 'while validating query parameters', null, "each form parameter must be a mapping", param[1].start_mark
+        throw new exports.ValidationError 'while validating query parameters', null, 'each form parameter must be a map', param[1].start_mark
       @trackRepeatedProperties(formParameters, @canonicalizePropertyName(param[0].value, true), param[0].start_mark, 'while validating form parameter', "parameter name already used")
       @valid_common_parameter_properties param[1], allowParameterKeys
 
@@ -642,25 +646,25 @@ class @Validator
     if @isNull property[1]
       return
     unless @isMapping property[1]
-      throw new exports.ValidationError 'while validating headers', null, "property: 'headers' must be a mapping", property[0].start_mark
+      throw new exports.ValidationError 'while validating headers', null, "property: 'headers' must be a map", property[0].start_mark
     headerNames = {}
     property[1].value.forEach (param) =>
       unless @isNullableMapping(param[1]) or @isNullableSequence(param[1])
-        throw new exports.ValidationError 'while validating query parameters', null, "each header must be a mapping", param[1].start_mark
+        throw new exports.ValidationError 'while validating query parameters', null, "each header must be a map", param[1].start_mark
       @trackRepeatedProperties(headerNames, @canonicalizePropertyName(param[0].value, true), param[0].start_mark, 'while validating headers', "header name already used")
       @valid_common_parameter_properties param[1], allowParameterKeys
 
   validate_response: (response, allowParameterKeys) ->
     if @isSequence response[0]
       unless response[0].value.length
-        throw new exports.ValidationError 'while validating responses', null, "there must be at least one response code", response[0].start_mark
+        throw new exports.ValidationError 'while validating responses', null, 'there must be at least one response code', response[0].start_mark
       response[0].value.forEach (responseCode) =>
         unless @isParameterKey(responseCode) or @isInteger(responseCode) or !isNaN(@canonicalizePropertyName(responseCode, allowParameterKeys))
           throw new exports.ValidationError 'while validating responses', null, "each response key must be an integer", responseCode.start_mark
     else unless @isParameterKey(response) or @isInteger(response[0]) or !isNaN(@canonicalizePropertyName(response[0].value, allowParameterKeys))
       throw new exports.ValidationError 'while validating responses', null, "each response key must be an integer", response[0].start_mark
     unless @isNullableMapping response[1]
-      throw new exports.ValidationError 'while validating responses', null, "each response property must be a mapping", response[0].start_mark
+      throw new exports.ValidationError 'while validating responses', null, "each response property must be a map", response[0].start_mark
 
     if @isMapping response[1]
       responseProperties = {}
@@ -673,13 +677,19 @@ class @Validator
               @validate_body property, allowParameterKeys, null, true
             when "description"
               unless @isScalar(property[1])
-                throw new exports.ValidationError 'while validating responses', null, "property description must be a string", response[0].start_mark
+                throw new exports.ValidationError 'while validating responses', null, 'property description must be a string', response[0].start_mark
             when "headers"
               unless @isNullableMapping(property[1])
-                throw new exports.ValidationError 'while validating resources', null, "property 'headers' must be a mapping", property[0].start_mark
+                throw new exports.ValidationError 'while validating resources', null, "property 'headers' must be a map", property[0].start_mark
               @validate_headers property
             else
               throw new exports.ValidationError 'while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
+
+  isHttpMethod: (value, allowParameterKeys = false) ->
+    if value
+      value = @canonicalizePropertyName value, allowParameterKeys
+      return value.toLowerCase() in ['get', 'post', 'put', 'delete', 'head', 'patch', 'options', 'update']
+    return false
 
   isParameterKey: (property) ->
     unless @isScalar(property[0])
@@ -702,7 +712,7 @@ class @Validator
     if @isNull property[1]
       return
     unless @isMapping property[1]
-      throw new exports.ValidationError 'while validating body', null, "property: body specification must be a mapping", property[0].start_mark
+      throw new exports.ValidationError 'while validating body', null, "property: body specification must be a map", property[0].start_mark
     implicitMode = ["implicit", "forcedImplicit"]
     bodyProperties = {}
     property[1].value?.forEach (bodyProperty) =>
@@ -774,7 +784,7 @@ class @Validator
       switch key
         when "is"
           unless @isSequence property[1]
-            throw new exports.ValidationError 'while validating resources', null, "property 'is' must be a list", property[0].start_mark
+            throw new exports.ValidationError 'while validating resources', null, "property 'is' must be an array", property[0].start_mark
 
           unless (property[1].value instanceof Array)
             throw new exports.ValidationError 'while validating trait consumption', null, 'is property must be an array', property[0].start_mark
@@ -787,7 +797,7 @@ class @Validator
             if @isMapping use[1]
               property[1].value.forEach (parameter) =>
                 unless @isNull(parameter[1]) or @isMapping(parameter[1])
-                  throw new exports.ValidationError 'while validating resource consumption', null, 'type parameters must be in a mapping', parameter[1].start_mark
+                  throw new exports.ValidationError 'while validating resource consumption', null, 'type parameters must be in a map', parameter[1].start_mark
 
           return true
     return false
@@ -795,7 +805,7 @@ class @Validator
   child_methods: (node) ->
     unless node and @isMapping node
       return []
-    return node.value.filter (childNode) -> return childNode[0].value.match(/^(get|post|put|delete|head|patch|options)$/);
+    return node.value.filter (childNode) => return @isHttpMethod childNode[0].value
 
   has_property: (node, property) ->
     if node and @isMapping node
@@ -835,7 +845,7 @@ class @Validator
   get_absolute_uris: ( node = @get_single_node(true, true, false), parentPath ) ->
     response = []
     unless @isNullableMapping node
-      throw new exports.ValidationError 'while validating resources', null, 'resource is not a mapping', node.start_mark
+      throw new exports.ValidationError 'while validating resources', null, 'resource is not a map', node.start_mark
     child_resources = @child_resources node
     child_resources.forEach (childResource) =>
       if parentPath?

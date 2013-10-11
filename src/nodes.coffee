@@ -7,7 +7,7 @@ class @ApplicationError extends MarkedYAMLError
 class @Node
   constructor: (@tag, @value, @start_mark, @end_mark) ->
     @unique_id = "node_#{unique_id++}"
-    
+
   clone: ->
     temp = new @constructor(@tag, @value.clone(), @start_mark, @end_mark)
     return temp
@@ -31,7 +31,7 @@ class @ScalarNode extends @Node
     else if not (node instanceof ScalarNode)
       throw new exports.ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
     @value = node.value
-    
+
   remove_question_mark_properties: ->
 
 class @CollectionNode extends @Node
@@ -51,14 +51,14 @@ class @SequenceNode extends @CollectionNode
       items.push value
     temp = new @constructor(@tag, items, @start_mark, @end_mark, @flow_style)
     return temp
-    
+
   combine: (node) ->
     unless node instanceof SequenceNode
       throw new exports.ApplicationError 'while applying node', null, 'different YAML structures', @start_mark
     node.value.forEach (property) =>
       value = property.clone()
       @value.push value
-  
+
   remove_question_mark_properties: ->
     @value.forEach (item) ->
       item.remove_question_mark_properties()
@@ -114,7 +114,7 @@ class @MappingNode extends @CollectionNode
 
   combine: (resourceNode) ->
     # We have a special combination strategy in which if the destination node is null,
-    # we convert it to a mapping
+    # we convert it to a map
     if resourceNode.tag is "tag:yaml.org,2002:null"
       resourceNode = new MappingNode 'tag:yaml.org,2002:map', [], resourceNode.start_mark, resourceNode.end_mark
 

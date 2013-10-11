@@ -21,7 +21,7 @@ describe('Regressions', function () {
         raml.load(definition).should.be.rejected.with(/Unsupported RAML version: \'#%RAML 0.1\'/).and.notify(done);
     });
 
-    it('should fail if baseUriParameter is not a mapping', function(done) {
+    it('should fail if baseUriParameter is not a map', function(done) {
         var definition = [
             '#%RAML 0.8',
             'title: Test',
@@ -33,7 +33,7 @@ describe('Regressions', function () {
             '      description'
         ].join('\n');
 
-        raml.load(definition).should.be.rejected.with(/parameter must be a mapping/).and.notify(done);
+        raml.load(definition).should.be.rejected.with(/parameter must be a map/).and.notify(done);
     });
 
     it('should not fail to parse an empty trait', function(done) {
@@ -45,7 +45,7 @@ describe('Regressions', function () {
             '    otherTrait:',
             '      description: Some description',
         ].join('\n');
-        raml.load(definition).should.be.rejected.with(/invalid trait definition, it must be a mapping/).and.notify(done);
+        raml.load(definition).should.be.rejected.with(/invalid trait definition, it must be a map/).and.notify(done);
     });
 
     it('should not fail to parse an empty trait list', function(done) {
@@ -79,7 +79,7 @@ describe('Regressions', function () {
             '#%RAML 0.8',
             '---'
         ].join('\n');
-        raml.load(definition).should.be.rejected.with(/document must be a mapping/).and.notify(done);
+        raml.load(definition).should.be.rejected.with(/document must be a map/).and.notify(done);
     });
 
     it('should not fail to parse a RAML null uriParameters. RT-178', function(done) {
@@ -178,7 +178,7 @@ describe('Regressions', function () {
             'baseUriParameters:',
             '  someparam'
         ].join('\n');
-        raml.load(definition).should.be.rejected.with(/base uri parameters must be a mapping/).and.notify(done);
+        raml.load(definition).should.be.rejected.with(/base uri parameters must be a map/).and.notify(done);
     });
 
     it('should fail if baseUriParameters is a string - RT-274 - with proper line numbering', function(done){
@@ -194,7 +194,7 @@ describe('Regressions', function () {
         ].join('\n');
         raml.load(definition).then(noop, function (error) {
             setTimeout(function () {
-                error.message.should.be.equal("base uri parameters must be a mapping");
+                error.message.should.be.equal("base uri parameters must be a map");
                 expect(error.problem_mark).to.exist;
                 error.problem_mark.line.should.be.equal(6);
                 error.problem_mark.column.should.be.equal(2);
@@ -214,7 +214,7 @@ describe('Regressions', function () {
             '  baseUriParameters:',
             '    someparam'
         ].join('\n');
-        raml.load(definition).should.be.rejected.with(/base uri parameters must be a mapping/).and.notify(done);
+        raml.load(definition).should.be.rejected.with(/base uri parameters must be a map/).and.notify(done);
     });
 
     it('should fail if baseUriParameters in a resource is a string - RT-274', function(done){
@@ -228,7 +228,7 @@ describe('Regressions', function () {
             '  uriParameters:',
             '    someparam'
         ].join('\n');
-        raml.load(definition).should.be.rejected.with(/uri parameters must be a mapping/).and.notify(done);
+        raml.load(definition).should.be.rejected.with(/uri parameters must be a map/).and.notify(done);
     });
 
     it('should report correct line (RT-244)', function (done) {
@@ -400,7 +400,7 @@ describe('Regressions', function () {
         ].join('\n');
         raml.load(definition).then(noop, function (error) {
             setTimeout(function () {
-                error.message.should.be.equal("invalid resourceType definition, it must be a mapping");
+                error.message.should.be.equal("invalid resourceType definition, it must be a map");
                 expect(error.problem_mark).to.exist;
                 error.problem_mark.column.should.be.equal(9);
                 error.problem_mark.line.should.be.equal(5);
