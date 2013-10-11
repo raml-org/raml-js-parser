@@ -453,7 +453,7 @@ class @Scanner
       # Are we allowed to start a key?
       unless @allow_simple_key
         throw new exports.ScannerError null, null,
-          'mapping keys are not allowed here', @et_mark()
+          'mapping keys are not allowed here', @get_mark()
 
       # We may need to add BLOCK-MAPPING-START.
       if @add_indent @column
@@ -1120,9 +1120,8 @@ class @Scanner
           for k in [0...length]
             throw new exports.ScannerError \
               'while scanning a double-quoted scalar', start_mark,
-              "expected escape sequence of #{length} hexadecimal numbers, but
-              found #{@peek k}", @get_mark() \
-              if @peek k not in C_NUMBERS + 'ABCDEFabcdef'
+              "expected escape sequence of #{length} hexadecimal numbers, but found #{@peek k}", @get_mark() \
+              if @peek(k) not in C_NUMBERS + 'ABCDEFabcdef'
           code = parseInt @prefix(length), 16
           chunks.push String.fromCharCode code
           @forward length
@@ -1170,7 +1169,7 @@ class @Scanner
     while true
       # Instead of checking for indentation, we check for document separators.
       prefix = @prefix 3
-      if prefix is '---' or prefix is '...' and @peek 3 in C_LB + C_WS + '\x00'
+      if prefix is '---' or prefix is '...' and @peek(3) in C_LB + C_WS + '\x00'
         throw new exports.ScannerError 'while scanning a quoted scalar',
           start_mark, 'found unexpected document separator', @get_mark()
       @forward() while @peek() in C_WS
