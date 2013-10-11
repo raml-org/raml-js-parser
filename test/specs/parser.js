@@ -3,7 +3,7 @@
 'use strict';
 
 if (typeof window === 'undefined') {
-    var raml           = require('../lib/raml.js');
+    var raml           = require('../../lib/raml.js');
     var chai           = require('chai');
     var expect         = chai.expect;
     var should         = chai.should();
@@ -143,7 +143,7 @@ describe('Parser', function() {
       var definition = [
         '#%RAML 0.8',
         '---',
-        '!include http://localhost:9001/test/external.yml'
+        '!include http://localhost:9001/test/raml-files/external.yml'
       ].join('\n');
 
       raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
@@ -153,7 +153,7 @@ describe('Parser', function() {
       var definition = [
         '#%RAML 0.8',
         '---',
-        '!include http://localhost:9001/test/external.yaml'
+        '!include http://localhost:9001/test/raml-files/external.yaml'
       ].join('\n');
 
       raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
@@ -165,8 +165,8 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'traits:',
-        '   - customTrait1: !include http://localhost:9001/test/customtrait.yml',
-        '   - customTrait2: !include http://localhost:9001/test/customtrait.yml'
+        '   - customTrait1: !include http://localhost:9001/test/raml-files/customtrait.yml',
+        '   - customTrait2: !include http://localhost:9001/test/raml-files/customtrait.yml'
       ].join('\n');
 
         raml.load(definition).should.eventually.deep.equal({
@@ -2362,8 +2362,8 @@ describe('Parser', function() {
           '---',
           'title: Test',
           'traits:',
-          '  - customTrait: !include http://localhost:9001/test/customtrait.yml',
-          '/: !include http://localhost:9001/test/root.yml'
+          '  - customTrait: !include http://localhost:9001/test/raml-files/customtrait.yml',
+          '/: !include http://localhost:9001/test/raml-files/root.yml'
       ].join('\n');
 
       raml.load(definition).should.eventually.deep.equal({
@@ -3481,8 +3481,8 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'traits:',
-        '  - customTrait: !include http://localhost:9001/test/customtrait.yml',
-        '/: !include http://localhost:9001/test/traitsAtResourceLevel.yml'
+        '  - customTrait: !include http://localhost:9001/test/raml-files/customtrait.yml',
+        '/: !include http://localhost:9001/test/raml-files/traitsAtResourceLevel.yml'
       ].join('\n');
 
       raml.load(definition).should.eventually.deep.equal({
@@ -8109,7 +8109,7 @@ describe('Parser', function() {
     });
 
     it('should detect circular !include of the same resource', function (done) {
-      var file = 'http://localhost:9001/test/RT-261.raml';
+      var file = 'http://localhost:9001/test/raml-files/RT-261.raml';
       raml.loadFile(file).should.be.rejected.with('detected circular !include of').and.notify(done);
     });
   });
