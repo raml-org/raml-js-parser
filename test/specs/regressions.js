@@ -1,7 +1,7 @@
 "use strict";
 
 if (typeof window === 'undefined') {
-    var raml = require('../lib/raml.js')
+    var raml = require('../../lib/raml.js')
     var chai = require('chai')
         , expect = chai.expect
         , should = chai.should();
@@ -541,11 +541,19 @@ describe('Regressions', function () {
         raml.load(definition).should.be.rejected.with(/file name\/URL cannot be null/).and.notify(done);
     });
     it('add a regression test for a complex RAML file', function(done) {
-        var noop       = function () {};
         var definition = [
             '#%RAML 0.8',
             '---',
-            '!include http://localhost:9001/test/regression.yml'
+            '!include http://localhost:9001/test/raml-files/regression.yml'
+        ].join('\n');
+
+        raml.load(definition).should.be.fulfilled.and.notify(done);
+    });
+    it('add a regression test for a big RAML file', function(done) {
+        var definition = [
+            '#%RAML 0.8',
+            '---',
+            '!include http://localhost:9001/test/raml-files/large-raml.yml'
         ].join('\n');
 
         raml.load(definition).should.be.fulfilled.and.notify(done);

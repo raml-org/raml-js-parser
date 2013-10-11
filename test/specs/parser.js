@@ -3,7 +3,7 @@
 'use strict';
 
 if (typeof window === 'undefined') {
-    var raml           = require('../lib/raml.js');
+    var raml           = require('../../lib/raml.js');
     var chai           = require('chai');
     var expect         = chai.expect;
     var should         = chai.should();
@@ -124,7 +124,7 @@ describe('Parser', function() {
         '[1,2]: v1'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/keys can only be strings/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/only scalar map keys are allowed in RAML/).and.notify(done);
     });
   });
 
@@ -143,7 +143,7 @@ describe('Parser', function() {
       var definition = [
         '#%RAML 0.8',
         '---',
-        '!include http://localhost:9001/test/external.yml'
+        '!include http://localhost:9001/test/raml-files/external.yml'
       ].join('\n');
 
       raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
@@ -153,7 +153,7 @@ describe('Parser', function() {
       var definition = [
         '#%RAML 0.8',
         '---',
-        '!include http://localhost:9001/test/external.yaml'
+        '!include http://localhost:9001/test/raml-files/external.yaml'
       ].join('\n');
 
       raml.load(definition).should.eventually.deep.equal({ title: 'MyApi', documentation: [ { title: 'Getting Started', content: '# Getting Started\n\nThis is a getting started guide.' } ] }).and.notify(done);
@@ -165,8 +165,8 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'traits:',
-        '   - customTrait1: !include http://localhost:9001/test/customtrait.yml',
-        '   - customTrait2: !include http://localhost:9001/test/customtrait.yml'
+        '   - customTrait1: !include http://localhost:9001/test/raml-files/customtrait.yml',
+        '   - customTrait2: !include http://localhost:9001/test/raml-files/customtrait.yml'
       ].join('\n');
 
         raml.load(definition).should.eventually.deep.equal({
@@ -2198,23 +2198,7 @@ describe('Parser', function() {
         ''
       ].join('\n');
 
-      var expected = {
-        title: 'Test',
-        resources: [{
-          displayName: 'A',
-          relativeUri: '/foo',
-          methods:[{
-            description: 'Blah',
-            responses: {
-              200: { description: 'Blah Blah'},
-              210: { description: 'Blah Blah'}
-            },
-            method: 'get'
-          }]
-        }]
-      };
-
-      raml.load(definition).should.become(expected).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/only scalar map keys are allowed in RAML/).and.notify(done);
     });
 
     it('should succeed with null response', function(done) {
@@ -2281,23 +2265,7 @@ describe('Parser', function() {
         ''
       ].join('\n');
 
-      var expected = {
-        title: 'Test',
-        resources: [{
-          displayName: 'A',
-          relativeUri: '/foo',
-          methods:[{
-            description: 'Blah',
-            responses: {
-              200: { description: 'Blah Blah'},
-              210: { description: 'Blah Blah'}
-            },
-            method: 'get'
-          }]
-        }]
-      };
-
-      raml.load(definition).should.become(expected).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/only scalar map keys are allowed in RAML/).and.notify(done);
     });
 
     it('should overwrite arrays as keys with new single node', function(done) {
@@ -2317,23 +2285,7 @@ describe('Parser', function() {
         ''
       ].join('\n');
 
-      var expected = {
-        title: 'Test',
-        resources: [{
-          displayName: 'A',
-          relativeUri: '/foo',
-          methods:[{
-            description: 'Blah',
-            responses: {
-              200: { description: 'Foo Foo'},
-              210: { description: 'Blah Blah'}
-            },
-            method: 'get'
-          }]
-        }]
-      };
-
-      raml.load(definition).should.become(expected).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/only scalar map keys are allowed in RAML/).and.notify(done);
     });
 
     it('should fail to load a yaml with hash as key', function(done) {
@@ -2351,7 +2303,7 @@ describe('Parser', function() {
         ''
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/each response key must be an integer/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/only scalar map keys are allowed in RAML/).and.notify(done);
     });
   });
 
@@ -2362,8 +2314,8 @@ describe('Parser', function() {
           '---',
           'title: Test',
           'traits:',
-          '  - customTrait: !include http://localhost:9001/test/customtrait.yml',
-          '/: !include http://localhost:9001/test/root.yml'
+          '  - customTrait: !include http://localhost:9001/test/raml-files/customtrait.yml',
+          '/: !include http://localhost:9001/test/raml-files/root.yml'
       ].join('\n');
 
       raml.load(definition).should.eventually.deep.equal({
@@ -3481,8 +3433,8 @@ describe('Parser', function() {
         '---',
         'title: Test',
         'traits:',
-        '  - customTrait: !include http://localhost:9001/test/customtrait.yml',
-        '/: !include http://localhost:9001/test/traitsAtResourceLevel.yml'
+        '  - customTrait: !include http://localhost:9001/test/raml-files/customtrait.yml',
+        '/: !include http://localhost:9001/test/raml-files/traitsAtResourceLevel.yml'
       ].join('\n');
 
       raml.load(definition).should.eventually.deep.equal({
@@ -6952,7 +6904,7 @@ describe('Parser', function() {
         '    responses:',
         '     [string]:'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/each response key must be an integer/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/only scalar map keys are allowed in RAML/).and.notify(done);
     });
   });
 
@@ -8109,7 +8061,7 @@ describe('Parser', function() {
     });
 
     it('should detect circular !include of the same resource', function (done) {
-      var file = 'http://localhost:9001/test/RT-261.raml';
+      var file = 'http://localhost:9001/test/raml-files/RT-261.raml';
       raml.loadFile(file).should.be.rejected.with('detected circular !include of').and.notify(done);
     });
   });
