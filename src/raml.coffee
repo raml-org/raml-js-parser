@@ -17,35 +17,35 @@ class @FileError extends @errors.MarkedYAMLError
 Parse the first RAML document in a stream and produce the corresponding
 representation tree.
 ###
-@compose = (stream, validate = true, apply = true, join = true, location, parent) ->
-  loader = new exports.loader.Loader stream, location, validate, apply, join, parent
-  return loader.get_single_node(validate, apply, join)
+@compose = (stream, validate = true, transformtree = true, location, parent) ->
+  loader = new exports.loader.Loader stream, location, validate, transformtree, parent
+  return loader.get_single_node()
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
 Javascript object.
 ###
-@load = (stream, location, validate = true, apply = true, join = true) ->
+@load = (stream, location, validate = true, transformtree = true) ->
   @q.fcall =>
-    loader = new exports.loader.Loader stream, location, validate, apply, join
-    return loader.get_single_data(validate, apply, join)
+    loader = new exports.loader.Loader stream, location, validate, transformtree
+    return loader.get_single_data(validate, transformtree)
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
 Javascript object.
 ###
-@loadFile = (file, validate = true, apply = true, join = true) ->
+@loadFile = (file, validate = true, transformtree = true) ->
   @q.fcall =>
     stream = @readFile file
-    return @load stream, file, validate, apply, join
+    return @load stream, file, validate, transformtree
 
 ###
 Parse the first RAML document in a file and produce the corresponding
 representation tree.
 ###
-@composeFile = (file, validate = true, apply = true, join = true, parent) ->
+@composeFile = (file, validate = true, transformtree = true, parent) ->
   stream = @readFile file
-  return @compose stream, validate, apply, join, file, parent
+  return @compose stream, validate, transformtree, file, parent
 
 ###
 Read file either locally or from the network.

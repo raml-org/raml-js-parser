@@ -3114,7 +3114,9 @@ window.RAML.Parser = require('../lib/raml')
   })(MarkedYAMLError);
 
   this.Composer = (function() {
-    function Composer() {
+    function Composer(validate, transformtree) {
+      this.validate = validate != null ? validate : true;
+      this.transformtree = transformtree != null ? transformtree : true;
       this.anchors = {};
     }
 
@@ -3136,16 +3138,13 @@ window.RAML.Parser = require('../lib/raml')
       }
     };
 
-    Composer.prototype.get_single_node = function(validate, apply, join) {
+    Composer.prototype.get_single_node = function(validate, transformtree) {
       var document, event;
       if (validate == null) {
-        validate = true;
+        validate = this.validate;
       }
-      if (apply == null) {
-        apply = true;
-      }
-      if (join == null) {
-        join = true;
+      if (transformtree == null) {
+        transformtree = this.transformtree;
       }
       this.get_event();
       document = null;
@@ -3157,7 +3156,7 @@ window.RAML.Parser = require('../lib/raml')
         throw new exports.ComposerError('document scan', document.start_mark, 'expected a single document in the stream but found another document', event.start_mark);
       }
       this.get_event();
-      if (validate || apply) {
+      if (validate || transformtree) {
         this.load_schemas(document);
         this.load_traits(document);
         this.load_types(document);
@@ -3166,13 +3165,11 @@ window.RAML.Parser = require('../lib/raml')
       if (validate) {
         this.validate_document(document);
       }
-      if (apply) {
+      if (transformtree) {
         this.apply_types(document);
         this.apply_traits(document);
         this.apply_schemas(document);
         this.apply_protocols(document);
-      }
-      if (join) {
         this.join_resources(document);
       }
       return document;
@@ -3244,7 +3241,7 @@ window.RAML.Parser = require('../lib/raml')
         extension = event.value.split(".").pop();
         if (extension === 'yaml' || extension === 'yml' || extension === 'raml') {
           raml.start_mark = event.start_mark;
-          return raml.composeFile(event.value, false, false, false, this);
+          return raml.composeFile(event.value, false, false, this);
         }
         raml.start_mark = event.start_mark;
         node = new nodes.ScalarNode('tag:yaml.org,2002:str', raml.readFile(event.value), event.start_mark, event.end_mark, event.style);
@@ -7259,18 +7256,15 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
     */
 
 
-    BaseConstructor.prototype.get_single_data = function(validate, apply, join) {
+    BaseConstructor.prototype.get_single_data = function(validate, transformtree) {
       var node;
       if (validate == null) {
         validate = true;
       }
-      if (apply == null) {
-        apply = true;
+      if (transformtree == null) {
+        transformtree = true;
       }
-      if (join == null) {
-        join = true;
-      }
-      node = this.get_single_node(validate, apply, join);
+      node = this.get_single_node(validate, transformtree);
       if (node != null) {
         return this.construct_document(node);
       }
@@ -7907,7 +7901,123 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],13:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],17:[function(require,module,exports){
+(function() {
+  var composer, construct, joiner, parser, protocols, reader, resolver, scanner, schemas, securitySchemes, traits, transformations, types, util, validator;
+
+  util = require('./util');
+
+  reader = require('./reader');
+
+  scanner = require('./scanner');
+
+  parser = require('./parser');
+
+  composer = require('./composer');
+
+  resolver = require('./resolver');
+
+  construct = require('./construct');
+
+  validator = require('./validator');
+
+  joiner = require('./joiner');
+
+  traits = require('./traits');
+
+  types = require('./resourceTypes');
+
+  schemas = require('./schemas');
+
+  protocols = require('./protocols');
+
+  securitySchemes = require('./securitySchemes');
+
+  transformations = require('./transformations');
+
+  this.make_loader = function(Reader, Scanner, Parser, Composer, Resolver, Validator, ResourceTypes, Traits, Schemas, Protocols, Joiner, SecuritySchemes, Constructor, Transformations) {
+    if (Reader == null) {
+      Reader = reader.Reader;
+    }
+    if (Scanner == null) {
+      Scanner = scanner.Scanner;
+    }
+    if (Parser == null) {
+      Parser = parser.Parser;
+    }
+    if (Composer == null) {
+      Composer = composer.Composer;
+    }
+    if (Resolver == null) {
+      Resolver = resolver.Resolver;
+    }
+    if (Validator == null) {
+      Validator = validator.Validator;
+    }
+    if (ResourceTypes == null) {
+      ResourceTypes = types.ResourceTypes;
+    }
+    if (Traits == null) {
+      Traits = traits.Traits;
+    }
+    if (Schemas == null) {
+      Schemas = schemas.Schemas;
+    }
+    if (Protocols == null) {
+      Protocols = protocols.Protocols;
+    }
+    if (Joiner == null) {
+      Joiner = joiner.Joiner;
+    }
+    if (SecuritySchemes == null) {
+      SecuritySchemes = securitySchemes.SecuritySchemes;
+    }
+    if (Constructor == null) {
+      Constructor = construct.Constructor;
+    }
+    if (Transformations == null) {
+      Transformations = transformations.Transformations;
+    }
+    return (function() {
+      var component, components;
+
+      components = [Reader, Scanner, Parser, Composer, Transformations, Resolver, Validator, Traits, ResourceTypes, Schemas, Protocols, Joiner, Constructor, SecuritySchemes];
+
+      util.extend.apply(util, [_Class.prototype].concat((function() {
+        var _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = components.length; _i < _len; _i++) {
+          component = components[_i];
+          _results.push(component.prototype);
+        }
+        return _results;
+      })()));
+
+      function _Class(stream, location, validate, transformtree, parent) {
+        var _i, _len, _ref;
+        this.parent = parent != null ? parent : null;
+        components[0].call(this, stream, location);
+        components[1].call(this, validate, transformtree);
+        components[2].call(this, validate, transformtree);
+        components[3].call(this, validate, transformtree);
+        components[4].call(this, transformtree);
+        _ref = components.slice(5);
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          component = _ref[_i];
+          component.call(this);
+        }
+      }
+
+      return _Class;
+
+    })();
+  };
+
+  this.Loader = this.make_loader();
+
+}).call(this);
+
+},{"./composer":12,"./construct":15,"./joiner":16,"./parser":19,"./protocols":26,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":20,"./schemas":25,"./securitySchemes":27,"./traits":23,"./transformations":28,"./util":4,"./validator":22}],13:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -8174,120 +8284,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],17:[function(require,module,exports){
-(function() {
-  var composer, construct, joiner, parser, protocols, reader, resolver, scanner, schemas, securitySchemes, traits, transformations, types, util, validator;
-
-  util = require('./util');
-
-  reader = require('./reader');
-
-  scanner = require('./scanner');
-
-  parser = require('./parser');
-
-  composer = require('./composer');
-
-  resolver = require('./resolver');
-
-  construct = require('./construct');
-
-  validator = require('./validator');
-
-  joiner = require('./joiner');
-
-  traits = require('./traits');
-
-  types = require('./resourceTypes');
-
-  schemas = require('./schemas');
-
-  protocols = require('./protocols');
-
-  securitySchemes = require('./securitySchemes');
-
-  transformations = require('./transformations');
-
-  this.make_loader = function(Reader, Scanner, Parser, Composer, Resolver, Validator, ResourceTypes, Traits, Schemas, Protocols, Joiner, SecuritySchemes, Constructor, Transformations) {
-    if (Reader == null) {
-      Reader = reader.Reader;
-    }
-    if (Scanner == null) {
-      Scanner = scanner.Scanner;
-    }
-    if (Parser == null) {
-      Parser = parser.Parser;
-    }
-    if (Composer == null) {
-      Composer = composer.Composer;
-    }
-    if (Resolver == null) {
-      Resolver = resolver.Resolver;
-    }
-    if (Validator == null) {
-      Validator = validator.Validator;
-    }
-    if (ResourceTypes == null) {
-      ResourceTypes = types.ResourceTypes;
-    }
-    if (Traits == null) {
-      Traits = traits.Traits;
-    }
-    if (Schemas == null) {
-      Schemas = schemas.Schemas;
-    }
-    if (Protocols == null) {
-      Protocols = protocols.Protocols;
-    }
-    if (Joiner == null) {
-      Joiner = joiner.Joiner;
-    }
-    if (SecuritySchemes == null) {
-      SecuritySchemes = securitySchemes.SecuritySchemes;
-    }
-    if (Constructor == null) {
-      Constructor = construct.Constructor;
-    }
-    if (Transformations == null) {
-      Transformations = transformations.Transformations;
-    }
-    return (function() {
-      var component, components;
-
-      components = [Reader, Scanner, Parser, Composer, Resolver, Validator, Traits, ResourceTypes, Schemas, Protocols, Joiner, Constructor, SecuritySchemes, Transformations];
-
-      util.extend.apply(util, [_Class.prototype].concat((function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = components.length; _i < _len; _i++) {
-          component = components[_i];
-          _results.push(component.prototype);
-        }
-        return _results;
-      })()));
-
-      function _Class(stream, location, validate, parent) {
-        var _i, _len, _ref;
-        this.parent = parent;
-        components[0].call(this, stream, location);
-        components[1].call(this, validate);
-        _ref = components.slice(2);
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          component = _ref[_i];
-          component.call(this);
-        }
-      }
-
-      return _Class;
-
-    })();
-  };
-
-  this.Loader = this.make_loader();
-
-}).call(this);
-
-},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./protocols":26,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./securitySchemes":27,"./traits":23,"./transformations":28,"./util":4,"./validator":22}],20:[function(require,module,exports){
+},{"./errors":1}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, events, tokens, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9502,7 +9499,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],19:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],20:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9987,7 +9984,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
       var mark, start_mark;
       if (this.flow_level === 0) {
         if (!this.allow_simple_key) {
-          throw new exports.ScannerError(null, null, 'mapping keys are not allowed here', this.et_mark());
+          throw new exports.ScannerError(null, null, 'mapping keys are not allowed here', this.get_mark());
         }
         if (this.add_indent(this.column)) {
           mark = this.get_mark();
@@ -10690,7 +10687,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 
     Scanner.prototype.scan_flow_scalar_non_spaces = function(double, start_mark) {
-      var char, chunks, code, k, length, _i, _ref1;
+      var char, chunks, code, k, length, _i, _ref1, _ref2;
       chunks = [];
       while (true) {
         length = 0;
@@ -10718,8 +10715,8 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
             length = ESCAPE_CODES[char];
             this.forward();
             for (k = _i = 0; 0 <= length ? _i < length : _i > length; k = 0 <= length ? ++_i : --_i) {
-              if (this.peek(__indexOf.call(C_NUMBERS + 'ABCDEFabcdef', k) < 0)) {
-                throw new exports.ScannerError('while scanning a double-quoted scalar', start_mark, "expected escape sequence of " + length + " hexadecimal numbers, but              found " + (this.peek(k)), this.get_mark());
+              if (_ref2 = this.peek(k), __indexOf.call(C_NUMBERS + 'ABCDEFabcdef', _ref2) < 0) {
+                throw new exports.ScannerError('while scanning a double-quoted scalar', start_mark, "expected escape sequence of " + length + " hexadecimal numbers, but found " + (this.peek(k)), this.get_mark());
               }
             }
             code = parseInt(this.prefix(length), 16);
@@ -10776,17 +10773,17 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 
     Scanner.prototype.scan_flow_scalar_breaks = function(double, start_mark) {
-      var chunks, prefix, _ref1, _ref2;
+      var chunks, prefix, _ref1, _ref2, _ref3;
       chunks = [];
       while (true) {
         prefix = this.prefix(3);
-        if (prefix === '---' || prefix === '...' && this.peek(__indexOf.call(C_LB + C_WS + '\x00', 3) >= 0)) {
+        if (prefix === '---' || prefix === '...' && (_ref1 = this.peek(3), __indexOf.call(C_LB + C_WS + '\x00', _ref1) >= 0)) {
           throw new exports.ScannerError('while scanning a quoted scalar', start_mark, 'found unexpected document separator', this.get_mark());
         }
-        while (_ref1 = this.peek(), __indexOf.call(C_WS, _ref1) >= 0) {
+        while (_ref2 = this.peek(), __indexOf.call(C_WS, _ref2) >= 0) {
           this.forward();
         }
-        if (_ref2 = this.peek(), __indexOf.call(C_LB, _ref2) >= 0) {
+        if (_ref3 = this.peek(), __indexOf.call(C_LB, _ref3) >= 0) {
           chunks.push(this.scan_line_break());
         } else {
           return chunks;
@@ -11551,54 +11548,21 @@ function decode(str) {
   })(this.errors.MarkedYAMLError);
 
   /*
-  Scan a RAML stream and produce scanning tokens.
-  */
-
-
-  this.scan = function(stream, location) {
-    var loader, _results;
-    loader = new exports.loader.Loader(stream, location, false);
-    _results = [];
-    while (loader.check_token()) {
-      _results.push(loader.get_token());
-    }
-    return _results;
-  };
-
-  /*
-  Parse a RAML stream and produce parsing events.
-  */
-
-
-  this.parse = function(stream, location) {
-    var loader, _results;
-    loader = new exports.loader.Loader(stream, location, false);
-    _results = [];
-    while (loader.check_event()) {
-      _results.push(loader.get_event());
-    }
-    return _results;
-  };
-
-  /*
   Parse the first RAML document in a stream and produce the corresponding
   representation tree.
   */
 
 
-  this.compose = function(stream, validate, apply, join, location, parent) {
+  this.compose = function(stream, validate, transformtree, location, parent) {
     var loader;
     if (validate == null) {
       validate = true;
     }
-    if (apply == null) {
-      apply = true;
+    if (transformtree == null) {
+      transformtree = true;
     }
-    if (join == null) {
-      join = true;
-    }
-    loader = new exports.loader.Loader(stream, location, validate, parent);
-    return loader.get_single_node(validate, apply, join);
+    loader = new exports.loader.Loader(stream, location, validate, transformtree, parent);
+    return loader.get_single_node();
   };
 
   /*
@@ -11607,33 +11571,18 @@ function decode(str) {
   */
 
 
-  this.load = function(stream, validate, location) {
+  this.load = function(stream, location, validate, transformtree) {
     var _this = this;
     if (validate == null) {
       validate = true;
     }
-    return this.q.fcall(function() {
-      var loader;
-      loader = new exports.loader.Loader(stream, location, validate);
-      return loader.get_single_data();
-    });
-  };
-
-  /*
-  Parse the first RAML document in a stream and produce a list of
-  all the absolute URIs for all resources.
-  */
-
-
-  this.resources = function(stream, validate, location) {
-    var _this = this;
-    if (validate == null) {
-      validate = true;
+    if (transformtree == null) {
+      transformtree = true;
     }
     return this.q.fcall(function() {
       var loader;
-      loader = new exports.loader.Loader(stream, location, validate);
-      return loader.resources();
+      loader = new exports.loader.Loader(stream, location, validate, transformtree);
+      return loader.get_single_data(validate, transformtree);
     });
   };
 
@@ -11643,15 +11592,18 @@ function decode(str) {
   */
 
 
-  this.loadFile = function(file, validate) {
+  this.loadFile = function(file, validate, transformtree) {
     var _this = this;
     if (validate == null) {
       validate = true;
+    }
+    if (transformtree == null) {
+      transformtree = true;
     }
     return this.q.fcall(function() {
       var stream;
       stream = _this.readFile(file);
-      return _this.load(stream, validate, file);
+      return _this.load(stream, file, validate, transformtree);
     });
   };
 
@@ -11661,34 +11613,16 @@ function decode(str) {
   */
 
 
-  this.composeFile = function(file, validate, apply, join, parent) {
+  this.composeFile = function(file, validate, transformtree, parent) {
     var stream;
     if (validate == null) {
       validate = true;
     }
-    if (apply == null) {
-      apply = true;
-    }
-    if (join == null) {
-      join = true;
+    if (transformtree == null) {
+      transformtree = true;
     }
     stream = this.readFile(file);
-    return this.compose(stream, validate, apply, join, file, parent);
-  };
-
-  /*
-  Parse the first RAML document in a file and produce a list of
-  all the absolute URIs for all resources.
-  */
-
-
-  this.resourcesFile = function(file, validate) {
-    var stream;
-    if (validate == null) {
-      validate = true;
-    }
-    stream = this.readFile(file);
-    return this.resources(stream, validate, file);
+    return this.compose(stream, validate, transformtree, file, parent);
   };
 
   /*
@@ -11747,7 +11681,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":29}],28:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":19,"./reader":18,"./resolver":21,"./scanner":20,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":29}],28:[function(require,module,exports){
 (function() {
   var nodes, uritemplate,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -11762,7 +11696,8 @@ function decode(str) {
 
 
   this.Transformations = (function() {
-    function Transformations() {
+    function Transformations(transformtree) {
+      this.transformtree = transformtree != null ? transformtree : true;
       this.isContentTypeString = __bind(this.isContentTypeString, this);
       this.add_key_value_to_node = __bind(this.add_key_value_to_node, this);
       this.apply_default_media_type_to_resource = __bind(this.apply_default_media_type_to_resource, this);
@@ -11774,11 +11709,15 @@ function decode(str) {
     }
 
     Transformations.prototype.applyTransformations = function(rootObject) {
-      return this.findAndInsertUriParameters(rootObject);
+      if (this.transformtree) {
+        return this.findAndInsertUriParameters(rootObject);
+      }
     };
 
     Transformations.prototype.applyAstTransformations = function(document) {
-      return this.transform_document(document);
+      if (this.transformtree) {
+        return this.transform_document(document);
+      }
     };
 
     Transformations.prototype.load_default_media_type = function(node) {
@@ -13460,58 +13399,6 @@ function decode(str) {
         });
       }
       return properties;
-    };
-
-    Validator.prototype.resources = function(node, parentPath) {
-      var child_resources, response,
-        _this = this;
-      if (node == null) {
-        node = this.get_single_node(true, true, false);
-      }
-      response = [];
-      child_resources = this.child_resources(node);
-      child_resources.forEach(function(childResource) {
-        var resourceResponse;
-        resourceResponse = {};
-        resourceResponse.methods = [];
-        if (parentPath != null) {
-          resourceResponse.uri = parentPath + childResource[0].value;
-        } else {
-          resourceResponse.uri = childResource[0].value;
-        }
-        if (_this.has_property(childResource[1], "displayName")) {
-          resourceResponse.displayName = _this.property_value(childResource[1], "displayName");
-        }
-        if (_this.has_property(childResource[1], "get")) {
-          resourceResponse.methods.push('get');
-        }
-        if (_this.has_property(childResource[1], "post")) {
-          resourceResponse.methods.push('post');
-        }
-        if (_this.has_property(childResource[1], "put")) {
-          resourceResponse.methods.push('put');
-        }
-        if (_this.has_property(childResource[1], "patch")) {
-          resourceResponse.methods.push('patch');
-        }
-        if (_this.has_property(childResource[1], "delete")) {
-          resourceResponse.methods.push('delete');
-        }
-        if (_this.has_property(childResource[1], "head")) {
-          resourceResponse.methods.push('head');
-        }
-        if (_this.has_property(childResource[1], "options")) {
-          resourceResponse.methods.push('options');
-        }
-        resourceResponse.line = childResource[0].start_mark.line + 1;
-        resourceResponse.column = childResource[0].start_mark.column + 1;
-        if (childResource[0].start_mark.name != null) {
-          resourceResponse.src = childResource[0].start_mark.name;
-        }
-        response.push(resourceResponse);
-        return response = response.concat(_this.resources(childResource[1], resourceResponse.uri));
-      });
-      return response;
     };
 
     Validator.prototype.valid_absolute_uris = function(node) {
@@ -15340,9 +15227,7 @@ https.request = function (params, cb) {
     params.scheme = 'https';
     return http.request.call(this, params, cb);
 }
-},{"http":33}],31:[function(require,module,exports){
-module.exports = require( './lib/inflection' );
-},{"./lib/inflection":35}],36:[function(require,module,exports){
+},{"http":33}],35:[function(require,module,exports){
 (function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
 
 var EventEmitter = exports.EventEmitter = process.EventEmitter;
@@ -15539,7 +15424,9 @@ EventEmitter.listenerCount = function(emitter, type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":5}],33:[function(require,module,exports){
+},{"__browserify_process":5}],31:[function(require,module,exports){
+module.exports = require( './lib/inflection' );
+},{"./lib/inflection":36}],33:[function(require,module,exports){
 var http = module.exports;
 var EventEmitter = require('events').EventEmitter;
 var Request = require('./lib/request');
@@ -15601,7 +15488,7 @@ var xhrHttp = (function () {
     }
 })();
 
-},{"./lib/request":37,"events":36}],35:[function(require,module,exports){
+},{"./lib/request":37,"events":35}],36:[function(require,module,exports){
 /*!
  * inflection
  * Copyright(c) 2011 Ben Lin <ben@dreamerslab.com>
@@ -16259,7 +16146,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":36,"util":39}],39:[function(require,module,exports){
+},{"events":35,"util":39}],39:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -16606,7 +16493,7 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":36}],40:[function(require,module,exports){
+},{"events":35}],40:[function(require,module,exports){
 (function(){// UTILITY
 var util = require('util');
 var Buffer = require("buffer").Buffer;
@@ -18483,5 +18370,5 @@ module.exports = function(cb) {
 module.exports.ConcatStream = ConcatStream
 
 })(require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":14,"stream":38,"util":39}]},{},[10,12,15,1,2,16,17,13,20,26,11,18,21,24,19,25,27,3,23,28,4,22,6])
+},{"__browserify_buffer":14,"stream":38,"util":39}]},{},[10,12,15,1,2,16,17,13,19,26,11,18,21,24,20,25,27,3,23,28,4,22,6])
 ;

@@ -7,7 +7,7 @@ class @ComposerError extends MarkedYAMLError
 
 class @Composer
 
-  constructor: (@validate = true, @apply = true, @join = true) ->
+  constructor: (@validate = true, @transformtree = true) ->
     @anchors = {}
 
   check_node: ->
@@ -23,7 +23,7 @@ class @Composer
   get_node: ->
     return @compose_document() unless @check_event events.StreamEndEvent
 
-  get_single_node: (validate = @validate, apply = @apply, join = @join) ->
+  get_single_node: (validate = @validate, transformtree = @transformtree) ->
     # Drop the STREAM-START event.
     @get_event()
 
@@ -40,7 +40,7 @@ class @Composer
     # Drop the STREAM-END event.
     @get_event()
 
-    if validate or apply
+    if validate or transformtree
       @load_schemas document
       @load_traits document
       @load_types document
@@ -49,13 +49,11 @@ class @Composer
     if validate
       @validate_document document
 
-    if apply
+    if transformtree
       @apply_types document
       @apply_traits document
       @apply_schemas document
       @apply_protocols document
-
-    if join
       @join_resources document
 
     return document
@@ -127,7 +125,7 @@ class @Composer
       extension = event.value.split(".").pop()
       if extension in ['yaml', 'yml', 'raml']
         raml.start_mark = event.start_mark
-        return raml.composeFile(event.value, false, false, false, @);
+        return raml.composeFile(event.value, false, false, @);
 
       raml.start_mark = event.start_mark
       node = new nodes.ScalarNode 'tag:yaml.org,2002:str', raml.readFile(event.value), event.start_mark, event.end_mark, event.style
