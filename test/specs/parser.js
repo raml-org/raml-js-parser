@@ -6354,6 +6354,222 @@ describe('Parser', function() {
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-{.+}"/).and.notify(done);
     });
+
+    it('resource should inherit securedBy from root', function(done) {
+      var definition = [
+          '#%RAML 0.8',
+          '---',
+          'title: Test',
+          'securitySchemes:',
+          '  - scheme1:',
+          '      type: x-other',
+          '      description: some thing goes here',
+          'securedBy: [scheme1]',
+          '/someResource:',
+          '  get:',
+          '  description: aslkjdhakjfh'
+      ].join('\n');
+      var expected = {
+          "title": "Test",
+          "securitySchemes": [
+              {
+                  "scheme1": {
+                      "type": "x-other",
+                      "description": "some thing goes here"
+                  }
+              }
+          ],
+          "securedBy": [
+              "scheme1"
+          ],
+          "resources": [
+              {
+                  "description": "aslkjdhakjfh",
+                  "relativeUri": "/someResource",
+                  "methods": [
+                      {
+                          "securedBy": [
+                              "scheme1"
+                          ],
+                          "method": "get"
+                      }
+                  ],
+                  "relativeUriPathSegments": [
+                      "someResource"
+                  ]
+              }
+          ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+
+    it('method should inherit securedBy from resource', function(done) {
+        var definition = [
+          '#%RAML 0.8',
+          '---',
+          'title: Test',
+          'securitySchemes:',
+          '  - scheme1:',
+          '      type: x-other',
+          '      description: some thing goes here',
+          '/someResource:',
+          '  securedBy: [scheme1]',
+          '  get:',
+          '  description: aslkjdhakjfh'
+        ].join('\n');
+        var expected = {
+            "title": "Test",
+            "securitySchemes": [
+                {
+                    "scheme1": {
+                        "type": "x-other",
+                        "description": "some thing goes here"
+                    }
+                }
+            ],
+            "resources": [
+                {
+                    "securedBy": [
+                        "scheme1"
+                    ],
+                    "description": "aslkjdhakjfh",
+                    "relativeUri": "/someResource",
+                    "methods": [
+                        {
+                            "securedBy": [
+                                "scheme1"
+                            ],
+                            "method": "get"
+                        }
+                    ],
+                    "relativeUriPathSegments": [
+                        "someResource"
+                    ]
+                }
+            ]
+        };
+
+        raml.load(definition).should.become(expected).and.notify(done);
+    });
+
+    it('method should not inherit securedBy from resource if it has property', function(done) {
+      var definition = [
+          '#%RAML 0.8',
+          '---',
+          'title: Test',
+          'securitySchemes:',
+          '  - scheme1:',
+          '      type: x-other',
+          '      description: some thing goes here',
+          '  - scheme2:',
+          '      type: x-other',
+          '      description: some thing goes here',
+          '/someResource:',
+          '  securedBy: [scheme2]',
+          '  get:',
+          '    securedBy: [scheme1]',
+          '  description: aslkjdhakjfh'
+      ].join('\n');
+      var expected = {
+          "title": "Test",
+          "securitySchemes": [
+              {
+                  "scheme1": {
+                      "type": "x-other",
+                      "description": "some thing goes here"
+                  }
+              },
+              {
+                  "scheme2": {
+                      "type": "x-other",
+                      "description": "some thing goes here"
+                  }
+              }
+          ],
+          "resources": [
+              {
+                  "securedBy": [
+                      "scheme2"
+                  ],
+                  "description": "aslkjdhakjfh",
+                  "relativeUri": "/someResource",
+                  "methods": [
+                      {
+                          "securedBy": [
+                              "scheme1"
+                          ],
+                          "method": "get"
+                      }
+                  ],
+                  "relativeUriPathSegments": [
+                      "someResource"
+                  ]
+              }
+          ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+
+    it('method should not inherit securedBy from root if it has property', function(done) {
+      var definition = [
+          '#%RAML 0.8',
+          '---',
+          'title: Test',
+          'securitySchemes:',
+          '  - scheme1:',
+          '      type: x-other',
+          '      description: some thing goes here',
+          '  - scheme2:',
+          '      type: x-other',
+          '      description: some thing goes here',
+          'securedBy: [scheme2]',
+          '/someResource:',
+          '  get:',
+          '    securedBy: [scheme1]',
+          '  description: aslkjdhakjfh'
+      ].join('\n');
+      var expected = {
+          "title": "Test",
+          "securitySchemes": [
+              {
+                  "scheme1": {
+                      "type": "x-other",
+                      "description": "some thing goes here"
+                  }
+              },
+              {
+                  "scheme2": {
+                      "type": "x-other",
+                      "description": "some thing goes here"
+                  }
+              }
+          ],
+          "securedBy": [
+              "scheme2"
+          ],
+          "resources": [
+              {
+                  "description": "aslkjdhakjfh",
+                  "relativeUri": "/someResource",
+                  "methods": [
+                      {
+                          "securedBy": [
+                              "scheme1"
+                          ],
+                          "method": "get"
+                      }
+                  ],
+                  "relativeUriPathSegments": [
+                      "someResource"
+                  ]
+              }
+          ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
   });
 
   describe('Resource Validations', function() {
