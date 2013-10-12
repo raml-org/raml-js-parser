@@ -10,7 +10,9 @@ class @Transformations
     @declaredSchemas = {}
 
   applyTransformations: (rootObject) =>
-    @findAndInsertUriParameters(rootObject)
+    @applyTransformationsToRoot rootObject
+    resources = rootObject.resources
+    @applyTransformationsToResources(rootObject, resources)
 
   applyAstTransformations: (document) =>
     @transform_document(document)
@@ -22,12 +24,7 @@ class @Transformations
   get_media_type: () =>
     return @mediaType
 
-  findAndInsertUriParameters: (rootObject) ->
-    @findAndInsertMissingBaseUriParameters rootObject
-    resources = rootObject.resources
-    @findAndInsertMissinngBaseUriParameters resources
-
-  findAndInsertMissingBaseUriParameters: (rootObject) ->
+  applyTransformationsToRoot: (rootObject) ->
     if rootObject.baseUri
 
       template = uritemplate.parse rootObject.baseUri
@@ -48,9 +45,16 @@ class @Transformations
           if parameterName is "version"
             rootObject.baseUriParameters[parameterName].enum = [ rootObject.version ]
 
-  findAndInsertMissinngBaseUriParameters: (resources) ->
+  applyTransformationsToResources: (rootObject, resources) ->
     if resources?.length
       for resource in resources
+        inheritedSecScheme = if resource.securedBy then resource.securedBy else rootObject?.securedBy
+        if resource.methods?.length
+            for method in resource.methods
+              unless "securedBy" of method
+                if inheritedSecScheme
+                  method.securedBy = inheritedSecScheme
+
         relativeUri = url.parse resource.relativeUri
         pathParts = relativeUri.path.split('\/')
         pathParts.shift() while !pathParts[0] and pathParts.length
@@ -71,7 +75,7 @@ class @Transformations
               displayName: parameterName
             }
 
-        @findAndInsertMissinngBaseUriParameters resource.resources
+        @applyTransformationsToResources rootObject, resource.resources
 
   ###
   Media Type pivot when using default mediaType property
