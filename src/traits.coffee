@@ -1,6 +1,7 @@
 {MarkedYAMLError} = require './errors'
 nodes             = require './nodes'
 inflection        = require 'inflection'
+util              = require './util'
 
 ###
 The Traits throws these.
@@ -27,7 +28,7 @@ class @Traits
         allTraits.forEach (trait_item) =>
           if trait_item and typeof trait_item is "object" and typeof trait_item.value is "object"
             trait_item.value.forEach (trait) =>
-               @declaredTraits[trait[0].value] = trait
+              @declaredTraits[trait[0].value] = trait
 
   has_traits: (node) ->
     if @declaredTraits.length == 0 and @has_property node, /^traits$/
@@ -40,21 +41,21 @@ class @Traits
     return null
 
   apply_traits: (node, resourceUri = "", removeQs = true) ->
-    return unless @isMapping(node)
+    return unless util.isMapping(node)
     if @has_traits node
       resources = @child_resources node
       resources.forEach (resource) =>
         @apply_traits_to_resource resourceUri + resource[0].value, resource[1], removeQs
 
   apply_traits_to_resource: (resourceUri, resource, removeQs) ->
-    return unless @isMapping resource
+    return unless util.isMapping resource
     methods = @child_methods resource
     # apply traits at the resource level, which is basically the same as applying to each method in the resource
     if @has_property resource, /^is$/
       uses = @property_value resource, /^is$/
       uses.forEach (use) =>
         methods.forEach (method) =>
-            @apply_trait resourceUri, method, use
+          @apply_trait resourceUri, method, use
 
     # iterate over all methods and apply all their traits
     methods.forEach (method) =>
@@ -86,19 +87,19 @@ class @Traits
 
   apply_parameters: (resource, parameters, useKey) ->
     @_apply_parameters resource, parameters, useKey, usedParameters = {
-        resourcePath: true,
-        methodName  : true
+      resourcePath: true,
+      methodName  : true
     }
 
     for parameterName of parameters
       unless usedParameters[parameterName]
-          throw new exports.ParameterError 'while aplying parameters', null, "unused parameter: #{parameterName}", useKey.start_mark
+        throw new exports.ParameterError 'while aplying parameters', null, "unused parameter: #{parameterName}", useKey.start_mark
 
   _apply_parameters: (resource, parameters, useKey, usedParameters) ->
     unless resource
       return
 
-    if @isString(resource)
+    if util.isString(resource)
       if parameterUse = resource.value.match(/<<\s*([^\|\s>]+)\s*(\|.*)?\s*>>/g)
         parameterUse.forEach (parameter) =>
           parameterName = parameter?.trim()?.replace(/[<>]+/g, '').trim()
@@ -121,12 +122,12 @@ class @Traits
           resource.value = resource.value.replace parameter, value
       return
 
-    if @isSequence(resource)
+    if util.isSequence(resource)
       resource.value.forEach (node) =>
         @_apply_parameters node, parameters, useKey, usedParameters
       return
 
-    if @isMapping(resource)
+    if util.isMapping(resource)
       resource.value.forEach (property) =>
         @_apply_parameters property[0], parameters, useKey, usedParameters
         @_apply_parameters property[1], parameters, useKey, usedParameters
@@ -137,10 +138,10 @@ class @Traits
       methodName: methodName,
       resourcePath: resourceUri.replace(/\/\/*/g, '/')
     }
-    return result unless @isMapping typeKey
+    return result unless util.isMapping typeKey
     parameters = @value_or_undefined typeKey
     parameters[0][1].value.forEach (parameter) =>
-      unless @isScalar(parameter[1])
+      unless util.isScalar(parameter[1])
         throw new exports.TraitError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
       if parameter[1].value in [ "methodName", "resourcePath", "resourcePathName"]
         throw new exports.TraitError 'while aplying parameters', null, 'invalid parameter name "methodName", "resourcePath" are reserved parameter names "resourcePathName"', parameter[1].start_mark
