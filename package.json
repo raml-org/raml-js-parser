@@ -24,7 +24,6 @@
     "grunt-mocha-cli": "1.0.6",
     "grunt-browserify": "1.0.5",
     "coffeeify": "0.4.1",
-    "coffeelint": "~0.6.1",
     "grunt-coffeelint": "0.0.7"
   }
 }

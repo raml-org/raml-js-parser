@@ -900,6 +900,6 @@ class @Validator
     output = {}
     for item in array
       if item of output
-        return item
+        return true
       output[item] = true
     return false
