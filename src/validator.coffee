@@ -1,7 +1,8 @@
+url               = require 'url'
+uritemplate       = require 'uritemplate'
 {MarkedYAMLError} = require './errors'
 nodes             = require './nodes'
 traits            = require './traits'
-uritemplate       = require 'uritemplate'
 util              = require './util'
 
 ###
@@ -873,11 +874,19 @@ class @Validator
     return undefined
 
   validate_base_uri: (baseUriNode) ->
-    baseUri = baseUriNode.value
+    baseUri = (baseUriNode.value or '').trim()
+    unless baseUri
+      throw new exports.ValidationError 'while validating baseUri', null, 'baseUri must have a value', baseUriNode.start_mark
+
+    protocol = ((url.parse baseUri).protocol or 'http:').slice(0, -1).toUpperCase()
+    unless protocol in ['HTTP', 'HTTPS']
+      throw new exports.ValidationError 'while validating baseUri', null, 'baseUri protocol must be either HTTP or HTTPS', baseUriNode.start_mark
+
     try
       template = uritemplate.parse baseUri
     catch err
       throw new exports.ValidationError 'while validating baseUri', null, err?.options?.message, baseUriNode.start_mark
+
     expressions = template.expressions.filter((expr) -> return 'templateText' of expr).map (expression) -> expression.templateText
     if 'version' in expressions
       return true

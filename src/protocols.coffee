@@ -24,7 +24,7 @@ class @Protocols
       return
 
     parsedBaseUri = url.parse(baseUri)
-    protocol      = parsedBaseUri.protocol.slice(0, -1).toUpperCase()
+    protocol      = (parsedBaseUri.protocol or 'http:').slice(0, -1).toUpperCase()
     protocols     = [
       new nodes.ScalarNode('tag:yaml.org,2002:str', 'protocols', node.start_mark, node.end_mark),
       new nodes.SequenceNode('tag:yaml.org,2002:seq', [
