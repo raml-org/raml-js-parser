@@ -243,4 +243,22 @@ describe('Validator', function () {
             '       type: <<resourceTypeName>>'
         ].join('\n')).should.be.fulfilled.and.notify(done);
     });
+
+    it('should not allow baseUri to be empty', function (done) {
+        raml.load([
+            '#%RAML 0.8',
+            '---',
+            'title: Example',
+            'baseUri:'
+        ].join('\n')).should.be.rejected.with('baseUri must have a value').and.notify(done);
+    });
+
+    it('should allow only HTTP and HTTPS protocols to be used in baseUri', function (done) {
+        raml.load([
+            '#%RAML 0.8',
+            '---',
+            'title: Example',
+            'baseUri: ftp://api.com'
+        ].join('\n')).should.be.rejected.with('baseUri protocol must be either HTTP or HTTPS').and.notify(done);
+    });
 });

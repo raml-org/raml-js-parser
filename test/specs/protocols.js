@@ -112,4 +112,19 @@ describe('Protocols', function () {
             ]
         }).and.notify(done);
     });
+
+    it('should assume HTTP protocol by default if there is no protocols property and baseUri has no protocol either', function (done) {
+        raml.load([
+            '#%RAML 0.8',
+            '---',
+            'title: Example',
+            'baseUri: api.com'
+        ].join('\n')).should.become({
+            title: 'Example',
+            baseUri: 'api.com',
+            protocols: [
+                'HTTP'
+            ]
+        }).and.notify(done);
+    });
 });
