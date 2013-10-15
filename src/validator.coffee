@@ -35,14 +35,16 @@ class @Validator
   validate_security_schemes: (schemesProperty) ->
     unless util.isSequence schemesProperty
       throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security schemes property, it must be an array', schemesProperty.start_mark
+
     schemeNamesTrack = {}
     for scheme_entry in schemesProperty.value
       unless util.isMapping scheme_entry
         throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security scheme property, it must be a map', scheme_entry.start_mark
+
       for scheme in scheme_entry.value
-        #@trackRepeatedProperties(schemeNamesTrack, scheme[0].value, scheme.start_mark, "while validating securitySchemes", "security scheme with the same name already exists")
         unless util.isMapping scheme[1]
-          throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security scheme property, it must be a map', scheme.start_mark
+          throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security scheme property, it must be a map', scheme[0].start_mark
+
         @validate_security_scheme scheme[1]
 
   trackRepeatedProperties: (properties, property, mark, section = "RAML", errorMessage = "a property with the same name already exists") ->
@@ -86,49 +88,46 @@ class @Validator
       @validate_oauth1_settings settings
 
   validate_oauth2_settings: (settings) ->
-    authorizationUrl = false
-    accessTokenUrl = false
     settingProperties = {}
+
     for property in settings[1].value
       @trackRepeatedProperties(settingProperties, property[0].value, property[0].start_mark, 'while validating security scheme', "setting with the same name already exists")
+
       switch property[0].value
-        when "authorizationUrl"
+        when "authorizationUri"
           unless util.isString property[1]
-            throw new exports.ValidationError 'while validating security scheme', null, 'authorizationUrl must be a URL', property[0].start_mark
-        when  "accessTokenUrl"
+            throw new exports.ValidationError 'while validating security scheme', null, 'authorizationUri must be a URL', property[0].start_mark
+
+        when  "accessTokenUri"
           unless util.isString property[1]
-            throw new exports.ValidationError 'while validating security scheme', null, 'accessTokenUrl must be a URL', property[0].start_mark
-    unless "accessTokenUrl" of settingProperties
-      throw new exports.ValidationError 'while validating security scheme', null, 'accessTokenUrl must be a URL', settings.start_mark
-    unless  "authorizationUrl" of settingProperties
-      throw new exports.ValidationError 'while validating security scheme', null, 'authorizationUrl must be a URL', settings.start_mark
+            throw new exports.ValidationError 'while validating security scheme', null, 'accessTokenUri must be a URL', property[0].start_mark
+
+    for propertyName in ['accessTokenUri', 'authorizationUri']
+      unless  propertyName of settingProperties
+        throw new exports.ValidationError 'while validating security scheme', null, "OAuth 2.0 settings must have #{propertyName} property", settings[0].start_mark
 
   validate_oauth1_settings: (settings) ->
-    requestTokenUri = false
-    authorizationUri = false
-    tokenCredentialsUri = false
     settingProperties = {}
+
     for property in settings[1].value
       @trackRepeatedProperties(settingProperties, property[0].value, property[0].start_mark, 'while validating security scheme', "setting with the same name already exists")
+
       switch property[0].value
         when "requestTokenUri"
           unless util.isString property[1]
             throw new exports.ValidationError 'while validating security scheme', null, 'requestTokenUri must be a URL', property[0].start_mark
-          requestTokenUri = true
+
         when "authorizationUri"
           unless util.isString property[1]
             throw new exports.ValidationError 'while validating security scheme', null, 'authorizationUri must be a URL', property[0].start_mark
-          authorizationUri = true
+
         when "tokenCredentialsUri"
           unless util.isString property[1]
             throw new exports.ValidationError 'while validating security scheme', null, 'tokenCredentialsUri must be a URL', property[0].start_mark
-          tokenCredentialsUri = true
-    unless  "requestTokenUri" of settingProperties
-      throw new exports.ValidationError 'while validating security scheme', null, 'requestTokenUri must be a URL', settings.start_mark
-    unless  "authorizationUri" of settingProperties
-      throw new exports.ValidationError 'while validating security scheme', null, 'authorizationUri must be a URL', settings.start_mark
-    unless  "tokenCredentialsUri" of settingProperties
-      throw new exports.ValidationError 'while validating security scheme', null, 'tokenCredentialsUri must be a URL', settings.start_mark
+
+    for propertyName in ['requestTokenUri', 'authorizationUri', 'tokenCredentialsUri']
+      unless  propertyName of settingProperties
+        throw new exports.ValidationError 'while validating security scheme', null, "OAuth 1.0 settings must have #{propertyName} property", settings[0].start_mark
 
   validate_root_schemas: (schemas) ->
     unless util.isSequence schemas

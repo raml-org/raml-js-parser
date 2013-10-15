@@ -49,13 +49,13 @@ describe('Duplicated properties', function (){
         '     description: This is some text',
         '     type: OAuth 2.0',
         '     settings:',
-        '       authorizationUrl: https://www.dropbox.com/1/oauth2/authorize',
-        '       accessTokenUrl: https://api.dropbox.com/1/oauth2/token',
+        '       authorizationUri: https://www.dropbox.com/1/oauth2/authorize',
+        '       accessTokenUri: https://api.dropbox.com/1/oauth2/token',
         '       authorizationGrants: [ code, token ]',
-        '       authorizationUrl: https://www.dropbox.com/1/oauth2/authorize'
+        '       authorizationUri: https://www.dropbox.com/1/oauth2/authorize'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/setting with the same name already exists: 'authorizationUrl'/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/setting with the same name already exists: 'authorizationUri'/).and.notify(done);
     });
     it('should fail if a OAuth 2.0 settings repeats an unknown property', function(done){
       var definition = [
@@ -67,9 +67,9 @@ describe('Duplicated properties', function (){
         '     description: This is some text',
         '     type: OAuth 2.0',
         '     settings:',
-        '       authorizationUrl: https://www.dropbox.com/1/oauth2/authorize',
+        '       authorizationUri: https://www.dropbox.com/1/oauth2/authorize',
         '       tokenTTL: 60s',
-        '       accessTokenUrl: https://api.dropbox.com/1/oauth2/token',
+        '       accessTokenUri: https://api.dropbox.com/1/oauth2/token',
         '       authorizationGrants: [ code, token ]',
         '       tokenTTL: 30s'
       ].join('\n');

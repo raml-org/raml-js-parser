@@ -6,32 +6,32 @@ baseUri: https://api.box.com/{version}/
 securitySchemes:
   - oauth_2_0:
       description: |
-        The Box API uses OAuth 2 for authentication. An authorization header containing 
-        a valid access_token must be included in every request. 
+        The Box API uses OAuth 2 for authentication. An authorization header containing
+        a valid access_token must be included in every request.
       type: OAuth 2.0
       describedBy:
         headers:
           Authorization:
             description: |
-              Used to send a valid OAuth 2 access token. Do not use together with 
+              Used to send a valid OAuth 2 access token. Do not use together with
               the "access_token" query string parameter.
             type: string
         queryParameters:
           access_token:
             description: |
-              Used to send a valid OAuth 2 access token. Do not use together with 
+              Used to send a valid OAuth 2 access token. Do not use together with
               the "Authorization" header
             type: string
       settings:
-        authorizationUrl: https://www.box.com/api/oauth2/authorize
-        accessTokenUrl: https://www.box.com/api/oauth2/token
+        authorizationUri: https://www.box.com/api/oauth2/authorize
+        accessTokenUri: https://www.box.com/api/oauth2/token
         authorizationGrants: [ code, token ]
 securedBy: [ oauth_2_0 ]
 mediaType: application/json
 resourceTypes:
   - base:
       get?:
-        headers:     
+        headers:
           If-None-Match?:
             description: |
               If-None-Match headers ensure that you don’t retrieve unnecessary data
@@ -39,38 +39,38 @@ resourceTypes:
             type: string
           On-Behalf-Of?:
             description: |
-              Used for enterprise administrators to make API calls on behalf of their 
+              Used for enterprise administrators to make API calls on behalf of their
               managed users. To enable this functionality, please contact us with your
               API key.
             type: string
-        responses: 
-          200?: 
+        responses:
+          200?:
             description: |
-                The request has succeeded. The information returned with the response 
+                The request has succeeded. The information returned with the response
                 is dependent on the method used in the request.
-          202?: 
+          202?:
             description: |
-                The request has been accepted for processing, but the processing has 
+                The request has been accepted for processing, but the processing has
                 not been completed.
-          302?: 
+          302?:
             description: "Found. The requested resource resides temporarily under a different URI."
-          304?: 
+          304?:
             description: |
-                Not Modified. If the client has performed a conditional GET request 
+                Not Modified. If the client has performed a conditional GET request
                 and access is allowed, but the document has not been modified
-          400: 
+          400:
             description: |
-                Bad Request. The request could not be understood by the server due 
+                Bad Request. The request could not be understood by the server due
                 to malformed syntax.
-          401: 
+          401:
             description: "Unauthorized. The request requires user authentication."
-          404: 
+          404:
             description: "Not Found. The server has not found anything matching the Request-URI."
-          429: 
+          429:
             description: "Your application is sending too many simultaneous requests."
-          500: 
+          500:
             description: "We couldn't return the representation due to an internal server error."
-          507: 
+          507:
             description: |
                 Insufficient Storage. The server is unable to store the representation
                 needed to complete the request
@@ -84,25 +84,25 @@ resourceTypes:
           Content-MD5:
             description: The SHA1 hash of the file.
             type: string
-        responses: 
-          201?: 
+        responses:
+          201?:
             description: |
-                The request has been fulfilled and resulted in a new resource being 
+                The request has been fulfilled and resulted in a new resource being
                 created.
-          403: 
+          403:
             description: |
-                Forbidden. The server understood the request, but is refusing to 
+                Forbidden. The server understood the request, but is refusing to
                 fulfill it.
-          405: 
+          405:
             description: |
-                Method Not Allowed. The method specified in the Request-Line is not 
+                Method Not Allowed. The method specified in the Request-Line is not
                 allowed for the resource identified by the Request-URI.
-          409: 
+          409:
             description: |
-                Conflict. The request could not be completed due to a conflict with 
-                the current state of the resource. Often happened because of file 
+                Conflict. The request could not be completed due to a conflict with
+                the current state of the resource. Often happened because of file
                 names duplication.
-          429: 
+          429:
             description: "Your application is sending too many simultaneous requests."
       put?:
         headers:
@@ -111,33 +111,33 @@ resourceTypes:
               If-Match header let you ensure that your app only alters files/folders
               on Box if you have the current version.
             type: string
-        responses: 
-          200?: 
+        responses:
+          200?:
             description: |
-                The request has succeeded. The information returned with the response 
+                The request has succeeded. The information returned with the response
                 is dependent on the method used in the request.
-          429: 
+          429:
             description: "Your application is sending too many simultaneous requests."
       delete?:
-        headers: 
+        headers:
           If-Match?:
             description: |
               If-Match header let you ensure that your app only alters files/folders
               on Box if you have the current version.
             type: string
-        responses: 
-          204?: 
+        responses:
+          204?:
             description: |
               "No Content. The server has fulfilled the request but does not need to
               return an entity-body, and might want to return updated metainformation."
-          404: 
+          404:
             description: "The file is not in the trash."
-          412: 
+          412:
             description: |
-                Precondition Failed. The precondition given in one or more of the 
-                request-header fields evaluated to false when it was tested on the 
+                Precondition Failed. The precondition given in one or more of the
+                request-header fields evaluated to false when it was tested on the
                 server.
-          429: 
+          429:
             description: "Your application is sending too many simultaneous requests."
 /folders:
   type: base
@@ -249,39 +249,39 @@ resourceTypes:
             	"type": "object" ,
             	"properties": {
             		"type": {
-            			"description": "For folders is 'folder'.",			 
+            			"description": "For folders is 'folder'.",
             			"type": "string"
             		},
             		"id": {
-            			"description": "The folder’s ID.",			 
+            			"description": "The folder’s ID.",
             			"type": "string"
             		},
             		"sequence_id": {
-            			"description": "A unique ID for use with the /events endpoint.",			 
+            			"description": "A unique ID for use with the /events endpoint.",
             			"type": "string"
             		},
             		"etag": {
-            			"description": "A unique string identifying the version of this folder.",			 
+            			"description": "A unique string identifying the version of this folder.",
             			"type": "string"
             		},
             		"name": {
-            			"description": "The name of the folder.",			 
+            			"description": "The name of the folder.",
             			"type": "string"
             		},
             		"created_at": {
-            			"description": "The time the folder was created.",			 
+            			"description": "The time the folder was created.",
             			"type": "timestamp"
             		},
             		"modified_at": {
-            			"description": "The time the folder or its contents were last modified.",			 
+            			"description": "The time the folder or its contents were last modified.",
             			"type": "timestamp"
             		},
             		"description": {
-            			"description": "The description of the folder.",			 
+            			"description": "The description of the folder.",
             			"type": "string"
             		},
             		"size": {
-            			"description": "The folder size in bytes.",			 
+            			"description": "The folder size in bytes.",
             			"type": "integer"
             		},
             		"path_collection": {
@@ -297,16 +297,16 @@ resourceTypes:
             							},
             							"id": {
             								"type": "string"
-            							},							
+            							},
             							"sequence_id": {
             								"type": "string"
-            							},							
+            							},
             							"etag": {
             								"type": "string"
             							},
             							"name": {
             								"type": "string"
-            							}							
+            							}
             						},
             						"type": "object"
             					},
@@ -315,8 +315,8 @@ resourceTypes:
             				},
             				"type": "object"
             			},
-            			"description": "Array of paths.",			
-            			"type": "array"     
+            			"description": "Array of paths.",
+            			"type": "array"
             		},
             		"created_by": {
             			"properties": {
@@ -333,8 +333,8 @@ resourceTypes:
             					"type": "string"
             				}
             			},
-            			"description": "The user who created this folder.",			 
-            			"type": "object"     
+            			"description": "The user who created this folder.",
+            			"type": "object"
             		},
             		"modified_by": {
             			"properties": {
@@ -351,8 +351,8 @@ resourceTypes:
             					"type": "string"
             				}
             			},
-            			"description": "The user who last modified this folder.",			 
-            			"type": "object"     
+            			"description": "The user who last modified this folder.",
+            			"type": "object"
             		},
             		"owned_by": {
             			"properties": {
@@ -369,8 +369,8 @@ resourceTypes:
             					"type": "string"
             				}
             			},
-            			"description": "The user who owns this folder.",			 
-            			"type": "object"     
+            			"description": "The user who owns this folder.",
+            			"type": "object"
             		},
             		"shared_link": {
             			"properties": {
@@ -409,8 +409,8 @@ resourceTypes:
             					}
             				}
             			},
-            			"description": "The shared link for this folder.",			 
-            			"type": "object"     
+            			"description": "The shared link for this folder.",
+            			"type": "object"
             		},
             		"folder_upload_email": {
             			"properties": {
@@ -421,8 +421,8 @@ resourceTypes:
             					"type": "string"
             				}
             			},
-            			"description": "The upload email address for this folder.",			 
-            			"type": "object"     
+            			"description": "The upload email address for this folder.",
+            			"type": "object"
             		},
             		"parent": {
             			"properties": {
@@ -431,22 +431,22 @@ resourceTypes:
             				},
             				"id": {
             					"type": "string"
-            				},							
+            				},
             				"sequence_id": {
             					"type": "string"
-            				},							
+            				},
             				"etag": {
             					"type": "string"
             				},
             				"name": {
             					"type": "string"
-            				}					
+            				}
             			},
-            			"description": "The folder that contains this one.",			 
-            			"type": "object"     
+            			"description": "The folder that contains this one.",
+            			"type": "object"
             		},
             		"item_status": {
-            			"description": "Whether this item is deleted or not.",			 
+            			"description": "Whether this item is deleted or not.",
             			"type": "string"
             		},
             		"item_collection": {
@@ -462,10 +462,10 @@ resourceTypes:
             							},
             							"id": {
             								"type": "string"
-            							},							
+            							},
             							"sequence_id": {
             								"type": "string"
-            							},							
+            							},
             							"etag": {
             								"type": "string"
             							},
@@ -474,7 +474,7 @@ resourceTypes:
             							},
             							"name": {
             								"type": "string"
-            							}							
+            							}
             						},
             						"type": "object"
             					},
@@ -483,20 +483,20 @@ resourceTypes:
             				},
             				"type": "object"
             			},
-            			"description": "A collection of mini file and folder objects contained in this folder.",			 
+            			"description": "A collection of mini file and folder objects contained in this folder.",
             			"type": "array"
             		},
             		"sync_state": {
             			"description": "Whether this folder will be synced by the Box sync clients or not.",
-            			"required": false,			 
+            			"required": false,
             			"enum": [ "synced", "not_synced", "partially_synced" ]
             		},
             		"has_collaborations": {
-            			"description": "Whether this folder has any collaborators.",	
-            			"required": false,		 
+            			"description": "Whether this folder has any collaborators.",
+            			"required": false,
             			"type": "boolean"
             		}
-            	},	 
+            	},
             	"type": "object"
             }
   /{folderId}:
@@ -508,7 +508,7 @@ resourceTypes:
         type: string
     get:
       description: |
-        Retrieves the full metadata about a folder, including information about 
+        Retrieves the full metadata about a folder, including information about
         when it was last updated as well as the files and folders contained in it.
         The root folder of a Box account is always represented by the id "0".
       responses:
@@ -603,35 +603,35 @@ resourceTypes:
               	"type": "object" ,
               	"properties": {
               		"type": {
-              			"description": "For files is 'file'",			 
+              			"description": "For files is 'file'",
               			"type": "string"
               		},
               		"id": {
-              			"description": "Box’s unique string identifying this file.",			 
+              			"description": "Box’s unique string identifying this file.",
               			"type": "string"
               		},
               		"sequence_id": {
-              			"description": "A unique ID for use with the /events endpoint.",			 
+              			"description": "A unique ID for use with the /events endpoint.",
               			"type": "string"
               		},
               		"etag": {
-              			"description": "A unique string identifying the version of this file.",			 
+              			"description": "A unique string identifying the version of this file.",
               			"type": "string"
               		},
               		"sha1": {
-              			"description": "The sha1 hash of this file.",			 
+              			"description": "The sha1 hash of this file.",
               			"type": "string"
               		},
               		"name": {
-              			"description": "The name of this file.",			 
+              			"description": "The name of this file.",
               			"type": "string"
               		},
               		"description": {
-              			"description": "The description of this file.",			 
+              			"description": "The description of this file.",
               			"type": "string"
               		},
               		"size": {
-              			"description": "Size of this file in bytes.",			 
+              			"description": "Size of this file in bytes.",
               			"type": "integer"
               		},
               		"path_collection": {
@@ -647,16 +647,16 @@ resourceTypes:
               							},
               							"id": {
               								"type": "string"
-              							},							
+              							},
               							"sequence_id": {
               								"type": "string"
-              							},							
+              							},
               							"etag": {
               								"type": "string"
               							},
               							"name": {
               								"type": "string"
-              							}							
+              							}
               						},
               						"type": "object"
               					},
@@ -665,33 +665,33 @@ resourceTypes:
               				},
               				"type": "object"
               			},
-              			"description": "The path of folders to this item, starting at the root.",			
-              			"type": "array"     
+              			"description": "The path of folders to this item, starting at the root.",
+              			"type": "array"
               		},
               		"created_at": {
-              			"description": "When this file was created on Box’s servers.",			 
+              			"description": "When this file was created on Box’s servers.",
               			"type": "timestamp"
               		},
               		"modified_at": {
-              			"description": "When this file was last updated on the Box servers.",			 
+              			"description": "When this file was last updated on the Box servers.",
               			"type": "timestamp"
               		},
               		"trashed_at": {
-              			"description": "When this file was last moved to the trash.",			 
+              			"description": "When this file was last moved to the trash.",
               			"type": "timestamp"
               		},
               		"purged_at": {
-              			"description": "When this file will be permanently deleted.",			 
+              			"description": "When this file will be permanently deleted.",
               			"type": "timestamp"
-              		},	
+              		},
               		"content_created_at": {
-              			"description": "When the content of this file was created.",			 
+              			"description": "When the content of this file was created.",
               			"type": "timestamp"
               		},
               		"content_modified_at": {
-              			"description": "When the content of this file was last modified.",			 
+              			"description": "When the content of this file was last modified.",
               			"type": "timestamp"
-              		},	
+              		},
               		"created_by": {
               			"properties": {
               				"type": {
@@ -707,8 +707,8 @@ resourceTypes:
               					"type": "string"
               				}
               			},
-              			"description": "The user who first created file.",			 
-              			"type": "object"     
+              			"description": "The user who first created file.",
+              			"type": "object"
               		},
               		"modified_by": {
               			"properties": {
@@ -725,8 +725,8 @@ resourceTypes:
               					"type": "string"
               				}
               			},
-              			"description": "The user who last updated this file.",			 
-              			"type": "object"     
+              			"description": "The user who last updated this file.",
+              			"type": "object"
               		},
               		"owned_by": {
               			"properties": {
@@ -743,8 +743,8 @@ resourceTypes:
               					"type": "string"
               				}
               			},
-              			"description": "The user who owns this file.",			 
-              			"type": "object"     
+              			"description": "The user who owns this file.",
+              			"type": "object"
               		},
               		"shared_link": {
               			"properties": {
@@ -783,8 +783,8 @@ resourceTypes:
               					}
               				}
               			},
-              			"description": "The shared link object for this file.",			 
-              			"type": "object"     
+              			"description": "The shared link object for this file.",
+              			"type": "object"
               		},
               		"parent": {
               			"properties": {
@@ -793,42 +793,42 @@ resourceTypes:
               				},
               				"id": {
               					"type": "string"
-              				},							
+              				},
               				"sequence_id": {
               					"type": "string"
-              				},							
+              				},
               				"etag": {
               					"type": "string"
               				},
               				"name": {
               					"type": "string"
-              				}					
+              				}
               			},
-              			"description": "The folder this file is contained in.",			 
-              			"type": "object"     
+              			"description": "The folder this file is contained in.",
+              			"type": "object"
               		},
               		"item_status": {
-              			"description": "Whether this item is deleted or not.",			 
+              			"description": "Whether this item is deleted or not.",
               			"type": "string"
               		},
               		"version_number": {
               			"description": "Whether this folder will be synced by the Box sync clients or not.",
-              			"required": false,			 
+              			"required": false,
               			"type": "string"
               		},
               		"comment_count": {
-              			"description": "The number of comments on a file",		
-              			"required": false,	 
+              			"description": "The number of comments on a file",
+              			"required": false,
               			"type": "integer"
               		}
-              	},	 
+              	},
               	"type": "object"
               }
     put:
       description: |
         Used to update information about the folder. To move a folder, update the ID
-        of its parent. To enable an email address that can be used to upload files 
-        to this folder, update the folder_upload_email attribute. An optional 
+        of its parent. To enable an email address that can be used to upload files
+        to this folder, update the folder_upload_email attribute. An optional
         If-Match header can be included to ensure that client only updates the folder
         if it knows about the latest version.
       body:
@@ -958,12 +958,12 @@ resourceTypes:
       description: |
         Used to delete a folder. A recursive parameter must be included in order to
         delete folders that have items inside of them. An optional If-Match header
-        can be included to ensure that client only deletes the folder if it knows 
+        can be included to ensure that client only deletes the folder if it knows
         about the latest version.
       queryParameters:
         recursive:
           description: Whether to delete this folder if it has items inside of it.
-          type: boolean 
+          type: boolean
       responses:
         204:
           description: Folder removed.
@@ -972,7 +972,7 @@ resourceTypes:
         Restores an item that has been moved to the trash. Default behavior is to
         restore the item to the folder it was in before it was moved to the trash.
         If that parent folder no longer exists or if there is now an item with the
-        same name in that parent folder, the new parent folder and/or new name 
+        same name in that parent folder, the new parent folder and/or new name
         will need to be included in the request.
       body:
         schema: |
@@ -1060,35 +1060,35 @@ resourceTypes:
               	"type": "object" ,
               	"properties": {
               		"type": {
-              			"description": "For files is 'file'",			 
+              			"description": "For files is 'file'",
               			"type": "string"
               		},
               		"id": {
-              			"description": "Box’s unique string identifying this file.",			 
+              			"description": "Box’s unique string identifying this file.",
               			"type": "string"
               		},
               		"sequence_id": {
-              			"description": "A unique ID for use with the /events endpoint.",			 
+              			"description": "A unique ID for use with the /events endpoint.",
               			"type": "string"
               		},
               		"etag": {
-              			"description": "A unique string identifying the version of this file.",			 
+              			"description": "A unique string identifying the version of this file.",
               			"type": "string"
               		},
               		"sha1": {
-              			"description": "The sha1 hash of this file.",			 
+              			"description": "The sha1 hash of this file.",
               			"type": "string"
               		},
               		"name": {
-              			"description": "The name of this file.",			 
+              			"description": "The name of this file.",
               			"type": "string"
               		},
               		"description": {
-              			"description": "The description of this file.",			 
+              			"description": "The description of this file.",
               			"type": "string"
               		},
               		"size": {
-              			"description": "Size of this file in bytes.",			 
+              			"description": "Size of this file in bytes.",
               			"type": "integer"
               		},
               		"path_collection": {
@@ -1104,16 +1104,16 @@ resourceTypes:
               							},
               							"id": {
               								"type": "string"
-              							},							
+              							},
               							"sequence_id": {
               								"type": "string"
-              							},							
+              							},
               							"etag": {
               								"type": "string"
               							},
               							"name": {
               								"type": "string"
-              							}							
+              							}
               						},
               						"type": "object"
               					},
@@ -1122,33 +1122,33 @@ resourceTypes:
               				},
               				"type": "object"
               			},
-              			"description": "The path of folders to this item, starting at the root.",			
-              			"type": "array"     
+              			"description": "The path of folders to this item, starting at the root.",
+              			"type": "array"
               		},
               		"created_at": {
-              			"description": "When this file was created on Box’s servers.",			 
+              			"description": "When this file was created on Box’s servers.",
               			"type": "timestamp"
               		},
               		"modified_at": {
-              			"description": "When this file was last updated on the Box servers.",			 
+              			"description": "When this file was last updated on the Box servers.",
               			"type": "timestamp"
               		},
               		"trashed_at": {
-              			"description": "When this file was last moved to the trash.",			 
+              			"description": "When this file was last moved to the trash.",
               			"type": "timestamp"
               		},
               		"purged_at": {
-              			"description": "When this file will be permanently deleted.",			 
+              			"description": "When this file will be permanently deleted.",
               			"type": "timestamp"
-              		},	
+              		},
               		"content_created_at": {
-              			"description": "When the content of this file was created.",			 
+              			"description": "When the content of this file was created.",
               			"type": "timestamp"
               		},
               		"content_modified_at": {
-              			"description": "When the content of this file was last modified.",			 
+              			"description": "When the content of this file was last modified.",
               			"type": "timestamp"
-              		},	
+              		},
               		"created_by": {
               			"properties": {
               				"type": {
@@ -1164,8 +1164,8 @@ resourceTypes:
               					"type": "string"
               				}
               			},
-              			"description": "The user who first created file.",			 
-              			"type": "object"     
+              			"description": "The user who first created file.",
+              			"type": "object"
               		},
               		"modified_by": {
               			"properties": {
@@ -1182,8 +1182,8 @@ resourceTypes:
               					"type": "string"
               				}
               			},
-              			"description": "The user who last updated this file.",			 
-              			"type": "object"     
+              			"description": "The user who last updated this file.",
+              			"type": "object"
               		},
               		"owned_by": {
               			"properties": {
@@ -1200,8 +1200,8 @@ resourceTypes:
               					"type": "string"
               				}
               			},
-              			"description": "The user who owns this file.",			 
-              			"type": "object"     
+              			"description": "The user who owns this file.",
+              			"type": "object"
               		},
               		"shared_link": {
               			"properties": {
@@ -1240,8 +1240,8 @@ resourceTypes:
               					}
               				}
               			},
-              			"description": "The shared link object for this file.",			 
-              			"type": "object"     
+              			"description": "The shared link object for this file.",
+              			"type": "object"
               		},
               		"parent": {
               			"properties": {
@@ -1250,35 +1250,35 @@ resourceTypes:
               				},
               				"id": {
               					"type": "string"
-              				},							
+              				},
               				"sequence_id": {
               					"type": "string"
-              				},							
+              				},
               				"etag": {
               					"type": "string"
               				},
               				"name": {
               					"type": "string"
-              				}					
+              				}
               			},
-              			"description": "The folder this file is contained in.",			 
-              			"type": "object"     
+              			"description": "The folder this file is contained in.",
+              			"type": "object"
               		},
               		"item_status": {
-              			"description": "Whether this item is deleted or not.",			 
+              			"description": "Whether this item is deleted or not.",
               			"type": "string"
               		},
               		"version_number": {
               			"description": "Whether this folder will be synced by the Box sync clients or not.",
-              			"required": false,			 
+              			"required": false,
               			"type": "string"
               		},
               		"comment_count": {
-              			"description": "The number of comments on a file",		
-              			"required": false,	 
+              			"description": "The number of comments on a file",
+              			"required": false,
               			"type": "integer"
               		}
-              	},	 
+              	},
               	"type": "object"
               }
     /copy:
@@ -1400,39 +1400,39 @@ resourceTypes:
                 	"type": "object" ,
                 	"properties": {
                 		"type": {
-                			"description": "For folders is 'folder'.",			 
+                			"description": "For folders is 'folder'.",
                 			"type": "string"
                 		},
                 		"id": {
-                			"description": "The folder’s ID.",			 
+                			"description": "The folder’s ID.",
                 			"type": "string"
                 		},
                 		"sequence_id": {
-                			"description": "A unique ID for use with the /events endpoint.",			 
+                			"description": "A unique ID for use with the /events endpoint.",
                 			"type": "string"
                 		},
                 		"etag": {
-                			"description": "A unique string identifying the version of this folder.",			 
+                			"description": "A unique string identifying the version of this folder.",
                 			"type": "string"
                 		},
                 		"name": {
-                			"description": "The name of the folder.",			 
+                			"description": "The name of the folder.",
                 			"type": "string"
                 		},
                 		"created_at": {
-                			"description": "The time the folder was created.",			 
+                			"description": "The time the folder was created.",
                 			"type": "timestamp"
                 		},
                 		"modified_at": {
-                			"description": "The time the folder or its contents were last modified.",			 
+                			"description": "The time the folder or its contents were last modified.",
                 			"type": "timestamp"
                 		},
                 		"description": {
-                			"description": "The description of the folder.",			 
+                			"description": "The description of the folder.",
                 			"type": "string"
                 		},
                 		"size": {
-                			"description": "The folder size in bytes.",			 
+                			"description": "The folder size in bytes.",
                 			"type": "integer"
                 		},
                 		"path_collection": {
@@ -1448,16 +1448,16 @@ resourceTypes:
                 							},
                 							"id": {
                 								"type": "string"
-                							},							
+                							},
                 							"sequence_id": {
                 								"type": "string"
-                							},							
+                							},
                 							"etag": {
                 								"type": "string"
                 							},
                 							"name": {
                 								"type": "string"
-                							}							
+                							}
                 						},
                 						"type": "object"
                 					},
@@ -1466,8 +1466,8 @@ resourceTypes:
                 				},
                 				"type": "object"
                 			},
-                			"description": "Array of paths.",			
-                			"type": "array"     
+                			"description": "Array of paths.",
+                			"type": "array"
                 		},
                 		"created_by": {
                 			"properties": {
@@ -1484,8 +1484,8 @@ resourceTypes:
                 					"type": "string"
                 				}
                 			},
-                			"description": "The user who created this folder.",			 
-                			"type": "object"     
+                			"description": "The user who created this folder.",
+                			"type": "object"
                 		},
                 		"modified_by": {
                 			"properties": {
@@ -1502,8 +1502,8 @@ resourceTypes:
                 					"type": "string"
                 				}
                 			},
-                			"description": "The user who last modified this folder.",			 
-                			"type": "object"     
+                			"description": "The user who last modified this folder.",
+                			"type": "object"
                 		},
                 		"owned_by": {
                 			"properties": {
@@ -1520,8 +1520,8 @@ resourceTypes:
                 					"type": "string"
                 				}
                 			},
-                			"description": "The user who owns this folder.",			 
-                			"type": "object"     
+                			"description": "The user who owns this folder.",
+                			"type": "object"
                 		},
                 		"shared_link": {
                 			"properties": {
@@ -1560,8 +1560,8 @@ resourceTypes:
                 					}
                 				}
                 			},
-                			"description": "The shared link for this folder.",			 
-                			"type": "object"     
+                			"description": "The shared link for this folder.",
+                			"type": "object"
                 		},
                 		"folder_upload_email": {
                 			"properties": {
@@ -1572,8 +1572,8 @@ resourceTypes:
                 					"type": "string"
                 				}
                 			},
-                			"description": "The upload email address for this folder.",			 
-                			"type": "object"     
+                			"description": "The upload email address for this folder.",
+                			"type": "object"
                 		},
                 		"parent": {
                 			"properties": {
@@ -1582,22 +1582,22 @@ resourceTypes:
                 				},
                 				"id": {
                 					"type": "string"
-                				},							
+                				},
                 				"sequence_id": {
                 					"type": "string"
-                				},							
+                				},
                 				"etag": {
                 					"type": "string"
                 				},
                 				"name": {
                 					"type": "string"
-                				}					
+                				}
                 			},
-                			"description": "The folder that contains this one.",			 
-                			"type": "object"     
+                			"description": "The folder that contains this one.",
+                			"type": "object"
                 		},
                 		"item_status": {
-                			"description": "Whether this item is deleted or not.",			 
+                			"description": "Whether this item is deleted or not.",
                 			"type": "string"
                 		},
                 		"item_collection": {
@@ -1613,10 +1613,10 @@ resourceTypes:
                 							},
                 							"id": {
                 								"type": "string"
-                							},							
+                							},
                 							"sequence_id": {
                 								"type": "string"
-                							},							
+                							},
                 							"etag": {
                 								"type": "string"
                 							},
@@ -1625,7 +1625,7 @@ resourceTypes:
                 							},
                 							"name": {
                 								"type": "string"
-                							}							
+                							}
                 						},
                 						"type": "object"
                 					},
@@ -1634,27 +1634,27 @@ resourceTypes:
                 				},
                 				"type": "object"
                 			},
-                			"description": "A collection of mini file and folder objects contained in this folder.",			 
+                			"description": "A collection of mini file and folder objects contained in this folder.",
                 			"type": "array"
                 		},
                 		"sync_state": {
                 			"description": "Whether this folder will be synced by the Box sync clients or not.",
-                			"required": false,			 
+                			"required": false,
                 			"enum": [ "synced", "not_synced", "partially_synced" ]
                 		},
                 		"has_collaborations": {
-                			"description": "Whether this folder has any collaborators.",	
-                			"required": false,		 
+                			"description": "Whether this folder has any collaborators.",
+                			"required": false,
                 			"type": "boolean"
                 		}
-                	},	 
+                	},
                 	"type": "object"
                 }
     /trash:
       type: base
       get:
         description: |
-          Retrieves an item that has been moved to the trash. The full item will be 
+          Retrieves an item that has been moved to the trash. The full item will be
           returned, including information about when the it was moved to the trash.
         responses:
           200:
@@ -1721,35 +1721,35 @@ resourceTypes:
                 	"type": "object" ,
                 	"properties": {
                 		"type": {
-                			"description": "For files is 'file'",			 
+                			"description": "For files is 'file'",
                 			"type": "string"
                 		},
                 		"id": {
-                			"description": "Box’s unique string identifying this file.",			 
+                			"description": "Box’s unique string identifying this file.",
                 			"type": "string"
                 		},
                 		"sequence_id": {
-                			"description": "A unique ID for use with the /events endpoint.",			 
+                			"description": "A unique ID for use with the /events endpoint.",
                 			"type": "string"
                 		},
                 		"etag": {
-                			"description": "A unique string identifying the version of this file.",			 
+                			"description": "A unique string identifying the version of this file.",
                 			"type": "string"
                 		},
                 		"sha1": {
-                			"description": "The sha1 hash of this file.",			 
+                			"description": "The sha1 hash of this file.",
                 			"type": "string"
                 		},
                 		"name": {
-                			"description": "The name of this file.",			 
+                			"description": "The name of this file.",
                 			"type": "string"
                 		},
                 		"description": {
-                			"description": "The description of this file.",			 
+                			"description": "The description of this file.",
                 			"type": "string"
                 		},
                 		"size": {
-                			"description": "Size of this file in bytes.",			 
+                			"description": "Size of this file in bytes.",
                 			"type": "integer"
                 		},
                 		"path_collection": {
@@ -1765,16 +1765,16 @@ resourceTypes:
                 							},
                 							"id": {
                 								"type": "string"
-                							},							
+                							},
                 							"sequence_id": {
                 								"type": "string"
-                							},							
+                							},
                 							"etag": {
                 								"type": "string"
                 							},
                 							"name": {
                 								"type": "string"
-                							}							
+                							}
                 						},
                 						"type": "object"
                 					},
@@ -1783,33 +1783,33 @@ resourceTypes:
                 				},
                 				"type": "object"
                 			},
-                			"description": "The path of folders to this item, starting at the root.",			
-                			"type": "array"     
+                			"description": "The path of folders to this item, starting at the root.",
+                			"type": "array"
                 		},
                 		"created_at": {
-                			"description": "When this file was created on Box’s servers.",			 
+                			"description": "When this file was created on Box’s servers.",
                 			"type": "timestamp"
                 		},
                 		"modified_at": {
-                			"description": "When this file was last updated on the Box servers.",			 
+                			"description": "When this file was last updated on the Box servers.",
                 			"type": "timestamp"
                 		},
                 		"trashed_at": {
-                			"description": "When this file was last moved to the trash.",			 
+                			"description": "When this file was last moved to the trash.",
                 			"type": "timestamp"
                 		},
                 		"purged_at": {
-                			"description": "When this file will be permanently deleted.",			 
+                			"description": "When this file will be permanently deleted.",
                 			"type": "timestamp"
-                		},	
+                		},
                 		"content_created_at": {
-                			"description": "When the content of this file was created.",			 
+                			"description": "When the content of this file was created.",
                 			"type": "timestamp"
                 		},
                 		"content_modified_at": {
-                			"description": "When the content of this file was last modified.",			 
+                			"description": "When the content of this file was last modified.",
                 			"type": "timestamp"
-                		},	
+                		},
                 		"created_by": {
                 			"properties": {
                 				"type": {
@@ -1825,8 +1825,8 @@ resourceTypes:
                 					"type": "string"
                 				}
                 			},
-                			"description": "The user who first created file.",			 
-                			"type": "object"     
+                			"description": "The user who first created file.",
+                			"type": "object"
                 		},
                 		"modified_by": {
                 			"properties": {
@@ -1843,8 +1843,8 @@ resourceTypes:
                 					"type": "string"
                 				}
                 			},
-                			"description": "The user who last updated this file.",			 
-                			"type": "object"     
+                			"description": "The user who last updated this file.",
+                			"type": "object"
                 		},
                 		"owned_by": {
                 			"properties": {
@@ -1861,8 +1861,8 @@ resourceTypes:
                 					"type": "string"
                 				}
                 			},
-                			"description": "The user who owns this file.",			 
-                			"type": "object"     
+                			"description": "The user who owns this file.",
+                			"type": "object"
                 		},
                 		"shared_link": {
                 			"properties": {
@@ -1901,8 +1901,8 @@ resourceTypes:
                 					}
                 				}
                 			},
-                			"description": "The shared link object for this file.",			 
-                			"type": "object"     
+                			"description": "The shared link object for this file.",
+                			"type": "object"
                 		},
                 		"parent": {
                 			"properties": {
@@ -1911,40 +1911,40 @@ resourceTypes:
                 				},
                 				"id": {
                 					"type": "string"
-                				},							
+                				},
                 				"sequence_id": {
                 					"type": "string"
-                				},							
+                				},
                 				"etag": {
                 					"type": "string"
                 				},
                 				"name": {
                 					"type": "string"
-                				}					
+                				}
                 			},
-                			"description": "The folder this file is contained in.",			 
-                			"type": "object"     
+                			"description": "The folder this file is contained in.",
+                			"type": "object"
                 		},
                 		"item_status": {
-                			"description": "Whether this item is deleted or not.",			 
+                			"description": "Whether this item is deleted or not.",
                 			"type": "string"
                 		},
                 		"version_number": {
                 			"description": "Whether this folder will be synced by the Box sync clients or not.",
-                			"required": false,			 
+                			"required": false,
                 			"type": "string"
                 		},
                 		"comment_count": {
-                			"description": "The number of comments on a file",		
-                			"required": false,	 
+                			"description": "The number of comments on a file",
+                			"required": false,
                 			"type": "integer"
                 		}
-                	},	 
+                	},
                 	"type": "object"
                 }
       delete:
         description: |
-          Permanently deletes an item that is in the trash. The item will no longer 
+          Permanently deletes an item that is in the trash. The item will no longer
           exist in Box. This action cannot be undone.
         responses:
           204:
@@ -1953,7 +1953,7 @@ resourceTypes:
       type: base
       get:
         description: |
-         Retrieves the files and/or folders contained within this folder 
+         Retrieves the files and/or folders contained within this folder
          without any other metadata about the folder.
         queryParameters:
           fields:
@@ -2265,7 +2265,7 @@ resourceTypes:
       type: base
       get:
         description: |
-          Use this to get a list of all the collaborations on a folder i.e. all of 
+          Use this to get a list of all the collaborations on a folder i.e. all of
           the users that have access to that folder.
         responses:
           200:
@@ -2382,12 +2382,12 @@ resourceTypes:
     type: base
     get:
       description: |
-        Retrieves the files and/or folders that have been moved to the trash. Any 
-        attribute in the full files or folders objects can be passed in with the 
-        fields parameter to get specific attributes, and only those specific 
-        attributes back; otherwise, the mini format is returned for each item by 
-        default. Multiple attributes can be passed in separated by commas e.g. 
-        fields=name,created_at. Paginated results can be retrieved using the limit 
+        Retrieves the files and/or folders that have been moved to the trash. Any
+        attribute in the full files or folders objects can be passed in with the
+        fields parameter to get specific attributes, and only those specific
+        attributes back; otherwise, the mini format is returned for each item by
+        default. Multiple attributes can be passed in separated by commas e.g.
+        fields=name,created_at. Paginated results can be retrieved using the limit
         and offset parameters.
       queryParameters:
         fields:
@@ -2688,7 +2688,7 @@ resourceTypes:
                   }
               }
 /files/{fileId}:
-  type: base 
+  type: base
   uriParameters:
     fileId:
       description: Box’s unique string identifying this file.
@@ -2776,35 +2776,35 @@ resourceTypes:
             	"type": "object" ,
             	"properties": {
             		"type": {
-            			"description": "For files is 'file'",			 
+            			"description": "For files is 'file'",
             			"type": "string"
             		},
             		"id": {
-            			"description": "Box’s unique string identifying this file.",			 
+            			"description": "Box’s unique string identifying this file.",
             			"type": "string"
             		},
             		"sequence_id": {
-            			"description": "A unique ID for use with the /events endpoint.",			 
+            			"description": "A unique ID for use with the /events endpoint.",
             			"type": "string"
             		},
             		"etag": {
-            			"description": "A unique string identifying the version of this file.",			 
+            			"description": "A unique string identifying the version of this file.",
             			"type": "string"
             		},
             		"sha1": {
-            			"description": "The sha1 hash of this file.",			 
+            			"description": "The sha1 hash of this file.",
             			"type": "string"
             		},
             		"name": {
-            			"description": "The name of this file.",			 
+            			"description": "The name of this file.",
             			"type": "string"
             		},
             		"description": {
-            			"description": "The description of this file.",			 
+            			"description": "The description of this file.",
             			"type": "string"
             		},
             		"size": {
-            			"description": "Size of this file in bytes.",			 
+            			"description": "Size of this file in bytes.",
             			"type": "integer"
             		},
             		"path_collection": {
@@ -2820,16 +2820,16 @@ resourceTypes:
             							},
             							"id": {
             								"type": "string"
-            							},							
+            							},
             							"sequence_id": {
             								"type": "string"
-            							},							
+            							},
             							"etag": {
             								"type": "string"
             							},
             							"name": {
             								"type": "string"
-            							}							
+            							}
             						},
             						"type": "object"
             					},
@@ -2838,33 +2838,33 @@ resourceTypes:
             				},
             				"type": "object"
             			},
-            			"description": "The path of folders to this item, starting at the root.",			
-            			"type": "array"     
+            			"description": "The path of folders to this item, starting at the root.",
+            			"type": "array"
             		},
             		"created_at": {
-            			"description": "When this file was created on Box’s servers.",			 
+            			"description": "When this file was created on Box’s servers.",
             			"type": "timestamp"
             		},
             		"modified_at": {
-            			"description": "When this file was last updated on the Box servers.",			 
+            			"description": "When this file was last updated on the Box servers.",
             			"type": "timestamp"
             		},
             		"trashed_at": {
-            			"description": "When this file was last moved to the trash.",			 
+            			"description": "When this file was last moved to the trash.",
             			"type": "timestamp"
             		},
             		"purged_at": {
-            			"description": "When this file will be permanently deleted.",			 
+            			"description": "When this file will be permanently deleted.",
             			"type": "timestamp"
-            		},	
+            		},
             		"content_created_at": {
-            			"description": "When the content of this file was created.",			 
+            			"description": "When the content of this file was created.",
             			"type": "timestamp"
             		},
             		"content_modified_at": {
-            			"description": "When the content of this file was last modified.",			 
+            			"description": "When the content of this file was last modified.",
             			"type": "timestamp"
-            		},	
+            		},
             		"created_by": {
             			"properties": {
             				"type": {
@@ -2880,8 +2880,8 @@ resourceTypes:
             					"type": "string"
             				}
             			},
-            			"description": "The user who first created file.",			 
-            			"type": "object"     
+            			"description": "The user who first created file.",
+            			"type": "object"
             		},
             		"modified_by": {
             			"properties": {
@@ -2898,8 +2898,8 @@ resourceTypes:
             					"type": "string"
             				}
             			},
-            			"description": "The user who last updated this file.",			 
-            			"type": "object"     
+            			"description": "The user who last updated this file.",
+            			"type": "object"
             		},
             		"owned_by": {
             			"properties": {
@@ -2916,8 +2916,8 @@ resourceTypes:
             					"type": "string"
             				}
             			},
-            			"description": "The user who owns this file.",			 
-            			"type": "object"     
+            			"description": "The user who owns this file.",
+            			"type": "object"
             		},
             		"shared_link": {
             			"properties": {
@@ -2956,8 +2956,8 @@ resourceTypes:
             					}
             				}
             			},
-            			"description": "The shared link object for this file.",			 
-            			"type": "object"     
+            			"description": "The shared link object for this file.",
+            			"type": "object"
             		},
             		"parent": {
             			"properties": {
@@ -2966,43 +2966,43 @@ resourceTypes:
             				},
             				"id": {
             					"type": "string"
-            				},							
+            				},
             				"sequence_id": {
             					"type": "string"
-            				},							
+            				},
             				"etag": {
             					"type": "string"
             				},
             				"name": {
             					"type": "string"
-            				}					
+            				}
             			},
-            			"description": "The folder this file is contained in.",			 
-            			"type": "object"     
+            			"description": "The folder this file is contained in.",
+            			"type": "object"
             		},
             		"item_status": {
-            			"description": "Whether this item is deleted or not.",			 
+            			"description": "Whether this item is deleted or not.",
             			"type": "string"
             		},
             		"version_number": {
             			"description": "Whether this folder will be synced by the Box sync clients or not.",
-            			"required": false,			 
+            			"required": false,
             			"type": "string"
             		},
             		"comment_count": {
-            			"description": "The number of comments on a file",		
-            			"required": false,	 
+            			"description": "The number of comments on a file",
+            			"required": false,
             			"type": "integer"
             		}
-            	},	 
+            	},
             	"type": "object"
             }
   put:
     description: |
       Used to update individual or multiple fields in the file object, including
-      renaming the file, changing it’s description, and creating a shared link 
+      renaming the file, changing it’s description, and creating a shared link
       for the file. To move a file, change the ID of its parent folder. An optional
-      If-Match header can be included to ensure that client only updates the file 
+      If-Match header can be included to ensure that client only updates the file
       if it knows about the latest version.
     body:
       schema: |
@@ -3133,35 +3133,35 @@ resourceTypes:
             	"type": "object" ,
             	"properties": {
             		"type": {
-            			"description": "For files is 'file'",			 
+            			"description": "For files is 'file'",
             			"type": "string"
             		},
             		"id": {
-            			"description": "Box’s unique string identifying this file.",			 
+            			"description": "Box’s unique string identifying this file.",
             			"type": "string"
             		},
             		"sequence_id": {
-            			"description": "A unique ID for use with the /events endpoint.",			 
+            			"description": "A unique ID for use with the /events endpoint.",
             			"type": "string"
             		},
             		"etag": {
-            			"description": "A unique string identifying the version of this file.",			 
+            			"description": "A unique string identifying the version of this file.",
             			"type": "string"
             		},
             		"sha1": {
-            			"description": "The sha1 hash of this file.",			 
+            			"description": "The sha1 hash of this file.",
             			"type": "string"
             		},
             		"name": {
-            			"description": "The name of this file.",			 
+            			"description": "The name of this file.",
             			"type": "string"
             		},
             		"description": {
-            			"description": "The description of this file.",			 
+            			"description": "The description of this file.",
             			"type": "string"
             		},
             		"size": {
-            			"description": "Size of this file in bytes.",			 
+            			"description": "Size of this file in bytes.",
             			"type": "integer"
             		},
             		"path_collection": {
@@ -3177,16 +3177,16 @@ resourceTypes:
             							},
             							"id": {
             								"type": "string"
-            							},							
+            							},
             							"sequence_id": {
             								"type": "string"
-            							},							
+            							},
             							"etag": {
             								"type": "string"
             							},
             							"name": {
             								"type": "string"
-            							}							
+            							}
             						},
             						"type": "object"
             					},
@@ -3195,33 +3195,33 @@ resourceTypes:
             				},
             				"type": "object"
             			},
-            			"description": "The path of folders to this item, starting at the root.",			
-            			"type": "array"     
+            			"description": "The path of folders to this item, starting at the root.",
+            			"type": "array"
             		},
             		"created_at": {
-            			"description": "When this file was created on Box’s servers.",			 
+            			"description": "When this file was created on Box’s servers.",
             			"type": "timestamp"
             		},
             		"modified_at": {
-            			"description": "When this file was last updated on the Box servers.",			 
+            			"description": "When this file was last updated on the Box servers.",
             			"type": "timestamp"
             		},
             		"trashed_at": {
-            			"description": "When this file was last moved to the trash.",			 
+            			"description": "When this file was last moved to the trash.",
             			"type": "timestamp"
             		},
             		"purged_at": {
-            			"description": "When this file will be permanently deleted.",			 
+            			"description": "When this file will be permanently deleted.",
             			"type": "timestamp"
-            		},	
+            		},
             		"content_created_at": {
-            			"description": "When the content of this file was created.",			 
+            			"description": "When the content of this file was created.",
             			"type": "timestamp"
             		},
             		"content_modified_at": {
-            			"description": "When the content of this file was last modified.",			 
+            			"description": "When the content of this file was last modified.",
             			"type": "timestamp"
-            		},	
+            		},
             		"created_by": {
             			"properties": {
             				"type": {
@@ -3237,8 +3237,8 @@ resourceTypes:
             					"type": "string"
             				}
             			},
-            			"description": "The user who first created file.",			 
-            			"type": "object"     
+            			"description": "The user who first created file.",
+            			"type": "object"
             		},
             		"modified_by": {
             			"properties": {
@@ -3255,8 +3255,8 @@ resourceTypes:
             					"type": "string"
             				}
             			},
-            			"description": "The user who last updated this file.",			 
-            			"type": "object"     
+            			"description": "The user who last updated this file.",
+            			"type": "object"
             		},
             		"owned_by": {
             			"properties": {
@@ -3273,8 +3273,8 @@ resourceTypes:
             					"type": "string"
             				}
             			},
-            			"description": "The user who owns this file.",			 
-            			"type": "object"     
+            			"description": "The user who owns this file.",
+            			"type": "object"
             		},
             		"shared_link": {
             			"properties": {
@@ -3313,8 +3313,8 @@ resourceTypes:
             					}
             				}
             			},
-            			"description": "The shared link object for this file.",			 
-            			"type": "object"     
+            			"description": "The shared link object for this file.",
+            			"type": "object"
             		},
             		"parent": {
             			"properties": {
@@ -3323,40 +3323,40 @@ resourceTypes:
             				},
             				"id": {
             					"type": "string"
-            				},							
+            				},
             				"sequence_id": {
             					"type": "string"
-            				},							
+            				},
             				"etag": {
             					"type": "string"
             				},
             				"name": {
             					"type": "string"
-            				}					
+            				}
             			},
-            			"description": "The folder this file is contained in.",			 
-            			"type": "object"     
+            			"description": "The folder this file is contained in.",
+            			"type": "object"
             		},
             		"item_status": {
-            			"description": "Whether this item is deleted or not.",			 
+            			"description": "Whether this item is deleted or not.",
             			"type": "string"
             		},
             		"version_number": {
             			"description": "Whether this folder will be synced by the Box sync clients or not.",
-            			"required": false,			 
+            			"required": false,
             			"type": "string"
             		},
             		"comment_count": {
-            			"description": "The number of comments on a file",		
-            			"required": false,	 
+            			"description": "The number of comments on a file",
+            			"required": false,
             			"type": "integer"
             		}
-            	},	 
+            	},
             	"type": "object"
             }
   delete:
     description: |
-      Discards a file to the trash. The 'etag' of the file can be included as an 
+      Discards a file to the trash. The 'etag' of the file can be included as an
       'If-Match' header to prevent race conditions.
       Trash: Depending on the enterprise settings for this user, the item will
       either be actually deleted from Box or moved to the trash.
@@ -3367,7 +3367,7 @@ resourceTypes:
         description: If the 'If-Match' header is sent and fails.
   post:
     description: |
-      Restores an item that has been moved to the trash. Default behavior is to 
+      Restores an item that has been moved to the trash. Default behavior is to
       restore the item to the folder it was in before it was moved to the trash.
       If that parent folder no longer exists or if there is now an item with the
       same name in that parent folder, the new parent folder and/or new name will
@@ -3470,35 +3470,35 @@ resourceTypes:
             	"type": "object" ,
             	"properties": {
             		"type": {
-            			"description": "For files is 'file'",			 
+            			"description": "For files is 'file'",
             			"type": "string"
             		},
             		"id": {
-            			"description": "Box’s unique string identifying this file.",			 
+            			"description": "Box’s unique string identifying this file.",
             			"type": "string"
             		},
             		"sequence_id": {
-            			"description": "A unique ID for use with the /events endpoint.",			 
+            			"description": "A unique ID for use with the /events endpoint.",
             			"type": "string"
             		},
             		"etag": {
-            			"description": "A unique string identifying the version of this file.",			 
+            			"description": "A unique string identifying the version of this file.",
             			"type": "string"
             		},
             		"sha1": {
-            			"description": "The sha1 hash of this file.",			 
+            			"description": "The sha1 hash of this file.",
             			"type": "string"
             		},
             		"name": {
-            			"description": "The name of this file.",			 
+            			"description": "The name of this file.",
             			"type": "string"
             		},
             		"description": {
-            			"description": "The description of this file.",			 
+            			"description": "The description of this file.",
             			"type": "string"
             		},
             		"size": {
-            			"description": "Size of this file in bytes.",			 
+            			"description": "Size of this file in bytes.",
             			"type": "integer"
             		},
             		"path_collection": {
@@ -3514,16 +3514,16 @@ resourceTypes:
             							},
             							"id": {
             								"type": "string"
-            							},							
+            							},
             							"sequence_id": {
             								"type": "string"
-            							},							
+            							},
             							"etag": {
             								"type": "string"
             							},
             							"name": {
             								"type": "string"
-            							}							
+            							}
             						},
             						"type": "object"
             					},
@@ -3532,33 +3532,33 @@ resourceTypes:
             				},
             				"type": "object"
             			},
-            			"description": "The path of folders to this item, starting at the root.",			
-            			"type": "array"     
+            			"description": "The path of folders to this item, starting at the root.",
+            			"type": "array"
             		},
             		"created_at": {
-            			"description": "When this file was created on Box’s servers.",			 
+            			"description": "When this file was created on Box’s servers.",
             			"type": "timestamp"
             		},
             		"modified_at": {
-            			"description": "When this file was last updated on the Box servers.",			 
+            			"description": "When this file was last updated on the Box servers.",
             			"type": "timestamp"
             		},
             		"trashed_at": {
-            			"description": "When this file was last moved to the trash.",			 
+            			"description": "When this file was last moved to the trash.",
             			"type": "timestamp"
             		},
             		"purged_at": {
-            			"description": "When this file will be permanently deleted.",			 
+            			"description": "When this file will be permanently deleted.",
             			"type": "timestamp"
-            		},	
+            		},
             		"content_created_at": {
-            			"description": "When the content of this file was created.",			 
+            			"description": "When the content of this file was created.",
             			"type": "timestamp"
             		},
             		"content_modified_at": {
-            			"description": "When the content of this file was last modified.",			 
+            			"description": "When the content of this file was last modified.",
             			"type": "timestamp"
-            		},	
+            		},
             		"created_by": {
             			"properties": {
             				"type": {
@@ -3574,8 +3574,8 @@ resourceTypes:
             					"type": "string"
             				}
             			},
-            			"description": "The user who first created file.",			 
-            			"type": "object"     
+            			"description": "The user who first created file.",
+            			"type": "object"
             		},
             		"modified_by": {
             			"properties": {
@@ -3592,8 +3592,8 @@ resourceTypes:
             					"type": "string"
             				}
             			},
-            			"description": "The user who last updated this file.",			 
-            			"type": "object"     
+            			"description": "The user who last updated this file.",
+            			"type": "object"
             		},
             		"owned_by": {
             			"properties": {
@@ -3610,8 +3610,8 @@ resourceTypes:
             					"type": "string"
             				}
             			},
-            			"description": "The user who owns this file.",			 
-            			"type": "object"     
+            			"description": "The user who owns this file.",
+            			"type": "object"
             		},
             		"shared_link": {
             			"properties": {
@@ -3650,8 +3650,8 @@ resourceTypes:
             					}
             				}
             			},
-            			"description": "The shared link object for this file.",			 
-            			"type": "object"     
+            			"description": "The shared link object for this file.",
+            			"type": "object"
             		},
             		"parent": {
             			"properties": {
@@ -3660,35 +3660,35 @@ resourceTypes:
             				},
             				"id": {
             					"type": "string"
-            				},							
+            				},
             				"sequence_id": {
             					"type": "string"
-            				},							
+            				},
             				"etag": {
             					"type": "string"
             				},
             				"name": {
             					"type": "string"
-            				}					
+            				}
             			},
-            			"description": "The folder this file is contained in.",			 
-            			"type": "object"     
+            			"description": "The folder this file is contained in.",
+            			"type": "object"
             		},
             		"item_status": {
-            			"description": "Whether this item is deleted or not.",			 
+            			"description": "Whether this item is deleted or not.",
             			"type": "string"
             		},
             		"version_number": {
             			"description": "Whether this folder will be synced by the Box sync clients or not.",
-            			"required": false,			 
+            			"required": false,
             			"type": "string"
             		},
             		"comment_count": {
-            			"description": "The number of comments on a file",		
-            			"required": false,	 
+            			"description": "The number of comments on a file",
+            			"required": false,
             			"type": "integer"
             		}
-            	},	 
+            	},
             	"type": "object"
             }
   /content:
@@ -3698,18 +3698,18 @@ resourceTypes:
         Retrieves the actual data of the file. An optional version parameter can be
         set to download a previous version of the file.
       queryParameters:
-        version: 
+        version:
           description: The ID specific version of this file to download.
           type: string
       responses:
         302:
-          description: Found      
-        202: 
+          description: Found
+        202:
           description: |
-            If the file is not ready to be downloaded (i.e. in the case where the 
-            file was uploaded immediately before the download request), a response 
+            If the file is not ready to be downloaded (i.e. in the case where the
+            file was uploaded immediately before the download request), a response
             with an HTTP status of 202 Accepted will be returned with a 'Retry-After'
-            header indicating the time in seconds after which the file will be 
+            header indicating the time in seconds after which the file will be
             available for the client to download.
   /versions:
     type: base
@@ -3717,11 +3717,11 @@ resourceTypes:
       description: |
         If there are previous versions of this file, this method can be used to
         retrieve metadata about the older versions.
-        ALERT: Versions are only tracked for Box users with premium accounts.  
+        ALERT: Versions are only tracked for Box users with premium accounts.
       responses:
-        200: 
+        200:
           description: |
-            An array of version objects are returned. If there are no previous 
+            An array of version objects are returned. If there are no previous
             versions of this file, then an empty array will be returned.
           body:
             example: |
@@ -3805,7 +3805,7 @@ resourceTypes:
     type: base
     post:
       description: |
-        Used to create a copy of a file in another folder. The original version of 
+        Used to create a copy of a file in another folder. The original version of
         the file will not be altered.
       body:
         schema: |
@@ -3909,35 +3909,35 @@ resourceTypes:
               	"type": "object" ,
               	"properties": {
               		"type": {
-              			"description": "For files is 'file'",			 
+              			"description": "For files is 'file'",
               			"type": "string"
               		},
               		"id": {
-              			"description": "Box’s unique string identifying this file.",			 
+              			"description": "Box’s unique string identifying this file.",
               			"type": "string"
               		},
               		"sequence_id": {
-              			"description": "A unique ID for use with the /events endpoint.",			 
+              			"description": "A unique ID for use with the /events endpoint.",
               			"type": "string"
               		},
               		"etag": {
-              			"description": "A unique string identifying the version of this file.",			 
+              			"description": "A unique string identifying the version of this file.",
               			"type": "string"
               		},
               		"sha1": {
-              			"description": "The sha1 hash of this file.",			 
+              			"description": "The sha1 hash of this file.",
               			"type": "string"
               		},
               		"name": {
-              			"description": "The name of this file.",			 
+              			"description": "The name of this file.",
               			"type": "string"
               		},
               		"description": {
-              			"description": "The description of this file.",			 
+              			"description": "The description of this file.",
               			"type": "string"
               		},
               		"size": {
-              			"description": "Size of this file in bytes.",			 
+              			"description": "Size of this file in bytes.",
               			"type": "integer"
               		},
               		"path_collection": {
@@ -3953,16 +3953,16 @@ resourceTypes:
               							},
               							"id": {
               								"type": "string"
-              							},							
+              							},
               							"sequence_id": {
               								"type": "string"
-              							},							
+              							},
               							"etag": {
               								"type": "string"
               							},
               							"name": {
               								"type": "string"
-              							}							
+              							}
               						},
               						"type": "object"
               					},
@@ -3971,33 +3971,33 @@ resourceTypes:
               				},
               				"type": "object"
               			},
-              			"description": "The path of folders to this item, starting at the root.",			
-              			"type": "array"     
+              			"description": "The path of folders to this item, starting at the root.",
+              			"type": "array"
               		},
               		"created_at": {
-              			"description": "When this file was created on Box’s servers.",			 
+              			"description": "When this file was created on Box’s servers.",
               			"type": "timestamp"
               		},
               		"modified_at": {
-              			"description": "When this file was last updated on the Box servers.",			 
+              			"description": "When this file was last updated on the Box servers.",
               			"type": "timestamp"
               		},
               		"trashed_at": {
-              			"description": "When this file was last moved to the trash.",			 
+              			"description": "When this file was last moved to the trash.",
               			"type": "timestamp"
               		},
               		"purged_at": {
-              			"description": "When this file will be permanently deleted.",			 
+              			"description": "When this file will be permanently deleted.",
               			"type": "timestamp"
-              		},	
+              		},
               		"content_created_at": {
-              			"description": "When the content of this file was created.",			 
+              			"description": "When the content of this file was created.",
               			"type": "timestamp"
               		},
               		"content_modified_at": {
-              			"description": "When the content of this file was last modified.",			 
+              			"description": "When the content of this file was last modified.",
               			"type": "timestamp"
-              		},	
+              		},
               		"created_by": {
               			"properties": {
               				"type": {
@@ -4013,8 +4013,8 @@ resourceTypes:
               					"type": "string"
               				}
               			},
-              			"description": "The user who first created file.",			 
-              			"type": "object"     
+              			"description": "The user who first created file.",
+              			"type": "object"
               		},
               		"modified_by": {
               			"properties": {
@@ -4031,8 +4031,8 @@ resourceTypes:
               					"type": "string"
               				}
               			},
-              			"description": "The user who last updated this file.",			 
-              			"type": "object"     
+              			"description": "The user who last updated this file.",
+              			"type": "object"
               		},
               		"owned_by": {
               			"properties": {
@@ -4049,8 +4049,8 @@ resourceTypes:
               					"type": "string"
               				}
               			},
-              			"description": "The user who owns this file.",			 
-              			"type": "object"     
+              			"description": "The user who owns this file.",
+              			"type": "object"
               		},
               		"shared_link": {
               			"properties": {
@@ -4089,8 +4089,8 @@ resourceTypes:
               					}
               				}
               			},
-              			"description": "The shared link object for this file.",			 
-              			"type": "object"     
+              			"description": "The shared link object for this file.",
+              			"type": "object"
               		},
               		"parent": {
               			"properties": {
@@ -4099,35 +4099,35 @@ resourceTypes:
               				},
               				"id": {
               					"type": "string"
-              				},							
+              				},
               				"sequence_id": {
               					"type": "string"
-              				},							
+              				},
               				"etag": {
               					"type": "string"
               				},
               				"name": {
               					"type": "string"
-              				}					
+              				}
               			},
-              			"description": "The folder this file is contained in.",			 
-              			"type": "object"     
+              			"description": "The folder this file is contained in.",
+              			"type": "object"
               		},
               		"item_status": {
-              			"description": "Whether this item is deleted or not.",			 
+              			"description": "Whether this item is deleted or not.",
               			"type": "string"
               		},
               		"version_number": {
               			"description": "Whether this folder will be synced by the Box sync clients or not.",
-              			"required": false,			 
+              			"required": false,
               			"type": "string"
               		},
               		"comment_count": {
-              			"description": "The number of comments on a file",		
-              			"required": false,	 
+              			"description": "The number of comments on a file",
+              			"required": false,
               			"type": "integer"
               		}
-              	},	 
+              	},
               	"type": "object"
               }
         409:
@@ -4143,19 +4143,19 @@ resourceTypes:
         are only available in .png format and will only be generated for image file
         formats.
           There are three success cases that your application needs to account for:
-        - If the thumbnail isn’t available yet, a 202 Accepted HTTP status will 
-        be returned, including a 'Location' header pointing to a placeholder 
+        - If the thumbnail isn’t available yet, a 202 Accepted HTTP status will
+        be returned, including a 'Location' header pointing to a placeholder
         graphic that can be used until the thumbnail is returned. A 'Retry-After'
         header will also be returned, indicating the time in seconds after which
         the thumbnail will be available. Your application should only attempt to
         get the thumbnail again after Retry-After time.
-        - If Box can’t generate a thumbnail for this file type, a 302 Found 
-        response will be returned, redirecting to a placeholder graphic in the 
+        - If Box can’t generate a thumbnail for this file type, a 302 Found
+        response will be returned, redirecting to a placeholder graphic in the
         requested size for this particular file type.
         - If the thumbnail is available, a 200 OK response will be returned with
         the contents of the thumbnail in the body.
-        - If Box is unable to generate a thumbnail for this particular file, a 
-        404 'Not Found' response will be returned with a code of 
+        - If Box is unable to generate a thumbnail for this particular file, a
+        404 'Not Found' response will be returned with a code of
         preview_cannot_be_generated. If there are any bad parameters sent in, a
         standard 400 'Bad Request' will be returned.
       queryParameters:
@@ -4255,35 +4255,35 @@ resourceTypes:
               	"type": "object" ,
               	"properties": {
               		"type": {
-              			"description": "For files is 'file'",			 
+              			"description": "For files is 'file'",
               			"type": "string"
               		},
               		"id": {
-              			"description": "Box’s unique string identifying this file.",			 
+              			"description": "Box’s unique string identifying this file.",
               			"type": "string"
               		},
               		"sequence_id": {
-              			"description": "A unique ID for use with the /events endpoint.",			 
+              			"description": "A unique ID for use with the /events endpoint.",
               			"type": "string"
               		},
               		"etag": {
-              			"description": "A unique string identifying the version of this file.",			 
+              			"description": "A unique string identifying the version of this file.",
               			"type": "string"
               		},
               		"sha1": {
-              			"description": "The sha1 hash of this file.",			 
+              			"description": "The sha1 hash of this file.",
               			"type": "string"
               		},
               		"name": {
-              			"description": "The name of this file.",			 
+              			"description": "The name of this file.",
               			"type": "string"
               		},
               		"description": {
-              			"description": "The description of this file.",			 
+              			"description": "The description of this file.",
               			"type": "string"
               		},
               		"size": {
-              			"description": "Size of this file in bytes.",			 
+              			"description": "Size of this file in bytes.",
               			"type": "integer"
               		},
               		"path_collection": {
@@ -4299,16 +4299,16 @@ resourceTypes:
               							},
               							"id": {
               								"type": "string"
-              							},							
+              							},
               							"sequence_id": {
               								"type": "string"
-              							},							
+              							},
               							"etag": {
               								"type": "string"
               							},
               							"name": {
               								"type": "string"
-              							}							
+              							}
               						},
               						"type": "object"
               					},
@@ -4317,33 +4317,33 @@ resourceTypes:
               				},
               				"type": "object"
               			},
-              			"description": "The path of folders to this item, starting at the root.",			
-              			"type": "array"     
+              			"description": "The path of folders to this item, starting at the root.",
+              			"type": "array"
               		},
               		"created_at": {
-              			"description": "When this file was created on Box’s servers.",			 
+              			"description": "When this file was created on Box’s servers.",
               			"type": "timestamp"
               		},
               		"modified_at": {
-              			"description": "When this file was last updated on the Box servers.",			 
+              			"description": "When this file was last updated on the Box servers.",
               			"type": "timestamp"
               		},
               		"trashed_at": {
-              			"description": "When this file was last moved to the trash.",			 
+              			"description": "When this file was last moved to the trash.",
               			"type": "timestamp"
               		},
               		"purged_at": {
-              			"description": "When this file will be permanently deleted.",			 
+              			"description": "When this file will be permanently deleted.",
               			"type": "timestamp"
-              		},	
+              		},
               		"content_created_at": {
-              			"description": "When the content of this file was created.",			 
+              			"description": "When the content of this file was created.",
               			"type": "timestamp"
               		},
               		"content_modified_at": {
-              			"description": "When the content of this file was last modified.",			 
+              			"description": "When the content of this file was last modified.",
               			"type": "timestamp"
-              		},	
+              		},
               		"created_by": {
               			"properties": {
               				"type": {
@@ -4359,8 +4359,8 @@ resourceTypes:
               					"type": "string"
               				}
               			},
-              			"description": "The user who first created file.",			 
-              			"type": "object"     
+              			"description": "The user who first created file.",
+              			"type": "object"
               		},
               		"modified_by": {
               			"properties": {
@@ -4377,8 +4377,8 @@ resourceTypes:
               					"type": "string"
               				}
               			},
-              			"description": "The user who last updated this file.",			 
-              			"type": "object"     
+              			"description": "The user who last updated this file.",
+              			"type": "object"
               		},
               		"owned_by": {
               			"properties": {
@@ -4395,8 +4395,8 @@ resourceTypes:
               					"type": "string"
               				}
               			},
-              			"description": "The user who owns this file.",			 
-              			"type": "object"     
+              			"description": "The user who owns this file.",
+              			"type": "object"
               		},
               		"shared_link": {
               			"properties": {
@@ -4435,8 +4435,8 @@ resourceTypes:
               					}
               				}
               			},
-              			"description": "The shared link object for this file.",			 
-              			"type": "object"     
+              			"description": "The shared link object for this file.",
+              			"type": "object"
               		},
               		"parent": {
               			"properties": {
@@ -4445,35 +4445,35 @@ resourceTypes:
               				},
               				"id": {
               					"type": "string"
-              				},							
+              				},
               				"sequence_id": {
               					"type": "string"
-              				},							
+              				},
               				"etag": {
               					"type": "string"
               				},
               				"name": {
               					"type": "string"
-              				}					
+              				}
               			},
-              			"description": "The folder this file is contained in.",			 
-              			"type": "object"     
+              			"description": "The folder this file is contained in.",
+              			"type": "object"
               		},
               		"item_status": {
-              			"description": "Whether this item is deleted or not.",			 
+              			"description": "Whether this item is deleted or not.",
               			"type": "string"
               		},
               		"version_number": {
               			"description": "Whether this folder will be synced by the Box sync clients or not.",
-              			"required": false,			 
+              			"required": false,
               			"type": "string"
               		},
               		"comment_count": {
-              			"description": "The number of comments on a file",		
-              			"required": false,	 
+              			"description": "The number of comments on a file",
+              			"required": false,
               			"type": "integer"
               		}
-              	},	 
+              	},
               	"type": "object"
               }
     delete:
@@ -4487,9 +4487,9 @@ resourceTypes:
     type: base
     get:
       description: |
-       Retrieves the comments on a particular file, if any exist. A collection of 
+       Retrieves the comments on a particular file, if any exist. A collection of
        comment objects are returned. If there are no comments on the file, an empty
-       comments array is returned.  
+       comments array is returned.
       responses:
         200:
           body:
@@ -4586,7 +4586,7 @@ resourceTypes:
     get:
       description: |
        Retrieves all of the tasks for given file. A collection of mini task objects
-       is returned. If there are no tasks, an empty collection will be returned.  
+       is returned. If there are no tasks, an empty collection will be returned.
       responses:
         200:
           body:
@@ -4615,7 +4615,7 @@ resourceTypes:
               	"type": "object" ,
               	"properties": {
               		"total_count": {
-              			"type": "integer"			
+              			"type": "integer"
               		},
               		"entries": [
               		    {
@@ -4654,28 +4654,28 @@ resourceTypes:
               					}
               				},
               				"type": "object"
-              			}			
+              			}
               		],
               		"type": "array"
               	}
               }
 /shared_items:
-  type: base 
+  type: base
   get:
     description: |
-      Used to retrieve the metadata about a shared item when only given a shared 
-      link. Because of varying permission levels for shared links, a password may 
-      be required to retrieve the shared item. Once the item has been retrieved, 
-      you can make API requests against the actual resource '/files/{id}' or 
+      Used to retrieve the metadata about a shared item when only given a shared
+      link. Because of varying permission levels for shared links, a password may
+      be required to retrieve the shared item. Once the item has been retrieved,
+      you can make API requests against the actual resource '/files/{id}' or
       '/folders/{id}' as long as the shared link and optional password are in the
       header.
-      A full file or folder object is returned if the shared link is valid and the 
+      A full file or folder object is returned if the shared link is valid and the
       user has access to it. An error may be returned if the link is invalid, if a
       password is required, or if the user does not have access to the file.
     queryParameters:
       BoxApi:
         required: true
-        enum: 
+        enum:
           - 0
           - 1
           - true
@@ -4694,7 +4694,7 @@ resourceTypes:
           - t
           - f
         type: string
-      shared_link_password: 
+      shared_link_password:
         description: The password for this shared link
         type: string
     responses:
@@ -4787,9 +4787,9 @@ resourceTypes:
   type: base
   post:
     description: |
-      Used to add a comment by the user to a specific file or comment (i.e. as a 
+      Used to add a comment by the user to a specific file or comment (i.e. as a
       reply comment).
-    body:    
+    body:
       schema: |
         {
         	"$schema": "http://json-schema.org/draft-03/schema",
@@ -4816,7 +4816,7 @@ resourceTypes:
         }
     responses:
       200:
-        body:        
+        body:
           example: |
             {
                 "type": "comment",
@@ -4851,7 +4851,7 @@ resourceTypes:
             		},
             		"is_reply_comment": {
             			"description": "Whether or not this comment is a reply to another comment.",
-            			"type": "boolean"      
+            			"type": "boolean"
             		},
             		"message": {
             			"description": "The comment text that the user typed.",
@@ -4898,7 +4898,7 @@ resourceTypes:
             		},
             		"modified_at": {
             			"description": "The time this comment was last modified.",
-            			"type": "timestamp"   
+            			"type": "timestamp"
             		}
             	},
             	"required": false,
@@ -4963,7 +4963,7 @@ resourceTypes:
               		},
               		"is_reply_comment": {
               			"description": "Whether or not this comment is a reply to another comment.",
-              			"type": "boolean"      
+              			"type": "boolean"
               		},
               		"message": {
               			"description": "The comment text that the user typed.",
@@ -5010,7 +5010,7 @@ resourceTypes:
               		},
               		"modified_at": {
               			"description": "The time this comment was last modified.",
-              			"type": "timestamp"   
+              			"type": "timestamp"
               		}
               	},
               	"required": false,
@@ -5018,7 +5018,7 @@ resourceTypes:
               }
     get:
       description: |
-        Used to retrieve the message and metadata about a specific comment. 
+        Used to retrieve the message and metadata about a specific comment.
         Information about the user who created the comment is also included.
       responses:
         200:
@@ -5057,7 +5057,7 @@ resourceTypes:
               		},
               		"is_reply_comment": {
               			"description": "Whether or not this comment is a reply to another comment.",
-              			"type": "boolean"      
+              			"type": "boolean"
               		},
               		"message": {
               			"description": "The comment text that the user typed.",
@@ -5104,7 +5104,7 @@ resourceTypes:
               		},
               		"modified_at": {
               			"description": "The time this comment was last modified.",
-              			"type": "timestamp"   
+              			"type": "timestamp"
               		}
               	},
               	"required": false,
@@ -5112,17 +5112,17 @@ resourceTypes:
               }
     delete:
       description: |
-        Permanently deletes a comment. An empty 200 response is returned to confirm 
+        Permanently deletes a comment. An empty 200 response is returned to confirm
         deletion of the comment. Errors can be thrown if the ID is invalid or if the
         user is not authorized to delete this particular comment.
       responses:
-        200: 
+        200:
           description: Confirm deletion of the comment.
 /collaborations:
   type: base
   post:
     description: |
-      Used to add a collaboration for a single user to a folder. Either an email 
+      Used to add a collaboration for a single user to a folder. Either an email
       address or a user ID can be used to create the collaboration.
     body:
       schema: |
@@ -5200,11 +5200,11 @@ resourceTypes:
             	"type": "object" ,
             	"properties": {
             		"type": {
-            			"description": "For collaborations is 'collaboration'",			 
+            			"description": "For collaborations is 'collaboration'",
             			"type": "string"
             		},
             		"id": {
-            			"description": "A unique string identifying this collaboration.",			 
+            			"description": "A unique string identifying this collaboration.",
             			"type": "string"
             		},
             		"created_by": {
@@ -5222,19 +5222,19 @@ resourceTypes:
             					"type": "string"
             				}
             			},
-            			"description": "The user who created this collaboration.",			 
-            			"type": "object"     
+            			"description": "The user who created this collaboration.",
+            			"type": "object"
             		},
             		"created_at": {
-            			"description": "The time this collaboration was created.",			 
+            			"description": "The time this collaboration was created.",
             			"type": "timestamp"
             		},
             		"modified_at": {
-            			"description": "The time this collaboration was last modified.",			 
+            			"description": "The time this collaboration was last modified.",
             			"type": "timestamp"
             		},
             		"expires_at": {
-            			"description": "The time this collaboration will expire.",			 
+            			"description": "The time this collaboration will expire.",
             			"type": "timestamp"
             		},
             		"status": {
@@ -5256,15 +5256,15 @@ resourceTypes:
             					"type": "string"
             				}
             			},
-            			"description": "The user who the collaboration applies to.",			 
-            			"type": "object"     
+            			"description": "The user who the collaboration applies to.",
+            			"type": "object"
             		},
             		"role": {
             			"description": "The level of access this user has.",
             			"enum": [ "editor", "viewer", "previewer", "uploader", "previewer uploader", "viewer uploader", "co-owner" ]
             		},
             		"acknowledged_at": {
-            			"description": "When the 'status' of this collab was changed.",			 
+            			"description": "When the 'status' of this collab was changed.",
             			"type": "timestamp"
             		},
             		"item": {
@@ -5274,16 +5274,16 @@ resourceTypes:
             				},
             				"id": {
             					"type": "string"
-            				},							
+            				},
             				"sequence_id": {
             					"type": "string"
-            				},							
+            				},
             				"etag": {
             					"type": "string"
             				},
             				"name": {
             					"type": "string"
-            				}					
+            				}
             			},
             			"description": "The folder this collaboration is related to",
             			"type": "object"
@@ -5298,8 +5298,8 @@ resourceTypes:
         type: string
     put:
       description: |
-        Used to edit an existing collaboration. The updated collaboration object 
-        is returned. Errors may occur if the IDs are invalid or if the user does 
+        Used to edit an existing collaboration. The updated collaboration object
+        is returned. Errors may occur if the IDs are invalid or if the user does
         not have permissions to edit the collaboration.
       body:
         schema: |
@@ -5315,7 +5315,7 @@ resourceTypes:
           			"description": "Whether this collaboration has been accepted.",
           			"enum": ["accepted", "pending", "rejected" ]
           		}
-          
+
           	}
           }
       responses:
@@ -5357,11 +5357,11 @@ resourceTypes:
               	"type": "object" ,
               	"properties": {
               		"type": {
-              			"description": "For collaborations is 'collaboration'",			 
+              			"description": "For collaborations is 'collaboration'",
               			"type": "string"
               		},
               		"id": {
-              			"description": "A unique string identifying this collaboration.",			 
+              			"description": "A unique string identifying this collaboration.",
               			"type": "string"
               		},
               		"created_by": {
@@ -5379,19 +5379,19 @@ resourceTypes:
               					"type": "string"
               				}
               			},
-              			"description": "The user who created this collaboration.",			 
-              			"type": "object"     
+              			"description": "The user who created this collaboration.",
+              			"type": "object"
               		},
               		"created_at": {
-              			"description": "The time this collaboration was created.",			 
+              			"description": "The time this collaboration was created.",
               			"type": "timestamp"
               		},
               		"modified_at": {
-              			"description": "The time this collaboration was last modified.",			 
+              			"description": "The time this collaboration was last modified.",
               			"type": "timestamp"
               		},
               		"expires_at": {
-              			"description": "The time this collaboration will expire.",			 
+              			"description": "The time this collaboration will expire.",
               			"type": "timestamp"
               		},
               		"status": {
@@ -5413,15 +5413,15 @@ resourceTypes:
               					"type": "string"
               				}
               			},
-              			"description": "The user who the collaboration applies to.",			 
-              			"type": "object"     
+              			"description": "The user who the collaboration applies to.",
+              			"type": "object"
               		},
               		"role": {
               			"description": "The level of access this user has.",
               			"enum": [ "editor", "viewer", "previewer", "uploader", "previewer uploader", "viewer uploader", "co-owner" ]
               		},
               		"acknowledged_at": {
-              			"description": "When the 'status' of this collab was changed.",			 
+              			"description": "When the 'status' of this collab was changed.",
               			"type": "timestamp"
               		},
               		"item": {
@@ -5431,16 +5431,16 @@ resourceTypes:
               				},
               				"id": {
               					"type": "string"
-              				},							
+              				},
               				"sequence_id": {
               					"type": "string"
-              				},							
+              				},
               				"etag": {
               					"type": "string"
               				},
               				"name": {
               					"type": "string"
-              				}					
+              				}
               			},
               			"description": "The folder this collaboration is related to",
               			"type": "object"
@@ -5449,20 +5449,20 @@ resourceTypes:
               }
     delete:
       description: |
-        Used to delete a single collaboration. A blank 200 response is returned if 
+        Used to delete a single collaboration. A blank 200 response is returned if
         the ID is valid, and the user has permissions to remove the collaboration.
       responses:
         200:
           description: User removed.
     get:
       description: |
-        Used to get information about a single collaboration. All collaborations 
-        for a single folder can be retrieved through 
+        Used to get information about a single collaboration. All collaborations
+        for a single folder can be retrieved through
         'GET /folders/{id}/collaborations'.
-        The collaboration object is returned. Errors may occur if the IDs are 
+        The collaboration object is returned. Errors may occur if the IDs are
         invalid or if the user does not have permissions to see the collaboration.
       queryParameters:
-        status: 
+        status:
           description: Can only be 'pending'.
           enum: [ "pending" ]
       responses:
@@ -5504,11 +5504,11 @@ resourceTypes:
               	"type": "object" ,
               	"properties": {
               		"type": {
-              			"description": "For collaborations is 'collaboration'",			 
+              			"description": "For collaborations is 'collaboration'",
               			"type": "string"
               		},
               		"id": {
-              			"description": "A unique string identifying this collaboration.",			 
+              			"description": "A unique string identifying this collaboration.",
               			"type": "string"
               		},
               		"created_by": {
@@ -5526,19 +5526,19 @@ resourceTypes:
               					"type": "string"
               				}
               			},
-              			"description": "The user who created this collaboration.",			 
-              			"type": "object"     
+              			"description": "The user who created this collaboration.",
+              			"type": "object"
               		},
               		"created_at": {
-              			"description": "The time this collaboration was created.",			 
+              			"description": "The time this collaboration was created.",
               			"type": "timestamp"
               		},
               		"modified_at": {
-              			"description": "The time this collaboration was last modified.",			 
+              			"description": "The time this collaboration was last modified.",
               			"type": "timestamp"
               		},
               		"expires_at": {
-              			"description": "The time this collaboration will expire.",			 
+              			"description": "The time this collaboration will expire.",
               			"type": "timestamp"
               		},
               		"status": {
@@ -5560,15 +5560,15 @@ resourceTypes:
               					"type": "string"
               				}
               			},
-              			"description": "The user who the collaboration applies to.",			 
-              			"type": "object"     
+              			"description": "The user who the collaboration applies to.",
+              			"type": "object"
               		},
               		"role": {
               			"description": "The level of access this user has.",
               			"enum": [ "editor", "viewer", "previewer", "uploader", "previewer uploader", "viewer uploader", "co-owner" ]
               		},
               		"acknowledged_at": {
-              			"description": "When the 'status' of this collab was changed.",			 
+              			"description": "When the 'status' of this collab was changed.",
               			"type": "timestamp"
               		},
               		"item": {
@@ -5578,16 +5578,16 @@ resourceTypes:
               				},
               				"id": {
               					"type": "string"
-              				},							
+              				},
               				"sequence_id": {
               					"type": "string"
-              				},							
+              				},
               				"etag": {
               					"type": "string"
               				},
               				"name": {
               					"type": "string"
-              				}					
+              				}
               			},
               			"description": "The folder this collaboration is related to",
               			"type": "object"
@@ -5598,7 +5598,7 @@ resourceTypes:
   type: base
   get:
     description: |
-      Searching a User’s Account. The search endpoint provides a simple way of 
+      Searching a User’s Account. The search endpoint provides a simple way of
       finding items that are accessible in a given user’s Box account.
       A collection of search results is returned. If there are no matching search
       results, the entries array will be empty.
@@ -5928,15 +5928,15 @@ resourceTypes:
   type: base
   get:
     description: |
-      Use this to get events for a given user. A chunk of event objects is 
-      returned for the user based on the parameters passed in. Parameters 
+      Use this to get events for a given user. A chunk of event objects is
+      returned for the user based on the parameters passed in. Parameters
       indicating how many chunks are left as well as the next stream_position
       are also returned.
     queryParameters:
       stream_position:
         description: |
           The location in the event stream at which you want to start receiving
-          events. Can specify special case `now` to get 0 events and the latest 
+          events. Can specify special case `now` to get 0 events and the latest
           stream position for initialization. A collection of events is returned.
         type: string
         default: 0
@@ -6207,19 +6207,19 @@ resourceTypes:
   options:
     description: |
       Long polling. To get real-time notification of activity in a Box account,
-      use the long poll feature of the /events API. To do so, first call the 
+      use the long poll feature of the /events API. To do so, first call the
       /events API with an OPTIONS call to retrieve the long poll URL to use. Next,
-      make a GET request to the provided URL to begin listening for events. If an 
-      event occurs within an account you are monitoring, you will receive a 
+      make a GET request to the provided URL to begin listening for events. If an
+      event occurs within an account you are monitoring, you will receive a
       response with the value new_change. It's important to note that this response
-      will not come with any other details, but should serve as a prompt to take 
-      further action such as calling the /events endpoint with your last known 
-      stream_position. After sending this response, the server will close the 
-      connection and you will need to repeat the long poll process to begin 
+      will not come with any other details, but should serve as a prompt to take
+      further action such as calling the /events endpoint with your last known
+      stream_position. After sending this response, the server will close the
+      connection and you will need to repeat the long poll process to begin
       listening for events again.
-        If no events occur for a period of time after you make the GET request to 
-      the long poll URL, you will receive a response with the value reconnect. When 
-      you receive this response, you'll make another OPTIONS call to the /events 
+        If no events occur for a period of time after you make the GET request to
+      the long poll URL, you will receive a response with the value reconnect. When
+      you receive this response, you'll make another OPTIONS call to the /events
       endpoint and repeat the long poll process.
     responses:
       200:
@@ -6271,15 +6271,15 @@ resourceTypes:
                 }
             }
 /users:
-  type: base 
+  type: base
   get:
     description: |
-      Get All Users in an Enterprise. Returns a list of all users for the 
+      Get All Users in an Enterprise. Returns a list of all users for the
       Enterprise along with their user_id, public_name, and login.
     queryParameters:
       filter_term:
         description: |
-          A string used to filter the results to only users starting with the 
+          A string used to filter the results to only users starting with the
           filter_term in either the name or the login
         type: string
       limit:
@@ -6440,7 +6440,7 @@ resourceTypes:
             }
   post:
     description: |
-      Used to provision a new user in an enterprise. This method only works 
+      Used to provision a new user in an enterprise. This method only works
       for enterprise admins.
     body:
       schema: |
@@ -6640,9 +6640,9 @@ resourceTypes:
             			"type": "object"
             		}
             	}
-            } 
+            }
   /me:
-    type: base 
+    type: base
     get:
       description: |
         Get the Current User’s Information. Retrieves information about the user who
@@ -6775,9 +6775,9 @@ resourceTypes:
               			"type": "object"
               		}
               	}
-              } 
+              }
   /{userId}:
-    type: base 
+    type: base
     uriParameters:
       userId:
         description: Box’s unique string identifying this user.
@@ -6785,8 +6785,8 @@ resourceTypes:
     put:
       description: |
         Update a User’s Information. Used to edit the settings and information about
-        a user. This method only works for enterprise admins. To roll a user out of 
-        the enterprise (and convert them to a standalone free user), update the 
+        a user. This method only works for enterprise admins. To roll a user out of
+        the enterprise (and convert them to a standalone free user), update the
         special 'enterprise' attribute to be 'null'.
         Returns the a full user object for the updated user. Errors may be thrown when
         the fields are invalid or this API call is made from a non-admin account.
@@ -6997,16 +6997,16 @@ resourceTypes:
               			"type": "object"
               		}
               	}
-              } 
+              }
     delete:
       description: |
-        Deletes a user in an enterprise account. An empty 200 response is sent to 
-        confirm deletion of the user. If the user still has files in their account 
+        Deletes a user in an enterprise account. An empty 200 response is sent to
+        confirm deletion of the user. If the user still has files in their account
         and the ???force’ parameter is not sent, an error is returned.
       queryParameters:
         notify:
           description: |
-            Determines if the destination user should receive email notification of 
+            Determines if the destination user should receive email notification of
             the transfer.
           type: string
         force:
@@ -7014,27 +7014,27 @@ resourceTypes:
             Whether or not the user should be deleted even if this user still own files.
           type: string
       responses:
-        200: 
+        200:
           description: Confirm deletion of the user.
     /folders/{folderId}:
-      type: base 
+      type: base
       uriParameters:
-        folderId:    
+        folderId:
           type: string
       put:
         description: |
-          Move Folder into Another User’s Folder. 
-          Moves all of the content from within one user’s folder into a new folder in 
+          Move Folder into Another User’s Folder.
+          Moves all of the content from within one user’s folder into a new folder in
           another user’s account. You can move folders across users as long as the you
-          have administrative permissions. To move everything from the root folder, 
+          have administrative permissions. To move everything from the root folder,
           use "0" which always represents the root folder of a Box account.
-           Returns the information for the newly created destination folder. An error 
+           Returns the information for the newly created destination folder. An error
           is thrown if you do not have the necessary permissions to move the folder.
           Alert: folder_id: Currently only moving of the root folder (0) is supported.
         queryParameters:
           notify:
             description: |
-              Determines if the destination user should receive email notification of 
+              Determines if the destination user should receive email notification of
               the transfer.
             type: string
         body:
@@ -7146,39 +7146,39 @@ resourceTypes:
                 	"type": "object" ,
                 	"properties": {
                 		"type": {
-                			"description": "For folders is 'folder'.",			 
+                			"description": "For folders is 'folder'.",
                 			"type": "string"
                 		},
                 		"id": {
-                			"description": "The folder’s ID.",			 
+                			"description": "The folder’s ID.",
                 			"type": "string"
                 		},
                 		"sequence_id": {
-                			"description": "A unique ID for use with the /events endpoint.",			 
+                			"description": "A unique ID for use with the /events endpoint.",
                 			"type": "string"
                 		},
                 		"etag": {
-                			"description": "A unique string identifying the version of this folder.",			 
+                			"description": "A unique string identifying the version of this folder.",
                 			"type": "string"
                 		},
                 		"name": {
-                			"description": "The name of the folder.",			 
+                			"description": "The name of the folder.",
                 			"type": "string"
                 		},
                 		"created_at": {
-                			"description": "The time the folder was created.",			 
+                			"description": "The time the folder was created.",
                 			"type": "timestamp"
                 		},
                 		"modified_at": {
-                			"description": "The time the folder or its contents were last modified.",			 
+                			"description": "The time the folder or its contents were last modified.",
                 			"type": "timestamp"
                 		},
                 		"description": {
-                			"description": "The description of the folder.",			 
+                			"description": "The description of the folder.",
                 			"type": "string"
                 		},
                 		"size": {
-                			"description": "The folder size in bytes.",			 
+                			"description": "The folder size in bytes.",
                 			"type": "integer"
                 		},
                 		"path_collection": {
@@ -7194,16 +7194,16 @@ resourceTypes:
                 							},
                 							"id": {
                 								"type": "string"
-                							},							
+                							},
                 							"sequence_id": {
                 								"type": "string"
-                							},							
+                							},
                 							"etag": {
                 								"type": "string"
                 							},
                 							"name": {
                 								"type": "string"
-                							}							
+                							}
                 						},
                 						"type": "object"
                 					},
@@ -7212,8 +7212,8 @@ resourceTypes:
                 				},
                 				"type": "object"
                 			},
-                			"description": "Array of paths.",			
-                			"type": "array"     
+                			"description": "Array of paths.",
+                			"type": "array"
                 		},
                 		"created_by": {
                 			"properties": {
@@ -7230,8 +7230,8 @@ resourceTypes:
                 					"type": "string"
                 				}
                 			},
-                			"description": "The user who created this folder.",			 
-                			"type": "object"     
+                			"description": "The user who created this folder.",
+                			"type": "object"
                 		},
                 		"modified_by": {
                 			"properties": {
@@ -7248,8 +7248,8 @@ resourceTypes:
                 					"type": "string"
                 				}
                 			},
-                			"description": "The user who last modified this folder.",			 
-                			"type": "object"     
+                			"description": "The user who last modified this folder.",
+                			"type": "object"
                 		},
                 		"owned_by": {
                 			"properties": {
@@ -7266,8 +7266,8 @@ resourceTypes:
                 					"type": "string"
                 				}
                 			},
-                			"description": "The user who owns this folder.",			 
-                			"type": "object"     
+                			"description": "The user who owns this folder.",
+                			"type": "object"
                 		},
                 		"shared_link": {
                 			"properties": {
@@ -7306,8 +7306,8 @@ resourceTypes:
                 					}
                 				}
                 			},
-                			"description": "The shared link for this folder.",			 
-                			"type": "object"     
+                			"description": "The shared link for this folder.",
+                			"type": "object"
                 		},
                 		"folder_upload_email": {
                 			"properties": {
@@ -7318,8 +7318,8 @@ resourceTypes:
                 					"type": "string"
                 				}
                 			},
-                			"description": "The upload email address for this folder.",			 
-                			"type": "object"     
+                			"description": "The upload email address for this folder.",
+                			"type": "object"
                 		},
                 		"parent": {
                 			"properties": {
@@ -7328,22 +7328,22 @@ resourceTypes:
                 				},
                 				"id": {
                 					"type": "string"
-                				},							
+                				},
                 				"sequence_id": {
                 					"type": "string"
-                				},							
+                				},
                 				"etag": {
                 					"type": "string"
                 				},
                 				"name": {
                 					"type": "string"
-                				}					
+                				}
                 			},
-                			"description": "The folder that contains this one.",			 
-                			"type": "object"     
+                			"description": "The folder that contains this one.",
+                			"type": "object"
                 		},
                 		"item_status": {
-                			"description": "Whether this item is deleted or not.",			 
+                			"description": "Whether this item is deleted or not.",
                 			"type": "string"
                 		},
                 		"item_collection": {
@@ -7359,10 +7359,10 @@ resourceTypes:
                 							},
                 							"id": {
                 								"type": "string"
-                							},							
+                							},
                 							"sequence_id": {
                 								"type": "string"
-                							},							
+                							},
                 							"etag": {
                 								"type": "string"
                 							},
@@ -7371,7 +7371,7 @@ resourceTypes:
                 							},
                 							"name": {
                 								"type": "string"
-                							}							
+                							}
                 						},
                 						"type": "object"
                 					},
@@ -7380,24 +7380,24 @@ resourceTypes:
                 				},
                 				"type": "object"
                 			},
-                			"description": "A collection of mini file and folder objects contained in this folder.",			 
+                			"description": "A collection of mini file and folder objects contained in this folder.",
                 			"type": "array"
                 		},
                 		"sync_state": {
                 			"description": "Whether this folder will be synced by the Box sync clients or not.",
-                			"required": false,			 
+                			"required": false,
                 			"enum": [ "synced", "not_synced", "partially_synced" ]
                 		},
                 		"has_collaborations": {
-                			"description": "Whether this folder has any collaborators.",	
-                			"required": false,		 
+                			"description": "Whether this folder has any collaborators.",
+                			"required": false,
                 			"type": "boolean"
                 		}
-                	},	 
+                	},
                 	"type": "object"
                 }
     /email_aliases:
-      type: base 
+      type: base
       get:
         description: |
           Get All Email Aliases for a User.
@@ -7505,7 +7505,7 @@ resourceTypes:
                 	}
                 }
       /{emailAliasId}:
-        type: base 
+        type: base
         delete:
           description: |
             Removes an email alias from a user. If the user has permission to remove
@@ -7515,7 +7515,7 @@ resourceTypes:
             204:
               description: Email alias removed.
 /tasks:
-  type: base 
+  type: base
   post:
     description: |
       Create a Task. Used to create a single task for single user on a single file.
@@ -7676,8 +7676,8 @@ resourceTypes:
                 }
             }
   /{taskId}:
-    type: base 
-    get: 
+    type: base
+    get:
       description: Fetches a specific task.
       responses:
         200:
@@ -7943,14 +7943,14 @@ resourceTypes:
               }
     delete:
       description: |
-        Permanently deletes a specific task. An empty 204 response will be 
+        Permanently deletes a specific task. An empty 204 response will be
         returned upon success.
       responses:
         204:
           description: Task deleted.
     /assignments:
-      type: base 
-      get: 
+      type: base
+      get:
         description: |
           Retrieves all of the assignments for a given task.
           A collection of task assignment mini objects will be returned upon success.
@@ -8046,10 +8046,10 @@ resourceTypes:
                     }
                 }
 /task_assignments:
-  type: base 
+  type: base
   post:
     description: |
-      Used to assign a task to a single user. There can be multiple assignments 
+      Used to assign a task to a single user. There can be multiple assignments
       on a given task.
       A new task assignment object will be returned upon success.
     body:
@@ -8204,7 +8204,7 @@ resourceTypes:
             	}
             }
   /{id}:
-    type: base 
+    type: base
     get:
       description: |
         Fetches a specific task assignment.
@@ -8350,11 +8350,11 @@ resourceTypes:
           		},
           		"resolution_state": {
           			"description": "Can be 'completed', 'incomplete', 'approved', or 'rejected'.",
-          			"type": [ 
-          				"completed", 
-          				"incomplete", 
-          				"approved", 
-          				"rejected" 
+          			"type": [
+          				"completed",
+          				"incomplete",
+          				"approved",
+          				"rejected"
           			]
           		}
           	}
