@@ -13,39 +13,41 @@
 
 class @FileError extends @errors.MarkedYAMLError
 
+defaultSettings = { validate: true, transform: true }
+
 ###
 Parse the first RAML document in a stream and produce the corresponding
 representation tree.
 ###
-@compose = (stream, validate = true, transformtree = true, location, parent) ->
-  loader = new exports.loader.Loader stream, location, validate, transformtree, parent
+@compose = (stream, settings = defaultSettings, location, parent) ->
+  loader = new exports.loader.Loader stream, location, settings, parent
   return loader.get_single_node()
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
 Javascript object.
 ###
-@load = (stream, location, validate = true, transformtree = true) ->
+@load = (stream, location, settings = defaultSettings) ->
   @q.fcall =>
-    loader = new exports.loader.Loader stream, location, validate, transformtree
-    return loader.get_single_data(validate, transformtree)
+    loader = new exports.loader.Loader stream, location, settings
+    return loader.get_single_data(settings)
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
 Javascript object.
 ###
-@loadFile = (file, validate = true, transformtree = true) ->
+@loadFile = (file, settings = defaultSettings) ->
   @q.fcall =>
     stream = @readFile file
-    return @load stream, file, validate, transformtree
+    return @load stream, file, settings
 
 ###
 Parse the first RAML document in a file and produce the corresponding
 representation tree.
 ###
-@composeFile = (file, validate = true, transformtree = true, parent) ->
+@composeFile = (file, settings = defaultSettings, parent) ->
   stream = @readFile file
-  return @compose stream, validate, transformtree, file, parent
+  return @compose stream, settings, file, parent
 
 ###
 Read file either locally or from the network.

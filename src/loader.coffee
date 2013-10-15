@@ -18,21 +18,21 @@ transformations = require './transformations'
   components = [Reader, Scanner, Parser, Composer, Transformations, Resolver, Validator, Traits, ResourceTypes, Schemas, Protocols, Joiner, Constructor, SecuritySchemes]
   util.extend.apply util, [@::].concat (component.prototype for component in components)
 
-  constructor: (stream, location, validate, transformtree, @parent = null) ->
+  constructor: (stream, location, settings, @parent = null) ->
     # Reader
     components[0].call @, stream, location
 
     # Scanner
-    components[1].call @, validate, transformtree
+    components[1].call @, settings
 
     # Parser
-    components[2].call @, validate, transformtree
+    components[2].call @
 
     # Composer
-    components[3].call @, validate, transformtree
+    components[3].call @, settings
 
     # Transformations
-    components[4].call @, transformtree
+    components[4].call @, settings
 
     component.call @ for component in components[5..]
 

@@ -79,7 +79,7 @@ describe('Parser', function() {
                 'title: ["title", "title line 2", "title line 3"]',
                 'baseUri: http://myapi.com'
             ].join('\n');
-            raml.load(definition, 'filename.yml', false, false).should.be.fulfilled.and.notify(done);
+            raml.load(definition, 'filename.yml', {validate: false, transform: false}).should.be.fulfilled.and.notify(done);
         });
         it('should not validate title if flag is set not to validate', function(done) {
             var definition = [
@@ -88,7 +88,7 @@ describe('Parser', function() {
                 'title: ["title", "title line 2", "title line 3"]',
                 'baseUri: http://myapi.com'
             ].join('\n');
-            raml.load(definition, 'filename.yml', false, true).should.be.fulfilled.and.notify(done);
+            raml.load(definition, 'filename.yml', {validate: false, transform: true}).should.be.fulfilled.and.notify(done);
         });
         it('should not apply transformations if flag is set to ignore', function(done) {
             var definition = [
@@ -103,7 +103,7 @@ describe('Parser', function() {
                 baseUri: "http://myapi.com/"
             };
 
-            raml.load(definition, 'filename.yml',  false, false).should.become(expected).and.notify(done);
+            raml.load(definition, 'filename.yml',  {validate: false, transform: false}).should.become(expected).and.notify(done);
         });
         it('should not apply transformations if flag is set to ignore', function(done) {
             var definition = [
@@ -118,7 +118,7 @@ describe('Parser', function() {
                 baseUri: "http://myapi.com/"
             };
 
-            raml.load(definition, 'filename.yml',  true, false).should.become(expected).and.notify(done);
+            raml.load(definition, 'filename.yml',  {validate: true, transform: false}).should.become(expected).and.notify(done);
         });
         it('should apply transformations if flag is set to ignore', function(done) {
             var definition = [
@@ -134,7 +134,7 @@ describe('Parser', function() {
                 protocols: ['HTTP']
             };
 
-            raml.load(definition, 'filename.yml',  false, true).should.become(expected).and.notify(done);
+            raml.load(definition, 'filename.yml',  {validate: true, transform: true}).should.become(expected).and.notify(done);
         });
         it('should apply transformations if flag is set to ignore', function(done) {
             var definition = [
@@ -150,7 +150,7 @@ describe('Parser', function() {
                 protocols: ['HTTP']
             };
 
-            raml.load(definition, 'filename.yml',  true, true).should.become(expected).and.notify(done);
+            raml.load(definition, 'filename.yml',  {validate: true, transform: true}).should.become(expected).and.notify(done);
         });
 
 

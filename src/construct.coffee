@@ -38,8 +38,8 @@ class @BaseConstructor
   ###
   Ensure that the stream contains a single document and construct it.
   ###
-  get_single_data: (validate = true, transformtree = true) ->
-    node = @get_single_node(validate, transformtree)
+  get_single_data: (settings = {transform: true, validate: true} ) ->
+    node = @get_single_node(settings)
     return @construct_document node if node?
     return null
 

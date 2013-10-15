@@ -51,12 +51,12 @@ class @Scanner
   ###
   Initialise the Scanner
   ###
-  constructor: (validateHeader = false) ->
+  constructor: (@settings) ->
     # Have we reached the end of the stream?
     @done = no
 
     # Has the RAML header been found?
-    @ramlHeaderFound = !validateHeader
+    @ramlHeaderFound = !@settings.validate
 
     # How many unclosed '{' or '[' have been seen. '0' implies block context.
     @flow_level = 0
