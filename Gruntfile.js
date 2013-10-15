@@ -79,6 +79,14 @@ module.exports = function(grunt) {
             bail: true
         },
         all: ['test/specs/*.js']
+    },
+    coffeelint: {
+      app: ['src/*.coffee'],
+      options: {
+        'max_line_length': {
+          'level': 'ignore'
+        }
+      }
     }
   });
 
@@ -89,10 +97,11 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-mocha-cli');
+  grunt.loadNpmTasks('grunt-coffeelint');
 
-  grunt.registerTask('compile', ['coffee']);
-  grunt.registerTask('default', ['coffee', 'browserify', 'uglify']);
-  grunt.registerTask('test', ['coffee', 'browserify', 'uglify', 'connect', 'mochacli', 'mocha_phantomjs']);
+  grunt.registerTask('compile', ['coffeelint', 'coffee']);
+  grunt.registerTask('default', ['coffeelint', 'coffee', 'browserify', 'uglify']);
+  grunt.registerTask('test', ['default', 'connect', 'mochacli', 'mocha_phantomjs']);
   grunt.registerTask('test-ui-only', ['coffee', 'browserify', 'uglify', 'connect', 'mocha_phantomjs']);
   grunt.registerTask('server', ['default', 'connect', 'watch']);
 };

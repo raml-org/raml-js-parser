@@ -39,7 +39,16 @@ describe('Parser', function() {
       ].join('\n');
 
       raml.load(definition).should.become({
-        title: 'MyApi', baseUri: 'http://myapi.com', resources: [ { relativeUri: '/', displayName: 'Root' } ], protocols: ['HTTP']
+        title: 'MyApi',
+          baseUri: 'http://myapi.com',
+          resources: [
+              {
+                  relativeUriPathSegments: [],
+                  relativeUri: '/',
+                  displayName: 'Root'
+              }
+          ],
+          protocols: ['HTTP']
       }).and.notify(done);
     });
 
@@ -1185,6 +1194,7 @@ describe('Parser', function() {
           ],
           resources: [
             {
+              relativeUriPathSegments: [ "resource" ],
               relativeUri: "/resource",
               baseUriParameters: null
             }
@@ -1261,7 +1271,8 @@ describe('Parser', function() {
                   },
                 ]
               },
-              relativeUri: "/resource"
+              relativeUri: "/resource",
+              relativeUriPathSegments: [ "resource" ],
             }
           ],
           baseUriParameters: {
@@ -1298,6 +1309,7 @@ describe('Parser', function() {
           resources: [
             {
               relativeUri: "/{a}resource",
+              relativeUriPathSegments: [ "{a}resource" ],
               uriParameters: {
                 'a':
                   {
@@ -1369,6 +1381,7 @@ describe('Parser', function() {
           resources: [
             {
               relativeUri: "/{a}resource",
+              relativeUriPathSegments: [ "{a}resource" ],
               uriParameters: {
                 'a': [
                   {
@@ -1413,6 +1426,7 @@ describe('Parser', function() {
           resources: [
             {
               relativeUri: "/resource",
+              relativeUriPathSegments: [ "resource" ],
               methods: [{
                 method: "get",
                 protocols: [
@@ -1485,6 +1499,7 @@ describe('Parser', function() {
           resources: [
             {
               relativeUri: "/resource",
+              relativeUriPathSegments: [ "resource" ],
               methods: [{
                 method: "get",
                 protocols: [
@@ -1534,6 +1549,7 @@ describe('Parser', function() {
           resources: [
             {
               relativeUri: "/resource",
+              relativeUriPathSegments: [ "resource" ],
               methods: [{
                 method: "get",
                 protocols: [
@@ -1567,6 +1583,7 @@ describe('Parser', function() {
           ],
           resources: [
             {
+              relativeUriPathSegments: [ "resource" ],
               relativeUri: "/resource",
               methods: [{
                 method: "get",
@@ -1644,6 +1661,7 @@ describe('Parser', function() {
           ],
           resources: [
             {
+              relativeUriPathSegments: [ "resource" ],
               relativeUri: "/resource",
               methods: [{
                 method: "get",
@@ -1744,6 +1762,7 @@ describe('Parser', function() {
           ],
           resources: [
             {
+              relativeUriPathSegments: [ "resource" ],
               relativeUri: "/resource",
               methods: [{
                 body: {
@@ -1825,6 +1844,7 @@ describe('Parser', function() {
           ],
           resources: [
             {
+              relativeUriPathSegments: [ "resource" ],
               relativeUri: "/resource",
               methods: [{
                 body: {
@@ -1878,6 +1898,7 @@ describe('Parser', function() {
           ],
           resources: [
             {
+              relativeUriPathSegments: [ "resource" ],
               relativeUri: "/resource",
               methods: [{
                 method: "get",
@@ -1960,6 +1981,7 @@ describe('Parser', function() {
           ],
           resources: [
             {
+              relativeUriPathSegments: [ "resource" ],
               relativeUri: "/resource",
               methods: [{
                 method: "get",
@@ -2028,16 +2050,19 @@ describe('Parser', function() {
         title: 'Test',
         resources: [
           {
+            relativeUriPathSegments: [ "a" ],
             relativeUri: '/a',
             displayName: 'A',
             resources: [
               {
+                relativeUriPathSegments: [ "b" ],
                 relativeUri: '/b',
                 displayName: 'B'
               }
             ]
           },
           {
+            relativeUriPathSegments: [ "a", "c" ],
             relativeUri: '/a/c',
             displayName: 'AC'
           }
@@ -2059,6 +2084,7 @@ describe('Parser', function() {
           title: 'Test',
           resources: [
               {
+                  relativeUriPathSegments: [ "a" ],
                   relativeUri: '/a',
                   displayName: 'A',
                   methods: [
@@ -2111,58 +2137,72 @@ describe('Parser', function() {
         title: 'Test',
         resources: [
           {
+            relativeUriPathSegments: [ "getSomething" ],
             relativeUri: '/getSomething',
             displayName: 'GetSomething'
           },
           {
+            relativeUriPathSegments: [ "postSomething" ],
             relativeUri: '/postSomething',
             displayName: 'PostSomething'
           },
           {
+            relativeUriPathSegments: [ "putSomething" ],
             relativeUri: '/putSomething',
             displayName: 'PutSomething'
           },
           {
+            relativeUriPathSegments: [ "deleteSomething" ],
             relativeUri: '/deleteSomething',
             displayName: 'DeleteSomething'
           },
           {
+            relativeUriPathSegments: [ "headSomething" ],
             relativeUri: '/headSomething',
             displayName: 'HeadSomething'
           },
           {
+            relativeUriPathSegments: [ "patchSomething" ],
             relativeUri: '/patchSomething',
             displayName: 'PatchSomething'
           },
           {
+            relativeUriPathSegments: [ "optionsSomething" ],
             relativeUri: '/optionsSomething',
             displayName: 'OptionsSomething'
           },
           {
+            relativeUriPathSegments: [ "get" ],
             relativeUri: '/get',
             displayName: 'Get'
           },
           {
+            relativeUriPathSegments: [ "post" ],
             relativeUri: '/post',
             displayName: 'Post'
           },
           {
+            relativeUriPathSegments: [ "put" ],
             relativeUri: '/put',
             displayName: 'Put'
           },
           {
+            relativeUriPathSegments: [ "delete" ],
             relativeUri: '/delete',
             displayName: 'Delete'
           },
           {
+            relativeUriPathSegments: [ "head" ],
             relativeUri: '/head',
             displayName: 'Head'
           },
           {
+            relativeUriPathSegments: [ "patch" ],
             relativeUri: '/patch',
             displayName: 'Patch'
           },
           {
+            relativeUriPathSegments: [ "options" ],
             relativeUri: '/options',
             displayName: 'Options'
           }
@@ -2182,6 +2222,7 @@ describe('Parser', function() {
         title: "Test",
         resources : [
           {
+            relativeUriPathSegments: [ ],
             relativeUri: "/"
           }
         ]
@@ -2250,6 +2291,7 @@ describe('Parser', function() {
         resources: [{
           displayName: 'A',
           relativeUri: '/foo',
+          relativeUriPathSegments: [ "foo" ],
           methods:[{
             description: 'Blah',
             responses: {
@@ -2369,33 +2411,35 @@ describe('Parser', function() {
                   relativeUri: "/",
                   methods: [
                       {
+                        description: "Root resource",
                         responses: {
                             429: {
                                 description: 'API Limit Exceeded'
                             }
                         },
-                        description: "Root resource",
                         method: "get"
                       }
                   ],
                   resources: [
                       {
-                          relativeUri: "/anotherResource",
-                          displayName: "Another Resource",
                           is: [ "customTrait" ],
+                          displayName: "Another Resource",
+                          relativeUri: "/anotherResource",
                           methods: [
                               {
                                 description: "Another resource",
-                                method: "get",
                                 responses: {
                                     429: {
                                         description: 'API Limit Exceeded'
                                     }
-                                }
+                                },
+                                method: "get"
                               }
-                          ]
+                          ],
+                          relativeUriPathSegments: [ "anotherResource" ]
                       }
-                  ]
+                  ],
+                  relativeUriPathSegments: [  ]
               }
           ]
       }).and.notify(done);
@@ -2450,6 +2494,7 @@ describe('Parser', function() {
         }],
         resources: [
           {
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             is: [ 'rateLimited', 'queryable' ],
             methods: [
@@ -2507,6 +2552,7 @@ describe('Parser', function() {
         ],
         resources: [
           {
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             is: [ 'rateLimited' ],
             methods: [
@@ -2573,6 +2619,7 @@ describe('Parser', function() {
           }],
         resources: [
           {
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             is: [ 'rateLimited', 'queryable' ],
             methods: [
@@ -2634,6 +2681,7 @@ describe('Parser', function() {
         }],
         resources: [
           {
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             is: [ 'rateLimited' ],
             methods: [
@@ -2680,6 +2728,7 @@ describe('Parser', function() {
         ],
         "resources": [
           {
+            relativeUriPathSegments: [ ],
             "is": [
               {
                 "rateLimited": {
@@ -2768,44 +2817,32 @@ describe('Parser', function() {
       var expected = {
         title: 'Test',
         baseUri: 'http://www.api.com/{version}/{company}',
+        version: 'v1.1',
         protocols: [
           'HTTP'
         ],
-        version: 'v1.1',
-        baseUriParameters: {
-          company: {
-            type: "string",
-            required: true,
-            displayName: "company"
-          },
-          version: {
-            type: "string",
-            required: true,
-            displayName: "version",
-            enum: [ "v1.1" ]
-          }
-        },
         resources: [
           {
             displayName: 'Tags',
             relativeUri: '/users',
             methods: [
               {
-                method: 'get',
                 protocols: [
                   'HTTP'
-                ]
+                ],
+                method: 'get'
               },
               {
-                method: 'post',
                 protocols: [
                   'HTTP'
-                ]
+                ],
+                method: 'post'
               }
             ],
             resources: [{
               displayName: 'Search',
               relativeUri: '/{userid}',
+              relativeUriPathSegments: [ "{userid}" ],
               uriParameters: {
                 userid: {
                   type: "string",
@@ -2813,9 +2850,23 @@ describe('Parser', function() {
                   displayName: "userid"
                 }
               }
-            }]
+            }],
+            relativeUriPathSegments: [ "users" ]
           }
-        ]
+        ],
+        baseUriParameters: {
+             version: {
+                type: "string",
+                required: true,
+                displayName: "version",
+                enum: [ "v1.1" ]
+            },
+            company: {
+                type: "string",
+                required: true,
+                displayName: "company"
+            }
+        },
       };
 
       raml.load(definition).should.become(expected).and.notify(done);
@@ -2873,6 +2924,7 @@ describe('Parser', function() {
         resources: [
           {
             is: [ 'rateLimited' ],
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             methods: [
               {
@@ -2944,6 +2996,7 @@ describe('Parser', function() {
         resources: [
           {
             is: [ { rateLimited: {} }],
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             methods: [
               {
@@ -3029,6 +3082,7 @@ describe('Parser', function() {
                 }
               }
             ],
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             methods: [
               {
@@ -3117,6 +3171,7 @@ describe('Parser', function() {
                 }
               }
             ],
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             methods: [
               {
@@ -3193,6 +3248,7 @@ describe('Parser', function() {
         resources: [
           {
             is: [ { rateLimited: { param1: 'value1', param2: 'value2'} }],
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             methods: [
               {
@@ -3272,6 +3328,7 @@ describe('Parser', function() {
         resources: [
           {
             is: [ { rateLimited: { param1: 'value1', param2: 'value2'} }],
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             methods: [
               {
@@ -3347,6 +3404,7 @@ describe('Parser', function() {
         resources: [
           {
             is: [ { rateLimited: { header: "Authorization", param1: 'value1', param2: 'value2'} }],
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             methods: [
               {
@@ -3414,6 +3472,7 @@ describe('Parser', function() {
         resources: [
           {
             is: [ { rateLimited: { header: "Authorization", param1: 'value1', param2: 'value2'} }],
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             methods: [
               {
@@ -3484,6 +3543,7 @@ describe('Parser', function() {
         resources: [
           {
             displayName: "Root",
+            relativeUriPathSegments: [ ],
             relativeUri: "/",
             methods: [
               {
@@ -3499,6 +3559,7 @@ describe('Parser', function() {
             ],
             resources: [
               {
+                relativeUriPathSegments: [ "anotherResource" ],
                 relativeUri: "/anotherResource",
                 displayName: "Another Resource",
                 methods: [
@@ -3567,6 +3628,7 @@ describe('Parser', function() {
         }],
         resources: [
           {
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             methods: [
               {
@@ -3628,6 +3690,7 @@ describe('Parser', function() {
         }],
         resources: [
           {
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             methods: [
               {
@@ -3758,6 +3821,7 @@ describe('Parser', function() {
         }],
         resources: [
           {
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             methods: [
               {
@@ -3829,6 +3893,7 @@ describe('Parser', function() {
         }],
         resources: [
           {
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             methods: [
               {
@@ -3909,6 +3974,7 @@ describe('Parser', function() {
         }],
         resources: [
           {
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             methods: [
               {
@@ -4048,6 +4114,7 @@ describe('Parser', function() {
         }],
         resources: [
           {
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             methods: [
               {
@@ -4111,6 +4178,7 @@ describe('Parser', function() {
         }],
         resources: [
           {
+            relativeUriPathSegments: [ "leagues" ],
             relativeUri: '/leagues',
             methods: [
               {
@@ -4173,9 +4241,9 @@ describe('Parser', function() {
         }],
         resources: [
           {
+            relativeUriPathSegments: [ ],
             displayName: "Root",
             relativeUri: "/"
-
           }
         ]
       };
@@ -4248,9 +4316,9 @@ describe('Parser', function() {
         ],
         resources: [
           {
+            relativeUriPathSegments: [ ],
             displayName: "Root",
             relativeUri: "/"
-
           }
         ]
       };
@@ -4345,7 +4413,8 @@ describe('Parser', function() {
           {
             "description": "The collection of Blah",
             "type": "collection",
-            "relativeUri": "/"
+            "relativeUri": "/",
+            relativeUriPathSegments: [ ],
           }
         ]
       };
@@ -4504,6 +4573,7 @@ describe('Parser', function() {
         ],
         resources: [
           {
+            relativeUriPathSegments: [ ],
             description: "This resourceType should be used for any collection of items",
             type: "collection",
             relativeUri: "/",
@@ -4576,6 +4646,7 @@ describe('Parser', function() {
         ],
         resources: [
           {
+            relativeUriPathSegments: [ ],
             description: "This resourceType should be used for any collection of items",
             type: {
               collection: null
@@ -4633,6 +4704,7 @@ describe('Parser', function() {
               }
             },
             relativeUri: "/",
+            relativeUriPathSegments: [ ],
             methods: [
               {
                 method: "post",
@@ -4716,6 +4788,7 @@ describe('Parser', function() {
             description: "This resourceType should be used for any collection of items post",
             type: "post",
             relativeUri: "/",
+            relativeUriPathSegments: [ ],
             methods: [
               {
                 body: null,
@@ -4804,6 +4877,7 @@ describe('Parser', function() {
           {
             type: "post",
             relativeUri: "/",
+            relativeUriPathSegments: [ ],
             description: "This resourceType should be used for any collection of items post",
             methods: [
               {
@@ -4868,6 +4942,7 @@ describe('Parser', function() {
               }
             },
             relativeUri: "/",
+            relativeUriPathSegments: [ ],
             methods: [
               {
                 method: "post",
@@ -4982,6 +5057,7 @@ describe('Parser', function() {
             description: "This resourceType should be used for any collection of items",
             type: "collection",
             relativeUri: "/",
+            relativeUriPathSegments: [ ],
             methods: [
               {
                 queryParameters: {
@@ -5042,6 +5118,7 @@ describe('Parser', function() {
           {
             description: "This resourceType should be used for any collection of items",
             type: "collection",
+            relativeUriPathSegments: [ ],
             relativeUri: "/",
             methods: [
               {
@@ -5090,6 +5167,7 @@ describe('Parser', function() {
           {
             description: "This resourceType should be used for any collection of items",
             type: "collection",
+            relativeUriPathSegments: [ ],
             relativeUri: "/",
             methods: [
               {
@@ -5245,7 +5323,8 @@ describe('Parser', function() {
                     "parameterName": "commuters"
                   }
                 },
-                "relativeUri": "/"
+                "relativeUri": "/",
+                relativeUriPathSegments: [ ],
               }
             ]
           };
@@ -5287,6 +5366,7 @@ describe('Parser', function() {
                   }
                 ],
                 "relativeUri": "/",
+                relativeUriPathSegments: [ ],
                 "methods": [
                   {
                     "description": "commuter resourceType should be used for any collection of items",
@@ -5333,7 +5413,8 @@ describe('Parser', function() {
                     "parameterName": "commuter"
                   }
                 },
-                "relativeUri": "/"
+                "relativeUri": "/",
+                relativeUriPathSegments: [ ]
               }
             ]
           };
@@ -5380,7 +5461,8 @@ describe('Parser', function() {
                     "description": "commuters resourceType should be used for any collection of items",
                     "method": "get"
                   }
-                ]
+                ],
+                relativeUriPathSegments: [ ],
               }
             ]
           };
@@ -5411,7 +5493,8 @@ describe('Parser', function() {
           ],
         resources : [
           {
-            relativeUri: "/resource"
+            relativeUri: "/resource",
+            relativeUriPathSegments: [ "resource" ],
           }
         ]
       };
@@ -5558,6 +5641,7 @@ describe('Parser', function() {
         resources: [{
           displayName: 'A',
           relativeUri: '/foo',
+          relativeUriPathSegments: [ "foo" ],
           methods:[{
             description: 'Blah',
             body: {
@@ -5623,6 +5707,7 @@ describe('Parser', function() {
         resources: [{
           displayName: 'A',
           relativeUri: '/foo',
+          relativeUriPathSegments: [ "foo" ],
           methods:[{
             description: 'Blah',
             body: {
@@ -5695,6 +5780,7 @@ describe('Parser', function() {
         ],
         resources: [{
           displayName: 'A',
+          relativeUriPathSegments: [ "foo" ],
           relativeUri: '/foo',
           methods:[{
             description: 'Blah',
@@ -5777,7 +5863,8 @@ describe('Parser', function() {
         "securitySchemes": [],
         "resources": [
           {
-            "relativeUri": "/resource"
+            "relativeUri": "/resource",
+            relativeUriPathSegments: [ "resource" ]
           }
         ]
       };
@@ -5878,8 +5965,8 @@ describe('Parser', function() {
         ],
         "resources": [
           {
-            "relativeUri": "/resource"
-          }
+            "relativeUri": "/resource",
+            relativeUriPathSegments: [ "resource" ]          }
         ]
       };
       raml.load(definition).should.become(expected).and.notify(done);
@@ -5951,7 +6038,8 @@ describe('Parser', function() {
         ],
         "resources": [
           {
-            "relativeUri": "/resource"
+            "relativeUri": "/resource",
+            relativeUriPathSegments: [ "resource" ]
           }
         ]
       };
@@ -6032,7 +6120,8 @@ describe('Parser', function() {
         ],
         "resources": [
           {
-            "relativeUri": "/resource"
+            "relativeUri": "/resource",
+            relativeUriPathSegments: [ "resource" ]
           }
         ]
       };
@@ -6062,6 +6151,7 @@ describe('Parser', function() {
         ],
         "resources": [
           {
+            relativeUriPathSegments: [ "resource" ],
             "relativeUri": "/resource"
           }
         ]
@@ -6092,6 +6182,7 @@ describe('Parser', function() {
         ],
         "resources": [
           {
+            relativeUriPathSegments: [ "resource" ],
             "relativeUri": "/resource"
           }
         ]
@@ -6124,6 +6215,7 @@ describe('Parser', function() {
         securedBy: [null],
         "resources": [
           {
+            relativeUriPathSegments: [ "resource" ],
             "relativeUri": "/resource"
           }
         ]
@@ -6156,6 +6248,7 @@ describe('Parser', function() {
         securedBy: [ "scheme" ],
         "resources": [
           {
+            relativeUriPathSegments: [ "resource" ],
             "relativeUri": "/resource"
           }
         ]
@@ -6188,6 +6281,7 @@ describe('Parser', function() {
         "resources": [
           {
             securedBy: [ "scheme" ],
+            relativeUriPathSegments: [ "resource" ],
             "relativeUri": "/resource"
           }
         ]
@@ -6221,6 +6315,7 @@ describe('Parser', function() {
         "resources": [
           {
             "relativeUri": "/resource",
+            relativeUriPathSegments: [ "resource" ],
             methods:[
               {
                 method: "get",
@@ -6289,6 +6384,222 @@ describe('Parser', function() {
         '/resource:'
       ].join('\n');
       raml.load(definition).should.be.rejected.with(/schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-{.+}"/).and.notify(done);
+    });
+
+    it('resource should inherit securedBy from root', function(done) {
+      var definition = [
+          '#%RAML 0.8',
+          '---',
+          'title: Test',
+          'securitySchemes:',
+          '  - scheme1:',
+          '      type: x-other',
+          '      description: some thing goes here',
+          'securedBy: [scheme1]',
+          '/someResource:',
+          '  get:',
+          '  description: aslkjdhakjfh'
+      ].join('\n');
+      var expected = {
+          "title": "Test",
+          "securitySchemes": [
+              {
+                  "scheme1": {
+                      "type": "x-other",
+                      "description": "some thing goes here"
+                  }
+              }
+          ],
+          "securedBy": [
+              "scheme1"
+          ],
+          "resources": [
+              {
+                  "description": "aslkjdhakjfh",
+                  "relativeUri": "/someResource",
+                  "methods": [
+                      {
+                          "securedBy": [
+                              "scheme1"
+                          ],
+                          "method": "get"
+                      }
+                  ],
+                  "relativeUriPathSegments": [
+                      "someResource"
+                  ]
+              }
+          ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+
+    it('method should inherit securedBy from resource', function(done) {
+        var definition = [
+          '#%RAML 0.8',
+          '---',
+          'title: Test',
+          'securitySchemes:',
+          '  - scheme1:',
+          '      type: x-other',
+          '      description: some thing goes here',
+          '/someResource:',
+          '  securedBy: [scheme1]',
+          '  get:',
+          '  description: aslkjdhakjfh'
+        ].join('\n');
+        var expected = {
+            "title": "Test",
+            "securitySchemes": [
+                {
+                    "scheme1": {
+                        "type": "x-other",
+                        "description": "some thing goes here"
+                    }
+                }
+            ],
+            "resources": [
+                {
+                    "securedBy": [
+                        "scheme1"
+                    ],
+                    "description": "aslkjdhakjfh",
+                    "relativeUri": "/someResource",
+                    "methods": [
+                        {
+                            "securedBy": [
+                                "scheme1"
+                            ],
+                            "method": "get"
+                        }
+                    ],
+                    "relativeUriPathSegments": [
+                        "someResource"
+                    ]
+                }
+            ]
+        };
+
+        raml.load(definition).should.become(expected).and.notify(done);
+    });
+
+    it('method should not inherit securedBy from resource if it has property', function(done) {
+      var definition = [
+          '#%RAML 0.8',
+          '---',
+          'title: Test',
+          'securitySchemes:',
+          '  - scheme1:',
+          '      type: x-other',
+          '      description: some thing goes here',
+          '  - scheme2:',
+          '      type: x-other',
+          '      description: some thing goes here',
+          '/someResource:',
+          '  securedBy: [scheme2]',
+          '  get:',
+          '    securedBy: [scheme1]',
+          '  description: aslkjdhakjfh'
+      ].join('\n');
+      var expected = {
+          "title": "Test",
+          "securitySchemes": [
+              {
+                  "scheme1": {
+                      "type": "x-other",
+                      "description": "some thing goes here"
+                  }
+              },
+              {
+                  "scheme2": {
+                      "type": "x-other",
+                      "description": "some thing goes here"
+                  }
+              }
+          ],
+          "resources": [
+              {
+                  "securedBy": [
+                      "scheme2"
+                  ],
+                  "description": "aslkjdhakjfh",
+                  "relativeUri": "/someResource",
+                  "methods": [
+                      {
+                          "securedBy": [
+                              "scheme1"
+                          ],
+                          "method": "get"
+                      }
+                  ],
+                  "relativeUriPathSegments": [
+                      "someResource"
+                  ]
+              }
+          ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+
+    it('method should not inherit securedBy from root if it has property', function(done) {
+      var definition = [
+          '#%RAML 0.8',
+          '---',
+          'title: Test',
+          'securitySchemes:',
+          '  - scheme1:',
+          '      type: x-other',
+          '      description: some thing goes here',
+          '  - scheme2:',
+          '      type: x-other',
+          '      description: some thing goes here',
+          'securedBy: [scheme2]',
+          '/someResource:',
+          '  get:',
+          '    securedBy: [scheme1]',
+          '  description: aslkjdhakjfh'
+      ].join('\n');
+      var expected = {
+          "title": "Test",
+          "securitySchemes": [
+              {
+                  "scheme1": {
+                      "type": "x-other",
+                      "description": "some thing goes here"
+                  }
+              },
+              {
+                  "scheme2": {
+                      "type": "x-other",
+                      "description": "some thing goes here"
+                  }
+              }
+          ],
+          "securedBy": [
+              "scheme2"
+          ],
+          "resources": [
+              {
+                  "description": "aslkjdhakjfh",
+                  "relativeUri": "/someResource",
+                  "methods": [
+                      {
+                          "securedBy": [
+                              "scheme1"
+                          ],
+                          "method": "get"
+                      }
+                  ],
+                  "relativeUriPathSegments": [
+                      "someResource"
+                  ]
+              }
+          ]
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
     });
   });
 
@@ -6538,6 +6849,7 @@ describe('Parser', function() {
         "title": "Test",
         "resources": [
           {
+            relativeUriPathSegments: [ "foo" ],
             "relativeUri": "/foo",
             "methods": [
               {
@@ -6628,6 +6940,7 @@ describe('Parser', function() {
         "resources": [
           {
             "relativeUri": "/foo",
+            relativeUriPathSegments: [ "foo" ],
             "methods": [
               {
                 "queryParameters": null,
@@ -6677,6 +6990,7 @@ describe('Parser', function() {
         title: "Test",
         resources: [
           {
+            relativeUriPathSegments: [ "foo" ],
             relativeUri: "/foo",
             methods: [
               {
@@ -6804,6 +7118,7 @@ describe('Parser', function() {
         ],
         resources: [
           {
+            relativeUriPathSegments: [ "{hello}" ],
             relativeUri: "/{hello}",
             methods: [
               {
@@ -6889,6 +7204,7 @@ describe('Parser', function() {
         "title": "Test",
         "resources": [
           {
+            relativeUriPathSegments: [ "root" ],
             "relativeUri": "/root",
             "methods": [
               {
@@ -7001,7 +7317,8 @@ describe('Parser', function() {
                 displayName: "domainName"
               }
             },
-            "relativeUri": "/resource"
+            "relativeUri": "/resource",
+            relativeUriPathSegments: [ "resource" ]
           }
         ]
       };
@@ -7028,6 +7345,7 @@ describe('Parser', function() {
           title: "Test",
           resources: [
             {
+              relativeUriPathSegments: [ "resource" ],
               "relativeUri": "/resource",
               methods: [
                 {
@@ -7086,9 +7404,11 @@ describe('Parser', function() {
         },
         resources: [
           {
+            relativeUriPathSegments: [ "resource" ],
             "relativeUri": "/resource",
             "resources": [
               {
+                relativeUriPathSegments: [ "resource" ],
                 "relativeUri": "/resource",
                 "resources": [
                   {
@@ -7100,7 +7420,8 @@ describe('Parser', function() {
                         displayName: "domainName"
                       }
                     },
-                    "relativeUri": "/resource"
+                    "relativeUri": "/resource",
+                    relativeUriPathSegments: [ "resource" ],
                   }
                 ]
               }
@@ -7341,6 +7662,7 @@ describe('Parser', function() {
           resources:[
             {
               relativeUri: "/resource",
+              relativeUriPathSegments: [ "resource" ],
               methods: [
                 {
                   body: {
@@ -7389,6 +7711,7 @@ describe('Parser', function() {
             {
               type: "gettable",
               relativeUri: "/resource",
+              relativeUriPathSegments: [ "resource" ],
               methods: [
                 {
                   body: {
@@ -7445,6 +7768,7 @@ describe('Parser', function() {
             {
               type: "gettable",
               relativeUri: "/resource",
+              relativeUriPathSegments: [ "resource" ],
               methods: [
                 {
                   body: {
@@ -7502,6 +7826,7 @@ describe('Parser', function() {
             {
               is: ["bodiable"],
               relativeUri: "/resource",
+              relativeUriPathSegments: [ "resource" ],
               methods: [
                 {
                   body: {
@@ -7570,6 +7895,7 @@ describe('Parser', function() {
             {
               type: "gettable",
               relativeUri: "/resource",
+              relativeUriPathSegments: [ "resource" ],
               methods: [
                 {
                   body: {
@@ -7608,6 +7934,7 @@ describe('Parser', function() {
           resources:[
             {
               relativeUri: "/resource",
+              relativeUriPathSegments: [ "resource" ],
               methods: [
                 {
                   responses: {
@@ -7666,6 +7993,7 @@ describe('Parser', function() {
             {
               type: "gettable",
               relativeUri: "/resource",
+              relativeUriPathSegments: [ "resource" ],
               methods: [
                 {
                   responses: {
@@ -7732,6 +8060,7 @@ describe('Parser', function() {
             {
               type: "gettable",
               relativeUri: "/resource",
+              relativeUriPathSegments: [ "resource" ],
               methods: [
                 {
                   responses: {
@@ -7799,6 +8128,7 @@ describe('Parser', function() {
             {
               is: ["bodiable"],
               relativeUri: "/resource",
+              relativeUriPathSegments: [ "resource" ],
               methods: [
                 {
                   responses: {
@@ -7807,7 +8137,7 @@ describe('Parser', function() {
                         "application/json": {
                           example: "example of a response"
                         }
-                      },
+                      }
                     }
                   },
                   method: "get"
@@ -7883,6 +8213,7 @@ describe('Parser', function() {
             {
               type: "gettable",
               relativeUri: "/resource",
+              relativeUriPathSegments: [ "resource" ],
               methods: [
                 {
                   responses: {
@@ -7980,6 +8311,7 @@ describe('Parser', function() {
         ],
         resources: [
           {
+            relativeUriPathSegments: [ ],
             relativeUri: '/',
             methods: [
               {
@@ -8022,6 +8354,7 @@ describe('Parser', function() {
         ],
         resources: [
           {
+            relativeUriPathSegments: [ ],
             relativeUri: '/',
             methods: [
               {

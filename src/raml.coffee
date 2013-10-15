@@ -82,8 +82,8 @@ Read file from the network.
 
     if (typeof xhr.status is 'number' and xhr.status == 200) or
        (typeof xhr.status is 'string' and xhr.status.match /^200/i)
-      return xhr.responseText;
+      return xhr.responseText
 
-    throw "HTTP #{xhr.status} #{xhr.statusText}"
+    throw new Error("HTTP #{xhr.status} #{xhr.statusText}")
   catch error
     throw new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{error})", @start_mark

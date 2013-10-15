@@ -405,7 +405,8 @@ describe('Regressions', function () {
                             "method": "get",
                             "description": "description"
                         }
-                    ]
+                    ],
+                    relativeUriPathSegments: [ "presentations" ]
                 }
             ]
         };
@@ -501,6 +502,7 @@ describe('Regressions', function () {
                 {
                     "type": "collection",
                     "relativeUri": "/users",
+                    relativeUriPathSegments: [ "users" ],
                     "methods": [
                         {
                             "queryParameters": {

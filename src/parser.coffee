@@ -156,7 +156,7 @@ class @Parser
           throw new exports.ParserError null, null, \
             'found duplicate YAML directive', token.start_mark
         [major, minor] = token.value
-        if (major isnt 1 or minor isnt 2)        
+        if (major isnt 1 or minor isnt 2)
           throw new exports.ParserError null, null, \
             'found incompatible YAML document (version 1.2 is required)',
             token.start_mark
@@ -391,7 +391,7 @@ class @Parser
   # flow_sequence ::= FLOW-SEQUENCE-START
   #   (flow_sequence_entry FLOW-ENTRY)* flow_sequence_entry? FLOW-SEQUENCE-END
   # flow_sequence_entry ::= flow_node | KEY flow_node? (VALUE flow_node?)?
-  # 
+  #
   # Note that while production rules for both flow_sequence_entry and
   # flow_mapping_entry are equal, their interpretations are different.  For
   # `flow_sequence_entry`, the part `KEY flow_node? (VALUE flow_node?)?`

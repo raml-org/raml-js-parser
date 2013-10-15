@@ -1,5 +1,6 @@
 {MarkedYAMLError} = require './errors'
 nodes             = require './nodes'
+util              = require './util'
 
 ###
 The ResourceTypes throws these.
@@ -33,7 +34,7 @@ class @ResourceTypes
     return @declaredTypes[typeName]
 
   apply_types: (node, resourceUri = "") =>
-    return unless @isMapping(node)
+    return unless util.isMapping(node)
     if @has_types node
       resources = @child_resources node
       resources.forEach (resource) =>
@@ -111,11 +112,11 @@ class @ResourceTypes
     result = {
       resourcePath: resourceUri.replace(/\/\/*/g, '/')
     }
-    return result unless @isMapping typeKey
+    return result unless util.isMapping typeKey
     parameters = @value_or_undefined typeKey
-    unless @isNull parameters[0][1]
+    unless util.isNull parameters[0][1]
       parameters[0][1].value.forEach (parameter) =>
-        unless  @isScalar(parameter[1])
+        unless  util.isScalar(parameter[1])
           throw new exports.ResourceTypeError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
         if parameter[1].value in [ "methodName", "resourcePath", "resourcePathName"]
           throw new exports.ResourceTypeError 'while aplying parameters', null, 'invalid parameter name "methodName", "resourcePath" are reserved parameter names "resourcePathName"', parameter[1].start_mark

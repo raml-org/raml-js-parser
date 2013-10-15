@@ -1,5 +1,7 @@
 uritemplate = require 'uritemplate'
 nodes       = require './nodes'
+url         = require 'url'
+util              = require './util'
 
 ###
    Applies transformations to the RAML
@@ -10,25 +12,22 @@ class @Transformations
 
   applyTransformations: (rootObject) =>
     if @transformtree
-      @findAndInsertUriParameters(rootObject)
+      @applyTransformationsToRoot rootObject
+      resources = rootObject.resources
+      @applyTransformationsToResources(rootObject, resources)
 
   applyAstTransformations: (document) =>
     if @transformtree
       @transform_document(document)
 
   load_default_media_type: (node) =>
-    return unless @isMapping node or node?.value
+    return unless util.isMapping node or node?.value
     @mediaType = @property_value node, "mediaType"
 
   get_media_type: () =>
     return @mediaType
 
-  findAndInsertUriParameters: (rootObject) ->
-    @findAndInsertMissingBaseUriParameters rootObject
-    resources = rootObject.resources
-    @findAndInsertMissinngBaseUriParameters resources
-
-  findAndInsertMissingBaseUriParameters: (rootObject) ->
+  applyTransformationsToRoot: (rootObject) ->
     if rootObject.baseUri
 
       template = uritemplate.parse rootObject.baseUri
@@ -49,16 +48,28 @@ class @Transformations
           if parameterName is "version"
             rootObject.baseUriParameters[parameterName].enum = [ rootObject.version ]
 
-  findAndInsertMissinngBaseUriParameters: (resources) ->
+  applyTransformationsToResources: (rootObject, resources) ->
     if resources?.length
-      resources.forEach (resource) =>
+      for resource in resources
+        inheritedSecScheme = if resource.securedBy then resource.securedBy else rootObject?.securedBy
+        if resource.methods?.length
+          for method in resource.methods
+            unless "securedBy" of method
+              if inheritedSecScheme
+                method.securedBy = inheritedSecScheme
+
+        relativeUri = url.parse resource.relativeUri
+        pathParts = relativeUri.path.split('\/')
+        pathParts.shift() while !pathParts[0] and pathParts.length
+        resource.relativeUriPathSegments = pathParts
+
         template = uritemplate.parse resource.relativeUri
         expressions = template.expressions.filter((expr) -> return 'templateText' of expr).map (expression) -> expression.templateText
 
         if expressions.length
           resource.uriParameters = {} unless resource.uriParameters
 
-        expressions.forEach (parameterName) ->
+        for parameterName in expressions
           unless parameterName of resource.uriParameters
             resource.uriParameters[parameterName] =
             {
@@ -66,21 +77,22 @@ class @Transformations
               required: true,
               displayName: parameterName
             }
-        @findAndInsertMissinngBaseUriParameters resource.resources
+
+        @applyTransformationsToResources rootObject, resource.resources
 
   ###
   Media Type pivot when using default mediaType property
   ###
   apply_default_media_type_to_resource: (resource) =>
     return unless @mediaType
-    return unless @isMapping resource
+    return unless util.isMapping resource
     methods = @child_methods resource
     methods.forEach (method) =>
       @apply_default_media_type_to_method(method[1])
 
   apply_default_media_type_to_method: (method) ->
     return unless @mediaType
-    return unless @isMapping method
+    return unless util.isMapping method
     # resource->methods->body
     if @has_property(method, "body")
       @apply_default_media_type_to_body @get_property(method, "body")
@@ -93,7 +105,7 @@ class @Transformations
           @apply_default_media_type_to_body @get_property(response[1], "body")
 
   apply_default_media_type_to_body: (body) ->
-    return unless @isMapping body
+    return unless util.isMapping body
     if body?.value?[0]?[0]?.value
       key = body.value[0][0].value
       unless key.match(/\//)
@@ -117,17 +129,17 @@ class @Transformations
         @transform_method trait[1], true
 
   transform_named_params: (property, allowParameterKeys, requiredByDefault = true) ->
-    if @isNull property[1]
+    if util.isNull property[1]
       return
 
     property[1].value.forEach (param) =>
-      if @isNull param[1]
+      if util.isNull param[1]
         param[1] = new nodes.MappingNode('tag:yaml.org,2002:map', [], param[1].start_mark, param[1].end_mark)
 
       @transform_common_parameter_properties param[0].value, param[1], allowParameterKeys, requiredByDefault
 
   transform_common_parameter_properties: (parameterName, node, allowParameterKeys, requiredByDefault) ->
-    if @isSequence(node)
+    if util.isSequence(node)
       node.value.forEach (parameter) =>
         @transform_named_parameter(parameterName, parameter, allowParameterKeys, requiredByDefault)
     else
@@ -210,7 +222,7 @@ class @Transformations
               else @noop()
 
   transform_method: (method, allowParameterKeys) ->
-    return if @isNull method
+    return if util.isNull method
     method.value.forEach (property) =>
       return if @transform_common_properties property, allowParameterKeys
       canonicalKey = @canonicalizePropertyName(property[0].value, allowParameterKeys)
@@ -225,11 +237,11 @@ class @Transformations
         else @noop()
 
   transform_responses: (responses, allowParameterKeys) ->
-    return if @isNull responses[1]
+    return if util.isNull responses[1]
     responses[1].value.forEach (response) => @transform_response response, allowParameterKeys
 
   transform_response: (response, allowParameterKeys) ->
-    if @isMapping response[1]
+    if util.isMapping response[1]
       response[1].value.forEach (property) =>
         canonicalKey = @canonicalizePropertyName(property[0].value, allowParameterKeys)
         switch canonicalKey
@@ -242,7 +254,7 @@ class @Transformations
     return value?.match(/^[^\/]+\/[^\/]+$/)
 
   transform_body: (property, allowParameterKeys) ->
-    return if @isNull property[1]
+    return if util.isNull property[1]
     property[1].value?.forEach (bodyProperty) =>
       if @isParameterKey(bodyProperty) then @noop()
       else if @isContentTypeString(bodyProperty[0].value) then @transform_body bodyProperty, allowParameterKeys
