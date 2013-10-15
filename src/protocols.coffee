@@ -1,6 +1,7 @@
 url               = require 'url'
 {MarkedYAMLError} = require './errors'
 nodes             = require './nodes'
+util              = require './util'
 
 ###
 The Protocols throws these.
@@ -25,12 +26,11 @@ class @Protocols
     parsedBaseUri = url.parse(baseUri)
     protocol      = parsedBaseUri.protocol.slice(0, -1).toUpperCase()
     protocols     = [
-        new nodes.ScalarNode('tag:yaml.org,2002:str', 'protocols', node.start_mark, node.end_mark),
-        new nodes.SequenceNode('tag:yaml.org,2002:seq', [
-            new nodes.ScalarNode('tag:yaml.org,2002:str', protocol, node.start_mark, node.end_mark)
-        ], node.start_mark, node.end_mark)
+      new nodes.ScalarNode('tag:yaml.org,2002:str', 'protocols', node.start_mark, node.end_mark),
+      new nodes.SequenceNode('tag:yaml.org,2002:seq', [
+          new nodes.ScalarNode('tag:yaml.org,2002:str', protocol, node.start_mark, node.end_mark)
+      ], node.start_mark, node.end_mark)
     ]
-
     node.value.push(protocols)
     return protocols[1]
 
@@ -42,7 +42,7 @@ class @Protocols
   apply_protocols_to_methods: (node, protocols) ->
     for method in @child_methods node[1]
       unless @has_property method[1], 'protocols'
-        unless @isMapping method[1]
+        unless util.isMapping method[1]
           method[1] = new nodes.MappingNode 'tag:yaml.org,2002:map', [], method[1].start_mark, method[1].end_mark
 
         method[1].value.push [

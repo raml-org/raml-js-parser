@@ -2,6 +2,7 @@ events            = require './events'
 {MarkedYAMLError} = require './errors'
 nodes             = require './nodes'
 raml              = require './raml'
+util              = require './util'
 
 class @ComposerError extends MarkedYAMLError
 
@@ -127,7 +128,7 @@ class @Composer
       extension = event.value.split(".").pop()
       if extension in ['yaml', 'yml', 'raml']
         raml.start_mark = event.start_mark
-        return raml.composeFile(event.value, false, false, false, @);
+        return raml.composeFile(event.value, false, false, false, @)
 
       raml.start_mark = event.start_mark
       node = new nodes.ScalarNode 'tag:yaml.org,2002:str', raml.readFile(event.value), event.start_mark, event.end_mark, event.style
@@ -165,7 +166,7 @@ class @Composer
     @anchors[anchor] = node if anchor isnt null
     while not @check_event events.MappingEndEvent
       item_key   = @compose_node node
-      unless @isScalar(item_key)
+      unless util.isScalar(item_key)
         throw new exports.ComposerError 'while composing mapping key', null, "only scalar map keys are allowed in RAML" , item_key.start_mark
       item_value = @compose_node node, item_key
       node.value.push [item_key, item_value]

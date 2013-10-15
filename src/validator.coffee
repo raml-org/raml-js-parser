@@ -2,6 +2,7 @@
 nodes             = require './nodes'
 traits            = require './traits'
 uritemplate       = require 'uritemplate'
+util              = require './util'
 
 ###
 The Validator throws these.
@@ -26,74 +27,51 @@ class @Validator
     @validations = [@validate_root, @validate_root_properties, @validate_base_uri_parameters, @valid_absolute_uris]
 
   validate_document: (node) ->
-    @validations.forEach (validation) =>
+    for validation in @validations
       validation.call @, node
     return true
 
   validate_security_schemes: (schemesProperty) ->
-    unless @isSequence schemesProperty
+    unless util.isSequence schemesProperty
       throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security schemes property, it must be an array', schemesProperty.start_mark
     schemeNamesTrack = {}
-    schemesProperty.value.forEach (scheme_entry) =>
-      unless @isMapping scheme_entry
+    for scheme_entry in schemesProperty.value
+      unless util.isMapping scheme_entry
         throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security scheme property, it must be a map', scheme_entry.start_mark
-      scheme_entry.value.forEach (scheme) =>
+      for scheme in scheme_entry.value
         #@trackRepeatedProperties(schemeNamesTrack, scheme[0].value, scheme.start_mark, "while validating securitySchemes", "security scheme with the same name already exists")
-        unless @isMapping scheme[1]
+        unless util.isMapping scheme[1]
           throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security scheme property, it must be a map', scheme.start_mark
         @validate_security_scheme scheme[1]
 
-
-  trackRepeatedProperties: (properties, property, mark, section = "RAML", errorMessage = "Property with the same name already exists") ->
+  trackRepeatedProperties: (properties, property, mark, section = "RAML", errorMessage = "a property with the same name already exists") ->
     if property of properties
       throw new exports.ValidationError "while validating #{section}", null, errorMessage + ": '#{property}'", mark
     properties[property] = true
-
-  isNoop:             (node) -> return node
-  isMapping:          (node) -> return node?.tag is "tag:yaml.org,2002:map"
-  isNull:             (node) -> return node?.tag is "tag:yaml.org,2002:null"
-  isSequence:         (node) -> return node?.tag is "tag:yaml.org,2002:seq"
-  isString:           (node) -> return node?.tag is "tag:yaml.org,2002:str"
-  isInteger:          (node) -> return node?.tag is "tag:yaml.org,2002:int"
-  isNullableMapping:  (node) -> return @isMapping(node) or @isNull(node)
-  isNullableString:   (node) -> return @isString(node) or @isNull(node)
-  isNullableSequence: (node) -> return @isSequence(node) or @isNull(node)
-  isScalar:           (node) -> return node?.tag is 'tag:yaml.org,2002:null' or
-                                       node?.tag is 'tag:yaml.org,2002:bool' or
-                                       node?.tag is 'tag:yaml.org,2002:int' or
-                                       node?.tag is 'tag:yaml.org,2002:float' or
-                                       node?.tag is 'tag:yaml.org,2002:binary' or
-                                       node?.tag is 'tag:yaml.org,2002:timestamp' or
-                                       node?.tag is 'tag:yaml.org,2002:str'
-  isCollection:       (node) -> return node?.tag is 'tag:yaml.org,2002:omap' or
-                                       node?.tag is 'tag:yaml.org,2002:pairs' or
-                                       node?.tag is 'tag:yaml.org,2002:set' or
-                                       node?.tag is 'tag:yaml.org,2002:seq' or
-                                       node?.tag is 'tag:yaml.org,2002:map'
 
   validate_security_scheme: (scheme) ->
     type = null
     settings = null
     schemeProperties = {}
-    scheme.value.forEach (property) =>
+    for property in scheme.value
       @trackRepeatedProperties(schemeProperties, property[0].value, property[0].start_mark, 'while validating security scheme', "property already used in security scheme")
 
       switch property[0].value
         when "description"
-          unless @isScalar property[1]
+          unless util.isScalar property[1]
             throw new exports.ValidationError 'while validating security scheme', null, 'schemes description must be a string', property[1].start_mark
         when "type"
           type = property[1].value
-          unless @isString(property[1]) and type.match(/^(OAuth 1.0|OAuth 2.0|Basic Authentication|Digest Authentication|x-.+)$/)
+          unless util.isString(property[1]) and type.match(/^(OAuth 1.0|OAuth 2.0|Basic Authentication|Digest Authentication|x-.+)$/)
             throw new exports.ValidationError 'while validating security scheme', null, 'schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-\{.+\}"', property[1].start_mark
         when "describedBy"
           @validate_method property, true, "security scheme"
         when "settings"
           settings = property
-          unless @isNullableMapping property[1]
+          unless util.isNullableMapping property[1]
             throw new exports.ValidationError 'while validating security scheme', null, 'schemes settings must be a map', property[1].start_mark
         else
-            throw new exports.ValidationError 'while validating security scheme', null, "property: '" + property[0].value + "' is invalid in a security scheme", property[0].start_mark
+          throw new exports.ValidationError 'while validating security scheme', null, "property: '#{property[0].value}' is invalid in a security scheme", property[0].start_mark
     unless type
       throw new exports.ValidationError 'while validating security scheme', null, 'schemes type must be any of: "OAuth 1.0", "OAuth 2.0", "Basic Authentication", "Digest Authentication", "x-\{.+\}"', scheme.start_mark
     else if type is "OAuth 2.0"
@@ -110,14 +88,14 @@ class @Validator
     authorizationUrl = false
     accessTokenUrl = false
     settingProperties = {}
-    settings[1].value.forEach (property) =>
+    for property in settings[1].value
       @trackRepeatedProperties(settingProperties, property[0].value, property[0].start_mark, 'while validating security scheme', "setting with the same name already exists")
       switch property[0].value
         when "authorizationUrl"
-          unless @isString property[1]
+          unless util.isString property[1]
             throw new exports.ValidationError 'while validating security scheme', null, 'authorizationUrl must be a URL', property[0].start_mark
         when  "accessTokenUrl"
-          unless @isString property[1]
+          unless util.isString property[1]
             throw new exports.ValidationError 'while validating security scheme', null, 'accessTokenUrl must be a URL', property[0].start_mark
     unless "accessTokenUrl" of settingProperties
       throw new exports.ValidationError 'while validating security scheme', null, 'accessTokenUrl must be a URL', settings.start_mark
@@ -129,19 +107,19 @@ class @Validator
     authorizationUri = false
     tokenCredentialsUri = false
     settingProperties = {}
-    settings[1].value.forEach (property) =>
+    for property in settings[1].value
       @trackRepeatedProperties(settingProperties, property[0].value, property[0].start_mark, 'while validating security scheme', "setting with the same name already exists")
       switch property[0].value
         when "requestTokenUri"
-          unless @isString property[1]
+          unless util.isString property[1]
             throw new exports.ValidationError 'while validating security scheme', null, 'requestTokenUri must be a URL', property[0].start_mark
           requestTokenUri = true
         when "authorizationUri"
-          unless @isString property[1]
+          unless util.isString property[1]
             throw new exports.ValidationError 'while validating security scheme', null, 'authorizationUri must be a URL', property[0].start_mark
           authorizationUri = true
         when "tokenCredentialsUri"
-          unless @isString property[1]
+          unless util.isString property[1]
             throw new exports.ValidationError 'while validating security scheme', null, 'tokenCredentialsUri must be a URL', property[0].start_mark
           tokenCredentialsUri = true
     unless  "requestTokenUri" of settingProperties
@@ -152,37 +130,31 @@ class @Validator
       throw new exports.ValidationError 'while validating security scheme', null, 'tokenCredentialsUri must be a URL', settings.start_mark
 
   validate_root_schemas: (schemas) ->
-    unless @isSequence schemas
+    unless util.isSequence schemas
       throw new exports.ValidationError 'while validating schemas', null, 'schemas property must be an array', schemas.start_mark
     schemaList = @get_all_schemas()
     for schemaName, schema of schemaList
-      unless schema[1].tag and @isString schema[1]
+      unless schema[1].tag and util.isString schema[1]
         throw new exports.ValidationError 'while validating schemas', null, 'schema ' + schemaName + ' must be a string', schema[0].start_mark
 
   validate_root: (node) ->
-    baseUriProperty = @get_property node, /^baseUri$/
-    @baseUri        = baseUriProperty.value
-
-    unless node or @isNull node
+    unless node or util.isNull node
       throw new exports.ValidationError 'while validating root', null, 'empty document', node?.start_mark
 
-    unless @isMapping node
+    unless util.isMapping node
       throw new exports.ValidationError 'while validating root', null, 'document must be a map', node.start_mark
 
   validate_base_uri_parameters: (node) ->
-    baseUri           = @get_property node, /^baseUri$/
-    baseUriParameters = @get_property node, 'baseUriParameters'
-
-    unless @has_property node, 'baseUriParameters'
+    unless @baseUriParameters
       return
 
-    unless @has_property node, /^baseUri$/
-      throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', baseUriParameters.start_mark
+    unless @baseUri
+      throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters defined when there is no baseUri', @baseUriParameters.start_mark
 
-    unless @isNullableMapping baseUriParameters
-      throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a map', baseUriParameters.start_mark
+    unless util.isNullableMapping @baseUriParameters
+      throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a map', @baseUriParameters.start_mark
 
-    @validate_uri_parameters @baseUri, baseUriParameters, false, false, [ "version" ]
+    @validate_uri_parameters @baseUri, @baseUriParameters, false, false, [ "version" ]
 
   validate_uri_parameters: (uri, uriProperty, allowParameterKeys, skipParameterUseCheck, reservedNames = []) ->
     try
@@ -192,15 +164,15 @@ class @Validator
     expressions = template.expressions.filter((expr) -> return "templateText" of expr ).map (expression) -> expression.templateText
     uriParameters = {}
     if typeof uriProperty.value is "object"
-      uriProperty.value.forEach (uriParameter) =>
+      for uriParameter in uriProperty.value
         parameterName = @canonicalizePropertyName(uriParameter[0].value, allowParameterKeys)
         @trackRepeatedProperties(uriParameters, parameterName, uriProperty.start_mark, 'while validating URI parameters', "URI parameter with the same name already exists")
 
         if parameterName in reservedNames
           throw new exports.ValidationError 'while validating baseUri', null, uriParameter[0].value + ' parameter not allowed here', uriParameter[0].start_mark
-        unless @isNullableMapping(uriParameter[1], allowParameterKeys) or @isNullableSequence(uriParameter[1], allowParameterKeys)
+        unless util.isNullableMapping(uriParameter[1], allowParameterKeys) or util.isNullableSequence(uriParameter[1], allowParameterKeys)
           throw new exports.ValidationError 'while validating baseUri', null, 'URI parameter must be a map', uriParameter[0].start_mark
-        unless @isNull(uriParameter[1])
+        unless util.isNull(uriParameter[1])
           @valid_common_parameter_properties uriParameter[1], allowParameterKeys
         unless skipParameterUseCheck or @isParameterKey(uriParameter) or parameterName in expressions
           throw new exports.ValidationError 'while validating baseUri', null, uriParameter[0].value + ' uri parameter unused', uriParameter[0].start_mark
@@ -208,18 +180,18 @@ class @Validator
   validate_types: (typeProperty) ->
     types = typeProperty.value
     typesNamesTrack = {}
-    unless @isSequence typeProperty
+    unless util.isSequence typeProperty
       throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceTypes definition, it must be an array', typeProperty.start_mark
 
-    types.forEach (type_entry) =>
-      unless @isMapping type_entry
+    for type_entry in types
+      unless util.isMapping type_entry
         throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a map', type_entry.start_mark
 
-      type_entry.value.forEach (type) =>
+      for type in type_entry.value
         if @isParameterKey type
           throw new exports.ValidationError 'while validating resource types', null, 'parameter key cannot be used as a resource type name', type[0].start_mark
 
-        unless @isMapping type[1]
+        unless util.isMapping type[1]
           throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceType definition, it must be a map', type[1].start_mark
 
         @validate_resource type, true, 'resource type'
@@ -230,22 +202,22 @@ class @Validator
     unless Array.isArray traits
       throw new exports.ValidationError 'while validating traits', null, 'invalid traits definition, it must be an array', traitProperty.start_mark
 
-    traits.forEach (trait_entry) =>
+    for trait_entry in traits
       unless Array.isArray trait_entry.value
         throw new exports.ValidationError 'while validating traits', null, 'invalid traits definition, it must be an array', traitProperty.start_mark
 
-      trait_entry.value.forEach (trait) =>
+      for trait in trait_entry.value
         if @isParameterKey trait
           throw new exports.ValidationError 'while validating traits', null, 'parameter key cannot be used as a trait name', trait[0].start_mark
 
-        unless @isMapping trait[1]
+        unless util.isMapping trait[1]
           throw new exports.ValidationError 'while validating traits', null, 'invalid trait definition, it must be a map', trait[1].start_mark
 
         @valid_traits_properties trait
 
   valid_traits_properties: (node) ->
     return unless node[1].value
-    return unless @isMapping node[1]
+    return unless util.isMapping node[1]
     invalid = node[1].value.filter (childNode) ->
       return (  childNode[0].value is "is" or
                 childNode[0].value is "type" )
@@ -255,56 +227,56 @@ class @Validator
     @validate_method node, true, 'trait'
 
   canonicalizePropertyName: (propertyName, mustRemoveQuestionMark)   ->
-    if mustRemoveQuestionMark and propertyName.slice(-1) == '?'
+    if mustRemoveQuestionMark and propertyName.slice(-1) is '?'
       return propertyName.slice(0,-1)
     return propertyName
 
   valid_common_parameter_properties: (node, allowParameterKeys) ->
     return unless node.value
-    if @isSequence(node)
+    if util.isSequence(node)
       if node.value.length == 0
         throw new exports.ValidationError 'while validating parameter properties', null, 'named parameter needs at least one type', node.start_mark
       unless node.value.length > 1
         throw new exports.ValidationError 'while validating parameter properties', null, 'single type for variably typed parameter', node.start_mark
-      node.value.forEach (parameter) =>
+      for parameter in node.value
         @validate_named_parameter(parameter, allowParameterKeys)
     else
       @validate_named_parameter(node, allowParameterKeys)
 
   validate_named_parameter: (node, allowParameterKeys) ->
     parameterProperties = {}
-    node.value.forEach (childNode) =>
+    for childNode in node.value
       propertyName = childNode[0].value
       propertyValue = childNode[1].value
       @trackRepeatedProperties(parameterProperties, @canonicalizePropertyName(childNode[0].value, true), childNode[0].start_mark, 'while validating parameter properties', "parameter property already used")
       booleanValues = ["true", "false"]
-      return if allowParameterKeys && @isParameterKey(childNode)
+      continue if allowParameterKeys && @isParameterKey(childNode)
 
       canonicalPropertyName = @canonicalizePropertyName propertyName, allowParameterKeys
 
       switch canonicalPropertyName
         when "displayName"
-          unless @isScalar (childNode[1])
+          unless util.isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of displayName must be a scalar', childNode[1].start_mark
         when "pattern"
-          unless @isScalar (childNode[1])
+          unless util.isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of pattern must be a scalar', childNode[1].start_mark
         when "default"
-          unless @isScalar (childNode[1])
+          unless util.isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of default must be a scalar', childNode[1].start_mark
         when "enum"
-          unless @isNullableSequence(childNode[1])
+          unless util.isNullableSequence(childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of enum must be an array', childNode[1].start_mark
           unless childNode[1].value.length
             throw new exports.ValidationError 'while validating parameter properties', null, 'enum is empty', childNode[1].start_mark
           enumValues = @get_list_values (childNode[1].value)
-          if enumValues.hasDuplicates()
+          if @hasDuplicates(enumValues)
             throw new exports.ValidationError 'while validating parameter properties', null, 'enum contains duplicated values', childNode[1].start_mark
         when "description"
-          unless @isScalar (childNode[1])
+          unless util.isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of description must be a scalar', childNode[1].start_mark
         when "example"
-          unless @isScalar (childNode[1])
+          unless util.isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of example must be a scalar', childNode[1].start_mark
         when "minLength"
           if isNaN(propertyValue)
@@ -347,12 +319,13 @@ class @Validator
 
         switch property[0].value
           when 'title'
-            unless @isScalar(property[1])
+            unless util.isScalar(property[1])
               throw new exports.ValidationError 'while validating root properties', null, 'title must be a string', property[0].start_mark
 
           when 'baseUri'
-            unless @isScalar(property[1])
+            unless util.isScalar(property[1])
               throw new exports.ValidationError 'while validating root properties', null, 'baseUri must be a string', property[0].start_mark
+            @baseUri = property[1].value
             checkVersion = @validate_base_uri property[1]
 
           when 'securitySchemes'
@@ -362,23 +335,24 @@ class @Validator
             @validate_root_schemas property[1]
 
           when 'version'
-            unless @isScalar(property[1])
+            unless util.isScalar(property[1])
               throw new exports.ValidationError 'while validating root properties', null, 'version must be a string', property[0].start_mark
 
           when 'traits'
             @validate_traits property[1]
 
           when 'documentation'
-            unless @isSequence property[1]
+            unless util.isSequence property[1]
               throw new exports.ValidationError 'while validating root properties', null, 'documentation must be an array', property[0].start_mark
             @validate_documentation property[1]
 
           when 'mediaType'
-            unless @isString property[1]
+            unless util.isString property[1]
               throw new exports.ValidationError 'while validating root properties', null, 'mediaType must be a scalar', property[0].start_mark
 
           when 'baseUriParameters'
-            @isNoop property[1]
+            @baseUriParameters = property[1]
+            util.isNoop property[1]
 
           when 'resourceTypes'
             @validate_types property[1]
@@ -408,18 +382,18 @@ class @Validator
       @validate_doc_section docSection
 
   validate_doc_section: (docSection) ->
-    unless @isMapping docSection
+    unless util.isMapping docSection
       throw new exports.ValidationError 'while validating documentation section', null, 'each documentation section must be a map', docSection.start_mark
     docProperties = {}
     docSection.value.forEach (property) =>
       @trackRepeatedProperties(docProperties, property[0].value, property[0].start_mark, 'while validating documentation section', "property already used")
       switch property[0].value
         when "title"
-          unless @isScalar(property[1]) and not @isNull(property[1])
+          unless util.isScalar(property[1]) and not util.isNull(property[1])
             throw new exports.ValidationError 'while validating documentation section', null, 'title must be a string', property[0].start_mark
           hasTitle = true
         when "content"
-          unless @isScalar(property[1]) and not @isNull(property[1])
+          unless util.isScalar(property[1]) and not util.isNull(property[1])
             throw new exports.ValidationError 'while validating documentation section', null, 'content must be a string', property[0].start_mark
           hasContent = true
         else
@@ -430,12 +404,12 @@ class @Validator
       throw new exports.ValidationError 'while validating documentation section', null, 'a documentation entry must have title property', docSection.start_mark
 
   child_resources: (node) ->
-    if node and @isMapping node
-      return node.value.filter (childNode) -> return childNode[0].value.match(/^\//);
+    if node and util.isMapping node
+      return node.value.filter (childNode) -> return childNode[0].value.match(/^\//)
     return []
 
   validate_resource: (resource, allowParameterKeys = false, context = "resource") ->
-    unless resource[1] and @isNullableMapping(resource[1])
+    unless resource[1] and util.isNullableMapping(resource[1])
       throw new exports.ValidationError 'while validating resources', null, 'resource is not a map', resource[1].start_mark
     if resource[0].value
       try
@@ -443,7 +417,7 @@ class @Validator
       catch err
         throw new exports.ValidationError 'while validating resource', null, "Resource name is invalid: " + err?.options?.message, resource[0].start_mark
 
-    return if @isNull resource[1]
+    return if util.isNull resource[1]
 
     if resource[1].value
       resourceProperties = {}
@@ -470,13 +444,13 @@ class @Validator
             # these properties are allowed to be parametrized in resource types
             switch canonicalKey
               when "uriParameters"
-                unless @isNullableMapping(property[1])
+                unless util.isNullableMapping(property[1])
                   throw new exports.ValidationError 'while validating uri parameters', null, 'uri parameters must be a map', property[0].start_mark
                 @validate_uri_parameters resource[0].value, property[1], allowParameterKeys, allowParameterKeys
               when "baseUriParameters"
                 unless @baseUri
                   throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
-                unless @isNullableMapping(property[1])
+                unless util.isNullableMapping(property[1])
                   throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a map', property[0].start_mark
                 @validate_uri_parameters @baseUri, property[1], allowParameterKeys
               else
@@ -496,37 +470,37 @@ class @Validator
                   throw new exports.ValidationError 'while validating resources', null, "property: '" + property[0].value + "' is invalid in a #{context}", property[0].start_mark
 
   validate_secured_by: (property) ->
-    unless @isSequence property[1]
+    unless util.isSequence property[1]
       throw new exports.ValidationError 'while validating securityScheme', null, "property 'securedBy' must be an array", property[0].start_mark
 
     secSchemes = @get_list_values (property[1].value)
-    if secSchemes.hasDuplicates()
+    if @hasDuplicates(secSchemes)
       throw new exports.ValidationError 'while validating securityScheme consumption', null, 'securitySchemes can only be referenced once in a securedBy property', property[0].start_mark
 
-    property[1].value.forEach (secScheme) =>
-      if @isSequence secScheme
+    for secScheme in property[1].value
+      if util.isSequence secScheme
         throw new exports.ValidationError 'while validating securityScheme consumption', null, 'securityScheme reference cannot be an array', secScheme.start_mark
-      unless @isNull secScheme
+      unless util.isNull secScheme
         securitySchemeName = @key_or_value secScheme
         unless @get_security_scheme securitySchemeName
           throw new exports.ValidationError 'while validating securityScheme consumption', null, 'there is no securityScheme named ' + securitySchemeName, secScheme.start_mark
 
   validate_protocols_property: (property) ->
-    unless @isSequence property[1]
+    unless util.isSequence property[1]
       throw new exports.ValidationError 'while validating protocols', null, 'property must be an array', property[0].start_mark
 
-    property[1].value.forEach (protocol) =>
-        unless @isString protocol
-            throw new exports.ValidationError 'while validating protocols', null, 'value must be a string', protocol.start_mark
+    for protocol in property[1].value
+      unless util.isString protocol
+        throw new exports.ValidationError 'while validating protocols', null, 'value must be a string', protocol.start_mark
 
-        unless protocol.value in ['HTTP', 'HTTPS']
-            throw new exports.ValidationError 'while validating protocols', null, 'only HTTP and HTTPS values are allowed', protocol.start_mark
+      unless protocol.value in ['HTTP', 'HTTPS']
+        throw new exports.ValidationError 'while validating protocols', null, 'only HTTP and HTTPS values are allowed', protocol.start_mark
 
   validate_type_property: (property, allowParameterKeys) ->
-    unless @isMapping(property[1]) or @isString(property[1])
+    unless util.isMapping(property[1]) or util.isString(property[1])
       throw new exports.ValidationError 'while validating resource types', null, "property 'type' must be a string or a map", property[0].start_mark
 
-    if @isMapping property[1]
+    if util.isMapping property[1]
       if property[1].value.length > 1
         throw new exports.ValidationError 'while validating resource types', null, 'a resource or resourceType can inherit from a single resourceType', property[0].start_mark
 
@@ -537,22 +511,22 @@ class @Validator
     unless @isParameterKeyValue(typeName) or @get_type(typeName)
       throw new exports.ValidationError 'while validating resource type consumption', null, "there is no resource type named #{typeName}", property[1].start_mark
 
-    if @isMapping property[1]
+    if util.isMapping property[1]
       property[1].value.forEach (parameter) =>
-        unless @isNull(parameter[1]) or @isMapping(parameter[1])
+        unless util.isNull(parameter[1]) or util.isMapping(parameter[1])
           throw new exports.ValidationError 'while validating resource consumption', null, 'resource type parameters must be in a map', parameter[1].start_mark
 
   validate_method: (method, allowParameterKeys, context = 'method') ->
-    if @isNull method[1]
+    if util.isNull method[1]
       return
 
-    unless @isMapping method[1]
+    unless util.isMapping method[1]
       throw new exports.ValidationError 'while validating methods', null, "method must be a map", method[0].start_mark
 
     methodProperties = {}
-    method[1].value.forEach (property) =>
+    for property in method[1].value
       @trackRepeatedProperties(methodProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating method', "property already used")
-      return if @validate_common_properties property, allowParameterKeys, context
+      continue if @validate_common_properties property, allowParameterKeys, context
 
       key          = property[0].value
       canonicalKey = @canonicalizePropertyName(key, allowParameterKeys)
@@ -584,7 +558,7 @@ class @Validator
           unless @baseUri
             throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
 
-          unless @isNullableMapping(property[1])
+          unless util.isNullableMapping(property[1])
             throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters must be a map', property[0].start_mark
 
           @validate_uri_parameters @baseUri, property[1], allowParameterKeys
@@ -594,75 +568,75 @@ class @Validator
             throw new exports.ValidationError 'while validating resources', null, "property: 'usage' is invalid in a #{context}", property[0].start_mark
 
         when 'protocols'
-            @validate_protocols_property property
+          @validate_protocols_property property
 
         else
           unless valid
             throw new exports.ValidationError 'while validating resources', null, "property: '#{property[0].value}' is invalid in a #{context}", property[0].start_mark
 
   validate_responses: (responses, allowParameterKeys) ->
-    if @isNull responses[1]
+    if util.isNull responses[1]
       return
-    unless @isMapping responses[1]
+    unless util.isMapping responses[1]
       throw new exports.ValidationError 'while validating responses', null, "property: 'responses' must be a map", responses[0].start_mark
     responseValues = {}
-    responses[1].value.forEach (response) =>
-      unless @isNullableMapping response[1]
+    for response in responses[1].value
+      unless util.isNullableMapping response[1]
         throw new exports.ValidationError 'while validating responses', null, 'each response must be a map', response[1].start_mark
       @trackRepeatedProperties(responseValues, @canonicalizePropertyName(response[0].value, true), response[0].start_mark, 'while validating responses', "response code already used")
       @validate_response response, allowParameterKeys
 
   validate_query_params: (property, allowParameterKeys) ->
-    if @isNull property[1]
+    if util.isNull property[1]
       return
-    unless @isMapping property[1]
+    unless util.isMapping property[1]
       throw new exports.ValidationError 'while validating query parameters', null, "property: 'queryParameters' must be a map", property[0].start_mark
     queryParameters = {}
-    property[1].value.forEach (param) =>
-      unless @isNullableMapping(param[1]) or @isNullableSequence(param[1])
+    for param in property[1].value
+      unless util.isNullableMapping(param[1]) or util.isNullableSequence(param[1])
         throw new exports.ValidationError 'while validating query parameters', null, "each query parameter must be a map", param[1].start_mark
       @trackRepeatedProperties(queryParameters, @canonicalizePropertyName(param[0].value, true), param[0].start_mark, 'while validating query parameter', "parameter name already used")
       @valid_common_parameter_properties param[1], allowParameterKeys
 
   validate_form_params: (property, allowParameterKeys) ->
-    if @isNull property[1]
+    if util.isNull property[1]
       return
-    unless @isMapping property[1]
+    unless util.isMapping property[1]
       throw new exports.ValidationError 'while validating query parameters', null, "property: 'formParameters' must be a map", property[0].start_mark
     formParameters = {}
-    property[1].value.forEach (param) =>
-      unless @isNullableMapping(param[1]) or @isNullableSequence(param[1])
+    for param in property[1].value
+      unless util.isNullableMapping(param[1]) or util.isNullableSequence(param[1])
         throw new exports.ValidationError 'while validating query parameters', null, 'each form parameter must be a map', param[1].start_mark
       @trackRepeatedProperties(formParameters, @canonicalizePropertyName(param[0].value, true), param[0].start_mark, 'while validating form parameter', "parameter name already used")
       @valid_common_parameter_properties param[1], allowParameterKeys
 
   validate_headers: (property, allowParameterKeys) ->
-    if @isNull property[1]
+    if util.isNull property[1]
       return
-    unless @isMapping property[1]
+    unless util.isMapping property[1]
       throw new exports.ValidationError 'while validating headers', null, "property: 'headers' must be a map", property[0].start_mark
     headerNames = {}
-    property[1].value.forEach (param) =>
-      unless @isNullableMapping(param[1]) or @isNullableSequence(param[1])
+    for param in property[1].value
+      unless util.isNullableMapping(param[1]) or util.isNullableSequence(param[1])
         throw new exports.ValidationError 'while validating query parameters', null, "each header must be a map", param[1].start_mark
       @trackRepeatedProperties(headerNames, @canonicalizePropertyName(param[0].value, true), param[0].start_mark, 'while validating headers', "header name already used")
       @valid_common_parameter_properties param[1], allowParameterKeys
 
   validate_response: (response, allowParameterKeys) ->
-    if @isSequence response[0]
+    if util.isSequence response[0]
       unless response[0].value.length
         throw new exports.ValidationError 'while validating responses', null, 'there must be at least one response code', response[0].start_mark
       response[0].value.forEach (responseCode) =>
-        unless @isParameterKey(responseCode) or @isInteger(responseCode) or !isNaN(@canonicalizePropertyName(responseCode, allowParameterKeys))
+        unless @isParameterKey(responseCode) or util.isInteger(responseCode) or !isNaN(@canonicalizePropertyName(responseCode, allowParameterKeys))
           throw new exports.ValidationError 'while validating responses', null, "each response key must be an integer", responseCode.start_mark
-    else unless @isParameterKey(response) or @isInteger(response[0]) or !isNaN(@canonicalizePropertyName(response[0].value, allowParameterKeys))
+    else unless @isParameterKey(response) or util.isInteger(response[0]) or !isNaN(@canonicalizePropertyName(response[0].value, allowParameterKeys))
       throw new exports.ValidationError 'while validating responses', null, "each response key must be an integer", response[0].start_mark
-    unless @isNullableMapping response[1]
+    unless util.isNullableMapping response[1]
       throw new exports.ValidationError 'while validating responses', null, "each response property must be a map", response[0].start_mark
 
-    if @isMapping response[1]
+    if util.isMapping response[1]
       responseProperties = {}
-      response[1].value.forEach (property) =>
+      for property in response[1].value
         canonicalKey = @canonicalizePropertyName(property[0].value, allowParameterKeys)
         @trackRepeatedProperties(responseProperties, canonicalKey, property[0].start_mark, 'while validating responses', "property already used")
         unless @isParameterKey(property)
@@ -670,10 +644,10 @@ class @Validator
             when "body"
               @validate_body property, allowParameterKeys, null, true
             when "description"
-              unless @isScalar(property[1])
+              unless util.isScalar(property[1])
                 throw new exports.ValidationError 'while validating responses', null, 'property description must be a string', response[0].start_mark
             when "headers"
-              unless @isNullableMapping(property[1])
+              unless util.isNullableMapping(property[1])
                 throw new exports.ValidationError 'while validating resources', null, "property 'headers' must be a map", property[0].start_mark
               @validate_headers property
             else
@@ -686,14 +660,10 @@ class @Validator
     return false
 
   isParameterKey: (property) ->
-    unless @isScalar(property[0])
-      return false
-
     if @isParameterKeyValue property[0].value
       return true
     else if property[0].value.match(/<<\s*([^\|\s>]+)\s*\|.*\s*>>/g)
       throw new exports.ValidationError 'while validating parameter', null, "unknown function applied to property name" , property[0].start_mark
-
     return false
 
   isParameterKeyValue: (value) ->
@@ -703,13 +673,13 @@ class @Validator
     return false
 
   validate_body: (property, allowParameterKeys, bodyMode = null, isResponseBody) ->
-    if @isNull property[1]
+    if util.isNull property[1]
       return
-    unless @isMapping property[1]
+    unless util.isMapping property[1]
       throw new exports.ValidationError 'while validating body', null, "property: body specification must be a map", property[0].start_mark
     implicitMode = ["implicit", "forcedImplicit"]
     bodyProperties = {}
-    property[1].value?.forEach (bodyProperty) =>
+    for bodyProperty in property[1].value
       @trackRepeatedProperties(bodyProperties, @canonicalizePropertyName(bodyProperty[0].value, true), bodyProperty[0].start_mark, 'while validating body', "property already used")
 
       if @isParameterKey(bodyProperty)
@@ -733,13 +703,13 @@ class @Validator
             if bodyMode and bodyMode not in implicitMode
               throw new exports.ValidationError 'while validating body', null, "not compatible with explicit Media Type", bodyProperty[0].start_mark
             bodyMode ?= "implicit"
-            unless @isScalar(bodyProperty[1])
+            unless util.isScalar(bodyProperty[1])
               throw new exports.ValidationError 'while validating body', null, "example must be a string", bodyProperty[0].start_mark
           when "schema"
             if bodyMode and bodyMode not in implicitMode
               throw new exports.ValidationError 'while validating body', null, "not compatible with explicit Media Type", bodyProperty[0].start_mark
             bodyMode ?= "implicit"
-            unless @isScalar(bodyProperty[1])
+            unless util.isScalar(bodyProperty[1])
               throw new exports.ValidationError 'while validating body', null, "schema must be a string", bodyProperty[0].start_mark
           else
             throw new exports.ValidationError 'while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark
@@ -765,44 +735,44 @@ class @Validator
           if context is 'method'
             return false
 
-          unless @isScalar(property[1])
+          unless util.isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'displayName' must be a string", property[0].start_mark
 
           return true
 
         when "description"
-          unless @isScalar(property[1])
+          unless util.isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'description' must be a string", property[0].start_mark
           return true
 
       switch key
         when "is"
-          unless @isSequence property[1]
+          unless util.isSequence property[1]
             throw new exports.ValidationError 'while validating resources', null, "property 'is' must be an array", property[0].start_mark
 
           unless (property[1].value instanceof Array)
             throw new exports.ValidationError 'while validating trait consumption', null, 'is property must be an array', property[0].start_mark
 
-          property[1].value.forEach (use) =>
+          for use in property[1].value
             traitName = @key_or_value use
             if not @isParameterKeyValue(traitName) and not @get_trait(traitName)
               throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + traitName, use.start_mark
 
-            if @isMapping use[1]
-              property[1].value.forEach (parameter) =>
-                unless @isNull(parameter[1]) or @isMapping(parameter[1])
+            if util.isMapping use[1]
+              for parameter in property[1].value
+                unless util.isNull(parameter[1]) or util.isMapping(parameter[1])
                   throw new exports.ValidationError 'while validating resource consumption', null, 'type parameters must be in a map', parameter[1].start_mark
 
           return true
     return false
 
   child_methods: (node) ->
-    unless node and @isMapping node
+    unless node and util.isMapping node
       return []
     return node.value.filter (childNode) => return @isHttpMethod childNode[0].value
 
   has_property: (node, property) ->
-    if node and @isMapping node
+    if node and util.isMapping node
       return node.value.some((childNode) -> return childNode[0].value and typeof childNode[0].value != "object" and childNode[0].value.match(property))
     return false
 
@@ -810,12 +780,12 @@ class @Validator
     filteredNodes = node.value.filter (childNode) ->
       return typeof childNode[0].value != "object" and childNode[0].value.match(property)
     if (filteredNodes.length)
-      return filteredNodes[0][1].value;
+      return filteredNodes[0][1].value
 
   get_property: (node, property) ->
-    if node and @isMapping node
+    if node and util.isMapping node
       filteredNodes = node.value.filter (childNode) =>
-        return @isString(childNode[0]) and childNode[0].value.match(property)
+        return util.isString(childNode[0]) and childNode[0].value.match(property)
       if filteredNodes.length > 0
         if filteredNodes[0].length > 0
           return filteredNodes[0][1]
@@ -823,9 +793,9 @@ class @Validator
 
   get_properties: (node, property) =>
     properties = []
-    if node and @isMapping node
-      node.value.forEach (prop) =>
-        if @isString(prop[0]) and prop[0].value?.match(property)
+    if node and util.isMapping node
+      for prop in node.value
+        if util.isString(prop[0]) and prop[0].value?.match(property)
           properties.push prop
         else
           properties = properties.concat @get_properties prop[1], property
@@ -871,12 +841,12 @@ class @Validator
 
   valid_absolute_uris: (node ) ->
     uris = @get_absolute_uris node
-    if repeatedUri = uris.hasDuplicatesUris()
+    if repeatedUri = @hasDuplicatesUris(uris)
       throw new exports.ValidationError 'while validating trait consumption', null, "two resources share same URI #{repeatedUri.uri}", repeatedUri.mark
 
   get_absolute_uris: ( node = @get_single_node(true, true, false), parentPath ) ->
     response = []
-    unless @isNullableMapping node
+    unless util.isNullableMapping node
       throw new exports.ValidationError 'while validating resources', null, 'resource is not a map', node.start_mark
     child_resources = @child_resources node
     child_resources.forEach (childResource) =>
@@ -918,18 +888,18 @@ class @Validator
   is_valid: ->
     return @validation_errors.length == 0
 
-  Array::hasDuplicatesUris = ->
+  hasDuplicatesUris: (array) ->
     output = {}
-    for key in [0...@length]
-      if @[key].uri of output
-        return @[key]
-      output[@[key].uri] = @[key]
+    for item in array
+      if item.uri of output
+        return item
+      output[item.uri] = item
     return false
 
-  Array::hasDuplicates = ->
+  hasDuplicates: (array) ->
     output = {}
-    for key in [0...@length]
-      if @[key] of output
-        return @[key]
-      output[@[key]] = true
+    for item in array
+      if item of output
+        return true
+      output[item] = true
     return false
