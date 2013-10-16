@@ -10,6 +10,7 @@
 @scanner     = require './scanner'
 @tokens      = require './tokens'
 @q           = require 'q'
+@url         = require('url')
 
 class @FileError extends @errors.MarkedYAMLError
 
@@ -22,7 +23,7 @@ Javascript object.
 @loadFile = (file, settings = defaultSettings) ->
   return @readFileAsync(file)
   .then (stream) =>
-      @load stream, file, settings
+    @load stream, file, settings
 
 ###
 Parse the first RAML document in a file and produce the corresponding
@@ -31,7 +32,7 @@ representation tree.
 @composeFile = (file, settings = defaultSettings, parent) ->
   return @readFileAsync(file)
   .then (stream) =>
-      @compose stream, file, settings, parent
+    @compose stream, file, settings, parent
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
@@ -89,13 +90,17 @@ getPendingFile = (loader, fileInfo) =>
   key     = fileInfo.parentKey
   fileUri = fileInfo.targetFileUri
 
-  if fileInfo.includingContext?
-    event.value = require('url').resolve(fileInfo.includingContext, fileInfo.targetFileUri)
+  if fileInfo.includingContext
+    fileUri = @url.resolve(fileInfo.includingContext, fileInfo.targetFileUri)
+
+  if loader.parent and isInIncludeTagsStack(fileUri, loader)
+    throw new exports.FileError 'while composing scalar out of !include', null, "detected circular !include of #{event.value}", event.start_mark
 
   if fileInfo.type is 'fragment'
     return @readFileAsync(fileUri)
     .then (result) =>
-      return @compose(result, fileInfo.targetFileUri, { validate: false, transform: false, compose: true }, loader)
+      console.log loader?.parent?.src
+      return @compose(result, fileUri, { validate: false, transform: false, compose: true }, loader)
     .then (value) =>
       return appendNewNodeToParent(node, key, value)
   else
@@ -119,7 +124,7 @@ appendNewNodeToParent = (node, key, value) ->
 Read file either locally or from the network.
 ###
 @readFileAsync = (file) ->
-  url = require('url').parse(file)
+  url = @url.parse(file)
   if url.protocol?
     unless url.protocol.match(/^https?/i)
       throw new exports.FileError "while reading #{file}", null, "unknown protocol #{url.protocol}", @start_mark
@@ -157,7 +162,6 @@ Read file from the network.
   try
     xhr.open 'GET', file, false
     xhr.setRequestHeader 'Accept', 'application/raml+yaml, */*'
-
     xhr.onreadystatechange = () =>
       if(xhr.readyState == 4)
         if (typeof xhr.status is 'number' and xhr.status == 200) or
@@ -165,10 +169,14 @@ Read file from the network.
           deferred.resolve(xhr.responseText)
         else
           deferred.reject(new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{xhr.statusText})", @start_mark)
-
     xhr.send null
-
     return deferred.promise
-
   catch error
     throw new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{error})", @start_mark
+
+
+isInIncludeTagsStack =  (include, parent) ->
+  while parent = parent.parent
+    if parent.src is include
+      return true
+  return false

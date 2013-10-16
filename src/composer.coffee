@@ -125,9 +125,6 @@ class @Composer
       if event.value.match(/^\s*$/)
         throw new exports.ComposerError 'while composing scalar out of !include', null, "file name/URL cannot be null", event.start_mark
 
-      if @isInIncludeTagsStack(event.value)
-        throw new exports.ComposerError 'while composing scalar out of !include', null, "detected circular !include of #{event.value}", event.start_mark
-
       extension = event.value.split(".").pop()
       if extension in ['yaml', 'yml', 'raml']
         fileType = 'fragment'
@@ -192,9 +189,3 @@ class @Composer
     node.end_mark = end_event.end_mark
     return node
 
-  isInIncludeTagsStack: (include) ->
-    parent = @
-    while parent = parent.parent
-      if parent.src is include
-        return true
-    return false
