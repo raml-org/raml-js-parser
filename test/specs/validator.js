@@ -261,4 +261,101 @@ describe('Validator', function () {
             'baseUri: ftp://api.com'
         ].join('\n')).should.be.rejected.with('baseUri protocol must be either HTTP or HTTPS').and.notify(done);
     });
+
+    it('should report correct line/column for scheme entry that is not a map', function (done) {
+        raml.load([
+            '#%RAML 0.8',
+            '---',
+            'title: Example',
+            'securitySchemes:',
+            '   - scheme1:'
+        ].join('\n')).then(function () {}, function (error) {
+            setTimeout(function () {
+                error.message.should.contain('invalid security scheme property, it must be a map');
+                error.problem_mark.line.should.be.equal(4);
+                error.problem_mark.column.should.be.equal(5);
+                done();
+            }, 0);
+        });
+    });
+
+    it('should report correct line/column when accessTokenUri has not been specified for OAuth 2.0 security scheme', function (done) {
+        raml.load([
+            '#%RAML 0.8',
+            '---',
+            'title: Example',
+            'securitySchemes:',
+            '   - scheme1:',
+            '       type: OAuth 2.0',
+            '       settings: {}'
+        ].join('\n')).then(function () {}, function (error) {
+            setTimeout(function () {
+                error.message.should.contain('OAuth 2.0 settings must have accessTokenUri property');
+                error.problem_mark.line.should.be.equal(6);
+                error.problem_mark.column.should.be.equal(7);
+                done();
+            }, 0);
+        });
+    });
+
+    it('should report correct line/column when authorizationUri has not been specified for OAuth 2.0 security scheme', function (done) {
+        raml.load([
+            '#%RAML 0.8',
+            '---',
+            'title: Example',
+            'securitySchemes:',
+            '   - scheme1:',
+            '       type: OAuth 2.0',
+            '       settings:',
+            '           accessTokenUri: i-dont-care'
+        ].join('\n')).then(function () {}, function (error) {
+            setTimeout(function () {
+                error.message.should.contain('OAuth 2.0 settings must have authorizationUri property');
+                error.problem_mark.line.should.be.equal(6);
+                error.problem_mark.column.should.be.equal(7);
+                done();
+            }, 0);
+        });
+    });
+
+    it('should report correct line/column when authorizationUri has not been specified for OAuth 1.0 security scheme', function (done) {
+        raml.load([
+            '#%RAML 0.8',
+            '---',
+            'title: Example',
+            'securitySchemes:',
+            '   - scheme1:',
+            '       type: OAuth 1.0',
+            '       settings:',
+            '           requestTokenUri: i-dont-care'
+        ].join('\n')).then(function () {}, function (error) {
+            setTimeout(function () {
+                error.message.should.contain('OAuth 1.0 settings must have authorizationUri property');
+                error.problem_mark.line.should.be.equal(6);
+                error.problem_mark.column.should.be.equal(7);
+                done();
+            }, 0);
+        });
+    });
+
+    it('should report correct line/column when tokenCredentialsUri has not been specified for OAuth 1.0 security scheme', function (done) {
+        raml.load([
+            '#%RAML 0.8',
+            '---',
+            'title: Example',
+            'securitySchemes:',
+            '   - scheme1:',
+            '       type: OAuth 1.0',
+            '       settings:',
+            '           requestTokenUri: i-dont-care',
+            '           authorizationUri: i-dont-care'
+        ].join('\n')).then(function () {}, function (error) {
+            setTimeout(function () {
+                error.message.should.contain('OAuth 1.0 settings must have tokenCredentialsUri property');
+                error.problem_mark.line.should.be.equal(6);
+                error.problem_mark.column.should.be.equal(7);
+                done();
+            }, 0);
+        });
+    });
 });
