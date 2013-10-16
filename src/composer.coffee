@@ -10,6 +10,7 @@ class @Composer
 
   constructor: (@settings = { validate: true, transform: true }) ->
     @anchors = {}
+    @filesToRead = []
 
   check_node: ->
     # Drop the STREAM-START event.
@@ -24,7 +25,7 @@ class @Composer
   get_node: ->
     return @compose_document() unless @check_event events.StreamEndEvent
 
-  get_single_node: (settings = @settings) ->
+  getYamlRoot: ->
     # Drop the STREAM-START event.
     @get_event()
 
@@ -41,23 +42,26 @@ class @Composer
     # Drop the STREAM-END event.
     @get_event()
 
+    return document
+
+  composeRamlTree: (node, settings)=>
     if settings.validate or settings.transform
-      @load_schemas document
-      @load_traits document
-      @load_types document
-      @load_security_schemes document
+      @load_schemas node
+      @load_traits node
+      @load_types node
+      @load_security_schemes node
 
     if settings.validate
-      @validate_document document
+      @validate_document node
 
     if settings.transform
-      @apply_types document
-      @apply_traits document
-      @apply_schemas document
-      @apply_protocols document
-      @join_resources document
+      @apply_types node
+      @apply_traits node
+      @apply_schemas node
+      @apply_protocols node
+      @join_resources node
 
-    return document
+    return node
 
   compose_document: ->
     # Drop the DOCUMENT-START event.
@@ -71,6 +75,9 @@ class @Composer
 
     @anchors = {}
     return node
+
+  getPendingFilesList: ->
+    return @filesToRead
 
   compose_node: (parent, index) ->
     if @check_event events.AliasEvent
@@ -90,7 +97,7 @@ class @Composer
 
     @descend_resolver parent, index
     if @check_event events.ScalarEvent
-      node = @compose_scalar_node anchor
+      node = @compose_scalar_node anchor, parent, index
     else if @check_event events.SequenceStartEvent
       node = @compose_sequence_node anchor
     else if @check_event events.MappingStartEvent
@@ -106,9 +113,10 @@ class @Composer
     @anchors[anchor] = node if anchor isnt null
     return node
 
-  compose_scalar_node: (anchor) ->
+  compose_scalar_node: (anchor, parent, key) ->
     event = @get_event()
     tag = event.tag
+    node = {}
 
     if tag is null or tag is '!'
       tag = @resolve nodes.ScalarNode, event.value, event.implicit
@@ -117,21 +125,31 @@ class @Composer
       if event.value.match(/^\s*$/)
         throw new exports.ComposerError 'while composing scalar out of !include', null, "file name/URL cannot be null", event.start_mark
 
-      if @src?
-        event.value = require('url').resolve(@src, event.value)
-
       if @isInIncludeTagsStack(event.value)
         throw new exports.ComposerError 'while composing scalar out of !include', null, "detected circular !include of #{event.value}", event.start_mark
 
       extension = event.value.split(".").pop()
       if extension in ['yaml', 'yml', 'raml']
+        fileType = 'fragment'
         raml.start_mark = event.start_mark
-        return raml.composeFile(event.value, {validate: false, transform: false} , @)
+      else
+        raml.start_mark = event.start_mark
+        fileType = 'scalar'
 
-      raml.start_mark = event.start_mark
-      node = new nodes.ScalarNode 'tag:yaml.org,2002:str', raml.readFile(event.value), event.start_mark, event.end_mark, event.style
+      @filesToRead.push({
+        targetUri: event.value,
+        type: fileType,
+        parentNode: parent,
+        parentKey: key,
+        event: event,
+        includingContext: @src,
+        targetFileUri: event.value
+      })
+      node = undefined
+
     else
       node = new nodes.ScalarNode tag, event.value, event.start_mark, event.end_mark, event.style
+
     @anchors[anchor] = node if anchor isnt null
     return node
 
@@ -167,7 +185,9 @@ class @Composer
       unless util.isScalar(item_key)
         throw new exports.ComposerError 'while composing mapping key', null, "only scalar map keys are allowed in RAML" , item_key.start_mark
       item_value = @compose_node node, item_key
-      node.value.push [item_key, item_value]
+      # if item_value us undefined, then the key is added derefed
+      node.value.push [item_key, item_value] unless item_value is undefined
+
     end_event = @get_event()
     node.end_mark = end_event.end_mark
     return node
