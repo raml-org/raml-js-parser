@@ -7803,116 +7803,6 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 })(require("__browserify_buffer").Buffer)
 },{"./errors":1,"./nodes":13,"./util":4,"__browserify_buffer":14}],16:[function(require,module,exports){
 (function() {
-  var MarkedYAMLError, nodes, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  /*
-  The Traits throws these.
-  */
-
-
-  this.JoinError = (function(_super) {
-    __extends(JoinError, _super);
-
-    function JoinError() {
-      _ref = JoinError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return JoinError;
-
-  })(MarkedYAMLError);
-
-  /*
-  The Joiner class groups resources under resource property and groups methods under operations property
-  */
-
-
-  this.Joiner = (function() {
-    function Joiner() {}
-
-    Joiner.prototype.join_resources = function(node, call) {
-      var resources, resourcesArray, resourcesName, resourcesValue,
-        _this = this;
-      if (call == null) {
-        call = 0;
-      }
-      resources = [];
-      if (node != null ? node.value : void 0) {
-        resources = node.value.filter(function(childNode) {
-          var _ref1;
-          return (_ref1 = childNode[0]) != null ? _ref1.value.match(/^\//) : void 0;
-        });
-      }
-      resourcesArray = [];
-      if (resources.length > 0) {
-        if (node != null ? node.value : void 0) {
-          node.value = node.value.filter(function(childNode) {
-            return !childNode[0].value.match(/^\//);
-          });
-        }
-        resourcesName = new nodes.ScalarNode('tag:yaml.org,2002:str', 'resources', resources[0][0].start_mark, resources[resources.length - 1][1].end_mark);
-        resources.forEach(function(resource) {
-          var relativeUriName, relativeUriValue;
-          relativeUriName = new nodes.ScalarNode('tag:yaml.org,2002:str', 'relativeUri', resource[0].start_mark, resource[1].end_mark);
-          relativeUriValue = new nodes.ScalarNode('tag:yaml.org,2002:str', resource[0].value, resource[0].start_mark, resource[1].end_mark);
-          if (resource[1].tag === "tag:yaml.org,2002:null") {
-            resource[1] = new nodes.MappingNode('tag:yaml.org,2002:map', [], resource[0].start_mark, resource[1].end_mark);
-          }
-          resource[1].value.push([relativeUriName, relativeUriValue]);
-          resourcesArray.push(resource[1]);
-          _this.join_methods(resource[1]);
-          return _this.join_resources(resource[1], ++call);
-        });
-        resourcesValue = new nodes.SequenceNode('tag:yaml.org,2002:seq', resourcesArray, resources[0][0].start_mark, resources[resources.length - 1][1].end_mark);
-        return node.value.push([resourcesName, resourcesValue]);
-      }
-    };
-
-    Joiner.prototype.join_methods = function(node) {
-      var methods, methodsArray, methodsName, methodsValue,
-        _this = this;
-      methods = [];
-      if (node && node.value) {
-        methods = node.value.filter(function(childNode) {
-          var _ref1;
-          return _this.isHttpMethod((_ref1 = childNode[0]) != null ? _ref1.value : void 0);
-        });
-      }
-      methodsArray = [];
-      if (methods.length > 0) {
-        node.value = node.value.filter(function(childNode) {
-          return !_this.isHttpMethod(childNode[0].value);
-        });
-        methodsName = new nodes.ScalarNode('tag:yaml.org,2002:str', 'methods', methods[0][0].start_mark, methods[methods.length - 1][1].end_mark);
-        methods.forEach(function(method) {
-          var methodName, methodValue;
-          methodName = new nodes.ScalarNode('tag:yaml.org,2002:str', 'method', method[0].start_mark, method[1].end_mark);
-          methodValue = new nodes.ScalarNode('tag:yaml.org,2002:str', method[0].value, method[0].start_mark, method[1].end_mark);
-          if (method[1].tag === 'tag:yaml.org,2002:null') {
-            method[1] = new nodes.MappingNode('tag:yaml.org,2002:map', [], method[1].start_mark, method[1].end_mark);
-          }
-          method[1].value.push([methodName, methodValue]);
-          return methodsArray.push(method[1]);
-        });
-        methodsValue = new nodes.SequenceNode('tag:yaml.org,2002:seq', methodsArray, methods[0][0].start_mark, methods[methods.length - 1][1].end_mark);
-        return node.value.push([methodsName, methodsValue]);
-      }
-    };
-
-    return Joiner;
-
-  })();
-
-}).call(this);
-
-},{"./errors":1,"./nodes":13}],17:[function(require,module,exports){
-(function() {
   var composer, construct, joiner, parser, protocols, reader, resolver, scanner, schemas, securitySchemes, traits, transformations, types, util, validator;
 
   util = require('./util');
@@ -8026,7 +7916,117 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./protocols":26,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./securitySchemes":27,"./traits":23,"./transformations":28,"./util":4,"./validator":22}],13:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./joiner":22,"./parser":19,"./protocols":26,"./reader":17,"./resolver":20,"./resourceTypes":24,"./scanner":18,"./schemas":25,"./securitySchemes":27,"./traits":23,"./transformations":28,"./util":4,"./validator":21}],22:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, nodes, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  /*
+  The Traits throws these.
+  */
+
+
+  this.JoinError = (function(_super) {
+    __extends(JoinError, _super);
+
+    function JoinError() {
+      _ref = JoinError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return JoinError;
+
+  })(MarkedYAMLError);
+
+  /*
+  The Joiner class groups resources under resource property and groups methods under operations property
+  */
+
+
+  this.Joiner = (function() {
+    function Joiner() {}
+
+    Joiner.prototype.join_resources = function(node, call) {
+      var resources, resourcesArray, resourcesName, resourcesValue,
+        _this = this;
+      if (call == null) {
+        call = 0;
+      }
+      resources = [];
+      if (node != null ? node.value : void 0) {
+        resources = node.value.filter(function(childNode) {
+          var _ref1;
+          return (_ref1 = childNode[0]) != null ? _ref1.value.match(/^\//) : void 0;
+        });
+      }
+      resourcesArray = [];
+      if (resources.length > 0) {
+        if (node != null ? node.value : void 0) {
+          node.value = node.value.filter(function(childNode) {
+            return !childNode[0].value.match(/^\//);
+          });
+        }
+        resourcesName = new nodes.ScalarNode('tag:yaml.org,2002:str', 'resources', resources[0][0].start_mark, resources[resources.length - 1][1].end_mark);
+        resources.forEach(function(resource) {
+          var relativeUriName, relativeUriValue;
+          relativeUriName = new nodes.ScalarNode('tag:yaml.org,2002:str', 'relativeUri', resource[0].start_mark, resource[1].end_mark);
+          relativeUriValue = new nodes.ScalarNode('tag:yaml.org,2002:str', resource[0].value, resource[0].start_mark, resource[1].end_mark);
+          if (resource[1].tag === "tag:yaml.org,2002:null") {
+            resource[1] = new nodes.MappingNode('tag:yaml.org,2002:map', [], resource[0].start_mark, resource[1].end_mark);
+          }
+          resource[1].value.push([relativeUriName, relativeUriValue]);
+          resourcesArray.push(resource[1]);
+          _this.join_methods(resource[1]);
+          return _this.join_resources(resource[1], ++call);
+        });
+        resourcesValue = new nodes.SequenceNode('tag:yaml.org,2002:seq', resourcesArray, resources[0][0].start_mark, resources[resources.length - 1][1].end_mark);
+        return node.value.push([resourcesName, resourcesValue]);
+      }
+    };
+
+    Joiner.prototype.join_methods = function(node) {
+      var methods, methodsArray, methodsName, methodsValue,
+        _this = this;
+      methods = [];
+      if (node && node.value) {
+        methods = node.value.filter(function(childNode) {
+          var _ref1;
+          return _this.isHttpMethod((_ref1 = childNode[0]) != null ? _ref1.value : void 0);
+        });
+      }
+      methodsArray = [];
+      if (methods.length > 0) {
+        node.value = node.value.filter(function(childNode) {
+          return !_this.isHttpMethod(childNode[0].value);
+        });
+        methodsName = new nodes.ScalarNode('tag:yaml.org,2002:str', 'methods', methods[0][0].start_mark, methods[methods.length - 1][1].end_mark);
+        methods.forEach(function(method) {
+          var methodName, methodValue;
+          methodName = new nodes.ScalarNode('tag:yaml.org,2002:str', 'method', method[0].start_mark, method[1].end_mark);
+          methodValue = new nodes.ScalarNode('tag:yaml.org,2002:str', method[0].value, method[0].start_mark, method[1].end_mark);
+          if (method[1].tag === 'tag:yaml.org,2002:null') {
+            method[1] = new nodes.MappingNode('tag:yaml.org,2002:map', [], method[1].start_mark, method[1].end_mark);
+          }
+          method[1].value.push([methodName, methodValue]);
+          return methodsArray.push(method[1]);
+        });
+        methodsValue = new nodes.SequenceNode('tag:yaml.org,2002:seq', methodsArray, methods[0][0].start_mark, methods[methods.length - 1][1].end_mark);
+        return node.value.push([methodsName, methodsValue]);
+      }
+    };
+
+    return Joiner;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./nodes":13}],13:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -8316,7 +8316,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],20:[function(require,module,exports){
+},{"./errors":1}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, events, tokens, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9027,7 +9027,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./util":4,"url":7}],18:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4,"url":7}],17:[function(require,module,exports){
 (function() {
   var Mark, YAMLError, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9141,7 +9141,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],21:[function(require,module,exports){
+},{"./errors":1}],20:[function(require,module,exports){
 (function() {
   var YAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -9535,7 +9535,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./util":4}],19:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4}],18:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11713,8 +11713,6 @@ function decode(str) {
     }
     if (fileInfo.type === 'fragment') {
       return _this.readFileAsync(fileUri).then(function(result) {
-        var _ref1;
-        console.log(loader != null ? (_ref1 = loader.parent) != null ? _ref1.src : void 0 : void 0);
         return _this.compose(result, fileUri, {
           validate: false,
           transform: false,
@@ -11834,7 +11832,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":29}],28:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":16,"./nodes":13,"./parser":19,"./reader":17,"./resolver":20,"./scanner":18,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":29}],28:[function(require,module,exports){
 (function() {
   var nodes, uritemplate, url, util,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -12347,7 +12345,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./nodes":13,"./util":4,"uritemplate":30,"url":7}],22:[function(require,module,exports){
+},{"./nodes":13,"./util":4,"uritemplate":30,"url":7}],21:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, traits, uritemplate, url, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -17729,5 +17727,5 @@ function reduced(list) {
   return out
 }
 
-},{}]},{},[10,12,15,1,2,16,17,13,20,26,11,18,21,24,19,25,27,3,23,28,4,22,6])
+},{}]},{},[10,12,15,1,2,22,16,13,19,26,11,17,20,24,18,25,27,3,23,28,4,21,6])
 ;

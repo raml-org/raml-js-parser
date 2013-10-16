@@ -99,7 +99,6 @@ getPendingFile = (loader, fileInfo) =>
   if fileInfo.type is 'fragment'
     return @readFileAsync(fileUri)
     .then (result) =>
-      console.log loader?.parent?.src
       return @compose(result, fileUri, { validate: false, transform: false, compose: true }, loader)
     .then (value) =>
       return appendNewNodeToParent(node, key, value)
