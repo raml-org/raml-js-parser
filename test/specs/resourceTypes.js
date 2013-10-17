@@ -146,4 +146,19 @@ describe('Resource Types', function () {
             ]
         }).and.notify(done);
     });
+
+    it('should not crash and report proper error if injected resource type does not exist', function (done) {
+        raml.load([
+            '#%RAML 0.8',
+            '---',
+            'title: Title',
+            'resourceTypes:',
+            '   - type1:',
+            '       type: <<typeName>>',
+            '/:',
+            '   type:',
+            '       type1:',
+            '           typeName: type2'
+        ].join('\n')).should.be.rejected.with('there is no resource type named type2').and.notify(done);
+    });
 });
