@@ -72,12 +72,12 @@ class @Traits
   apply_trait: (resourceUri, method, useKey) ->
     traitName = @key_or_value useKey
     unless trait = @get_trait traitName
-      throw new exports.TraitError 'while aplying trait', null, "there is no trait named #{traitName}", useKey.start_mark
+      throw new exports.TraitError 'while applying trait', null, "there is no trait named #{traitName}", useKey.start_mark
 
     plainParameters = @get_parameters_from_is_key resourceUri, method[0].value, useKey
     temp = trait.cloneForTrait()
 
-    # by aplying the parameter mapping first, we allow users to rename things in the trait,
+    # by applying the parameter mapping first, we allow users to rename things in the trait,
     # and then merge it with the resource
 
     @apply_parameters temp, plainParameters, useKey
@@ -93,7 +93,7 @@ class @Traits
 
     for parameterName of parameters
       unless usedParameters[parameterName]
-        throw new exports.ParameterError 'while aplying parameters', null, "unused parameter: #{parameterName}", useKey.start_mark
+        throw new exports.ParameterError 'while applying parameters', null, "unused parameter: #{parameterName}", useKey.start_mark
 
   _apply_parameters: (resource, parameters, useKey, usedParameters) ->
     unless resource
@@ -106,7 +106,7 @@ class @Traits
           [parameterName, method] = parameterName.split(/\s*\|\s*/)
 
           unless parameterName of parameters
-            throw new exports.ParameterError 'while aplying parameters', null, "value was not provided for parameter: #{parameterName}", useKey.start_mark
+            throw new exports.ParameterError 'while applying parameters', null, "value was not provided for parameter: #{parameterName}", useKey.start_mark
 
           value = parameters[parameterName]
           usedParameters[parameterName] = true
@@ -142,8 +142,8 @@ class @Traits
     parameters = @value_or_undefined typeKey
     parameters[0][1].value.forEach (parameter) =>
       unless util.isScalar(parameter[1])
-        throw new exports.TraitError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
+        throw new exports.TraitError 'while applying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
       if parameter[1].value in [ "methodName", "resourcePath", "resourcePathName"]
-        throw new exports.TraitError 'while aplying parameters', null, 'invalid parameter name "methodName", "resourcePath" are reserved parameter names "resourcePathName"', parameter[1].start_mark
+        throw new exports.TraitError 'while applying parameters', null, 'invalid parameter name "methodName", "resourcePath" are reserved parameter names "resourcePathName"', parameter[1].start_mark
       result[parameter[0].value] = parameter[1].value
     return result

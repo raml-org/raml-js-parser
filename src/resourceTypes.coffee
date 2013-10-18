@@ -17,16 +17,16 @@ class @ResourceTypes
   # Loading is extra careful because it is done before validation (so it can be used for validation)
   load_types: (node) =>
     @load_default_media_type(node)
-    if @has_property node, "resourceTypes"
-      allTypes = @property_value node, "resourceTypes"
-      if allTypes and typeof allTypes is "object"
+    if @has_property node, 'resourceTypes'
+      allTypes = @property_value node, 'resourceTypes'
+      if allTypes and typeof allTypes is 'object'
         allTypes.forEach (type_item) =>
-          if type_item and typeof type_item is "object" and typeof type_item.value is "object"
+          if type_item and typeof type_item is 'object' and typeof type_item.value is 'object'
             type_item.value.forEach (type) =>
               @declaredTypes[type[0].value] = type
 
   has_types: (node) =>
-    if Object.keys(@declaredTypes).length == 0 and @has_property node, "resourceTypes"
+    if Object.keys(@declaredTypes).length == 0 and @has_property node, 'resourceTypes'
       @load_types node
     return Object.keys(@declaredTypes).length > 0
 
@@ -40,8 +40,8 @@ class @ResourceTypes
       resources.forEach (resource) =>
         @apply_default_media_type_to_resource resource[1]
 
-        if @has_property resource[1], "type"
-          type = @get_property resource[1], "type"
+        if @has_property resource[1], 'type'
+          type = @get_property resource[1], 'type'
           @apply_type resourceUri + resource[0].value, resource, type
         @apply_types resource[1], resourceUri + resource[0].value
     else
@@ -76,7 +76,7 @@ class @ResourceTypes
       if parentTypeName of compiledTypes
         pathToCircularRef = typesToApply.concat(parentTypeName).join(' -> ')
         childTypeProperty = @get_type(childTypeName)[0]
-        throw new exports.ResourceTypeError 'while aplying resourceTypes', null, "circular reference of \"#{parentTypeName}\" has been detected: #{pathToCircularRef}", childTypeProperty.start_mark
+        throw new exports.ResourceTypeError 'while applying resourceTypes', null, "circular reference of \"#{parentTypeName}\" has been detected: #{pathToCircularRef}", childTypeProperty.start_mark
 
       # apply parameters
       parentType = @apply_parameters_to_type resourceUri, parentTypeName, typeKey
@@ -103,9 +103,14 @@ class @ResourceTypes
     return result
 
   apply_parameters_to_type: (resourceUri, typeName, typeKey) =>
-    type = (@get_type typeName)[1].clone()
+    unless type = @get_type typeName
+      throw new exports.ResourceTypeError 'while applying parameters', null, "there is no resource type named #{typeName}", typeKey.start_mark
+
+    type       = type[1].clone()
     parameters = @_get_parameters_from_type_key resourceUri, typeKey
+
     @apply_parameters type, parameters, typeKey
+
     return type
 
   _get_parameters_from_type_key: (resourceUri, typeKey) ->
@@ -117,8 +122,8 @@ class @ResourceTypes
     unless util.isNull parameters[0][1]
       parameters[0][1].value.forEach (parameter) =>
         unless  util.isScalar(parameter[1])
-          throw new exports.ResourceTypeError 'while aplying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
+          throw new exports.ResourceTypeError 'while applying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
         if parameter[1].value in [ "methodName", "resourcePath", "resourcePathName"]
-          throw new exports.ResourceTypeError 'while aplying parameters', null, 'invalid parameter name "methodName", "resourcePath" are reserved parameter names "resourcePathName"', parameter[1].start_mark
+          throw new exports.ResourceTypeError 'while applying parameters', null, 'invalid parameter name "methodName", "resourcePath" are reserved parameter names "resourcePathName"', parameter[1].start_mark
         result[parameter[0].value] = parameter[1].value
     return result
