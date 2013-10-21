@@ -1,20 +1,23 @@
-"use strict";
+/* global RAML, describe, it */
+
+'use strict';
 
 if (typeof window === 'undefined') {
-  var raml = require('../../lib/raml.js')
-  var chai = require('chai')
-    , expect = chai.expect
-    , should = chai.should();
-  var chaiAsPromised = require("chai-as-promised");
+  var raml           = require('../../lib/raml.js');
+  var chai           = require('chai');
+  var chaiAsPromised = require('chai-as-promised');
+
+  chai.should();
   chai.use(chaiAsPromised);
 } else {
-  var raml = RAML.Parser;
+  var raml           = RAML.Parser;
+
   chai.should();
 }
 
-describe('Duplicated properties', function (){
-  describe('in Security Schemes', function(){
-    it.skip('should fail if two security schemes have the same name', function(done){
+describe('Duplicated properties', function () {
+  describe('in Security Schemes', function () {
+    it.skip('should fail if two security schemes have the same name', function (done) {
       var definition = [
         '#%RAML 0.8',
         'title: some API',
@@ -27,7 +30,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/security scheme with the same name already exists: 'scheme1'/).and.notify(done);
     });
-    it('should fail if a security scheme repeats the type property', function(done){
+
+    it('should fail if a security scheme repeats the type property', function (done) {
       var definition = [
         '#%RAML 0.8',
         'title: some API',
@@ -39,7 +43,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used in security scheme: 'type'/).and.notify(done);
     });
-    it('should fail if a OAuth 2.0 settings repeats a known property', function(done){
+
+    it('should fail if a OAuth 2.0 settings repeats a known property', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -57,7 +62,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/setting with the same name already exists: 'authorizationUri'/).and.notify(done);
     });
-    it('should fail if a OAuth 2.0 settings repeats an unknown property', function(done){
+
+    it('should fail if a OAuth 2.0 settings repeats an unknown property', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -76,7 +82,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/setting with the same name already exists: 'tokenTTL'/).and.notify(done);
     });
-    it('should fail if a OAuth 1.0 settings repeats a known property', function(done){
+
+    it('should fail if a OAuth 1.0 settings repeats a known property', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -94,7 +101,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/setting with the same name already exists: 'requestTokenUri'/).and.notify(done);
     });
-    it('should fail if a OAuth 1.0 settings repeats an unknown property', function(done){
+
+    it('should fail if a OAuth 1.0 settings repeats an unknown property', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -114,8 +122,9 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/setting with the same name already exists: 'requestTimeout'/).and.notify(done);
     });
   });
-  describe('in URI parameters', function(){
-    it('should fail if there are repeated base URI parameter names at the root level', function(done){
+
+  describe('in URI parameters', function () {
+    it('should fail if there are repeated base URI parameter names at the root level', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -128,7 +137,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/URI parameter with the same name already exists: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a base URI parameter at the root level', function(done){
+
+    it('should fail if there are repeated properties in a base URI parameter at the root level', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -142,7 +152,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated base URI parameter names in a resource', function(done){
+
+    it('should fail if there are repeated base URI parameter names in a resource', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -156,7 +167,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/URI parameter with the same name already exists: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a base URI parameter in a resource', function(done){
+
+    it('should fail if there are repeated properties in a base URI parameter in a resource', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -171,7 +183,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated URI parameter names in a resource', function(done){
+
+    it('should fail if there are repeated URI parameter names in a resource', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -185,7 +198,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/URI parameter with the same name already exists: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a URI parameter in a resource', function(done){
+
+    it('should fail if there are repeated properties in a URI parameter in a resource', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -201,8 +215,9 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
   });
-  describe('in resource type names', function(){
-    it.skip('should fail if there are two resource types with the same name in the same list', function(done){
+
+  describe('in resource type names', function () {
+    it.skip('should fail if there are two resource types with the same name in the same list', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -215,7 +230,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/Resource type with the same name already exists: 'type1'/).and.notify(done);
     });
-    it.skip('should fail if there are two resource types with the same name in separate lists', function(done){
+
+    it.skip('should fail if there are two resource types with the same name in separate lists', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -230,8 +246,9 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/Resource type with the same name already exists: 'type1'/).and.notify(done);
     });
   });
-  describe('in traits names', function(){
-    it.skip('should fail if there are two traits with the same name in the same list', function(done){
+
+  describe('in traits names', function () {
+    it.skip('should fail if there are two traits with the same name in the same list', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -244,7 +261,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/Trait with the same name already exists: 'trait1'/).and.notify(done);
     });
-    it.skip('should fail if there are two resource types with the same name in separate lists', function(done){
+
+    it.skip('should fail if there are two resource types with the same name in separate lists', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -259,8 +277,9 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/Trait with the same name already exists: 'trait1'/).and.notify(done);
     });
   });
-  describe('in root', function(){
-    it('should fail if there are repeated root properties', function(done){
+
+  describe('in root', function () {
+    it('should fail if there are repeated root properties', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -271,8 +290,9 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/root property already used: 'title'/).and.notify(done);
     });
   });
-  describe('in documentation', function(){
-    it('should fail if there are repeated doc section titles', function(done){
+
+  describe('in documentation', function () {
+    it('should fail if there are repeated doc section titles', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -294,7 +314,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'title'/).and.notify(done);
     });
-    it('should fail if there are repeated doc section content', function(done){
+
+    it('should fail if there are repeated doc section content', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -308,8 +329,9 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/property already used: 'content'/).and.notify(done);
     });
   });
-  describe('in resource names', function(){
-    it('should fail if there are repeated resources in the document', function(done){
+
+  describe('in resource names', function () {
+    it('should fail if there are repeated resources in the document', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -320,7 +342,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/resource already declared: '\/resource'/).and.notify(done);
     });
-    it('should fail if there are repeated resources in a resource', function(done){
+
+    it('should fail if there are repeated resources in a resource', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -334,8 +357,9 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/resource already declared: '\/resource'/).and.notify(done);
     });
   });
-  describe('in method names', function(){
-    it('should fail if there are repeated methods in a resource', function(done){
+
+  describe('in method names', function () {
+    it('should fail if there are repeated methods in a resource', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -349,7 +373,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/method already declared: 'get'/).and.notify(done);
     });
-    it('should fail if there are repeated methods in a resource type', function(done){
+
+    it('should fail if there are repeated methods in a resource type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -364,7 +389,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/method already declared: 'get'/).and.notify(done);
     });
-    it('should fail if there are repeated methods in a resource type first declaration optional', function(done){
+
+    it('should fail if there are repeated methods in a resource type first declaration optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -379,7 +405,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/method already declared: 'get'/).and.notify(done);
     });
-    it('should fail if there are repeated methods in a resource type second declaration optional', function(done){
+
+    it('should fail if there are repeated methods in a resource type second declaration optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -394,7 +421,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/method already declared: 'get'/).and.notify(done);
     });
-    it('should fail if there are repeated methods in a resource type both declarations optional', function(done){
+
+    it('should fail if there are repeated methods in a resource type both declarations optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -409,7 +437,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/method already declared: 'get'/).and.notify(done);
     });
-    it('should fail if there are repeated methods in a resource type both declarations parameters', function(done){
+
+    it('should fail if there are repeated methods in a resource type both declarations parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -425,8 +454,9 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/property already used: '<<retieveMethodName>>'/).and.notify(done);
     });
   });
-  describe('in a resource', function(){
-    it('should fail if there are repeated properties in a resource', function(done){
+
+  describe('in a resource', function () {
+    it('should fail if there are repeated properties in a resource', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -438,7 +468,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'description'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a resource type', function(done){
+
+    it('should fail if there are repeated properties in a resource type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -451,7 +482,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'description'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a resource type first declaration optional', function(done){
+
+    it('should fail if there are repeated properties in a resource type first declaration optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -464,7 +496,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'description'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a resource type second declaration optional', function(done){
+
+    it('should fail if there are repeated properties in a resource type second declaration optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -477,7 +510,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'description'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a resource type both declarations optional', function(done){
+
+    it('should fail if there are repeated properties in a resource type both declarations optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -490,10 +524,10 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'description'/).and.notify(done);
     });
-
   });
-  describe('in a method', function(){
-    it('should fail if there are repeated properties in a method', function(done){
+
+  describe('in a method', function () {
+    it('should fail if there are repeated properties in a method', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -506,7 +540,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'body'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a trait', function(done){
+
+    it('should fail if there are repeated properties in a trait', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -519,7 +554,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'body'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a trait first declararion optional', function(done){
+
+    it('should fail if there are repeated properties in a trait first declararion optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -532,7 +568,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'body'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a trait second declaration optional', function(done){
+
+    it('should fail if there are repeated properties in a trait second declaration optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -545,7 +582,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'body'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a trait both declarations optional', function(done){
+
+    it('should fail if there are repeated properties in a trait both declarations optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -558,7 +596,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'body'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a trait both declarations parameters', function(done){
+
+    it('should fail if there are repeated properties in a trait both declarations parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -571,7 +610,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: '<<propertyName>>'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a method in a resource type', function(done){
+
+    it('should fail if there are repeated properties in a method in a resource type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -585,7 +625,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'body'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a method in a resource type first declararion optional', function(done){
+
+    it('should fail if there are repeated properties in a method in a resource type first declararion optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -599,7 +640,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'body'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a method in a resource type second declaration optional', function(done){
+
+    it('should fail if there are repeated properties in a method in a resource type second declaration optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -613,7 +655,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'body'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a method in a resource type both declarations optional', function(done){
+
+    it('should fail if there are repeated properties in a method in a resource type both declarations optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -627,7 +670,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'body'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a method in a resource type both declarations parameters', function(done){
+
+    it('should fail if there are repeated properties in a method in a resource type both declarations parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -642,8 +686,9 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/property already used: '<<propertyName>>'/).and.notify(done);
     });
   });
-  describe('in response codes', function(){
-    it('should fail if there are repeated response codes in a method', function(done){
+
+  describe('in response codes', function () {
+    it('should fail if there are repeated response codes in a method', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -659,7 +704,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/response code already used: '200'/).and.notify(done);
     });
-    it('should fail if there are repeated response codes in a trait', function(done){
+
+    it('should fail if there are repeated response codes in a trait', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -675,7 +721,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/response code already used: '200'/).and.notify(done);
     });
-    it('should fail if there are repeated response codes in a trait first declararion optional', function(done){
+
+    it('should fail if there are repeated response codes in a trait first declararion optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -691,7 +738,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/response code already used: '200'/).and.notify(done);
     });
-    it('should fail if there are repeated response codes in a trait second declaration optional', function(done){
+
+    it('should fail if there are repeated response codes in a trait second declaration optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -707,7 +755,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/response code already used: '200'/).and.notify(done);
     });
-    it('should fail if there are repeated response codes in a trait both declarations optional', function(done){
+
+    it('should fail if there are repeated response codes in a trait both declarations optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -723,7 +772,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/response code already used: '200'/).and.notify(done);
     });
-    it('should fail if there are repeated response codes in a trait both declarations parameters', function(done){
+
+    it('should fail if there are repeated response codes in a trait both declarations parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -739,7 +789,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/response code already used: '<<successCode>>'/).and.notify(done);
     });
-    it('should fail if there are repeated response codes in a method in a resource type', function(done){
+
+    it('should fail if there are repeated response codes in a method in a resource type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -756,7 +807,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/response code already used: '200'/).and.notify(done);
     });
-    it('should fail if there are repeated response codes in a method in a resource type first declararion optional', function(done){
+
+    it('should fail if there are repeated response codes in a method in a resource type first declararion optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -773,7 +825,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/response code already used: '200'/).and.notify(done);
     });
-    it('should fail if there are repeated response codes in a method in a resource type second declaration optional', function(done){
+
+    it('should fail if there are repeated response codes in a method in a resource type second declaration optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -790,7 +843,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/response code already used: '200'/).and.notify(done);
     });
-    it('should fail if there are repeated response codes in a method in a resource type both declarations optional', function(done){
+
+    it('should fail if there are repeated response codes in a method in a resource type both declarations optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -807,7 +861,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/response code already used: '200'/).and.notify(done);
     });
-    it('should fail if there are repeated response codes in a method in a resource type both declarations parameters', function(done){
+
+    it('should fail if there are repeated response codes in a method in a resource type both declarations parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -825,8 +880,9 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/response code already used: '<<successCode>>'/).and.notify(done);
     });
   });
-  describe('in responses', function(){
-    it('should fail if there are repeated properties in a response in a method', function(done){
+
+  describe('in responses', function () {
+    it('should fail if there are repeated properties in a response in a method', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -841,7 +897,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'description'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a response in a trait', function(done){
+
+    it('should fail if there are repeated properties in a response in a trait', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -856,7 +913,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'description'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a response in a trait first declararion optional', function(done){
+
+    it('should fail if there are repeated properties in a response in a trait first declararion optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -871,7 +929,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'description'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a response in a trait second declaration optional', function(done){
+
+    it('should fail if there are repeated properties in a response in a trait second declaration optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -886,7 +945,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'description'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a response in a trait both declarations optional', function(done){
+
+    it('should fail if there are repeated properties in a response in a trait both declarations optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -901,7 +961,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'description'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a response in a trait both declarations parameters', function(done){
+
+    it('should fail if there are repeated properties in a response in a trait both declarations parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -916,7 +977,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: '<<somePropertyName>>'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a response in a method in a resource type', function(done){
+
+    it('should fail if there are repeated properties in a response in a method in a resource type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -932,7 +994,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'description'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a response in a method in a resource type first declararion optional', function(done){
+
+    it('should fail if there are repeated properties in a response in a method in a resource type first declararion optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -948,7 +1011,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'description'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a response in a method in a resource type second declaration optional', function(done){
+
+    it('should fail if there are repeated properties in a response in a method in a resource type second declaration optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -964,7 +1028,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'description'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a response in a method in a resource type both declarations optional', function(done){
+
+    it('should fail if there are repeated properties in a response in a method in a resource type both declarations optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -980,7 +1045,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'description'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a response in a method in a resource type both declarations parameters', function(done){
+
+    it('should fail if there are repeated properties in a response in a method in a resource type both declarations parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -997,8 +1063,9 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/property already used: '<<someParam>>'/).and.notify(done);
     });
   });
-  describe('in query parameters', function(){
-    it('should fail if there are repeated query parameter names in a method', function(done){
+
+  describe('in query parameters', function () {
+    it('should fail if there are repeated query parameter names in a method', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1012,7 +1079,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated query parameter names in a trait', function(done){
+
+    it('should fail if there are repeated query parameter names in a trait', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1026,7 +1094,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated query parameter names in a trait first optional', function(done){
+
+    it('should fail if there are repeated query parameter names in a trait first optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1040,7 +1109,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated query parameter names in a trait second optional', function(done){
+
+    it('should fail if there are repeated query parameter names in a trait second optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1054,7 +1124,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated query parameter names in a trait both optional', function(done){
+
+    it('should fail if there are repeated query parameter names in a trait both optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1068,7 +1139,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated query parameter names in a trait both parameters', function(done){
+
+    it('should fail if there are repeated query parameter names in a trait both parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1082,7 +1154,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: '<<parameter>>'/).and.notify(done);
     });
-    it('should fail if there are repeated query parameter names in a resource type', function(done){
+
+    it('should fail if there are repeated query parameter names in a resource type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1097,7 +1170,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated query parameter names in a resource type first optional', function(done){
+
+    it('should fail if there are repeated query parameter names in a resource type first optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1112,7 +1186,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated query parameter names in a resource type second optional', function(done){
+
+    it('should fail if there are repeated query parameter names in a resource type second optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1127,7 +1202,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated query parameter names in a resource type both optional', function(done){
+
+    it('should fail if there are repeated query parameter names in a resource type both optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1142,7 +1218,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated query parameter names in a resource type both parameters', function(done){
+
+    it('should fail if there are repeated query parameter names in a resource type both parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1158,8 +1235,9 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/parameter name already used: '<<parameter>>'/).and.notify(done);
     });
   });
-  describe('in URI parameters', function(){
-    it('should fail if there are repeated properties in a URI parameter in a method', function(done){
+
+  describe('in URI parameters', function () {
+    it('should fail if there are repeated properties in a URI parameter in a method', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1174,7 +1252,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a URI parameter in a trait', function(done){
+
+    it('should fail if there are repeated properties in a URI parameter in a trait', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1189,7 +1268,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a URI parameter in a trait first optional', function(done){
+
+    it('should fail if there are repeated properties in a URI parameter in a trait first optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1204,7 +1284,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a URI parameter in a trait second optional', function(done){
+
+    it('should fail if there are repeated properties in a URI parameter in a trait second optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1219,7 +1300,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a URI parameter in a trait both optional', function(done){
+
+    it('should fail if there are repeated properties in a URI parameter in a trait both optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1234,7 +1316,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a URI parameter in a trait both parameters', function(done){
+
+    it('should fail if there are repeated properties in a URI parameter in a trait both parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1249,7 +1332,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: '<<someParameter>>'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a URI parameter in a resourceType', function(done){
+
+    it('should fail if there are repeated properties in a URI parameter in a resourceType', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1265,7 +1349,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a URI parameter in a resourceType first optional', function(done){
+
+    it('should fail if there are repeated properties in a URI parameter in a resourceType first optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1281,7 +1366,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a URI parameter in a resourceType second optional', function(done){
+
+    it('should fail if there are repeated properties in a URI parameter in a resourceType second optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1297,7 +1383,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a URI parameter in a resourceType both optional', function(done){
+
+    it('should fail if there are repeated properties in a URI parameter in a resourceType both optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1313,7 +1400,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a URI parameter in a resourceType both parameters', function(done){
+
+    it('should fail if there are repeated properties in a URI parameter in a resourceType both parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1330,8 +1418,9 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/parameter property already used: '<<someParameter>>'/).and.notify(done);
     });
   });
-  describe('form parameters', function(){
-    it('should fail if there are repeated form parameter names in a method with default Media Type', function(done){
+
+  describe('form parameters', function () {
+    it('should fail if there are repeated form parameter names in a method with default Media Type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1347,7 +1436,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a trait with default Media Type', function(done){
+
+    it('should fail if there are repeated form parameter names in a trait with default Media Type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1362,7 +1452,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a trait first optional with default Media Type', function(done){
+
+    it('should fail if there are repeated form parameter names in a trait first optional with default Media Type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1377,7 +1468,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a trait second optional with default Media Type', function(done){
+
+    it('should fail if there are repeated form parameter names in a trait second optional with default Media Type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1392,7 +1484,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a trait both optional with default Media Type', function(done){
+
+    it('should fail if there are repeated form parameter names in a trait both optional with default Media Type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1407,7 +1500,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a trait both parameters with default Media Type', function(done){
+
+    it('should fail if there are repeated form parameter names in a trait both parameters with default Media Type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1422,7 +1516,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: '<<parameter>>'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a resource type with default Media Type', function(done){
+
+    it('should fail if there are repeated form parameter names in a resource type with default Media Type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1438,7 +1533,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a resource type first optional with default Media Type', function(done){
+
+    it('should fail if there are repeated form parameter names in a resource type first optional with default Media Type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1454,7 +1550,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a resource type second optional with default Media Type', function(done){
+
+    it('should fail if there are repeated form parameter names in a resource type second optional with default Media Type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1470,7 +1567,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a resource type both optional with default Media Type', function(done){
+
+    it('should fail if there are repeated form parameter names in a resource type both optional with default Media Type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1486,7 +1584,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a resource type both parameters with default Media Type', function(done){
+
+    it('should fail if there are repeated form parameter names in a resource type both parameters with default Media Type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1502,7 +1601,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: '<<parameter>>'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a method with content type', function(done){
+
+    it('should fail if there are repeated form parameter names in a method with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1518,7 +1618,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a trait with content type', function(done){
+
+    it('should fail if there are repeated form parameter names in a trait with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1534,7 +1635,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a trait first optional with content type', function(done){
+
+    it('should fail if there are repeated form parameter names in a trait first optional with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1550,7 +1652,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a trait second optional with content type', function(done){
+
+    it('should fail if there are repeated form parameter names in a trait second optional with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1566,7 +1669,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a trait both optional with content type', function(done){
+
+    it('should fail if there are repeated form parameter names in a trait both optional with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1582,7 +1686,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a trait both parameters with content type', function(done){
+
+    it('should fail if there are repeated form parameter names in a trait both parameters with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1598,7 +1703,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: '<<parameter>>'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a resource type with content type', function(done){
+
+    it('should fail if there are repeated form parameter names in a resource type with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1615,7 +1721,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a resource type first optional with content type', function(done){
+
+    it('should fail if there are repeated form parameter names in a resource type first optional with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1632,7 +1739,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a resource type second optional with content type', function(done){
+
+    it('should fail if there are repeated form parameter names in a resource type second optional with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1649,7 +1757,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a resource type both optional with content type', function(done){
+
+    it('should fail if there are repeated form parameter names in a resource type both optional with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1666,7 +1775,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter name already used: 'param1'/).and.notify(done);
     });
-    it('should fail if there are repeated form parameter names in a resource type both parameters with content type', function(done){
+
+    it('should fail if there are repeated form parameter names in a resource type both parameters with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1685,7 +1795,7 @@ describe('Duplicated properties', function (){
     });
 
 
-    it('should fail if there are repeated properties in a form parameter in a method with default media type', function(done){
+    it('should fail if there are repeated properties in a form parameter in a method with default media type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1701,7 +1811,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a trait with default media type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a trait with default media type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1717,7 +1828,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a trait first optional with default media type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a trait first optional with default media type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1733,7 +1845,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a trait second optional with default media type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a trait second optional with default media type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1749,7 +1862,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a trait both optional with default media type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a trait both optional with default media type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1765,7 +1879,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a trait both parameters with default media type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a trait both parameters with default media type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1781,7 +1896,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: '<<someParameter>>'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a resourceType with default media type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a resourceType with default media type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1798,7 +1914,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a resourceType first optional with default media type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a resourceType first optional with default media type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1815,7 +1932,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a resourceType second optional with default media type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a resourceType second optional with default media type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1832,7 +1950,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a resourceType both optional with default media type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a resourceType both optional with default media type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1849,7 +1968,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a resourceType both parameters with default media type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a resourceType both parameters with default media type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1867,7 +1987,7 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/parameter property already used: '<<someParameter>>'/).and.notify(done);
     });
 
-    it('should fail if there are repeated properties in a form parameter in a method with content type', function(done){
+    it('should fail if there are repeated properties in a form parameter in a method with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1884,7 +2004,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a trait with content type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a trait with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1901,7 +2022,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a trait first optional with content type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a trait first optional with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1918,7 +2040,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a trait second optional with content type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a trait second optional with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1935,7 +2058,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a trait both optional with content type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a trait both optional with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1952,7 +2076,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a trait both parameters with content type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a trait both parameters with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1969,7 +2094,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: '<<someParameter>>'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a resourceType with content type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a resourceType with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -1987,7 +2113,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a resourceType first optional with content type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a resourceType first optional with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2005,7 +2132,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a resourceType second optional with content type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a resourceType second optional with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2023,7 +2151,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a resourceType both optional with content type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a resourceType both optional with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2041,7 +2170,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/parameter property already used: 'type'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a form parameter in a resourceType both parameters with content type', function(done){
+
+    it('should fail if there are repeated properties in a form parameter in a resourceType both parameters with content type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2060,8 +2190,9 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/parameter property already used: '<<someParameter>>'/).and.notify(done);
     });
   });
-  describe('in content types', function(){
-    it('should fail if there are repeated content types in a body in a resource', function(done){
+
+  describe('in content types', function () {
+    it('should fail if there are repeated content types in a body in a resource', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2075,7 +2206,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded'/).and.notify(done);
     });
-    it('should fail if there are repeated content types in a body in a resource type', function(done){
+
+    it('should fail if there are repeated content types in a body in a resource type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2090,7 +2222,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded/).and.notify(done);
     });
-    it('should fail if there are repeated content types in a body in a resource type first optional', function(done){
+
+    it('should fail if there are repeated content types in a body in a resource type first optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2105,7 +2238,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded/).and.notify(done);
     });
-    it('should fail if there are repeated content types in a body in a resource type second optional', function(done){
+
+    it('should fail if there are repeated content types in a body in a resource type second optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2120,7 +2254,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded/).and.notify(done);
     });
-    it('should fail if there are repeated content types in a body in a resource type both optional', function(done){
+
+    it('should fail if there are repeated content types in a body in a resource type both optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2135,7 +2270,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded/).and.notify(done);
     });
-    it('should fail if there are repeated content types in a body in a resource type both parameters', function(done){
+
+    it('should fail if there are repeated content types in a body in a resource type both parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2150,7 +2286,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: '<<someContentType>>'/).and.notify(done);
     });
-    it('should fail if there are repeated content types in a body in a trait', function(done){
+
+    it('should fail if there are repeated content types in a body in a trait', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2164,7 +2301,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded/).and.notify(done);
     });
-    it('should fail if there are repeated content types in a body in a trait first optional', function(done){
+
+    it('should fail if there are repeated content types in a body in a trait first optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2178,7 +2316,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded/).and.notify(done);
     });
-    it('should fail if there are repeated content types in a body in a trait second optional', function(done){
+
+    it('should fail if there are repeated content types in a body in a trait second optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2192,7 +2331,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded/).and.notify(done);
     });
-    it('should fail if there are repeated content types in a body in a trait both optional', function(done){
+
+    it('should fail if there are repeated content types in a body in a trait both optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2206,7 +2346,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'application\/x-www-form-urlencoded/).and.notify(done);
     });
-    it('should fail if there are repeated content types in a body in a trait both parameters', function(done){
+
+    it('should fail if there are repeated content types in a body in a trait both parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2220,10 +2361,10 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: '<<someContentType>>'/).and.notify(done);
     });
-
   });
-  describe('in body properties', function(){
-    it('should fail if there are repeated properties in a body in a resource', function(done){
+
+  describe('in body properties', function () {
+    it('should fail if there are repeated properties in a body in a resource', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2237,7 +2378,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a resource type', function(done){
+
+    it('should fail if there are repeated properties in a body in a resource type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2252,7 +2394,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a resource type first optional', function(done){
+
+    it('should fail if there are repeated properties in a body in a resource type first optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2267,7 +2410,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a resource type second optional', function(done){
+
+    it('should fail if there are repeated properties in a body in a resource type second optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2282,7 +2426,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a resource type both optional', function(done){
+
+    it('should fail if there are repeated properties in a body in a resource type both optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2297,7 +2442,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a resource type both parameters', function(done){
+
+    it('should fail if there are repeated properties in a body in a resource type both parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2312,7 +2458,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: '<<someContentType>>'/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a trait', function(done){
+
+    it('should fail if there are repeated properties in a body in a trait', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2326,7 +2473,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a trait first optional', function(done){
+
+    it('should fail if there are repeated properties in a body in a trait first optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2340,7 +2488,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a trait second optional', function(done){
+
+    it('should fail if there are repeated properties in a body in a trait second optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2354,7 +2503,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a trait both optional', function(done){
+
+    it('should fail if there are repeated properties in a body in a trait both optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2368,7 +2518,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/property already used: 'schema/).and.notify(done);
     });
-    it('should fail if there are repeated properties in a body in a trait both parameters', function(done){
+
+    it('should fail if there are repeated properties in a body in a trait both parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2383,8 +2534,9 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/property already used: '<<someContentType>>'/).and.notify(done);
     });
   });
-  describe('in header', function(){
-    it('should fail if there are repeated header names in a method', function(done){
+
+  describe('in header', function () {
+    it('should fail if there are repeated header names in a method', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2398,7 +2550,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/header name already used: 'header1'/).and.notify(done);
     });
-    it('should fail if there are repeated header names in a trait', function(done){
+
+    it('should fail if there are repeated header names in a trait', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2412,7 +2565,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/header name already used: 'header1'/).and.notify(done);
     });
-    it('should fail if there are repeated header names in a trait first optional', function(done){
+
+    it('should fail if there are repeated header names in a trait first optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2426,7 +2580,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/header name already used: 'header1'/).and.notify(done);
     });
-    it('should fail if there are repeated header names in a trait second optional', function(done){
+
+    it('should fail if there are repeated header names in a trait second optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2440,7 +2595,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/header name already used: 'header1'/).and.notify(done);
     });
-    it('should fail if there are repeated header names in a trait both optional', function(done){
+
+    it('should fail if there are repeated header names in a trait both optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2454,7 +2610,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/header name already used: 'header1'/).and.notify(done);
     });
-    it('should fail if there are repeated header names in a trait both parameters', function(done){
+
+    it('should fail if there are repeated header names in a trait both parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2468,7 +2625,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/header name already used: '<<headerName>>'/).and.notify(done);
     });
-    it('should fail if there are repeated header names in a resource type', function(done){
+
+    it('should fail if there are repeated header names in a resource type', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2483,7 +2641,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/header name already used: 'header1'/).and.notify(done);
     });
-    it('should fail if there are repeated header names in a resource type first optional', function(done){
+
+    it('should fail if there are repeated header names in a resource type first optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2498,7 +2657,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/header name already used: 'header1'/).and.notify(done);
     });
-    it('should fail if there are repeated header names in a resource type second optional', function(done){
+
+    it('should fail if there are repeated header names in a resource type second optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2513,7 +2673,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/header name already used: 'header1'/).and.notify(done);
     });
-    it('should fail if there are repeated header names in a resource type both optional', function(done){
+
+    it('should fail if there are repeated header names in a resource type both optional', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2528,7 +2689,8 @@ describe('Duplicated properties', function (){
 
       raml.load(definition).should.be.rejected.with(/header name already used: 'header1'/).and.notify(done);
     });
-    it('should fail if there are repeated header names in a resource type both parameters', function(done){
+
+    it('should fail if there are repeated header names in a resource type both parameters', function (done) {
       var definition = [
         '#%RAML 0.8',
         '---',
@@ -2544,5 +2706,4 @@ describe('Duplicated properties', function (){
       raml.load(definition).should.be.rejected.with(/header name already used: '<<headerName>>'/).and.notify(done);
     });
   });
-
 });
