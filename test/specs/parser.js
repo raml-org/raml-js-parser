@@ -3135,7 +3135,7 @@ describe('Parser', function() {
         '      200:',
         '        description: Retrieve a list of leagues'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/parameter value must be a scalar/).and.notify(done);
     });
 
     it('should reject parameters whose value is a map', function(done) {
@@ -3186,7 +3186,7 @@ describe('Parser', function() {
           }
         ]
       };
-      raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/parameter value must be a scalar/).and.notify(done);
     });
 
     it('should reject trait with missing provided parameters', function(done) {
@@ -4035,7 +4035,7 @@ describe('Parser', function() {
         '        description: Retrieve a list of leagues'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/parameter value must be a scalar/).and.notify(done);
     });
     it('should reject parameters whose value is a map', function(done) {
       var definition = [
@@ -4053,7 +4053,7 @@ describe('Parser', function() {
         '        description: Retrieve a list of leagues'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/parameter value must be a scalar/).and.notify(done);
     });
 
     it('should reject trait with missing provided parameters', function(done) {
@@ -5943,8 +5943,8 @@ describe('Parser', function() {
         '     description: This is some text',
         '     type: OAuth 2.0',
         '     settings:',
-        '       authorizationUrl: https://www.dropbox.com/1/oauth2/authorize',
-        '       accessTokenUrl: https://api.dropbox.com/1/oauth2/token',
+        '       authorizationUri: https://www.dropbox.com/1/oauth2/authorize',
+        '       accessTokenUri: https://api.dropbox.com/1/oauth2/token',
         '       authorizationGrants: [ code, token ]',
         '/resource:'
       ].join('\n');
@@ -5956,8 +5956,8 @@ describe('Parser', function() {
               "description": "This is some text",
               "type": "OAuth 2.0",
               settings: {
-                authorizationUrl: "https://www.dropbox.com/1/oauth2/authorize",
-                accessTokenUrl: "https://api.dropbox.com/1/oauth2/token",
+                authorizationUri: "https://www.dropbox.com/1/oauth2/authorize",
+                accessTokenUri: "https://api.dropbox.com/1/oauth2/token",
                 authorizationGrants: ["code", "token"]
               }
             }
@@ -5970,40 +5970,6 @@ describe('Parser', function() {
         ]
       };
       raml.load(definition).should.become(expected).and.notify(done);
-    });
-
-    it('should fail when type is "OAuth 2.0" and authorizationUrl is missing in settings', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: Test',
-        'securitySchemes:',
-        ' - scheme:',
-        '     description: This is some text',
-        '     type: OAuth 2.0',
-        '     settings:',
-        '       accessTokenUrl: https://api.dropbox.com/1/oauth2/token',
-        '       authorizationGrants: [ code, token ]',
-        '/resource:'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/authorizationUrl must be a URL/).and.notify(done);
-    });
-
-    it('should fail when type is "OAuth 2.0" and accessTokenUrl is missing in settings', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: Test',
-        'securitySchemes:',
-        ' - scheme:',
-        '     description: This is some text',
-        '     type: OAuth 2.0',
-        '     settings:',
-        '       authorizationUrl: https://www.dropbox.com/1/oauth2/authorize',
-        '       authorizationGrants: [ code, token ]',
-        '/resource:'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/accessTokenUrl must be a URL/).and.notify(done);
     });
 
     it('should succeed when type is "OAuth 1.0"', function(done) {
@@ -6044,57 +6010,6 @@ describe('Parser', function() {
         ]
       };
       raml.load(definition).should.become(expected).and.notify(done);
-    });
-
-    it('should fail when type is "OAuth 1.0" and requestTokenUri is missing in settings', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: Test',
-        'securitySchemes:',
-        ' - scheme:',
-        '     description: This is some text',
-        '     type: OAuth 1.0',
-        '     settings:',
-        '       authorizationUri: https://www.dropbox.com/1/oauth/authorize',
-        '       tokenCredentialsUri: https://api.dropbox.com/1/oauth/access_token',
-        '/resource:'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/requestTokenUri must be a URL/).and.notify(done);
-    });
-
-    it('should fail when type is "OAuth 1.0" and authorizationUri is missing in settings', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: Test',
-        'securitySchemes:',
-        ' - scheme:',
-        '     description: This is some text',
-        '     type: OAuth 1.0',
-        '     settings:',
-        '       requestTokenUri: https://api.dropbox.com/1/oauth/request_token',
-        '       tokenCredentialsUri: https://api.dropbox.com/1/oauth/access_token',
-        '/resource:'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/authorizationUri must be a URL/).and.notify(done);
-    });
-
-    it('should fail when type is "OAuth 1.0" and tokenCredentialsUri is missing in settings', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: Test',
-        'securitySchemes:',
-        ' - scheme:',
-        '     description: This is some text',
-        '     type: OAuth 1.0',
-        '     settings:',
-        '       requestTokenUri: https://api.dropbox.com/1/oauth/request_token',
-        '       authorizationUri: https://www.dropbox.com/1/oauth/authorize',
-        '/resource:'
-      ].join('\n');
-      raml.load(definition).should.be.rejected.with(/tokenCredentialsUri must be a URL/).and.notify(done);
     });
 
     it('should succeed when type is "Basic Authentication"', function(done) {
