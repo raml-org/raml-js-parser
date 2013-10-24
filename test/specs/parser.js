@@ -3104,7 +3104,7 @@ describe('Parser', function() {
         '      200:',
         '        description: Retrieve a list of leagues'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/parameter value must be a scalar/).and.notify(done);
     });
 
     it('should reject parameters whose value is a map', function(done) {
@@ -3155,7 +3155,7 @@ describe('Parser', function() {
           }
         ]
       };
-      raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/parameter value must be a scalar/).and.notify(done);
     });
 
     it('should reject trait with missing provided parameters', function(done) {
@@ -4004,7 +4004,7 @@ describe('Parser', function() {
         '        description: Retrieve a list of leagues'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/parameter value must be a scalar/).and.notify(done);
     });
     it('should reject parameters whose value is a map', function(done) {
       var definition = [
@@ -4022,7 +4022,7 @@ describe('Parser', function() {
         '        description: Retrieve a list of leagues'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/parameter value is not a scalar/).and.notify(done);
+      raml.load(definition).should.be.rejected.with(/parameter value must be a scalar/).and.notify(done);
     });
 
     it('should reject trait with missing provided parameters', function(done) {

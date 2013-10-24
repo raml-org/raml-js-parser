@@ -750,21 +750,33 @@ class @Validator
           unless util.isSequence property[1]
             throw new exports.ValidationError 'while validating resources', null, "property 'is' must be an array", property[0].start_mark
 
-          unless (property[1].value instanceof Array)
-            throw new exports.ValidationError 'while validating trait consumption', null, 'is property must be an array', property[0].start_mark
-
           for use in property[1].value
-            traitName = @key_or_value use
-            if not @isParameterKeyValue(traitName) and not @get_trait(traitName)
-              throw new exports.ValidationError 'while validating trait consumption', null, 'there is no trait named ' + traitName, use.start_mark
-
-            if util.isMapping use[1]
-              for parameter in property[1].value
-                unless util.isNull(parameter[1]) or util.isMapping(parameter[1])
-                  throw new exports.ValidationError 'while validating resource consumption', null, 'type parameters must be in a map', parameter[1].start_mark
+            @validate_trait_use use
 
           return true
     return false
+
+  validate_trait_use: (node) ->
+    unless util.isScalar(node) or util.isMapping(node)
+      throw new exports.ValidationError 'while validating trait consumption', null, 'trait must be a string or a map', node.start_mark
+
+    traitName = @key_or_value node
+    unless @isParameterKeyValue(traitName) or @get_trait(traitName)
+      throw new exports.ValidationError 'while validating trait consumption', null, "there is no trait named #{traitName}", node.start_mark
+
+    if util.isScalar node
+      return
+
+    traitValue = node.value[0][1]
+    unless util.isNull(traitValue) or util.isMapping(traitValue)
+      throw new exports.ValidationError 'while validating trait consumption', null, 'trait must be a map', traitValue.start_mark
+
+    if util.isNull traitValue
+      return
+
+    for parameter in traitValue.value
+      unless util.isScalar parameter[1]
+        throw new exports.ValidationError 'while validating trait consumption', null, 'parameter value must be a scalar', parameter[1].start_mark
 
   child_methods: (node) ->
     unless node and util.isMapping node
