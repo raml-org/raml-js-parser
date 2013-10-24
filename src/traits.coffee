@@ -134,16 +134,18 @@ class @Traits
       return
 
   get_parameters_from_is_key: (resourceUri, methodName, typeKey) ->
-    result = {
-      methodName: methodName,
+    result   = {}
+    reserved = {
+      methodName  : methodName,
       resourcePath: resourceUri.replace(/\/\/*/g, '/')
     }
-    return result unless util.isMapping typeKey
-    parameters = @value_or_undefined typeKey
-    parameters[0][1].value.forEach (parameter) =>
-      unless util.isScalar(parameter[1])
-        throw new exports.TraitError 'while applying parameters', null, 'parameter value is not a scalar', parameter[1].start_mark
-      if parameter[1].value in [ "methodName", "resourcePath", "resourcePathName"]
-        throw new exports.TraitError 'while applying parameters', null, 'invalid parameter name "methodName", "resourcePath" are reserved parameter names "resourcePathName"', parameter[1].start_mark
-      result[parameter[0].value] = parameter[1].value
-    return result
+
+    if util.isMapping typeKey
+      parameters = @value_or_undefined typeKey
+      if util.isMapping parameters[0][1]
+        for parameter in parameters[0][1].value
+          if parameter[0].value of reserved
+            throw new exports.TraitError 'while applying parameters', null, "invalid parameter name: #{parameter[0].value} is reserved", parameter[0].start_mark
+          result[parameter[0].value] = parameter[1].value
+
+    return util.extend result, reserved
