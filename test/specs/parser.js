@@ -4880,7 +4880,6 @@ describe('Parser', function() {
         '      description: <<foo>> resourceType should be used for any collection of items',
         '      post:',
         '       description: <<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>',
-        '       <<foo>>: <<bar>>',
         '/:',
         '  type: { collection: { foo: bar, bar: foo} }'
       ].join('\n');
@@ -4895,8 +4894,7 @@ describe('Parser', function() {
               description: "<<foo>> resourceType should be used for any collection of items",
               post:
               {
-                description: "<<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>",
-                "<<foo>>": "<<bar>>"
+                description: "<<foo>><<foo>><<foo>> fixed text <<bar>><<bar>><<bar>>"
               }
             }
           }
@@ -4915,8 +4913,7 @@ describe('Parser', function() {
             methods: [
               {
                 method: "post",
-                description: "barbarbar fixed text foofoofoo",
-                bar: "foo"
+                description: "barbarbar fixed text foofoofoo"
               }
             ]
           }
