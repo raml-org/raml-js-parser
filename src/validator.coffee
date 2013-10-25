@@ -337,7 +337,8 @@ class @Validator
           when 'version'
             unless util.isScalar(property[1])
               throw new exports.ValidationError 'while validating root properties', null, 'version must be a string', property[0].start_mark
-
+            unless util.isNull(property[1])
+              property[1].tag = 'tag:yaml.org,2002:str'
           when 'traits'
             @validate_traits property[1]
 

@@ -16,6 +16,8 @@
 @isNullableMapping =  (node) -> return @isMapping(node) or @isNull(node)
 @isNullableString =   (node) -> return @isString(node) or @isNull(node)
 @isNullableSequence = (node) -> return @isSequence(node) or @isNull(node)
+@isNumber =           (node) -> return node?.tag is 'tag:yaml.org,2002:int' or
+                                        node?.tag is 'tag:yaml.org,2002:float'
 @isScalar =           (node) -> return node?.tag is 'tag:yaml.org,2002:null' or
                                       node?.tag is 'tag:yaml.org,2002:bool' or
                                       node?.tag is 'tag:yaml.org,2002:int' or

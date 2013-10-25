@@ -124,6 +124,38 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.with(/unknown property/).and.notify(done);
     });
 
+    it('should coherce version to be a string even when it is a float', function(done) {
+      var definition = [
+          '#%RAML 0.8',
+          '---',
+          'title: MyApi',
+          'version: 1.0'
+      ].join('\n');
+
+      var expected = {
+        title: "MyApi",
+        version: "1.0"
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+
+    it('should coherce version to be a string even when it is an int', function(done) {
+      var definition = [
+          '#%RAML 0.8',
+          '---',
+          'title: MyApi',
+          'version: 1'
+      ].join('\n');
+
+      var expected = {
+        title: "MyApi",
+        version: "1"
+      };
+
+      raml.load(definition).should.become(expected).and.notify(done);
+    });
+
     it('should fail if there is a root property with array', function(done) {
       var definition = [
         '#%RAML 0.8',
