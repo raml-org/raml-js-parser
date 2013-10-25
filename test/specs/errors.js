@@ -32,4 +32,17 @@ describe('Errors', function () {
       }, 0);
     });
   });
+  it('should be at right line/column when new document content started without special marker right after end marker', function (done) {
+    raml.load([
+            '#%RAML 0.8',
+            '*Note:* You may provide an optional *scope* parameter to request additional permissions outside of the â€œbasicâ€ permissions scope. [Learn more about scope](http://instagram.com/developer/authentication/#scop'
+    ].join('\n')).then(function () {}, function (error) {
+      setTimeout(function () {
+        error.problem_mark.should.exist;
+        error.problem_mark.line.should.be.equal(1);
+        error.problem_mark.column.should.be.equal(113);
+        done();
+      }, 0);
+    });
+});
 });
