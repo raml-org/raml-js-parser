@@ -4,11 +4,6 @@ nodes             = require './nodes'
 util              = require './util'
 
 ###
-The Protocols throws these.
-###
-class @ProtocolError extends MarkedYAMLError
-
-###
 The Protocols class deals with applying protocols to methods according to the spec
 ###
 class @Protocols

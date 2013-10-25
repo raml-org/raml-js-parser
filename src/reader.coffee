@@ -1,14 +1,6 @@
-{Mark, YAMLError} = require './errors'
+{Mark, MarkedYAMLError} = require './errors'
 
-class @ReaderError extends YAMLError
-  constructor: (@name, @position, @character, @reason) ->
-    super()
-  
-  toString: ->
-    """
-    unacceptable character #{@character.charCodeAt()}: #{@reason}
-      in "#{@name}", position #{@position}
-    """
+class @ReaderError extends MarkedYAMLError
 
 ###
 Reader:
@@ -22,8 +14,6 @@ class @Reader
     @line = 0
     @column = 0
     @index = 0
-    
-    @check_printable()
     @string += '\x00'
   
   peek: (index = 0) -> @string[@index + index]
@@ -39,6 +29,7 @@ class @Reader
         @line++
         @column = 0
       else
+        @check_printable(char)
         @column++
       length--
 
@@ -48,10 +39,6 @@ class @Reader
   get_mark: ->
     @create_mark()
   
-  check_printable: ->
-    match = NON_PRINTABLE.exec @string
-    if match
-      character = match[0]
-      position = (@string.length - @index) + match.index
-      throw new exports.ReaderError @name, position, character.charCodeAt(),
-        'special characters are not allowed'
+  check_printable: (char)->
+    if NON_PRINTABLE.exec char
+      throw new exports.ReaderError 'while reading file', null, "non printable characters are not allowed column: #{@get_mark().column}", @get_mark()
