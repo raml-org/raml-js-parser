@@ -7844,6 +7844,10 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 })(require("__browserify_buffer").Buffer)
 },{"./errors":1,"./nodes":11,"./util":4,"__browserify_buffer":13}],15:[function(require,module,exports){
+window.RAML = {}
+
+window.RAML.Parser = require('../lib/raml')
+},{"../lib/raml":12}],16:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -7953,7 +7957,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11}],16:[function(require,module,exports){
+},{"./errors":1,"./nodes":11}],17:[function(require,module,exports){
 (function() {
   var composer, construct, joiner, parser, protocols, reader, resolver, scanner, schemas, securitySchemes, traits, transformations, types, util, validator;
 
@@ -8066,7 +8070,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./composer":10,"./construct":14,"./joiner":15,"./parser":19,"./protocols":24,"./reader":17,"./resolver":20,"./resourceTypes":23,"./scanner":18,"./schemas":25,"./securitySchemes":26,"./traits":22,"./transformations":27,"./util":4,"./validator":21}],11:[function(require,module,exports){
+},{"./composer":10,"./construct":14,"./joiner":16,"./parser":20,"./protocols":26,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./securitySchemes":27,"./traits":23,"./transformations":28,"./util":4,"./validator":22}],11:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -8356,7 +8360,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],19:[function(require,module,exports){
+},{"./errors":1}],20:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, events, tokens, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -8967,7 +8971,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./events":2,"./tokens":3}],24:[function(require,module,exports){
+},{"./errors":1,"./events":2,"./tokens":3}],26:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, url, util,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -9048,7 +9052,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11,"./util":4,"url":7}],17:[function(require,module,exports){
+},{"./errors":1,"./nodes":11,"./util":4,"url":7}],18:[function(require,module,exports){
 (function() {
   var Mark, MarkedYAMLError, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -9151,7 +9155,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],20:[function(require,module,exports){
+},{"./errors":1}],21:[function(require,module,exports){
 (function() {
   var YAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -9360,7 +9364,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11,"./util":4}],23:[function(require,module,exports){
+},{"./errors":1,"./nodes":11,"./util":4}],24:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9545,11 +9549,108 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11,"./util":4}],28:[function(require,module,exports){
-window.RAML = {}
+},{"./errors":1,"./nodes":11,"./util":4}],25:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, nodes, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-window.RAML.Parser = require('../lib/raml')
-},{"../lib/raml":12}],18:[function(require,module,exports){
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  /*
+  The Schemas throws these.
+  */
+
+
+  this.SchemaError = (function(_super) {
+    __extends(SchemaError, _super);
+
+    function SchemaError() {
+      _ref = SchemaError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return SchemaError;
+
+  })(MarkedYAMLError);
+
+  /*
+    The Schemas class deals with applying schemas to resources according to the spec
+  */
+
+
+  this.Schemas = (function() {
+    function Schemas() {
+      this.get_schemas_used = __bind(this.get_schemas_used, this);
+      this.apply_schemas = __bind(this.apply_schemas, this);
+      this.get_all_schemas = __bind(this.get_all_schemas, this);
+      this.has_schemas = __bind(this.has_schemas, this);
+      this.load_schemas = __bind(this.load_schemas, this);
+      this.declaredSchemas = {};
+    }
+
+    Schemas.prototype.load_schemas = function(node) {
+      var allSchemas,
+        _this = this;
+      if (this.has_property(node, "schemas")) {
+        allSchemas = this.property_value(node, "schemas");
+        if (allSchemas && typeof allSchemas === "object") {
+          return allSchemas.forEach(function(schema_entry) {
+            if (schema_entry && typeof schema_entry === "object" && typeof schema_entry.value === "object") {
+              return schema_entry.value.forEach(function(schema) {
+                return _this.declaredSchemas[schema[0].value] = schema;
+              });
+            }
+          });
+        }
+      }
+    };
+
+    Schemas.prototype.has_schemas = function(node) {
+      if (this.declaredSchemas.length === 0 && this.has_property(node, "schemas")) {
+        this.load_schemas(node);
+      }
+      return Object.keys(this.declaredSchemas).length > 0;
+    };
+
+    Schemas.prototype.get_all_schemas = function() {
+      return this.declaredSchemas;
+    };
+
+    Schemas.prototype.apply_schemas = function(node) {
+      var resources, schemas,
+        _this = this;
+      resources = this.child_resources(node);
+      schemas = this.get_schemas_used(resources);
+      return schemas.forEach(function(schema) {
+        if (schema[1].value in _this.declaredSchemas) {
+          return schema[1].value = _this.declaredSchemas[schema[1].value][1].value;
+        }
+      });
+    };
+
+    Schemas.prototype.get_schemas_used = function(resources) {
+      var schemas,
+        _this = this;
+      schemas = [];
+      resources.forEach(function(resource) {
+        var properties;
+        properties = _this.get_properties(resource[1], "schema");
+        return schemas = schemas.concat(properties);
+      });
+      return schemas;
+    };
+
+    return Schemas;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./nodes":11}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11055,108 +11156,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./tokens":3,"./util":4}],25:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, nodes, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  /*
-  The Schemas throws these.
-  */
-
-
-  this.SchemaError = (function(_super) {
-    __extends(SchemaError, _super);
-
-    function SchemaError() {
-      _ref = SchemaError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return SchemaError;
-
-  })(MarkedYAMLError);
-
-  /*
-    The Schemas class deals with applying schemas to resources according to the spec
-  */
-
-
-  this.Schemas = (function() {
-    function Schemas() {
-      this.get_schemas_used = __bind(this.get_schemas_used, this);
-      this.apply_schemas = __bind(this.apply_schemas, this);
-      this.get_all_schemas = __bind(this.get_all_schemas, this);
-      this.has_schemas = __bind(this.has_schemas, this);
-      this.load_schemas = __bind(this.load_schemas, this);
-      this.declaredSchemas = {};
-    }
-
-    Schemas.prototype.load_schemas = function(node) {
-      var allSchemas,
-        _this = this;
-      if (this.has_property(node, "schemas")) {
-        allSchemas = this.property_value(node, "schemas");
-        if (allSchemas && typeof allSchemas === "object") {
-          return allSchemas.forEach(function(schema_entry) {
-            if (schema_entry && typeof schema_entry === "object" && typeof schema_entry.value === "object") {
-              return schema_entry.value.forEach(function(schema) {
-                return _this.declaredSchemas[schema[0].value] = schema;
-              });
-            }
-          });
-        }
-      }
-    };
-
-    Schemas.prototype.has_schemas = function(node) {
-      if (this.declaredSchemas.length === 0 && this.has_property(node, "schemas")) {
-        this.load_schemas(node);
-      }
-      return Object.keys(this.declaredSchemas).length > 0;
-    };
-
-    Schemas.prototype.get_all_schemas = function() {
-      return this.declaredSchemas;
-    };
-
-    Schemas.prototype.apply_schemas = function(node) {
-      var resources, schemas,
-        _this = this;
-      resources = this.child_resources(node);
-      schemas = this.get_schemas_used(resources);
-      return schemas.forEach(function(schema) {
-        if (schema[1].value in _this.declaredSchemas) {
-          return schema[1].value = _this.declaredSchemas[schema[1].value][1].value;
-        }
-      });
-    };
-
-    Schemas.prototype.get_schemas_used = function(resources) {
-      var schemas,
-        _this = this;
-      schemas = [];
-      resources.forEach(function(resource) {
-        var properties;
-        properties = _this.get_properties(resource[1], "schema");
-        return schemas = schemas.concat(properties);
-      });
-      return schemas;
-    };
-
-    return Schemas;
-
-  })();
-
-}).call(this);
-
-},{"./errors":1,"./nodes":11}],26:[function(require,module,exports){
+},{"./errors":1,"./tokens":3,"./util":4}],27:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11555,1054 +11555,7 @@ function decode(str) {
   }
 }
 
-},{}],22:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, inflection, nodes, util, _ref, _ref1,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  inflection = require('inflection');
-
-  util = require('./util');
-
-  /*
-  The Traits throws these.
-  */
-
-
-  this.TraitError = (function(_super) {
-    __extends(TraitError, _super);
-
-    function TraitError() {
-      _ref = TraitError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return TraitError;
-
-  })(MarkedYAMLError);
-
-  /*
-  */
-
-
-  this.ParameterError = (function(_super) {
-    __extends(ParameterError, _super);
-
-    function ParameterError() {
-      _ref1 = ParameterError.__super__.constructor.apply(this, arguments);
-      return _ref1;
-    }
-
-    return ParameterError;
-
-  })(MarkedYAMLError);
-
-  /*
-  The Traits class deals with applying traits to resources according to the spec
-  */
-
-
-  this.Traits = (function() {
-    function Traits() {
-      this.declaredTraits = {};
-    }
-
-    Traits.prototype.load_traits = function(node) {
-      var allTraits,
-        _this = this;
-      if (this.has_property(node, /^traits$/)) {
-        allTraits = this.property_value(node, /^traits$/);
-        if (allTraits && typeof allTraits === "object") {
-          return allTraits.forEach(function(trait_item) {
-            if (trait_item && typeof trait_item === "object" && typeof trait_item.value === "object") {
-              return trait_item.value.forEach(function(trait) {
-                return _this.declaredTraits[trait[0].value] = trait;
-              });
-            }
-          });
-        }
-      }
-    };
-
-    Traits.prototype.has_traits = function(node) {
-      if (this.declaredTraits.length === 0 && this.has_property(node, /^traits$/)) {
-        this.load_traits(node);
-      }
-      return Object.keys(this.declaredTraits).length > 0;
-    };
-
-    Traits.prototype.get_trait = function(traitName) {
-      if (traitName in this.declaredTraits) {
-        return this.declaredTraits[traitName][1];
-      }
-      return null;
-    };
-
-    Traits.prototype.apply_traits = function(node, resourceUri, removeQs) {
-      var resources,
-        _this = this;
-      if (resourceUri == null) {
-        resourceUri = "";
-      }
-      if (removeQs == null) {
-        removeQs = true;
-      }
-      if (!util.isMapping(node)) {
-        return;
-      }
-      if (this.has_traits(node)) {
-        resources = this.child_resources(node);
-        return resources.forEach(function(resource) {
-          return _this.apply_traits_to_resource(resourceUri + resource[0].value, resource[1], removeQs);
-        });
-      }
-    };
-
-    Traits.prototype.apply_traits_to_resource = function(resourceUri, resource, removeQs) {
-      var methods, uses,
-        _this = this;
-      if (!util.isMapping(resource)) {
-        return;
-      }
-      methods = this.child_methods(resource);
-      if (this.has_property(resource, /^is$/)) {
-        uses = this.property_value(resource, /^is$/);
-        uses.forEach(function(use) {
-          return methods.forEach(function(method) {
-            return _this.apply_trait(resourceUri, method, use);
-          });
-        });
-      }
-      methods.forEach(function(method) {
-        if (_this.has_property(method[1], /^is$/)) {
-          uses = _this.property_value(method[1], /^is$/);
-          return uses.forEach(function(use) {
-            return _this.apply_trait(resourceUri, method, use);
-          });
-        }
-      });
-      if (removeQs) {
-        resource.remove_question_mark_properties();
-      }
-      return this.apply_traits(resource, resourceUri, removeQs);
-    };
-
-    Traits.prototype.apply_trait = function(resourceUri, method, useKey) {
-      var plainParameters, temp, trait, traitName;
-      traitName = this.key_or_value(useKey);
-      if (!(trait = this.get_trait(traitName))) {
-        throw new exports.TraitError('while applying trait', null, "there is no trait named " + traitName, useKey.start_mark);
-      }
-      plainParameters = this.get_parameters_from_is_key(resourceUri, method[0].value, useKey);
-      temp = trait.cloneForTrait();
-      this.apply_parameters(temp, plainParameters, useKey);
-      this.apply_default_media_type_to_method(temp);
-      temp.combine(method[1]);
-      return method[1] = temp;
-    };
-
-    Traits.prototype.apply_parameters = function(resource, parameters, useKey) {
-      var parameterName, usedParameters, _results;
-      this._apply_parameters(resource, parameters, useKey, usedParameters = {
-        resourcePath: true,
-        methodName: true
-      });
-      _results = [];
-      for (parameterName in parameters) {
-        if (!usedParameters[parameterName]) {
-          throw new exports.ParameterError('while applying parameters', null, "unused parameter: " + parameterName, useKey.start_mark);
-        } else {
-          _results.push(void 0);
-        }
-      }
-      return _results;
-    };
-
-    Traits.prototype._apply_parameters = function(resource, parameters, useKey, usedParameters) {
-      var parameterUse,
-        _this = this;
-      if (!resource) {
-        return;
-      }
-      if (util.isString(resource)) {
-        if (parameterUse = resource.value.match(/<<\s*([^\|\s>]+)\s*(\|.*)?\s*>>/g)) {
-          parameterUse.forEach(function(parameter) {
-            var method, parameterName, value, _ref2, _ref3;
-            parameterName = parameter != null ? (_ref2 = parameter.trim()) != null ? _ref2.replace(/[<>]+/g, '').trim() : void 0 : void 0;
-            _ref3 = parameterName.split(/\s*\|\s*/), parameterName = _ref3[0], method = _ref3[1];
-            if (!(parameterName in parameters)) {
-              throw new exports.ParameterError('while applying parameters', null, "value was not provided for parameter: " + parameterName, useKey.start_mark);
-            }
-            value = parameters[parameterName];
-            usedParameters[parameterName] = true;
-            if (method) {
-              if (method.match(/!\s*singularize/)) {
-                value = inflection.singularize(value);
-              } else if (method.match(/!\s*pluralize/)) {
-                value = inflection.pluralize(value);
-              } else {
-                throw new exports.ParameterError('while validating parameter', null, 'unknown function applied to parameter', resource.start_mark);
-              }
-            }
-            return resource.value = resource.value.replace(parameter, value);
-          });
-        }
-        return;
-      }
-      if (util.isSequence(resource)) {
-        resource.value.forEach(function(node) {
-          return _this._apply_parameters(node, parameters, useKey, usedParameters);
-        });
-        return;
-      }
-      if (util.isMapping(resource)) {
-        resource.value.forEach(function(property) {
-          _this._apply_parameters(property[0], parameters, useKey, usedParameters);
-          return _this._apply_parameters(property[1], parameters, useKey, usedParameters);
-        });
-      }
-    };
-
-    Traits.prototype.get_parameters_from_is_key = function(resourceUri, methodName, typeKey) {
-      var parameter, parameters, reserved, result, _i, _len, _ref2;
-      result = {};
-      reserved = {
-        methodName: methodName,
-        resourcePath: resourceUri.replace(/\/\/*/g, '/')
-      };
-      if (util.isMapping(typeKey)) {
-        parameters = this.value_or_undefined(typeKey);
-        if (util.isMapping(parameters[0][1])) {
-          _ref2 = parameters[0][1].value;
-          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-            parameter = _ref2[_i];
-            if (parameter[0].value in reserved) {
-              throw new exports.TraitError('while applying parameters', null, "invalid parameter name: " + parameter[0].value + " is reserved", parameter[0].start_mark);
-            }
-            result[parameter[0].value] = parameter[1].value;
-          }
-        }
-      }
-      return util.extend(result, reserved);
-    };
-
-    return Traits;
-
-  })();
-
-}).call(this);
-
-},{"./errors":1,"./nodes":11,"./util":4,"inflection":29}],12:[function(require,module,exports){
-(function() {
-  var _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  this.composer = require('./composer');
-
-  this.constructor = require('./construct');
-
-  this.errors = require('./errors');
-
-  this.events = require('./events');
-
-  this.loader = require('./loader');
-
-  this.nodes = require('./nodes');
-
-  this.parser = require('./parser');
-
-  this.reader = require('./reader');
-
-  this.resolver = require('./resolver');
-
-  this.scanner = require('./scanner');
-
-  this.tokens = require('./tokens');
-
-  this.q = require('q');
-
-  this.FileError = (function(_super) {
-    __extends(FileError, _super);
-
-    function FileError() {
-      _ref = FileError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return FileError;
-
-  })(this.errors.MarkedYAMLError);
-
-  /*
-  Scan a RAML stream and produce scanning tokens.
-  */
-
-
-  this.scan = function(stream, location) {
-    var loader, _results;
-    loader = new exports.loader.Loader(stream, location, false);
-    _results = [];
-    while (loader.check_token()) {
-      _results.push(loader.get_token());
-    }
-    return _results;
-  };
-
-  /*
-  Parse a RAML stream and produce parsing events.
-  */
-
-
-  this.parse = function(stream, location) {
-    var loader, _results;
-    loader = new exports.loader.Loader(stream, location, false);
-    _results = [];
-    while (loader.check_event()) {
-      _results.push(loader.get_event());
-    }
-    return _results;
-  };
-
-  /*
-  Parse the first RAML document in a stream and produce the corresponding
-  representation tree.
-  */
-
-
-  this.compose = function(stream, validate, apply, join, location, parent) {
-    var loader;
-    if (validate == null) {
-      validate = true;
-    }
-    if (apply == null) {
-      apply = true;
-    }
-    if (join == null) {
-      join = true;
-    }
-    loader = new exports.loader.Loader(stream, location, validate, parent);
-    return loader.get_single_node(validate, apply, join);
-  };
-
-  /*
-  Parse the first RAML document in a stream and produce the corresponding
-  Javascript object.
-  */
-
-
-  this.load = function(stream, validate, location) {
-    var _this = this;
-    if (validate == null) {
-      validate = true;
-    }
-    return this.q.fcall(function() {
-      var loader;
-      loader = new exports.loader.Loader(stream, location, validate);
-      return loader.get_single_data();
-    });
-  };
-
-  /*
-  Parse the first RAML document in a stream and produce a list of
-  all the absolute URIs for all resources.
-  */
-
-
-  this.resources = function(stream, validate, location) {
-    var _this = this;
-    if (validate == null) {
-      validate = true;
-    }
-    return this.q.fcall(function() {
-      var loader;
-      loader = new exports.loader.Loader(stream, location, validate);
-      return loader.resources();
-    });
-  };
-
-  /*
-  Parse the first RAML document in a stream and produce the corresponding
-  Javascript object.
-  */
-
-
-  this.loadFile = function(file, validate) {
-    var _this = this;
-    if (validate == null) {
-      validate = true;
-    }
-    return this.q.fcall(function() {
-      var stream;
-      stream = _this.readFile(file);
-      return _this.load(stream, validate, file);
-    });
-  };
-
-  /*
-  Parse the first RAML document in a file and produce the corresponding
-  representation tree.
-  */
-
-
-  this.composeFile = function(file, validate, apply, join, parent) {
-    var stream;
-    if (validate == null) {
-      validate = true;
-    }
-    if (apply == null) {
-      apply = true;
-    }
-    if (join == null) {
-      join = true;
-    }
-    stream = this.readFile(file);
-    return this.compose(stream, validate, apply, join, file, parent);
-  };
-
-  /*
-  Parse the first RAML document in a file and produce a list of
-  all the absolute URIs for all resources.
-  */
-
-
-  this.resourcesFile = function(file, validate) {
-    var stream;
-    if (validate == null) {
-      validate = true;
-    }
-    stream = this.readFile(file);
-    return this.resources(stream, validate, file);
-  };
-
-  /*
-  Read file either locally or from the network.
-  */
-
-
-  this.readFile = function(file) {
-    var error, url;
-    url = require('url').parse(file);
-    if (url.protocol != null) {
-      if (!url.protocol.match(/^https?/i)) {
-        throw new exports.FileError("while reading " + file, null, "unknown protocol " + url.protocol, this.start_mark);
-      } else {
-        return this.fetchFile(file);
-      }
-    } else {
-      if (typeof window !== "undefined" && window !== null) {
-        return this.fetchFile(file);
-      } else {
-        try {
-          return require('fs').readFileSync(file).toString();
-        } catch (_error) {
-          error = _error;
-          throw new exports.FileError("while reading " + file, null, "cannot read " + file + " (" + error + ")", this.start_mark);
-        }
-      }
-    }
-  };
-
-  /*
-  Read file from the network.
-  */
-
-
-  this.fetchFile = function(file) {
-    var error, xhr;
-    if (typeof window !== "undefined" && window !== null) {
-      xhr = new XMLHttpRequest();
-    } else {
-      xhr = new (require('xmlhttprequest').XMLHttpRequest)();
-    }
-    try {
-      xhr.open('GET', file, false);
-      xhr.setRequestHeader('Accept', 'application/raml+yaml, */*');
-      xhr.send(null);
-      if ((typeof xhr.status === 'number' && xhr.status === 200) || (typeof xhr.status === 'string' && xhr.status.match(/^200/i))) {
-        return xhr.responseText;
-      }
-      throw new Error("HTTP " + xhr.status + " " + xhr.statusText);
-    } catch (_error) {
-      error = _error;
-      throw new exports.FileError("while fetching " + file, null, "cannot fetch " + file + " (" + error + ")", this.start_mark);
-    }
-  };
-
-}).call(this);
-
-},{"./composer":10,"./construct":14,"./errors":1,"./events":2,"./loader":16,"./nodes":11,"./parser":19,"./reader":17,"./resolver":20,"./scanner":18,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":30}],30:[function(require,module,exports){
-(function(process,Buffer){/**
- * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
- *
- * This can be used with JS designed for browsers to improve reuse of code and
- * allow the use of existing libraries.
- *
- * Usage: include("XMLHttpRequest.js") and use XMLHttpRequest per W3C specs.
- *
- * @author Dan DeFelippi <dan@driverdan.com>
- * @contributor David Ellis <d.f.ellis@ieee.org>
- * @license MIT
- */
-
-var Url = require("url")
-  , spawn = require("child_process").spawn
-  , fs = require('fs');
-
-exports.XMLHttpRequest = function() {
-  /**
-   * Private variables
-   */
-  var self = this;
-  var http = require('http');
-  var https = require('https');
-
-  // Holds http.js objects
-  var client;
-  var request;
-  var response;
-
-  // Request settings
-  var settings = {};
-
-  // Disable header blacklist.
-  // Not part of XHR specs.
-  var disableHeaderCheck = false;
-
-  // Set some default headers
-  var defaultHeaders = {
-    "User-Agent": "node-XMLHttpRequest",
-    "Accept": "*/*",
-  };
-
-  var headers = defaultHeaders;
-
-  // These headers are not user setable.
-  // The following are allowed but banned in the spec:
-  // * user-agent
-  var forbiddenRequestHeaders = [
-    "accept-charset",
-    "accept-encoding",
-    "access-control-request-headers",
-    "access-control-request-method",
-    "connection",
-    "content-length",
-    "content-transfer-encoding",
-    "cookie",
-    "cookie2",
-    "date",
-    "expect",
-    "host",
-    "keep-alive",
-    "origin",
-    "referer",
-    "te",
-    "trailer",
-    "transfer-encoding",
-    "upgrade",
-    "via"
-  ];
-
-  // These request methods are not allowed
-  var forbiddenRequestMethods = [
-    "TRACE",
-    "TRACK",
-    "CONNECT"
-  ];
-
-  // Send flag
-  var sendFlag = false;
-  // Error flag, used when errors occur or abort is called
-  var errorFlag = false;
-
-  // Event listeners
-  var listeners = {};
-
-  /**
-   * Constants
-   */
-
-  this.UNSENT = 0;
-  this.OPENED = 1;
-  this.HEADERS_RECEIVED = 2;
-  this.LOADING = 3;
-  this.DONE = 4;
-
-  /**
-   * Public vars
-   */
-
-  // Current state
-  this.readyState = this.UNSENT;
-
-  // default ready state change handler in case one is not set or is set late
-  this.onreadystatechange = null;
-
-  // Result & response
-  this.responseText = "";
-  this.responseXML = "";
-  this.status = null;
-  this.statusText = null;
-
-  /**
-   * Private methods
-   */
-
-  /**
-   * Check if the specified header is allowed.
-   *
-   * @param string header Header to validate
-   * @return boolean False if not allowed, otherwise true
-   */
-  var isAllowedHttpHeader = function(header) {
-    return disableHeaderCheck || (header && forbiddenRequestHeaders.indexOf(header.toLowerCase()) === -1);
-  };
-
-  /**
-   * Check if the specified method is allowed.
-   *
-   * @param string method Request method to validate
-   * @return boolean False if not allowed, otherwise true
-   */
-  var isAllowedHttpMethod = function(method) {
-    return (method && forbiddenRequestMethods.indexOf(method) === -1);
-  };
-
-  /**
-   * Public methods
-   */
-
-  /**
-   * Open the connection. Currently supports local server requests.
-   *
-   * @param string method Connection method (eg GET, POST)
-   * @param string url URL for the connection.
-   * @param boolean async Asynchronous connection. Default is true.
-   * @param string user Username for basic authentication (optional)
-   * @param string password Password for basic authentication (optional)
-   */
-  this.open = function(method, url, async, user, password) {
-    this.abort();
-    errorFlag = false;
-
-    // Check for valid request method
-    if (!isAllowedHttpMethod(method)) {
-      throw "SecurityError: Request method not allowed";
-      return;
-    }
-
-    settings = {
-      "method": method,
-      "url": url.toString(),
-      "async": (typeof async !== "boolean" ? true : async),
-      "user": user || null,
-      "password": password || null
-    };
-
-    setState(this.OPENED);
-  };
-
-  /**
-   * Disables or enables isAllowedHttpHeader() check the request. Enabled by default.
-   * This does not conform to the W3C spec.
-   *
-   * @param boolean state Enable or disable header checking.
-   */
-  this.setDisableHeaderCheck = function(state) {
-    disableHeaderCheck = state;
-  }
-
-  /**
-   * Sets a header for the request.
-   *
-   * @param string header Header name
-   * @param string value Header value
-   */
-  this.setRequestHeader = function(header, value) {
-    if (this.readyState != this.OPENED) {
-      throw "INVALID_STATE_ERR: setRequestHeader can only be called when state is OPEN";
-    }
-    if (!isAllowedHttpHeader(header)) {
-      console.warn('Refused to set unsafe header "' + header + '"');
-      return;
-    }
-    if (sendFlag) {
-      throw "INVALID_STATE_ERR: send flag is true";
-    }
-    headers[header] = value;
-  };
-
-  /**
-   * Gets a header from the server response.
-   *
-   * @param string header Name of header to get.
-   * @return string Text of the header or null if it doesn't exist.
-   */
-  this.getResponseHeader = function(header) {
-    if (typeof header === "string"
-      && this.readyState > this.OPENED
-      && response.headers[header.toLowerCase()]
-      && !errorFlag
-    ) {
-      return response.headers[header.toLowerCase()];
-    }
-
-    return null;
-  };
-
-  /**
-   * Gets all the response headers.
-   *
-   * @return string A string with all response headers separated by CR+LF
-   */
-  this.getAllResponseHeaders = function() {
-    if (this.readyState < this.HEADERS_RECEIVED || errorFlag) {
-      return "";
-    }
-    var result = "";
-
-    for (var i in response.headers) {
-      // Cookie headers are excluded
-      if (i !== "set-cookie" && i !== "set-cookie2") {
-        result += i + ": " + response.headers[i] + "\r\n";
-      }
-    }
-    return result.substr(0, result.length - 2);
-  };
-
-  /**
-   * Gets a request header
-   *
-   * @param string name Name of header to get
-   * @return string Returns the request header or empty string if not set
-   */
-  this.getRequestHeader = function(name) {
-    // @TODO Make this case insensitive
-    if (typeof name === "string" && headers[name]) {
-      return headers[name];
-    }
-
-    return "";
-  }
-
-  /**
-   * Sends the request to the server.
-   *
-   * @param string data Optional data to send as request body.
-   */
-  this.send = function(data) {
-    if (this.readyState != this.OPENED) {
-      throw "INVALID_STATE_ERR: connection must be opened before send() is called";
-    }
-
-    if (sendFlag) {
-      throw "INVALID_STATE_ERR: send has already been called";
-    }
-
-    var ssl = false, local = false;
-    var url = Url.parse(settings.url);
-
-    // Determine the server
-    switch (url.protocol) {
-      case 'https:':
-        ssl = true;
-        // SSL & non-SSL both need host, no break here.
-      case 'http:':
-        var host = url.hostname;
-        break;
-
-      case 'file:':
-        local = true;
-        break;
-
-      case undefined:
-      case '':
-        var host = "localhost";
-        break;
-
-      default:
-        throw "Protocol not supported.";
-    }
-
-    // Load files off the local filesystem (file://)
-    if (local) {
-      if (settings.method !== "GET") {
-        throw "XMLHttpRequest: Only GET method is supported";
-      }
-
-      if (settings.async) {
-        fs.readFile(url.pathname, 'utf8', function(error, data) {
-          if (error) {
-            self.handleError(error);
-          } else {
-            self.status = 200;
-            self.responseText = data;
-            setState(self.DONE);
-          }
-        });
-      } else {
-        try {
-          this.responseText = fs.readFileSync(url.pathname, 'utf8');
-          this.status = 200;
-          setState(self.DONE);
-        } catch(e) {
-          this.handleError(e);
-        }
-      }
-
-      return;
-    }
-
-    // Default to port 80. If accessing localhost on another port be sure
-    // to use http://localhost:port/path
-    var port = url.port || (ssl ? 443 : 80);
-    // Add query string if one is used
-    var uri = url.pathname + (url.search ? url.search : '');
-
-    // Set the Host header or the server may reject the request
-    headers["Host"] = host;
-    if (!((ssl && port === 443) || port === 80)) {
-      headers["Host"] += ':' + url.port;
-    }
-
-    // Set Basic Auth if necessary
-    if (settings.user) {
-      if (typeof settings.password == "undefined") {
-        settings.password = "";
-      }
-      var authBuf = new Buffer(settings.user + ":" + settings.password);
-      headers["Authorization"] = "Basic " + authBuf.toString("base64");
-    }
-
-    // Set content length header
-    if (settings.method === "GET" || settings.method === "HEAD") {
-      data = null;
-    } else if (data) {
-      headers["Content-Length"] = Buffer.byteLength(data);
-
-      if (!headers["Content-Type"]) {
-        headers["Content-Type"] = "text/plain;charset=UTF-8";
-      }
-    } else if (settings.method === "POST") {
-      // For a post with no data set Content-Length: 0.
-      // This is required by buggy servers that don't meet the specs.
-      headers["Content-Length"] = 0;
-    }
-
-    var options = {
-      host: host,
-      port: port,
-      path: uri,
-      method: settings.method,
-      headers: headers,
-      agent: false
-    };
-
-    // Reset error flag
-    errorFlag = false;
-
-    // Handle async requests
-    if (settings.async) {
-      // Use the proper protocol
-      var doRequest = ssl ? https.request : http.request;
-
-      // Request is being sent, set send flag
-      sendFlag = true;
-
-      // As per spec, this is called here for historical reasons.
-      self.dispatchEvent("readystatechange");
-
-      // Create the request
-      request = doRequest(options, function(resp) {
-        response = resp;
-        response.setEncoding("utf8");
-
-        setState(self.HEADERS_RECEIVED);
-        self.status = response.statusCode;
-
-        response.on('data', function(chunk) {
-          // Make sure there's some data
-          if (chunk) {
-            self.responseText += chunk;
-          }
-          // Don't emit state changes if the connection has been aborted.
-          if (sendFlag) {
-            setState(self.LOADING);
-          }
-        });
-
-        response.on('end', function() {
-          if (sendFlag) {
-            // Discard the 'end' event if the connection has been aborted
-            setState(self.DONE);
-            sendFlag = false;
-          }
-        });
-
-        response.on('error', function(error) {
-          self.handleError(error);
-        });
-      }).on('error', function(error) {
-        self.handleError(error);
-      });
-
-      // Node 0.4 and later won't accept empty data. Make sure it's needed.
-      if (data) {
-        request.write(data);
-      }
-
-      request.end();
-
-      self.dispatchEvent("loadstart");
-    } else { // Synchronous
-      // Create a temporary file for communication with the other Node process
-      var syncFile = ".node-xmlhttprequest-sync-" + process.pid;
-      fs.writeFileSync(syncFile, "", "utf8");
-      // The async request the other Node process executes
-      var execString = "var http = require('http'), https = require('https'), fs = require('fs');"
-        + "var doRequest = http" + (ssl ? "s" : "") + ".request;"
-        + "var options = " + JSON.stringify(options) + ";"
-        + "var responseText = '';"
-        + "var req = doRequest(options, function(response) {"
-        + "response.setEncoding('utf8');"
-        + "response.on('data', function(chunk) {"
-        + "responseText += chunk;"
-        + "});"
-        + "response.on('end', function() {"
-        + "fs.writeFileSync('" + syncFile + "', 'NODE-XMLHTTPREQUEST-STATUS:' + response.statusCode + ',' + responseText, 'utf8');"
-        + "});"
-        + "response.on('error', function(error) {"
-        + "fs.writeFileSync('" + syncFile + "', 'NODE-XMLHTTPREQUEST-ERROR:' + JSON.stringify(error), 'utf8');"
-        + "});"
-        + "}).on('error', function(error) {"
-        + "fs.writeFileSync('" + syncFile + "', 'NODE-XMLHTTPREQUEST-ERROR:' + JSON.stringify(error), 'utf8');"
-        + "});"
-        + (data ? "req.write('" + data.replace(/'/g, "\\'") + "');":"")
-        + "req.end();";
-      // Start the other Node Process, executing this string
-      syncProc = spawn(process.argv[0], ["-e", execString]);
-      while((self.responseText = fs.readFileSync(syncFile, 'utf8')) == "") {
-        // Wait while the file is empty
-      }
-      // Kill the child process once the file has data
-      syncProc.stdin.end();
-      // Remove the temporary file
-      fs.unlinkSync(syncFile);
-      if (self.responseText.match(/^NODE-XMLHTTPREQUEST-ERROR:/)) {
-        // If the file returned an error, handle it
-        var errorObj = self.responseText.replace(/^NODE-XMLHTTPREQUEST-ERROR:/, "");
-        self.handleError(errorObj);
-      } else {
-        // If the file returned okay, parse its data and move to the DONE state
-        self.status = self.responseText.replace(/^NODE-XMLHTTPREQUEST-STATUS:([0-9]*),.*/, "$1");
-        self.responseText = self.responseText.replace(/^NODE-XMLHTTPREQUEST-STATUS:[0-9]*,(.*)/, "$1");
-        setState(self.DONE);
-      }
-    }
-  };
-
-  /**
-   * Called when an error is encountered to deal with it.
-   */
-  this.handleError = function(error) {
-    this.status = 503;
-    this.statusText = error;
-    this.responseText = error.stack;
-    errorFlag = true;
-    setState(this.DONE);
-  };
-
-  /**
-   * Aborts a request.
-   */
-  this.abort = function() {
-    if (request) {
-      request.abort();
-      request = null;
-    }
-
-    headers = defaultHeaders;
-    this.responseText = "";
-    this.responseXML = "";
-
-    errorFlag = true;
-
-    if (this.readyState !== this.UNSENT
-        && (this.readyState !== this.OPENED || sendFlag)
-        && this.readyState !== this.DONE) {
-      sendFlag = false;
-      setState(this.DONE);
-    }
-    this.readyState = this.UNSENT;
-  };
-
-  /**
-   * Adds an event listener. Preferred method of binding to events.
-   */
-  this.addEventListener = function(event, callback) {
-    if (!(event in listeners)) {
-      listeners[event] = [];
-    }
-    // Currently allows duplicate callbacks. Should it?
-    listeners[event].push(callback);
-  };
-
-  /**
-   * Remove an event callback that has already been bound.
-   * Only works on the matching funciton, cannot be a copy.
-   */
-  this.removeEventListener = function(event, callback) {
-    if (event in listeners) {
-      // Filter will return a new array with the callback removed
-      listeners[event] = listeners[event].filter(function(ev) {
-        return ev !== callback;
-      });
-    }
-  };
-
-  /**
-   * Dispatch any events, including both "on" methods and events attached using addEventListener.
-   */
-  this.dispatchEvent = function(event) {
-    if (typeof self["on" + event] === "function") {
-      self["on" + event]();
-    }
-    if (event in listeners) {
-      for (var i = 0, len = listeners[event].length; i < len; i++) {
-        listeners[event][i].call(self);
-      }
-    }
-  };
-
-  /**
-   * Changes readyState and calls onreadystatechange.
-   *
-   * @param int state New state
-   */
-  var setState = function(state) {
-    if (self.readyState !== state) {
-      self.readyState = state;
-
-      if (settings.async || self.readyState < self.OPENED || self.readyState === self.DONE) {
-        self.dispatchEvent("readystatechange");
-      }
-
-      if (self.readyState === self.DONE && !errorFlag) {
-        self.dispatchEvent("load");
-        // @TODO figure out InspectorInstrumentation::didLoadXHR(cookie)
-        self.dispatchEvent("loadend");
-      }
-    }
-  };
-};
-
-})(require("__browserify_process"),require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":13,"__browserify_process":5,"child_process":31,"fs":9,"http":32,"https":33,"url":7}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function() {
   var nodes, uritemplate, url, util,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -13107,7 +12060,246 @@ exports.XMLHttpRequest = function() {
 
 }).call(this);
 
-},{"./nodes":11,"./util":4,"uritemplate":34,"url":7}],21:[function(require,module,exports){
+},{"./nodes":11,"./util":4,"uritemplate":29,"url":7}],12:[function(require,module,exports){
+(function() {
+  var _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  this.composer = require('./composer');
+
+  this.constructor = require('./construct');
+
+  this.errors = require('./errors');
+
+  this.events = require('./events');
+
+  this.loader = require('./loader');
+
+  this.nodes = require('./nodes');
+
+  this.parser = require('./parser');
+
+  this.reader = require('./reader');
+
+  this.resolver = require('./resolver');
+
+  this.scanner = require('./scanner');
+
+  this.tokens = require('./tokens');
+
+  this.q = require('q');
+
+  this.FileError = (function(_super) {
+    __extends(FileError, _super);
+
+    function FileError() {
+      _ref = FileError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return FileError;
+
+  })(this.errors.MarkedYAMLError);
+
+  /*
+  Scan a RAML stream and produce scanning tokens.
+  */
+
+
+  this.scan = function(stream, location) {
+    var loader, _results;
+    loader = new exports.loader.Loader(stream, location, false);
+    _results = [];
+    while (loader.check_token()) {
+      _results.push(loader.get_token());
+    }
+    return _results;
+  };
+
+  /*
+  Parse a RAML stream and produce parsing events.
+  */
+
+
+  this.parse = function(stream, location) {
+    var loader, _results;
+    loader = new exports.loader.Loader(stream, location, false);
+    _results = [];
+    while (loader.check_event()) {
+      _results.push(loader.get_event());
+    }
+    return _results;
+  };
+
+  /*
+  Parse the first RAML document in a stream and produce the corresponding
+  representation tree.
+  */
+
+
+  this.compose = function(stream, validate, apply, join, location, parent) {
+    var loader;
+    if (validate == null) {
+      validate = true;
+    }
+    if (apply == null) {
+      apply = true;
+    }
+    if (join == null) {
+      join = true;
+    }
+    loader = new exports.loader.Loader(stream, location, validate, parent);
+    return loader.get_single_node(validate, apply, join);
+  };
+
+  /*
+  Parse the first RAML document in a stream and produce the corresponding
+  Javascript object.
+  */
+
+
+  this.load = function(stream, validate, location) {
+    var _this = this;
+    if (validate == null) {
+      validate = true;
+    }
+    return this.q.fcall(function() {
+      var loader;
+      loader = new exports.loader.Loader(stream, location, validate);
+      return loader.get_single_data();
+    });
+  };
+
+  /*
+  Parse the first RAML document in a stream and produce a list of
+  all the absolute URIs for all resources.
+  */
+
+
+  this.resources = function(stream, validate, location) {
+    var _this = this;
+    if (validate == null) {
+      validate = true;
+    }
+    return this.q.fcall(function() {
+      var loader;
+      loader = new exports.loader.Loader(stream, location, validate);
+      return loader.resources();
+    });
+  };
+
+  /*
+  Parse the first RAML document in a stream and produce the corresponding
+  Javascript object.
+  */
+
+
+  this.loadFile = function(file, validate) {
+    var _this = this;
+    if (validate == null) {
+      validate = true;
+    }
+    return this.q.fcall(function() {
+      var stream;
+      stream = _this.readFile(file);
+      return _this.load(stream, validate, file);
+    });
+  };
+
+  /*
+  Parse the first RAML document in a file and produce the corresponding
+  representation tree.
+  */
+
+
+  this.composeFile = function(file, validate, apply, join, parent) {
+    var stream;
+    if (validate == null) {
+      validate = true;
+    }
+    if (apply == null) {
+      apply = true;
+    }
+    if (join == null) {
+      join = true;
+    }
+    stream = this.readFile(file);
+    return this.compose(stream, validate, apply, join, file, parent);
+  };
+
+  /*
+  Parse the first RAML document in a file and produce a list of
+  all the absolute URIs for all resources.
+  */
+
+
+  this.resourcesFile = function(file, validate) {
+    var stream;
+    if (validate == null) {
+      validate = true;
+    }
+    stream = this.readFile(file);
+    return this.resources(stream, validate, file);
+  };
+
+  /*
+  Read file either locally or from the network.
+  */
+
+
+  this.readFile = function(file) {
+    var error, url;
+    url = require('url').parse(file);
+    if (url.protocol != null) {
+      if (!url.protocol.match(/^https?/i)) {
+        throw new exports.FileError("while reading " + file, null, "unknown protocol " + url.protocol, this.start_mark);
+      } else {
+        return this.fetchFile(file);
+      }
+    } else {
+      if (typeof window !== "undefined" && window !== null) {
+        return this.fetchFile(file);
+      } else {
+        try {
+          return require('fs').readFileSync(file).toString();
+        } catch (_error) {
+          error = _error;
+          throw new exports.FileError("while reading " + file, null, "cannot read " + file + " (" + error + ")", this.start_mark);
+        }
+      }
+    }
+  };
+
+  /*
+  Read file from the network.
+  */
+
+
+  this.fetchFile = function(file) {
+    var error, xhr;
+    if (typeof window !== "undefined" && window !== null) {
+      xhr = new XMLHttpRequest();
+    } else {
+      xhr = new (require('xmlhttprequest').XMLHttpRequest)();
+    }
+    try {
+      xhr.open('GET', file, false);
+      xhr.setRequestHeader('Accept', 'application/raml+yaml, */*');
+      xhr.send(null);
+      if ((typeof xhr.status === 'number' && xhr.status === 200) || (typeof xhr.status === 'string' && xhr.status.match(/^200/i))) {
+        return xhr.responseText;
+      }
+      throw new Error("HTTP " + xhr.status + " " + xhr.statusText);
+    } catch (_error) {
+      error = _error;
+      throw new exports.FileError("while fetching " + file, null, "cannot fetch " + file + " (" + error + ")", this.start_mark);
+    }
+  };
+
+}).call(this);
+
+},{"./composer":10,"./construct":14,"./errors":1,"./events":2,"./loader":17,"./nodes":11,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":30}],22:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, traits, uritemplate, url, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -14598,25 +13790,249 @@ exports.XMLHttpRequest = function() {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11,"./traits":22,"./util":4,"uritemplate":34,"url":7}],31:[function(require,module,exports){
-exports.spawn = function () {};
-exports.exec = function () {};
+},{"./errors":1,"./nodes":11,"./traits":23,"./util":4,"uritemplate":29,"url":7}],23:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, inflection, nodes, util, _ref, _ref1,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-},{}],33:[function(require,module,exports){
-var http = require('http');
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
 
-var https = module.exports;
+  nodes = require('./nodes');
 
-for (var key in http) {
-    if (http.hasOwnProperty(key)) https[key] = http[key];
-};
+  inflection = require('inflection');
 
-https.request = function (params, cb) {
-    if (!params) params = {};
-    params.scheme = 'https';
-    return http.request.call(this, params, cb);
-}
-},{"http":32}],34:[function(require,module,exports){
+  util = require('./util');
+
+  /*
+  The Traits throws these.
+  */
+
+
+  this.TraitError = (function(_super) {
+    __extends(TraitError, _super);
+
+    function TraitError() {
+      _ref = TraitError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return TraitError;
+
+  })(MarkedYAMLError);
+
+  /*
+  */
+
+
+  this.ParameterError = (function(_super) {
+    __extends(ParameterError, _super);
+
+    function ParameterError() {
+      _ref1 = ParameterError.__super__.constructor.apply(this, arguments);
+      return _ref1;
+    }
+
+    return ParameterError;
+
+  })(MarkedYAMLError);
+
+  /*
+  The Traits class deals with applying traits to resources according to the spec
+  */
+
+
+  this.Traits = (function() {
+    function Traits() {
+      this.declaredTraits = {};
+    }
+
+    Traits.prototype.load_traits = function(node) {
+      var allTraits,
+        _this = this;
+      if (this.has_property(node, /^traits$/)) {
+        allTraits = this.property_value(node, /^traits$/);
+        if (allTraits && typeof allTraits === "object") {
+          return allTraits.forEach(function(trait_item) {
+            if (trait_item && typeof trait_item === "object" && typeof trait_item.value === "object") {
+              return trait_item.value.forEach(function(trait) {
+                return _this.declaredTraits[trait[0].value] = trait;
+              });
+            }
+          });
+        }
+      }
+    };
+
+    Traits.prototype.has_traits = function(node) {
+      if (this.declaredTraits.length === 0 && this.has_property(node, /^traits$/)) {
+        this.load_traits(node);
+      }
+      return Object.keys(this.declaredTraits).length > 0;
+    };
+
+    Traits.prototype.get_trait = function(traitName) {
+      if (traitName in this.declaredTraits) {
+        return this.declaredTraits[traitName][1];
+      }
+      return null;
+    };
+
+    Traits.prototype.apply_traits = function(node, resourceUri, removeQs) {
+      var resources,
+        _this = this;
+      if (resourceUri == null) {
+        resourceUri = "";
+      }
+      if (removeQs == null) {
+        removeQs = true;
+      }
+      if (!util.isMapping(node)) {
+        return;
+      }
+      if (this.has_traits(node)) {
+        resources = this.child_resources(node);
+        return resources.forEach(function(resource) {
+          return _this.apply_traits_to_resource(resourceUri + resource[0].value, resource[1], removeQs);
+        });
+      }
+    };
+
+    Traits.prototype.apply_traits_to_resource = function(resourceUri, resource, removeQs) {
+      var methods, uses,
+        _this = this;
+      if (!util.isMapping(resource)) {
+        return;
+      }
+      methods = this.child_methods(resource);
+      if (this.has_property(resource, /^is$/)) {
+        uses = this.property_value(resource, /^is$/);
+        uses.forEach(function(use) {
+          return methods.forEach(function(method) {
+            return _this.apply_trait(resourceUri, method, use);
+          });
+        });
+      }
+      methods.forEach(function(method) {
+        if (_this.has_property(method[1], /^is$/)) {
+          uses = _this.property_value(method[1], /^is$/);
+          return uses.forEach(function(use) {
+            return _this.apply_trait(resourceUri, method, use);
+          });
+        }
+      });
+      if (removeQs) {
+        resource.remove_question_mark_properties();
+      }
+      return this.apply_traits(resource, resourceUri, removeQs);
+    };
+
+    Traits.prototype.apply_trait = function(resourceUri, method, useKey) {
+      var plainParameters, temp, trait, traitName;
+      traitName = this.key_or_value(useKey);
+      if (!(trait = this.get_trait(traitName))) {
+        throw new exports.TraitError('while applying trait', null, "there is no trait named " + traitName, useKey.start_mark);
+      }
+      plainParameters = this.get_parameters_from_is_key(resourceUri, method[0].value, useKey);
+      temp = trait.cloneForTrait();
+      this.apply_parameters(temp, plainParameters, useKey);
+      this.apply_default_media_type_to_method(temp);
+      temp.combine(method[1]);
+      return method[1] = temp;
+    };
+
+    Traits.prototype.apply_parameters = function(resource, parameters, useKey) {
+      var parameterName, usedParameters, _results;
+      this._apply_parameters(resource, parameters, useKey, usedParameters = {
+        resourcePath: true,
+        methodName: true
+      });
+      _results = [];
+      for (parameterName in parameters) {
+        if (!usedParameters[parameterName]) {
+          throw new exports.ParameterError('while applying parameters', null, "unused parameter: " + parameterName, useKey.start_mark);
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
+    };
+
+    Traits.prototype._apply_parameters = function(resource, parameters, useKey, usedParameters) {
+      var parameterUse,
+        _this = this;
+      if (!resource) {
+        return;
+      }
+      if (util.isString(resource)) {
+        if (parameterUse = resource.value.match(/<<\s*([^\|\s>]+)\s*(\|.*)?\s*>>/g)) {
+          parameterUse.forEach(function(parameter) {
+            var method, parameterName, value, _ref2, _ref3;
+            parameterName = parameter != null ? (_ref2 = parameter.trim()) != null ? _ref2.replace(/[<>]+/g, '').trim() : void 0 : void 0;
+            _ref3 = parameterName.split(/\s*\|\s*/), parameterName = _ref3[0], method = _ref3[1];
+            if (!(parameterName in parameters)) {
+              throw new exports.ParameterError('while applying parameters', null, "value was not provided for parameter: " + parameterName, useKey.start_mark);
+            }
+            value = parameters[parameterName];
+            usedParameters[parameterName] = true;
+            if (method) {
+              if (method.match(/!\s*singularize/)) {
+                value = inflection.singularize(value);
+              } else if (method.match(/!\s*pluralize/)) {
+                value = inflection.pluralize(value);
+              } else {
+                throw new exports.ParameterError('while validating parameter', null, 'unknown function applied to parameter', resource.start_mark);
+              }
+            }
+            return resource.value = resource.value.replace(parameter, value);
+          });
+        }
+        return;
+      }
+      if (util.isSequence(resource)) {
+        resource.value.forEach(function(node) {
+          return _this._apply_parameters(node, parameters, useKey, usedParameters);
+        });
+        return;
+      }
+      if (util.isMapping(resource)) {
+        resource.value.forEach(function(property) {
+          _this._apply_parameters(property[0], parameters, useKey, usedParameters);
+          return _this._apply_parameters(property[1], parameters, useKey, usedParameters);
+        });
+      }
+    };
+
+    Traits.prototype.get_parameters_from_is_key = function(resourceUri, methodName, typeKey) {
+      var parameter, parameters, reserved, result, _i, _len, _ref2;
+      result = {};
+      reserved = {
+        methodName: methodName,
+        resourcePath: resourceUri.replace(/\/\/*/g, '/')
+      };
+      if (util.isMapping(typeKey)) {
+        parameters = this.value_or_undefined(typeKey);
+        if (util.isMapping(parameters[0][1])) {
+          _ref2 = parameters[0][1].value;
+          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+            parameter = _ref2[_i];
+            if (parameter[0].value in reserved) {
+              throw new exports.TraitError('while applying parameters', null, "invalid parameter name: " + parameter[0].value + " is reserved", parameter[0].start_mark);
+            }
+            result[parameter[0].value] = parameter[1].value;
+          }
+        }
+      }
+      return util.extend(result, reserved);
+    };
+
+    return Traits;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./nodes":11,"./util":4,"inflection":31}],29:[function(require,module,exports){
 (function(global){/*global unescape, module, define, window, global*/
 
 /*
@@ -15504,7 +14920,593 @@ var UriTemplate = (function () {
 ));
 
 })(window)
-},{}],35:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
+(function(process,Buffer){/**
+ * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
+ *
+ * This can be used with JS designed for browsers to improve reuse of code and
+ * allow the use of existing libraries.
+ *
+ * Usage: include("XMLHttpRequest.js") and use XMLHttpRequest per W3C specs.
+ *
+ * @author Dan DeFelippi <dan@driverdan.com>
+ * @contributor David Ellis <d.f.ellis@ieee.org>
+ * @license MIT
+ */
+
+var Url = require("url")
+  , spawn = require("child_process").spawn
+  , fs = require('fs');
+
+exports.XMLHttpRequest = function() {
+  /**
+   * Private variables
+   */
+  var self = this;
+  var http = require('http');
+  var https = require('https');
+
+  // Holds http.js objects
+  var client;
+  var request;
+  var response;
+
+  // Request settings
+  var settings = {};
+
+  // Disable header blacklist.
+  // Not part of XHR specs.
+  var disableHeaderCheck = false;
+
+  // Set some default headers
+  var defaultHeaders = {
+    "User-Agent": "node-XMLHttpRequest",
+    "Accept": "*/*",
+  };
+
+  var headers = defaultHeaders;
+
+  // These headers are not user setable.
+  // The following are allowed but banned in the spec:
+  // * user-agent
+  var forbiddenRequestHeaders = [
+    "accept-charset",
+    "accept-encoding",
+    "access-control-request-headers",
+    "access-control-request-method",
+    "connection",
+    "content-length",
+    "content-transfer-encoding",
+    "cookie",
+    "cookie2",
+    "date",
+    "expect",
+    "host",
+    "keep-alive",
+    "origin",
+    "referer",
+    "te",
+    "trailer",
+    "transfer-encoding",
+    "upgrade",
+    "via"
+  ];
+
+  // These request methods are not allowed
+  var forbiddenRequestMethods = [
+    "TRACE",
+    "TRACK",
+    "CONNECT"
+  ];
+
+  // Send flag
+  var sendFlag = false;
+  // Error flag, used when errors occur or abort is called
+  var errorFlag = false;
+
+  // Event listeners
+  var listeners = {};
+
+  /**
+   * Constants
+   */
+
+  this.UNSENT = 0;
+  this.OPENED = 1;
+  this.HEADERS_RECEIVED = 2;
+  this.LOADING = 3;
+  this.DONE = 4;
+
+  /**
+   * Public vars
+   */
+
+  // Current state
+  this.readyState = this.UNSENT;
+
+  // default ready state change handler in case one is not set or is set late
+  this.onreadystatechange = null;
+
+  // Result & response
+  this.responseText = "";
+  this.responseXML = "";
+  this.status = null;
+  this.statusText = null;
+
+  /**
+   * Private methods
+   */
+
+  /**
+   * Check if the specified header is allowed.
+   *
+   * @param string header Header to validate
+   * @return boolean False if not allowed, otherwise true
+   */
+  var isAllowedHttpHeader = function(header) {
+    return disableHeaderCheck || (header && forbiddenRequestHeaders.indexOf(header.toLowerCase()) === -1);
+  };
+
+  /**
+   * Check if the specified method is allowed.
+   *
+   * @param string method Request method to validate
+   * @return boolean False if not allowed, otherwise true
+   */
+  var isAllowedHttpMethod = function(method) {
+    return (method && forbiddenRequestMethods.indexOf(method) === -1);
+  };
+
+  /**
+   * Public methods
+   */
+
+  /**
+   * Open the connection. Currently supports local server requests.
+   *
+   * @param string method Connection method (eg GET, POST)
+   * @param string url URL for the connection.
+   * @param boolean async Asynchronous connection. Default is true.
+   * @param string user Username for basic authentication (optional)
+   * @param string password Password for basic authentication (optional)
+   */
+  this.open = function(method, url, async, user, password) {
+    this.abort();
+    errorFlag = false;
+
+    // Check for valid request method
+    if (!isAllowedHttpMethod(method)) {
+      throw "SecurityError: Request method not allowed";
+      return;
+    }
+
+    settings = {
+      "method": method,
+      "url": url.toString(),
+      "async": (typeof async !== "boolean" ? true : async),
+      "user": user || null,
+      "password": password || null
+    };
+
+    setState(this.OPENED);
+  };
+
+  /**
+   * Disables or enables isAllowedHttpHeader() check the request. Enabled by default.
+   * This does not conform to the W3C spec.
+   *
+   * @param boolean state Enable or disable header checking.
+   */
+  this.setDisableHeaderCheck = function(state) {
+    disableHeaderCheck = state;
+  }
+
+  /**
+   * Sets a header for the request.
+   *
+   * @param string header Header name
+   * @param string value Header value
+   */
+  this.setRequestHeader = function(header, value) {
+    if (this.readyState != this.OPENED) {
+      throw "INVALID_STATE_ERR: setRequestHeader can only be called when state is OPEN";
+    }
+    if (!isAllowedHttpHeader(header)) {
+      console.warn('Refused to set unsafe header "' + header + '"');
+      return;
+    }
+    if (sendFlag) {
+      throw "INVALID_STATE_ERR: send flag is true";
+    }
+    headers[header] = value;
+  };
+
+  /**
+   * Gets a header from the server response.
+   *
+   * @param string header Name of header to get.
+   * @return string Text of the header or null if it doesn't exist.
+   */
+  this.getResponseHeader = function(header) {
+    if (typeof header === "string"
+      && this.readyState > this.OPENED
+      && response.headers[header.toLowerCase()]
+      && !errorFlag
+    ) {
+      return response.headers[header.toLowerCase()];
+    }
+
+    return null;
+  };
+
+  /**
+   * Gets all the response headers.
+   *
+   * @return string A string with all response headers separated by CR+LF
+   */
+  this.getAllResponseHeaders = function() {
+    if (this.readyState < this.HEADERS_RECEIVED || errorFlag) {
+      return "";
+    }
+    var result = "";
+
+    for (var i in response.headers) {
+      // Cookie headers are excluded
+      if (i !== "set-cookie" && i !== "set-cookie2") {
+        result += i + ": " + response.headers[i] + "\r\n";
+      }
+    }
+    return result.substr(0, result.length - 2);
+  };
+
+  /**
+   * Gets a request header
+   *
+   * @param string name Name of header to get
+   * @return string Returns the request header or empty string if not set
+   */
+  this.getRequestHeader = function(name) {
+    // @TODO Make this case insensitive
+    if (typeof name === "string" && headers[name]) {
+      return headers[name];
+    }
+
+    return "";
+  }
+
+  /**
+   * Sends the request to the server.
+   *
+   * @param string data Optional data to send as request body.
+   */
+  this.send = function(data) {
+    if (this.readyState != this.OPENED) {
+      throw "INVALID_STATE_ERR: connection must be opened before send() is called";
+    }
+
+    if (sendFlag) {
+      throw "INVALID_STATE_ERR: send has already been called";
+    }
+
+    var ssl = false, local = false;
+    var url = Url.parse(settings.url);
+
+    // Determine the server
+    switch (url.protocol) {
+      case 'https:':
+        ssl = true;
+        // SSL & non-SSL both need host, no break here.
+      case 'http:':
+        var host = url.hostname;
+        break;
+
+      case 'file:':
+        local = true;
+        break;
+
+      case undefined:
+      case '':
+        var host = "localhost";
+        break;
+
+      default:
+        throw "Protocol not supported.";
+    }
+
+    // Load files off the local filesystem (file://)
+    if (local) {
+      if (settings.method !== "GET") {
+        throw "XMLHttpRequest: Only GET method is supported";
+      }
+
+      if (settings.async) {
+        fs.readFile(url.pathname, 'utf8', function(error, data) {
+          if (error) {
+            self.handleError(error);
+          } else {
+            self.status = 200;
+            self.responseText = data;
+            setState(self.DONE);
+          }
+        });
+      } else {
+        try {
+          this.responseText = fs.readFileSync(url.pathname, 'utf8');
+          this.status = 200;
+          setState(self.DONE);
+        } catch(e) {
+          this.handleError(e);
+        }
+      }
+
+      return;
+    }
+
+    // Default to port 80. If accessing localhost on another port be sure
+    // to use http://localhost:port/path
+    var port = url.port || (ssl ? 443 : 80);
+    // Add query string if one is used
+    var uri = url.pathname + (url.search ? url.search : '');
+
+    // Set the Host header or the server may reject the request
+    headers["Host"] = host;
+    if (!((ssl && port === 443) || port === 80)) {
+      headers["Host"] += ':' + url.port;
+    }
+
+    // Set Basic Auth if necessary
+    if (settings.user) {
+      if (typeof settings.password == "undefined") {
+        settings.password = "";
+      }
+      var authBuf = new Buffer(settings.user + ":" + settings.password);
+      headers["Authorization"] = "Basic " + authBuf.toString("base64");
+    }
+
+    // Set content length header
+    if (settings.method === "GET" || settings.method === "HEAD") {
+      data = null;
+    } else if (data) {
+      headers["Content-Length"] = Buffer.byteLength(data);
+
+      if (!headers["Content-Type"]) {
+        headers["Content-Type"] = "text/plain;charset=UTF-8";
+      }
+    } else if (settings.method === "POST") {
+      // For a post with no data set Content-Length: 0.
+      // This is required by buggy servers that don't meet the specs.
+      headers["Content-Length"] = 0;
+    }
+
+    var options = {
+      host: host,
+      port: port,
+      path: uri,
+      method: settings.method,
+      headers: headers,
+      agent: false
+    };
+
+    // Reset error flag
+    errorFlag = false;
+
+    // Handle async requests
+    if (settings.async) {
+      // Use the proper protocol
+      var doRequest = ssl ? https.request : http.request;
+
+      // Request is being sent, set send flag
+      sendFlag = true;
+
+      // As per spec, this is called here for historical reasons.
+      self.dispatchEvent("readystatechange");
+
+      // Create the request
+      request = doRequest(options, function(resp) {
+        response = resp;
+        response.setEncoding("utf8");
+
+        setState(self.HEADERS_RECEIVED);
+        self.status = response.statusCode;
+
+        response.on('data', function(chunk) {
+          // Make sure there's some data
+          if (chunk) {
+            self.responseText += chunk;
+          }
+          // Don't emit state changes if the connection has been aborted.
+          if (sendFlag) {
+            setState(self.LOADING);
+          }
+        });
+
+        response.on('end', function() {
+          if (sendFlag) {
+            // Discard the 'end' event if the connection has been aborted
+            setState(self.DONE);
+            sendFlag = false;
+          }
+        });
+
+        response.on('error', function(error) {
+          self.handleError(error);
+        });
+      }).on('error', function(error) {
+        self.handleError(error);
+      });
+
+      // Node 0.4 and later won't accept empty data. Make sure it's needed.
+      if (data) {
+        request.write(data);
+      }
+
+      request.end();
+
+      self.dispatchEvent("loadstart");
+    } else { // Synchronous
+      // Create a temporary file for communication with the other Node process
+      var syncFile = ".node-xmlhttprequest-sync-" + process.pid;
+      fs.writeFileSync(syncFile, "", "utf8");
+      // The async request the other Node process executes
+      var execString = "var http = require('http'), https = require('https'), fs = require('fs');"
+        + "var doRequest = http" + (ssl ? "s" : "") + ".request;"
+        + "var options = " + JSON.stringify(options) + ";"
+        + "var responseText = '';"
+        + "var req = doRequest(options, function(response) {"
+        + "response.setEncoding('utf8');"
+        + "response.on('data', function(chunk) {"
+        + "responseText += chunk;"
+        + "});"
+        + "response.on('end', function() {"
+        + "fs.writeFileSync('" + syncFile + "', 'NODE-XMLHTTPREQUEST-STATUS:' + response.statusCode + ',' + responseText, 'utf8');"
+        + "});"
+        + "response.on('error', function(error) {"
+        + "fs.writeFileSync('" + syncFile + "', 'NODE-XMLHTTPREQUEST-ERROR:' + JSON.stringify(error), 'utf8');"
+        + "});"
+        + "}).on('error', function(error) {"
+        + "fs.writeFileSync('" + syncFile + "', 'NODE-XMLHTTPREQUEST-ERROR:' + JSON.stringify(error), 'utf8');"
+        + "});"
+        + (data ? "req.write('" + data.replace(/'/g, "\\'") + "');":"")
+        + "req.end();";
+      // Start the other Node Process, executing this string
+      syncProc = spawn(process.argv[0], ["-e", execString]);
+      while((self.responseText = fs.readFileSync(syncFile, 'utf8')) == "") {
+        // Wait while the file is empty
+      }
+      // Kill the child process once the file has data
+      syncProc.stdin.end();
+      // Remove the temporary file
+      fs.unlinkSync(syncFile);
+      if (self.responseText.match(/^NODE-XMLHTTPREQUEST-ERROR:/)) {
+        // If the file returned an error, handle it
+        var errorObj = self.responseText.replace(/^NODE-XMLHTTPREQUEST-ERROR:/, "");
+        self.handleError(errorObj);
+      } else {
+        // If the file returned okay, parse its data and move to the DONE state
+        self.status = self.responseText.replace(/^NODE-XMLHTTPREQUEST-STATUS:([0-9]*),.*/, "$1");
+        self.responseText = self.responseText.replace(/^NODE-XMLHTTPREQUEST-STATUS:[0-9]*,(.*)/, "$1");
+        setState(self.DONE);
+      }
+    }
+  };
+
+  /**
+   * Called when an error is encountered to deal with it.
+   */
+  this.handleError = function(error) {
+    this.status = 503;
+    this.statusText = error;
+    this.responseText = error.stack;
+    errorFlag = true;
+    setState(this.DONE);
+  };
+
+  /**
+   * Aborts a request.
+   */
+  this.abort = function() {
+    if (request) {
+      request.abort();
+      request = null;
+    }
+
+    headers = defaultHeaders;
+    this.responseText = "";
+    this.responseXML = "";
+
+    errorFlag = true;
+
+    if (this.readyState !== this.UNSENT
+        && (this.readyState !== this.OPENED || sendFlag)
+        && this.readyState !== this.DONE) {
+      sendFlag = false;
+      setState(this.DONE);
+    }
+    this.readyState = this.UNSENT;
+  };
+
+  /**
+   * Adds an event listener. Preferred method of binding to events.
+   */
+  this.addEventListener = function(event, callback) {
+    if (!(event in listeners)) {
+      listeners[event] = [];
+    }
+    // Currently allows duplicate callbacks. Should it?
+    listeners[event].push(callback);
+  };
+
+  /**
+   * Remove an event callback that has already been bound.
+   * Only works on the matching funciton, cannot be a copy.
+   */
+  this.removeEventListener = function(event, callback) {
+    if (event in listeners) {
+      // Filter will return a new array with the callback removed
+      listeners[event] = listeners[event].filter(function(ev) {
+        return ev !== callback;
+      });
+    }
+  };
+
+  /**
+   * Dispatch any events, including both "on" methods and events attached using addEventListener.
+   */
+  this.dispatchEvent = function(event) {
+    if (typeof self["on" + event] === "function") {
+      self["on" + event]();
+    }
+    if (event in listeners) {
+      for (var i = 0, len = listeners[event].length; i < len; i++) {
+        listeners[event][i].call(self);
+      }
+    }
+  };
+
+  /**
+   * Changes readyState and calls onreadystatechange.
+   *
+   * @param int state New state
+   */
+  var setState = function(state) {
+    if (self.readyState !== state) {
+      self.readyState = state;
+
+      if (settings.async || self.readyState < self.OPENED || self.readyState === self.DONE) {
+        self.dispatchEvent("readystatechange");
+      }
+
+      if (self.readyState === self.DONE && !errorFlag) {
+        self.dispatchEvent("load");
+        // @TODO figure out InspectorInstrumentation::didLoadXHR(cookie)
+        self.dispatchEvent("loadend");
+      }
+    }
+  };
+};
+
+})(require("__browserify_process"),require("__browserify_buffer").Buffer)
+},{"__browserify_buffer":13,"__browserify_process":5,"child_process":32,"fs":9,"http":33,"https":34,"url":7}],32:[function(require,module,exports){
+exports.spawn = function () {};
+exports.exec = function () {};
+
+},{}],34:[function(require,module,exports){
+var http = require('http');
+
+var https = module.exports;
+
+for (var key in http) {
+    if (http.hasOwnProperty(key)) https[key] = http[key];
+};
+
+https.request = function (params, cb) {
+    if (!params) params = {};
+    params.scheme = 'https';
+    return http.request.call(this, params, cb);
+}
+},{"http":33}],31:[function(require,module,exports){
+module.exports = require( './lib/inflection' );
+},{"./lib/inflection":35}],36:[function(require,module,exports){
 (function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
 
 var EventEmitter = exports.EventEmitter = process.EventEmitter;
@@ -15701,7 +15703,7 @@ EventEmitter.listenerCount = function(emitter, type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":5}],32:[function(require,module,exports){
+},{"__browserify_process":5}],33:[function(require,module,exports){
 var http = module.exports;
 var EventEmitter = require('events').EventEmitter;
 var Request = require('./lib/request');
@@ -15763,9 +15765,7 @@ var xhrHttp = (function () {
     }
 })();
 
-},{"./lib/request":36,"events":35}],29:[function(require,module,exports){
-module.exports = require( './lib/inflection' );
-},{"./lib/inflection":37}],37:[function(require,module,exports){
+},{"./lib/request":37,"events":36}],35:[function(require,module,exports){
 /*!
  * inflection
  * Copyright(c) 2011 Ben Lin <ben@dreamerslab.com>
@@ -16423,7 +16423,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":35,"util":39}],39:[function(require,module,exports){
+},{"events":36,"util":39}],39:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -16770,7 +16770,7 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":35}],40:[function(require,module,exports){
+},{"events":36}],40:[function(require,module,exports){
 var Stream = require('stream');
 var util = require('util');
 
@@ -16892,64 +16892,7 @@ var isArray = Array.isArray || function (xs) {
     return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{"stream":38,"util":39}],41:[function(require,module,exports){
-;(function () {
-
-  var
-    object = typeof exports != 'undefined' ? exports : this, // #8: web workers
-    chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=',
-    INVALID_CHARACTER_ERR = (function () {
-      // fabricate a suitable error object
-      try { document.createElement('$'); }
-      catch (error) { return error; }}());
-
-  // encoder
-  // [https://gist.github.com/999166] by [https://github.com/nignag]
-  object.btoa || (
-  object.btoa = function (input) {
-    for (
-      // initialize result and counter
-      var block, charCode, idx = 0, map = chars, output = '';
-      // if the next input index does not exist:
-      //   change the mapping table to "="
-      //   check if d has no fractional digits
-      input.charAt(idx | 0) || (map = '=', idx % 1);
-      // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
-      output += map.charAt(63 & block >> 8 - idx % 1 * 8)
-    ) {
-      charCode = input.charCodeAt(idx += 3/4);
-      if (charCode > 0xFF) throw INVALID_CHARACTER_ERR;
-      block = block << 8 | charCode;
-    }
-    return output;
-  });
-
-  // decoder
-  // [https://gist.github.com/1020396] by [https://github.com/atk]
-  object.atob || (
-  object.atob = function (input) {
-    input = input.replace(/=+$/, '')
-    if (input.length % 4 == 1) throw INVALID_CHARACTER_ERR;
-    for (
-      // initialize result and counters
-      var bc = 0, bs, buffer, idx = 0, output = '';
-      // get next character
-      buffer = input.charAt(idx++);
-      // character found in table? initialize bit storage and add its ascii value;
-      ~buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer,
-        // and if not first of each 4 characters,
-        // convert the first 8 bits to one ascii character
-        bc++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0
-    ) {
-      // try to find character in table (0-63, not found => -1)
-      buffer = chars.indexOf(buffer);
-    }
-    return output;
-  });
-
-}());
-
-},{}],36:[function(require,module,exports){
+},{"stream":38,"util":39}],37:[function(require,module,exports){
 var Stream = require('stream');
 var Response = require('./response');
 var concatStream = require('concat-stream');
@@ -17083,7 +17026,64 @@ var indexOf = function (xs, x) {
     return -1;
 };
 
-},{"./response":40,"Base64":41,"concat-stream":42,"stream":38,"util":39}],42:[function(require,module,exports){
+},{"./response":40,"Base64":42,"concat-stream":41,"stream":38,"util":39}],42:[function(require,module,exports){
+;(function () {
+
+  var
+    object = typeof exports != 'undefined' ? exports : this, // #8: web workers
+    chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=',
+    INVALID_CHARACTER_ERR = (function () {
+      // fabricate a suitable error object
+      try { document.createElement('$'); }
+      catch (error) { return error; }}());
+
+  // encoder
+  // [https://gist.github.com/999166] by [https://github.com/nignag]
+  object.btoa || (
+  object.btoa = function (input) {
+    for (
+      // initialize result and counter
+      var block, charCode, idx = 0, map = chars, output = '';
+      // if the next input index does not exist:
+      //   change the mapping table to "="
+      //   check if d has no fractional digits
+      input.charAt(idx | 0) || (map = '=', idx % 1);
+      // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
+      output += map.charAt(63 & block >> 8 - idx % 1 * 8)
+    ) {
+      charCode = input.charCodeAt(idx += 3/4);
+      if (charCode > 0xFF) throw INVALID_CHARACTER_ERR;
+      block = block << 8 | charCode;
+    }
+    return output;
+  });
+
+  // decoder
+  // [https://gist.github.com/1020396] by [https://github.com/atk]
+  object.atob || (
+  object.atob = function (input) {
+    input = input.replace(/=+$/, '')
+    if (input.length % 4 == 1) throw INVALID_CHARACTER_ERR;
+    for (
+      // initialize result and counters
+      var bc = 0, bs, buffer, idx = 0, output = '';
+      // get next character
+      buffer = input.charAt(idx++);
+      // character found in table? initialize bit storage and add its ascii value;
+      ~buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer,
+        // and if not first of each 4 characters,
+        // convert the first 8 bits to one ascii character
+        bc++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0
+    ) {
+      // try to find character in table (0-63, not found => -1)
+      buffer = chars.indexOf(buffer);
+    }
+    return output;
+  });
+
+}());
+
+},{}],41:[function(require,module,exports){
 var stream = require('stream')
 var bops = require('bops')
 var util = require('util')
@@ -17464,45 +17464,7 @@ function get(target) {
   return out
 }
 
-},{}],45:[function(require,module,exports){
-module.exports = to
-
-var base64 = require('base64-js')
-  , toutf8 = require('to-utf8')
-
-var encoders = {
-    hex: to_hex
-  , utf8: to_utf
-  , base64: to_base64
-}
-
-function to(buf, encoding) {
-  return encoders[encoding || 'utf8'](buf)
-}
-
-function to_hex(buf) {
-  var str = ''
-    , byt
-
-  for(var i = 0, len = buf.length; i < len; ++i) {
-    byt = buf[i]
-    str += ((byt & 0xF0) >>> 4).toString(16)
-    str += (byt & 0x0F).toString(16)
-  }
-
-  return str
-}
-
-function to_utf(buf) {
-  return toutf8(buf)
-}
-
-function to_base64(buf) {
-  return base64.fromByteArray(buf)
-}
-
-
-},{"base64-js":55,"to-utf8":54}],44:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 module.exports = from
 
 var base64 = require('base64-js')
@@ -17562,82 +17524,45 @@ function from_base64(str) {
   return new Uint8Array(base64.toByteArray(str)) 
 }
 
-},{"base64-js":55}],54:[function(require,module,exports){
-module.exports = to_utf8
+},{"base64-js":54}],45:[function(require,module,exports){
+module.exports = to
 
-var out = []
-  , col = []
-  , fcc = String.fromCharCode
-  , mask = [0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01]
-  , unmask = [
-      0x00
-    , 0x01
-    , 0x02 | 0x01
-    , 0x04 | 0x02 | 0x01
-    , 0x08 | 0x04 | 0x02 | 0x01
-    , 0x10 | 0x08 | 0x04 | 0x02 | 0x01
-    , 0x20 | 0x10 | 0x08 | 0x04 | 0x02 | 0x01
-    , 0x40 | 0x20 | 0x10 | 0x08 | 0x04 | 0x02 | 0x01
-  ]
+var base64 = require('base64-js')
+  , toutf8 = require('to-utf8')
 
-function to_utf8(bytes, start, end) {
-  start = start === undefined ? 0 : start
-  end = end === undefined ? bytes.length : end
-
-  var idx = 0
-    , hi = 0x80
-    , collecting = 0
-    , pos
-    , by
-
-  col.length =
-  out.length = 0
-
-  while(idx < bytes.length) {
-    by = bytes[idx]
-    if(!collecting && by & hi) {
-      pos = find_pad_position(by)
-      collecting += pos
-      if(pos < 8) {
-        col[col.length] = by & unmask[6 - pos]
-      }
-    } else if(collecting) {
-      col[col.length] = by & unmask[6]
-      --collecting
-      if(!collecting && col.length) {
-        out[out.length] = fcc(reduced(col, pos))
-        col.length = 0
-      }
-    } else { 
-      out[out.length] = fcc(by)
-    }
-    ++idx
-  }
-  if(col.length && !collecting) {
-    out[out.length] = fcc(reduced(col, pos))
-    col.length = 0
-  }
-  return out.join('')
+var encoders = {
+    hex: to_hex
+  , utf8: to_utf
+  , base64: to_base64
 }
 
-function find_pad_position(byt) {
-  for(var i = 0; i < 7; ++i) {
-    if(!(byt & mask[i])) {
-      break
-    }
-  }
-  return i
+function to(buf, encoding) {
+  return encoders[encoding || 'utf8'](buf)
 }
 
-function reduced(list) {
-  var out = 0
-  for(var i = 0, len = list.length; i < len; ++i) {
-    out |= list[i] << ((len - i - 1) * 6)
+function to_hex(buf) {
+  var str = ''
+    , byt
+
+  for(var i = 0, len = buf.length; i < len; ++i) {
+    byt = buf[i]
+    str += ((byt & 0xF0) >>> 4).toString(16)
+    str += (byt & 0x0F).toString(16)
   }
-  return out
+
+  return str
 }
 
-},{}],55:[function(require,module,exports){
+function to_utf(buf) {
+  return toutf8(buf)
+}
+
+function to_base64(buf) {
+  return base64.fromByteArray(buf)
+}
+
+
+},{"base64-js":54,"to-utf8":55}],54:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 
@@ -17723,5 +17648,80 @@ function reduced(list) {
 	module.exports.fromByteArray = uint8ToBase64;
 }());
 
-},{}]},{},[28,10,14,1,2,15,16,11,19,24,12,17,20,23,18,25,26,3,22,27,4,21,6])
+},{}],55:[function(require,module,exports){
+module.exports = to_utf8
+
+var out = []
+  , col = []
+  , fcc = String.fromCharCode
+  , mask = [0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01]
+  , unmask = [
+      0x00
+    , 0x01
+    , 0x02 | 0x01
+    , 0x04 | 0x02 | 0x01
+    , 0x08 | 0x04 | 0x02 | 0x01
+    , 0x10 | 0x08 | 0x04 | 0x02 | 0x01
+    , 0x20 | 0x10 | 0x08 | 0x04 | 0x02 | 0x01
+    , 0x40 | 0x20 | 0x10 | 0x08 | 0x04 | 0x02 | 0x01
+  ]
+
+function to_utf8(bytes, start, end) {
+  start = start === undefined ? 0 : start
+  end = end === undefined ? bytes.length : end
+
+  var idx = 0
+    , hi = 0x80
+    , collecting = 0
+    , pos
+    , by
+
+  col.length =
+  out.length = 0
+
+  while(idx < bytes.length) {
+    by = bytes[idx]
+    if(!collecting && by & hi) {
+      pos = find_pad_position(by)
+      collecting += pos
+      if(pos < 8) {
+        col[col.length] = by & unmask[6 - pos]
+      }
+    } else if(collecting) {
+      col[col.length] = by & unmask[6]
+      --collecting
+      if(!collecting && col.length) {
+        out[out.length] = fcc(reduced(col, pos))
+        col.length = 0
+      }
+    } else { 
+      out[out.length] = fcc(by)
+    }
+    ++idx
+  }
+  if(col.length && !collecting) {
+    out[out.length] = fcc(reduced(col, pos))
+    col.length = 0
+  }
+  return out.join('')
+}
+
+function find_pad_position(byt) {
+  for(var i = 0; i < 7; ++i) {
+    if(!(byt & mask[i])) {
+      break
+    }
+  }
+  return i
+}
+
+function reduced(list) {
+  var out = 0
+  for(var i = 0, len = list.length; i < len; ++i) {
+    out |= list[i] << ((len - i - 1) * 6)
+  }
+  return out
+}
+
+},{}]},{},[15,10,14,1,2,16,17,11,20,26,12,18,21,24,19,25,27,3,23,28,4,22,6])
 ;
