@@ -116,7 +116,8 @@ class @ResourceTypes
   _get_parameters_from_type_key: (resourceUri, typeKey) ->
     result   = {}
     reserved = {
-      resourcePath: resourceUri.replace(/\/\/*/g, '/')
+      resourcePath: resourceUri.replace(/\/\/*/g, '/'),
+      resourcePathName: @extractResourcePathName resourceUri
     }
 
     if util.isMapping typeKey
