@@ -88,6 +88,7 @@ class @Traits
   apply_parameters: (resource, parameters, useKey) ->
     @_apply_parameters resource, parameters, useKey, usedParameters = {
       resourcePath: true,
+      resourcePathName: true,
       methodName  : true
     }
 
@@ -137,7 +138,8 @@ class @Traits
     result   = {}
     reserved = {
       methodName  : methodName,
-      resourcePath: resourceUri.replace(/\/\/*/g, '/')
+      resourcePath: resourceUri.replace(/\/\/*/g, '/'),
+      resourcePathName: @extractResourcePathName resourceUri
     }
 
     if util.isMapping typeKey
@@ -149,3 +151,10 @@ class @Traits
           result[parameter[0].value] = parameter[1].value
 
     return util.extend result, reserved
+
+  extractResourcePathName: (resourceUri) ->
+    pathSegments = resourceUri.split(/\//)
+    while segment = pathSegments.pop()
+      unless segment?.match(/[{}]/)
+        return segment
+    return ""

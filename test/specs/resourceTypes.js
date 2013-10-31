@@ -176,4 +176,43 @@ describe('Resource Types', function () {
       '           resourcePath: does-not-matter'
     ].join('\n')).should.be.rejected.with('invalid parameter name: resourcePath is reserved').and.notify(done);
   });
+
+  it('should provide reserved <<resourcePathName>> parameter', function (done) {
+    raml.load([
+        '#%RAML 0.8',
+        '---',
+        'title: Title',
+        'resourceTypes:',
+        '   - type1:',
+        '       description: <<resourcePathName>>',
+        '/a/b/c:',
+        '   type: type1'
+    ].join('\n')).should.eventually.to.have.deep.property('resources[0].description', 'c').and.notify(done);
+  });
+
+  it('should provide reserved <<resourcePathName>> parameter when there are variables in the URI', function (done) {
+    raml.load([
+        '#%RAML 0.8',
+        '---',
+        'title: Title',
+        'resourceTypes:',
+        '   - type1:',
+        '       description: <<resourcePathName>>',
+        '/a/b/{c}:',
+        '   type: type1'
+    ].join('\n')).should.eventually.to.have.deep.property('resources[0].description', 'b').and.notify(done);
+  });
+
+  it('should provide reserved <<resourcePathName>> parameter when there are variables in the URI', function (done) {
+    raml.load([
+        '#%RAML 0.8',
+        '---',
+        'title: Title',
+        'resourceTypes:',
+        '   - type1:',
+        '       description: <<resourcePathName>>',
+        '/{a}/{b}/{c}:',
+        '   type: type1'
+    ].join('\n')).should.eventually.to.have.deep.property('resources[0].description', '').and.notify(done);
+  });
 });
