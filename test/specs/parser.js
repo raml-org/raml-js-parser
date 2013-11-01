@@ -2797,7 +2797,7 @@ describe('Parser', function() {
         '  is: [ throttled, rateLimited: { parameter: value } ]'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/there is no trait named throttled/).and.notify(done);
+      raml.load(definition).should.be.rejected.with('there is no trait named throttled').and.notify(done);
     });
 
     it('should allow using "use" as a resource name', function(done) {
@@ -3768,7 +3768,7 @@ describe('Parser', function() {
         '    is: [ throttled, rateLimited: { parameter: value } ]'
       ].join('\n');
 
-      raml.load(definition).should.be.rejected.with(/there is no trait named throttled/).and.notify(done);
+      raml.load(definition).should.be.rejected.with('there is no trait named throttled').and.notify(done);
     });
 
     it('should not add intermediate structures in optional keys for missing properties', function(done) {
@@ -4476,7 +4476,7 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejected.with(/resource type cannot define child resources/).and.notify(done);
     });
 
-    it('should fail if type dictionary has no keys', function(done){
+    it('should fail if type dictionary has no keys', function(done) {
       var definition = [
       '#%RAML 0.8',
       'title: titulo',
@@ -4484,7 +4484,7 @@ describe('Parser', function() {
       '/resource:',
       '  type: {}'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/missing resource type name in type property/).and.notify(done);
+      raml.load(definition).should.be.rejected.with('resource type name must be provided').and.notify(done);
     });
 
     it('should fail if a resource type inherits from a missing type', function(done) {
@@ -4519,7 +4519,7 @@ describe('Parser', function() {
         '/:',
         '  type: collection'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
+      raml.load(definition).should.be.rejected.with('there is no trait named bar').and.notify(done);
     });
 
     it('should fail if a resource type\'s method applies a missing trait', function(done) {
@@ -4539,7 +4539,7 @@ describe('Parser', function() {
         '/:',
         '  type: collection'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/there is no trait named bar/).and.notify(done);
+      raml.load(definition).should.be.rejected.with('there is no trait named bar').and.notify(done);
     });
 
     it('should apply a resource type', function(done) {
@@ -4995,7 +4995,7 @@ describe('Parser', function() {
         '/:',
         '  type: collection'
       ].join('\n');
-      raml.load(definition).should.be.rejected.with(/there is no trait named blah/).and.notify(done);
+      raml.load(definition).should.be.rejected.with('there is no trait named blah').and.notify(done);
     });
 
     it('should apply a trait to a resource type', function(done) {

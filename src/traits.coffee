@@ -71,6 +71,9 @@ class @Traits
 
   apply_trait: (resourceUri, method, useKey) ->
     traitName = @key_or_value useKey
+    unless traitName?.trim()
+      throw new exports.TraitError 'while applying trait', null, 'trait name must be provided', useKey.start_mark
+
     unless trait = @get_trait traitName
       throw new exports.TraitError 'while applying trait', null, "there is no trait named #{traitName}", useKey.start_mark
 
