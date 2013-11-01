@@ -657,7 +657,19 @@ class @Validator
   isHttpMethod: (value, allowParameterKeys = false) ->
     if value
       value = @canonicalizePropertyName value, allowParameterKeys
-      return value.toLowerCase() in ['get', 'post', 'put', 'delete', 'head', 'patch', 'options', 'update']
+      return value.toLowerCase() in [
+        # RFC2616
+        'options',
+        'get',
+        'head',
+        'post',
+        'put',
+        'delete',
+        'trace',
+        'connect',
+        # RFC5789
+        'patch'
+      ]
     return false
 
   isParameterKey: (property) ->

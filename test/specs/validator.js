@@ -451,4 +451,32 @@ describe('Validator', function () {
       '             param1: {}'
     ].join('\n')).should.be.rejected.with('parameter value must be a scalar').and.notify(done);
   });
+
+  (function () {
+    [
+      // RFC2616
+      'options',
+      'get',
+      'head',
+      'post',
+      'put',
+      'delete',
+      'trace',
+      'connect',
+      // RFC5789
+      'patch'
+    ].forEach(function (httpMethod) {
+      (function (httpMethod) {
+        it('should allow \'' + httpMethod + '\' HTTP method', function (done) {
+          raml.load([
+            '#%RAML 0.8',
+            '---',
+            'title: Title',
+            '/:',
+            '  ' + httpMethod + ':'
+          ].join('\n')).should.eventually.have.deep.property('resources[0].methods[0].method', httpMethod).and.notify(done);
+        });
+      })(httpMethod);
+    });
+  })();
 });
