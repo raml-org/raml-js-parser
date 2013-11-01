@@ -71,6 +71,9 @@ class @Traits
 
   apply_trait: (resourceUri, method, useKey) ->
     traitName = @key_or_value useKey
+    unless traitName?.trim()
+      throw new exports.TraitError 'while applying trait', null, 'trait name must be provided', useKey.start_mark
+
     unless trait = @get_trait traitName
       throw new exports.TraitError 'while applying trait', null, "there is no trait named #{traitName}", useKey.start_mark
 
@@ -88,6 +91,7 @@ class @Traits
   apply_parameters: (resource, parameters, useKey) ->
     @_apply_parameters resource, parameters, useKey, usedParameters = {
       resourcePath: true,
+      resourcePathName: true,
       methodName  : true
     }
 
@@ -137,7 +141,8 @@ class @Traits
     result   = {}
     reserved = {
       methodName  : methodName,
-      resourcePath: resourceUri.replace(/\/\/*/g, '/')
+      resourcePath: resourceUri.replace(/\/\/*/g, '/'),
+      resourcePathName: @extractResourcePathName resourceUri
     }
 
     if util.isMapping typeKey
@@ -149,3 +154,10 @@ class @Traits
           result[parameter[0].value] = parameter[1].value
 
     return util.extend result, reserved
+
+  extractResourcePathName: (resourceUri) ->
+    pathSegments = resourceUri.split(/\//)
+    while segment = pathSegments.pop()
+      unless segment?.match(/[{}]/)
+        return segment
+    return ""

@@ -337,7 +337,8 @@ class @Validator
           when 'version'
             unless util.isScalar(property[1])
               throw new exports.ValidationError 'while validating root properties', null, 'version must be a string', property[0].start_mark
-
+            unless util.isNull(property[1])
+              property[1].tag = 'tag:yaml.org,2002:str'
           when 'traits'
             @validate_traits property[1]
 
@@ -505,8 +506,8 @@ class @Validator
         throw new exports.ValidationError 'while validating resource types', null, 'a resource or resourceType can inherit from a single resourceType', property[0].start_mark
 
     typeName = @key_or_value property[1]
-    unless typeName
-      throw new exports.ValidationError 'while validating resource type consumption', null, 'missing resource type name in type property', property[1].start_mark
+    unless typeName?.trim()
+      throw new exports.ValidationError 'while validating resource type consumption', null, 'resource type name must be provided', property[1].start_mark
 
     unless @isParameterKeyValue(typeName) or @get_type(typeName)
       throw new exports.ValidationError 'while validating resource type consumption', null, "there is no resource type named #{typeName}", property[1].start_mark
@@ -656,7 +657,19 @@ class @Validator
   isHttpMethod: (value, allowParameterKeys = false) ->
     if value
       value = @canonicalizePropertyName value, allowParameterKeys
-      return value.toLowerCase() in ['get', 'post', 'put', 'delete', 'head', 'patch', 'options', 'update']
+      return value.toLowerCase() in [
+        # RFC2616
+        'options',
+        'get',
+        'head',
+        'post',
+        'put',
+        'delete',
+        'trace',
+        'connect',
+        # RFC5789
+        'patch'
+      ]
     return false
 
   isParameterKey: (property) ->
@@ -761,6 +774,9 @@ class @Validator
       throw new exports.ValidationError 'while validating trait consumption', null, 'trait must be a string or a map', node.start_mark
 
     traitName = @key_or_value node
+    unless traitName?.trim()
+      throw new exports.ValidationError 'while validating trait consumption', null, 'trait name must be provided', node.start_mark
+
     unless @isParameterKeyValue(traitName) or @get_trait(traitName)
       throw new exports.ValidationError 'while validating trait consumption', null, "there is no trait named #{traitName}", node.start_mark
 
@@ -847,7 +863,7 @@ class @Validator
     return undefined
 
   validate_base_uri: (baseUriNode) ->
-    baseUri = (baseUriNode.value or '').trim()
+    baseUri = baseUriNode.value?.trim()
     unless baseUri
       throw new exports.ValidationError 'while validating baseUri', null, 'baseUri must have a value', baseUriNode.start_mark
 

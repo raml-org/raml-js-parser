@@ -103,8 +103,11 @@ class @ResourceTypes
     return result
 
   apply_parameters_to_type: (resourceUri, typeName, typeKey) =>
+    unless typeName?.trim()
+      throw new exports.ResourceTypeError 'while applying resource type', null, 'resource type name must be provided', typeKey.start_mark
+
     unless type = @get_type typeName
-      throw new exports.ResourceTypeError 'while applying parameters', null, "there is no resource type named #{typeName}", typeKey.start_mark
+      throw new exports.ResourceTypeError 'while applying resource type', null, "there is no resource type named #{typeName}", typeKey.start_mark
 
     type       = type[1].clone()
     parameters = @_get_parameters_from_type_key resourceUri, typeKey
@@ -116,7 +119,8 @@ class @ResourceTypes
   _get_parameters_from_type_key: (resourceUri, typeKey) ->
     result   = {}
     reserved = {
-      resourcePath: resourceUri.replace(/\/\/*/g, '/')
+      resourcePath: resourceUri.replace(/\/\/*/g, '/'),
+      resourcePathName: @extractResourcePathName resourceUri
     }
 
     if util.isMapping typeKey

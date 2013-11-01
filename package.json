@@ -1,6 +1,6 @@
 {
   "name": "raml-parser",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "main": "./lib/raml.js",
   "dependencies": {
     "inflection": "0.0.1",
@@ -23,5 +23,8 @@
     "grunt-mocha-phantomjs": "~0.2.8",
     "mocha": "1.9.0",
     "grunt-contrib-watch": "~0.5.3"
+  },
+  "scripts": {
+    "test": "grunt test"
   }
 }

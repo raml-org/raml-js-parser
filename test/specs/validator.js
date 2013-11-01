@@ -451,4 +451,92 @@ describe('Validator', function () {
       '             param1: {}'
     ].join('\n')).should.be.rejected.with('parameter value must be a scalar').and.notify(done);
   });
+
+  it('should check for empty trait name within resource method', function (done) {
+    raml.load([
+      '#%RAML 0.8',
+      '---',
+      'title: Title',
+      '/:',
+      '   get:',
+      '       is:',
+      '         -'
+    ].join('\n')).should.be.rejected.with('trait name must be provided').and.notify(done);
+  });
+
+  it('should check for empty trait name within resource type method', function (done) {
+    raml.load([
+      '#%RAML 0.8',
+      '---',
+      'title: Title',
+      'resourceTypes:',
+      '  - resourceType1:',
+      '      get:',
+      '        is:',
+      '          -'
+    ].join('\n')).should.be.rejected.with('trait name must be provided').and.notify(done);
+  });
+
+  it('should check for empty trait name filled with whitespaces only within resource method', function (done) {
+    raml.load([
+      '#%RAML 0.8',
+      '---',
+      'title: Title',
+      '/:',
+      '   get:',
+      '       is:',
+      '         -  '
+    ].join('\n')).should.be.rejected.with('trait name must be provided').and.notify(done);
+  });
+
+  it('should check for empty trait name filled with whitespaces only within resource type method', function (done) {
+    raml.load([
+      '#%RAML 0.8',
+      '---',
+      'title: Title',
+      'resourceTypes:',
+      '  - resourceType1:',
+      '      get:',
+      '        is:',
+      '          -  '
+    ].join('\n')).should.be.rejected.with('trait name must be provided').and.notify(done);
+  });
+
+  it('should check for empty resource type name', function (done) {
+    raml.load([
+      '#%RAML 0.8',
+      '---',
+      'title: Title',
+      '/:',
+      '  type: " "'
+    ].join('\n')).should.be.rejected.with('resource type name must be provided').and.notify(done);
+  });
+
+  (function () {
+    [
+      // RFC2616
+      'options',
+      'get',
+      'head',
+      'post',
+      'put',
+      'delete',
+      'trace',
+      'connect',
+      // RFC5789
+      'patch'
+    ].forEach(function (httpMethod) {
+      (function (httpMethod) {
+        it('should allow \'' + httpMethod + '\' HTTP method', function (done) {
+          raml.load([
+            '#%RAML 0.8',
+            '---',
+            'title: Title',
+            '/:',
+            '  ' + httpMethod + ':'
+          ].join('\n')).should.eventually.have.deep.property('resources[0].methods[0].method', httpMethod).and.notify(done);
+        });
+      })(httpMethod);
+    });
+  })();
 });

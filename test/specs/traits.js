@@ -164,4 +164,66 @@ describe('Traits', function () {
       '         - trait1:'
     ].join('\n')).should.be.fulfilled.and.notify(done);
   });
+
+  it('should provide reserved <<resourcePathName>> parameter', function (done) {
+    raml.load([
+        '#%RAML 0.8',
+        '---',
+        'title: Title',
+        'traits:',
+        '   - trait1:',
+        '       description: <<resourcePathName>>',
+        '/a/b/c:',
+        '   get:',
+        '       is:',
+        '         - trait1:'
+    ].join('\n')).should.eventually.to.have.deep.property('resources[0].methods[0].description', 'c').and.notify(done);
+  });
+
+  it('should provide reserved <<resourcePathName>> parameter', function (done) {
+    raml.load([
+        '#%RAML 0.8',
+        '---',
+        'title: Title',
+        'traits:',
+        '   - trait1:',
+        '       description: <<resourcePathName>>',
+        '/a/b/{c}:',
+        '   get:',
+        '       is:',
+        '         - trait1:'
+    ].join('\n')).should.eventually.to.have.deep.property('resources[0].methods[0].description', 'b').and.notify(done);
+  });
+
+  it('should provide reserved <<resourcePathName>> parameter', function (done) {
+    raml.load([
+        '#%RAML 0.8',
+        '---',
+        'title: Title',
+        'traits:',
+        '   - trait1:',
+        '       description: <<resourcePathName>>',
+        '/{a}/{b}/{c}:',
+        '   get:',
+        '       is:',
+        '         - trait1:'
+    ].join('\n')).should.eventually.to.have.deep.property('resources[0].methods[0].description', '').and.notify(done);
+  });
+
+  it('should check for empty trait name provided as a parameter to resource type', function (done) {
+    raml.load([
+      '#%RAML 0.8',
+      '---',
+      'resourceTypes:',
+      '  - resourceType1:',
+      '      get:',
+      '        is:',
+      '          - <<traitName>>',
+      'title: Title',
+      '/:',
+      '  type:',
+      '    resourceType1:',
+      '      traitName:'
+    ].join('\n')).should.be.rejected.with('trait name must be provided').and.notify(done);
+  });
 });
