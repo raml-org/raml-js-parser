@@ -506,8 +506,8 @@ class @Validator
         throw new exports.ValidationError 'while validating resource types', null, 'a resource or resourceType can inherit from a single resourceType', property[0].start_mark
 
     typeName = @key_or_value property[1]
-    unless typeName
-      throw new exports.ValidationError 'while validating resource type consumption', null, 'missing resource type name in type property', property[1].start_mark
+    unless typeName?.trim()
+      throw new exports.ValidationError 'while validating resource type consumption', null, 'resource type name must be provided', property[1].start_mark
 
     unless @isParameterKeyValue(typeName) or @get_type(typeName)
       throw new exports.ValidationError 'while validating resource type consumption', null, "there is no resource type named #{typeName}", property[1].start_mark
@@ -762,6 +762,9 @@ class @Validator
       throw new exports.ValidationError 'while validating trait consumption', null, 'trait must be a string or a map', node.start_mark
 
     traitName = @key_or_value node
+    unless traitName?.trim()
+      throw new exports.ValidationError 'while validating trait consumption', null, 'trait name must be provided', node.start_mark
+
     unless @isParameterKeyValue(traitName) or @get_trait(traitName)
       throw new exports.ValidationError 'while validating trait consumption', null, "there is no trait named #{traitName}", node.start_mark
 
@@ -886,7 +889,7 @@ class @Validator
     return undefined
 
   validate_base_uri: (baseUriNode) ->
-    baseUri = (baseUriNode.value or '').trim()
+    baseUri = baseUriNode.value?.trim()
     unless baseUri
       throw new exports.ValidationError 'while validating baseUri', null, 'baseUri must have a value', baseUriNode.start_mark
 

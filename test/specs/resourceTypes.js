@@ -215,4 +215,19 @@ describe('Resource Types', function () {
         '   type: type1'
     ].join('\n')).should.eventually.to.have.deep.property('resources[0].description', '').and.notify(done);
   });
+
+  it('should check for empty resource type name provided as a parameter to another resource type', function (done) {
+    raml.load([
+      '#%RAML 0.8',
+      '---',
+      'title: Title',
+      'resourceTypes:',
+      '  - resourceType1:',
+      '      type: <<resourceTypeName>>',
+      '/:',
+      '  type:',
+      '    resourceType1:',
+      '      resourceTypeName:'
+    ].join('\n')).should.be.rejected.with('resource type name must be provided').and.notify(done);
+  });
 });
