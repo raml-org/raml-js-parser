@@ -3132,6 +3132,10 @@ function parseHost(host) {
 // nothing to see here... no file methods for the browser
 
 },{}],10:[function(require,module,exports){
+window.RAML = {}
+
+window.RAML.Parser = require('../lib/raml')
+},{"../lib/raml":11}],12:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, events, nodes, raml, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -3365,7 +3369,7 @@ function parseHost(host) {
 
 }).call(this);
 
-},{"./errors":1,"./events":2,"./nodes":11,"./raml":12,"./util":4,"url":7}],13:[function(require,module,exports){
+},{"./errors":1,"./events":2,"./nodes":13,"./raml":11,"./util":4,"url":7}],14:[function(require,module,exports){
 require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{1:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
@@ -7230,7 +7234,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 },{}]},{},[])
 ;;module.exports=require("buffer-browserify")
 
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 (function(Buffer){(function() {
   var MarkedYAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -7843,7 +7847,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 }).call(this);
 
 })(require("__browserify_buffer").Buffer)
-},{"./errors":1,"./nodes":11,"./util":4,"__browserify_buffer":13}],15:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4,"__browserify_buffer":14}],16:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -7953,7 +7957,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11}],16:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],17:[function(require,module,exports){
 (function() {
   var composer, construct, joiner, parser, protocols, reader, resolver, scanner, schemas, securitySchemes, traits, transformations, types, util, validator;
 
@@ -8066,7 +8070,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./composer":10,"./construct":14,"./joiner":15,"./parser":19,"./protocols":25,"./reader":17,"./resolver":20,"./resourceTypes":23,"./scanner":18,"./schemas":24,"./securitySchemes":26,"./traits":22,"./transformations":27,"./util":4,"./validator":21}],11:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./protocols":26,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./securitySchemes":27,"./traits":23,"./transformations":28,"./util":4,"./validator":22}],13:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -8356,11 +8360,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1}],28:[function(require,module,exports){
-window.RAML = {}
-
-window.RAML.Parser = require('../lib/raml')
-},{"../lib/raml":12}],19:[function(require,module,exports){
+},{"./errors":1}],20:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, events, tokens, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -8971,7 +8971,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./events":2,"./tokens":3}],25:[function(require,module,exports){
+},{"./errors":1,"./events":2,"./tokens":3}],26:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, url, util,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -9052,7 +9052,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11,"./util":4,"url":7}],17:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4,"url":7}],18:[function(require,module,exports){
 (function() {
   var Mark, MarkedYAMLError, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -9155,7 +9155,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1}],20:[function(require,module,exports){
+},{"./errors":1}],21:[function(require,module,exports){
 (function() {
   var YAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -9364,7 +9364,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11,"./util":4}],23:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4}],24:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9553,7 +9553,108 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11,"./util":4}],18:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4}],25:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, nodes, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  /*
+  The Schemas throws these.
+  */
+
+
+  this.SchemaError = (function(_super) {
+    __extends(SchemaError, _super);
+
+    function SchemaError() {
+      _ref = SchemaError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return SchemaError;
+
+  })(MarkedYAMLError);
+
+  /*
+    The Schemas class deals with applying schemas to resources according to the spec
+  */
+
+
+  this.Schemas = (function() {
+    function Schemas() {
+      this.get_schemas_used = __bind(this.get_schemas_used, this);
+      this.apply_schemas = __bind(this.apply_schemas, this);
+      this.get_all_schemas = __bind(this.get_all_schemas, this);
+      this.has_schemas = __bind(this.has_schemas, this);
+      this.load_schemas = __bind(this.load_schemas, this);
+      this.declaredSchemas = {};
+    }
+
+    Schemas.prototype.load_schemas = function(node) {
+      var allSchemas,
+        _this = this;
+      if (this.has_property(node, "schemas")) {
+        allSchemas = this.property_value(node, "schemas");
+        if (allSchemas && typeof allSchemas === "object") {
+          return allSchemas.forEach(function(schema_entry) {
+            if (schema_entry && typeof schema_entry === "object" && typeof schema_entry.value === "object") {
+              return schema_entry.value.forEach(function(schema) {
+                return _this.declaredSchemas[schema[0].value] = schema;
+              });
+            }
+          });
+        }
+      }
+    };
+
+    Schemas.prototype.has_schemas = function(node) {
+      if (this.declaredSchemas.length === 0 && this.has_property(node, "schemas")) {
+        this.load_schemas(node);
+      }
+      return Object.keys(this.declaredSchemas).length > 0;
+    };
+
+    Schemas.prototype.get_all_schemas = function() {
+      return this.declaredSchemas;
+    };
+
+    Schemas.prototype.apply_schemas = function(node) {
+      var resources, schemas,
+        _this = this;
+      resources = this.child_resources(node);
+      schemas = this.get_schemas_used(resources);
+      return schemas.forEach(function(schema) {
+        if (schema[1].value in _this.declaredSchemas) {
+          return schema[1].value = _this.declaredSchemas[schema[1].value][1].value;
+        }
+      });
+    };
+
+    Schemas.prototype.get_schemas_used = function(resources) {
+      var schemas,
+        _this = this;
+      schemas = [];
+      resources.forEach(function(resource) {
+        var properties;
+        properties = _this.get_properties(resource[1], "schema");
+        return schemas = schemas.concat(properties);
+      });
+      return schemas;
+    };
+
+    return Schemas;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./nodes":13}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11059,108 +11160,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./tokens":3,"./util":4}],24:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, nodes, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  /*
-  The Schemas throws these.
-  */
-
-
-  this.SchemaError = (function(_super) {
-    __extends(SchemaError, _super);
-
-    function SchemaError() {
-      _ref = SchemaError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return SchemaError;
-
-  })(MarkedYAMLError);
-
-  /*
-    The Schemas class deals with applying schemas to resources according to the spec
-  */
-
-
-  this.Schemas = (function() {
-    function Schemas() {
-      this.get_schemas_used = __bind(this.get_schemas_used, this);
-      this.apply_schemas = __bind(this.apply_schemas, this);
-      this.get_all_schemas = __bind(this.get_all_schemas, this);
-      this.has_schemas = __bind(this.has_schemas, this);
-      this.load_schemas = __bind(this.load_schemas, this);
-      this.declaredSchemas = {};
-    }
-
-    Schemas.prototype.load_schemas = function(node) {
-      var allSchemas,
-        _this = this;
-      if (this.has_property(node, "schemas")) {
-        allSchemas = this.property_value(node, "schemas");
-        if (allSchemas && typeof allSchemas === "object") {
-          return allSchemas.forEach(function(schema_entry) {
-            if (schema_entry && typeof schema_entry === "object" && typeof schema_entry.value === "object") {
-              return schema_entry.value.forEach(function(schema) {
-                return _this.declaredSchemas[schema[0].value] = schema;
-              });
-            }
-          });
-        }
-      }
-    };
-
-    Schemas.prototype.has_schemas = function(node) {
-      if (this.declaredSchemas.length === 0 && this.has_property(node, "schemas")) {
-        this.load_schemas(node);
-      }
-      return Object.keys(this.declaredSchemas).length > 0;
-    };
-
-    Schemas.prototype.get_all_schemas = function() {
-      return this.declaredSchemas;
-    };
-
-    Schemas.prototype.apply_schemas = function(node) {
-      var resources, schemas,
-        _this = this;
-      resources = this.child_resources(node);
-      schemas = this.get_schemas_used(resources);
-      return schemas.forEach(function(schema) {
-        if (schema[1].value in _this.declaredSchemas) {
-          return schema[1].value = _this.declaredSchemas[schema[1].value][1].value;
-        }
-      });
-    };
-
-    Schemas.prototype.get_schemas_used = function(resources) {
-      var schemas,
-        _this = this;
-      schemas = [];
-      resources.forEach(function(resource) {
-        var properties;
-        properties = _this.get_properties(resource[1], "schema");
-        return schemas = schemas.concat(properties);
-      });
-      return schemas;
-    };
-
-    return Schemas;
-
-  })();
-
-}).call(this);
-
-},{"./errors":1,"./nodes":11}],26:[function(require,module,exports){
+},{"./errors":1,"./tokens":3,"./util":4}],27:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11240,7 +11240,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11}],8:[function(require,module,exports){
+},{"./errors":1,"./nodes":13}],8:[function(require,module,exports){
 
 /**
  * Object#toString() ref for stringify().
@@ -11559,7 +11559,7 @@ function decode(str) {
   }
 }
 
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function() {
   var _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11798,7 +11798,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./composer":10,"./construct":14,"./errors":1,"./events":2,"./loader":16,"./nodes":11,"./parser":19,"./reader":17,"./resolver":20,"./scanner":18,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":29}],27:[function(require,module,exports){
+},{"./composer":12,"./construct":15,"./errors":1,"./events":2,"./loader":17,"./nodes":13,"./parser":20,"./reader":18,"./resolver":21,"./scanner":19,"./tokens":3,"fs":9,"q":6,"url":7,"xmlhttprequest":29}],28:[function(require,module,exports){
 (function() {
   var nodes, uritemplate, url, util,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -12303,7 +12303,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./nodes":11,"./util":4,"uritemplate":30,"url":7}],21:[function(require,module,exports){
+},{"./nodes":13,"./util":4,"uritemplate":30,"url":7}],22:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, traits, uritemplate, url, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -13382,7 +13382,7 @@ function decode(str) {
       }
       if (value) {
         value = this.canonicalizePropertyName(value, allowParameterKeys);
-        return (_ref1 = value.toLowerCase()) === 'get' || _ref1 === 'post' || _ref1 === 'put' || _ref1 === 'delete' || _ref1 === 'head' || _ref1 === 'patch' || _ref1 === 'options' || _ref1 === 'update';
+        return (_ref1 = value.toLowerCase()) === 'options' || _ref1 === 'get' || _ref1 === 'head' || _ref1 === 'post' || _ref1 === 'put' || _ref1 === 'delete' || _ref1 === 'trace' || _ref1 === 'connect' || _ref1 === 'patch';
       }
       return false;
     };
@@ -13797,7 +13797,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11,"./traits":22,"./util":4,"uritemplate":30,"url":7}],22:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./traits":23,"./util":4,"uritemplate":30,"url":7}],23:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, inflection, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -14055,7 +14055,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":11,"./util":4,"inflection":31}],29:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4,"inflection":31}],29:[function(require,module,exports){
 (function(process,Buffer){/**
  * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
  *
@@ -14621,7 +14621,7 @@ exports.XMLHttpRequest = function() {
 };
 
 })(require("__browserify_process"),require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":13,"__browserify_process":5,"child_process":32,"fs":9,"http":33,"https":34,"url":7}],30:[function(require,module,exports){
+},{"__browserify_buffer":14,"__browserify_process":5,"child_process":32,"fs":9,"http":33,"https":34,"url":7}],30:[function(require,module,exports){
 (function(global){/*global unescape, module, define, window, global*/
 
 /*
@@ -15527,71 +15527,7 @@ https.request = function (params, cb) {
     params.scheme = 'https';
     return http.request.call(this, params, cb);
 }
-},{"http":33}],33:[function(require,module,exports){
-var http = module.exports;
-var EventEmitter = require('events').EventEmitter;
-var Request = require('./lib/request');
-
-http.request = function (params, cb) {
-    if (!params) params = {};
-    if (!params.host) params.host = window.location.host.split(':')[0];
-    if (!params.port) params.port = window.location.port;
-    if (!params.scheme) params.scheme = window.location.protocol.split(':')[0];
-    
-    var req = new Request(new xhrHttp, params);
-    if (cb) req.on('response', cb);
-    return req;
-};
-
-http.get = function (params, cb) {
-    params.method = 'GET';
-    var req = http.request(params, cb);
-    req.end();
-    return req;
-};
-
-http.Agent = function () {};
-http.Agent.defaultMaxSockets = 4;
-
-var xhrHttp = (function () {
-    if (typeof window === 'undefined') {
-        throw new Error('no window object present');
-    }
-    else if (window.XMLHttpRequest) {
-        return window.XMLHttpRequest;
-    }
-    else if (window.ActiveXObject) {
-        var axs = [
-            'Msxml2.XMLHTTP.6.0',
-            'Msxml2.XMLHTTP.3.0',
-            'Microsoft.XMLHTTP'
-        ];
-        for (var i = 0; i < axs.length; i++) {
-            try {
-                var ax = new(window.ActiveXObject)(axs[i]);
-                return function () {
-                    if (ax) {
-                        var ax_ = ax;
-                        ax = null;
-                        return ax_;
-                    }
-                    else {
-                        return new(window.ActiveXObject)(axs[i]);
-                    }
-                };
-            }
-            catch (e) {}
-        }
-        throw new Error('ajax not supported in this browser')
-    }
-    else {
-        throw new Error('ajax not supported in this browser');
-    }
-})();
-
-},{"./lib/request":36,"events":35}],31:[function(require,module,exports){
-module.exports = require( './lib/inflection' );
-},{"./lib/inflection":37}],35:[function(require,module,exports){
+},{"http":33}],35:[function(require,module,exports){
 (function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
 
 var EventEmitter = exports.EventEmitter = process.EventEmitter;
@@ -15788,7 +15724,71 @@ EventEmitter.listenerCount = function(emitter, type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":5}],37:[function(require,module,exports){
+},{"__browserify_process":5}],31:[function(require,module,exports){
+module.exports = require( './lib/inflection' );
+},{"./lib/inflection":36}],33:[function(require,module,exports){
+var http = module.exports;
+var EventEmitter = require('events').EventEmitter;
+var Request = require('./lib/request');
+
+http.request = function (params, cb) {
+    if (!params) params = {};
+    if (!params.host) params.host = window.location.host.split(':')[0];
+    if (!params.port) params.port = window.location.port;
+    if (!params.scheme) params.scheme = window.location.protocol.split(':')[0];
+    
+    var req = new Request(new xhrHttp, params);
+    if (cb) req.on('response', cb);
+    return req;
+};
+
+http.get = function (params, cb) {
+    params.method = 'GET';
+    var req = http.request(params, cb);
+    req.end();
+    return req;
+};
+
+http.Agent = function () {};
+http.Agent.defaultMaxSockets = 4;
+
+var xhrHttp = (function () {
+    if (typeof window === 'undefined') {
+        throw new Error('no window object present');
+    }
+    else if (window.XMLHttpRequest) {
+        return window.XMLHttpRequest;
+    }
+    else if (window.ActiveXObject) {
+        var axs = [
+            'Msxml2.XMLHTTP.6.0',
+            'Msxml2.XMLHTTP.3.0',
+            'Microsoft.XMLHTTP'
+        ];
+        for (var i = 0; i < axs.length; i++) {
+            try {
+                var ax = new(window.ActiveXObject)(axs[i]);
+                return function () {
+                    if (ax) {
+                        var ax_ = ax;
+                        ax = null;
+                        return ax_;
+                    }
+                    else {
+                        return new(window.ActiveXObject)(axs[i]);
+                    }
+                };
+            }
+            catch (e) {}
+        }
+        throw new Error('ajax not supported in this browser')
+    }
+    else {
+        throw new Error('ajax not supported in this browser');
+    }
+})();
+
+},{"./lib/request":37,"events":35}],36:[function(require,module,exports){
 /*!
  * inflection
  * Copyright(c) 2011 Ben Lin <ben@dreamerslab.com>
@@ -16327,6 +16327,127 @@ module.exports = {
 
 },{}],38:[function(require,module,exports){
 var events = require('events');
+var util = require('util');
+
+function Stream() {
+  events.EventEmitter.call(this);
+}
+util.inherits(Stream, events.EventEmitter);
+module.exports = Stream;
+// Backwards-compat with node 0.4.x
+Stream.Stream = Stream;
+
+Stream.prototype.pipe = function(dest, options) {
+  var source = this;
+
+  function ondata(chunk) {
+    if (dest.writable) {
+      if (false === dest.write(chunk) && source.pause) {
+        source.pause();
+      }
+    }
+  }
+
+  source.on('data', ondata);
+
+  function ondrain() {
+    if (source.readable && source.resume) {
+      source.resume();
+    }
+  }
+
+  dest.on('drain', ondrain);
+
+  // If the 'end' option is not supplied, dest.end() will be called when
+  // source gets the 'end' or 'close' events.  Only dest.end() once, and
+  // only when all sources have ended.
+  if (!dest._isStdio && (!options || options.end !== false)) {
+    dest._pipeCount = dest._pipeCount || 0;
+    dest._pipeCount++;
+
+    source.on('end', onend);
+    source.on('close', onclose);
+  }
+
+  var didOnEnd = false;
+  function onend() {
+    if (didOnEnd) return;
+    didOnEnd = true;
+
+    dest._pipeCount--;
+
+    // remove the listeners
+    cleanup();
+
+    if (dest._pipeCount > 0) {
+      // waiting for other incoming streams to end.
+      return;
+    }
+
+    dest.end();
+  }
+
+
+  function onclose() {
+    if (didOnEnd) return;
+    didOnEnd = true;
+
+    dest._pipeCount--;
+
+    // remove the listeners
+    cleanup();
+
+    if (dest._pipeCount > 0) {
+      // waiting for other incoming streams to end.
+      return;
+    }
+
+    dest.destroy();
+  }
+
+  // don't leave dangling pipes when there are errors.
+  function onerror(er) {
+    cleanup();
+    if (this.listeners('error').length === 0) {
+      throw er; // Unhandled stream error in pipe.
+    }
+  }
+
+  source.on('error', onerror);
+  dest.on('error', onerror);
+
+  // remove all the event listeners that were added.
+  function cleanup() {
+    source.removeListener('data', ondata);
+    dest.removeListener('drain', ondrain);
+
+    source.removeListener('end', onend);
+    source.removeListener('close', onclose);
+
+    source.removeListener('error', onerror);
+    dest.removeListener('error', onerror);
+
+    source.removeListener('end', cleanup);
+    source.removeListener('close', cleanup);
+
+    dest.removeListener('end', cleanup);
+    dest.removeListener('close', cleanup);
+  }
+
+  source.on('end', cleanup);
+  source.on('close', cleanup);
+
+  dest.on('end', cleanup);
+  dest.on('close', cleanup);
+
+  dest.emit('pipe', source);
+
+  // Allow for unix-like usage: A.pipe(B).pipe(C)
+  return dest;
+};
+
+},{"events":35,"util":39}],39:[function(require,module,exports){
+var events = require('events');
 
 exports.isArray = isArray;
 exports.isDate = function(obj){return Object.prototype.toString.call(obj) === '[object Date]'};
@@ -16672,128 +16793,7 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":35}],39:[function(require,module,exports){
-var events = require('events');
-var util = require('util');
-
-function Stream() {
-  events.EventEmitter.call(this);
-}
-util.inherits(Stream, events.EventEmitter);
-module.exports = Stream;
-// Backwards-compat with node 0.4.x
-Stream.Stream = Stream;
-
-Stream.prototype.pipe = function(dest, options) {
-  var source = this;
-
-  function ondata(chunk) {
-    if (dest.writable) {
-      if (false === dest.write(chunk) && source.pause) {
-        source.pause();
-      }
-    }
-  }
-
-  source.on('data', ondata);
-
-  function ondrain() {
-    if (source.readable && source.resume) {
-      source.resume();
-    }
-  }
-
-  dest.on('drain', ondrain);
-
-  // If the 'end' option is not supplied, dest.end() will be called when
-  // source gets the 'end' or 'close' events.  Only dest.end() once, and
-  // only when all sources have ended.
-  if (!dest._isStdio && (!options || options.end !== false)) {
-    dest._pipeCount = dest._pipeCount || 0;
-    dest._pipeCount++;
-
-    source.on('end', onend);
-    source.on('close', onclose);
-  }
-
-  var didOnEnd = false;
-  function onend() {
-    if (didOnEnd) return;
-    didOnEnd = true;
-
-    dest._pipeCount--;
-
-    // remove the listeners
-    cleanup();
-
-    if (dest._pipeCount > 0) {
-      // waiting for other incoming streams to end.
-      return;
-    }
-
-    dest.end();
-  }
-
-
-  function onclose() {
-    if (didOnEnd) return;
-    didOnEnd = true;
-
-    dest._pipeCount--;
-
-    // remove the listeners
-    cleanup();
-
-    if (dest._pipeCount > 0) {
-      // waiting for other incoming streams to end.
-      return;
-    }
-
-    dest.destroy();
-  }
-
-  // don't leave dangling pipes when there are errors.
-  function onerror(er) {
-    cleanup();
-    if (this.listeners('error').length === 0) {
-      throw er; // Unhandled stream error in pipe.
-    }
-  }
-
-  source.on('error', onerror);
-  dest.on('error', onerror);
-
-  // remove all the event listeners that were added.
-  function cleanup() {
-    source.removeListener('data', ondata);
-    dest.removeListener('drain', ondrain);
-
-    source.removeListener('end', onend);
-    source.removeListener('close', onclose);
-
-    source.removeListener('error', onerror);
-    dest.removeListener('error', onerror);
-
-    source.removeListener('end', cleanup);
-    source.removeListener('close', cleanup);
-
-    dest.removeListener('end', cleanup);
-    dest.removeListener('close', cleanup);
-  }
-
-  source.on('end', cleanup);
-  source.on('close', cleanup);
-
-  dest.on('end', cleanup);
-  dest.on('close', cleanup);
-
-  dest.emit('pipe', source);
-
-  // Allow for unix-like usage: A.pipe(B).pipe(C)
-  return dest;
-};
-
-},{"events":35,"util":38}],40:[function(require,module,exports){
+},{"events":35}],40:[function(require,module,exports){
 var Stream = require('stream');
 var util = require('util');
 
@@ -16915,7 +16915,7 @@ var isArray = Array.isArray || function (xs) {
     return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{"stream":39,"util":38}],36:[function(require,module,exports){
+},{"stream":38,"util":39}],37:[function(require,module,exports){
 var Stream = require('stream');
 var Response = require('./response');
 var concatStream = require('concat-stream');
@@ -17049,7 +17049,7 @@ var indexOf = function (xs, x) {
     return -1;
 };
 
-},{"./response":40,"Base64":41,"concat-stream":42,"stream":39,"util":38}],41:[function(require,module,exports){
+},{"./response":40,"Base64":42,"concat-stream":41,"stream":38,"util":39}],42:[function(require,module,exports){
 ;(function () {
 
   var
@@ -17106,7 +17106,7 @@ var indexOf = function (xs, x) {
 
 }());
 
-},{}],42:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 var stream = require('stream')
 var bops = require('bops')
 var util = require('util')
@@ -17157,7 +17157,7 @@ module.exports = function(cb) {
 
 module.exports.ConcatStream = ConcatStream
 
-},{"bops":43,"stream":39,"util":38}],43:[function(require,module,exports){
+},{"bops":43,"stream":38,"util":39}],43:[function(require,module,exports){
 var proto = {}
 module.exports = proto
 
@@ -17178,7 +17178,13 @@ function mix(from, into) {
   }
 }
 
-},{"./copy.js":49,"./create.js":50,"./from.js":44,"./is.js":46,"./join.js":48,"./read.js":51,"./subarray.js":47,"./to.js":45,"./write.js":52}],47:[function(require,module,exports){
+},{"./copy.js":49,"./create.js":51,"./from.js":44,"./is.js":46,"./join.js":48,"./read.js":50,"./subarray.js":47,"./to.js":45,"./write.js":52}],46:[function(require,module,exports){
+
+module.exports = function(buffer) {
+  return buffer instanceof Uint8Array;
+}
+
+},{}],47:[function(require,module,exports){
 module.exports = subarray
 
 function subarray(buf, from, to) {
@@ -17221,12 +17227,6 @@ function get_length(targets) {
     size += targets[i].byteLength
   }
   return size
-}
-
-},{}],46:[function(require,module,exports){
-
-module.exports = function(buffer) {
-  return buffer instanceof Uint8Array;
 }
 
 },{}],49:[function(require,module,exports){
@@ -17283,12 +17283,12 @@ function slow_copy(from, to, j, i, jend) {
   }
 }
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 module.exports = function(size) {
   return new Uint8Array(size)
 }
 
-},{}],51:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 module.exports = {
     readUInt8:      read_uint8
   , readInt8:       read_int8
@@ -17585,82 +17585,7 @@ function to_base64(buf) {
 }
 
 
-},{"base64-js":54,"to-utf8":55}],55:[function(require,module,exports){
-module.exports = to_utf8
-
-var out = []
-  , col = []
-  , fcc = String.fromCharCode
-  , mask = [0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01]
-  , unmask = [
-      0x00
-    , 0x01
-    , 0x02 | 0x01
-    , 0x04 | 0x02 | 0x01
-    , 0x08 | 0x04 | 0x02 | 0x01
-    , 0x10 | 0x08 | 0x04 | 0x02 | 0x01
-    , 0x20 | 0x10 | 0x08 | 0x04 | 0x02 | 0x01
-    , 0x40 | 0x20 | 0x10 | 0x08 | 0x04 | 0x02 | 0x01
-  ]
-
-function to_utf8(bytes, start, end) {
-  start = start === undefined ? 0 : start
-  end = end === undefined ? bytes.length : end
-
-  var idx = 0
-    , hi = 0x80
-    , collecting = 0
-    , pos
-    , by
-
-  col.length =
-  out.length = 0
-
-  while(idx < bytes.length) {
-    by = bytes[idx]
-    if(!collecting && by & hi) {
-      pos = find_pad_position(by)
-      collecting += pos
-      if(pos < 8) {
-        col[col.length] = by & unmask[6 - pos]
-      }
-    } else if(collecting) {
-      col[col.length] = by & unmask[6]
-      --collecting
-      if(!collecting && col.length) {
-        out[out.length] = fcc(reduced(col, pos))
-        col.length = 0
-      }
-    } else { 
-      out[out.length] = fcc(by)
-    }
-    ++idx
-  }
-  if(col.length && !collecting) {
-    out[out.length] = fcc(reduced(col, pos))
-    col.length = 0
-  }
-  return out.join('')
-}
-
-function find_pad_position(byt) {
-  for(var i = 0; i < 7; ++i) {
-    if(!(byt & mask[i])) {
-      break
-    }
-  }
-  return i
-}
-
-function reduced(list) {
-  var out = 0
-  for(var i = 0, len = list.length; i < len; ++i) {
-    out |= list[i] << ((len - i - 1) * 6)
-  }
-  return out
-}
-
-},{}],54:[function(require,module,exports){
+},{"base64-js":54,"to-utf8":55}],54:[function(require,module,exports){
 (function (exports) {
 	'use strict';
 
@@ -17746,5 +17671,80 @@ function reduced(list) {
 	module.exports.fromByteArray = uint8ToBase64;
 }());
 
-},{}]},{},[28,10,14,1,2,15,16,11,19,25,12,17,20,23,18,24,26,3,22,27,4,21,6])
+},{}],55:[function(require,module,exports){
+module.exports = to_utf8
+
+var out = []
+  , col = []
+  , fcc = String.fromCharCode
+  , mask = [0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01]
+  , unmask = [
+      0x00
+    , 0x01
+    , 0x02 | 0x01
+    , 0x04 | 0x02 | 0x01
+    , 0x08 | 0x04 | 0x02 | 0x01
+    , 0x10 | 0x08 | 0x04 | 0x02 | 0x01
+    , 0x20 | 0x10 | 0x08 | 0x04 | 0x02 | 0x01
+    , 0x40 | 0x20 | 0x10 | 0x08 | 0x04 | 0x02 | 0x01
+  ]
+
+function to_utf8(bytes, start, end) {
+  start = start === undefined ? 0 : start
+  end = end === undefined ? bytes.length : end
+
+  var idx = 0
+    , hi = 0x80
+    , collecting = 0
+    , pos
+    , by
+
+  col.length =
+  out.length = 0
+
+  while(idx < bytes.length) {
+    by = bytes[idx]
+    if(!collecting && by & hi) {
+      pos = find_pad_position(by)
+      collecting += pos
+      if(pos < 8) {
+        col[col.length] = by & unmask[6 - pos]
+      }
+    } else if(collecting) {
+      col[col.length] = by & unmask[6]
+      --collecting
+      if(!collecting && col.length) {
+        out[out.length] = fcc(reduced(col, pos))
+        col.length = 0
+      }
+    } else { 
+      out[out.length] = fcc(by)
+    }
+    ++idx
+  }
+  if(col.length && !collecting) {
+    out[out.length] = fcc(reduced(col, pos))
+    col.length = 0
+  }
+  return out.join('')
+}
+
+function find_pad_position(byt) {
+  for(var i = 0; i < 7; ++i) {
+    if(!(byt & mask[i])) {
+      break
+    }
+  }
+  return i
+}
+
+function reduced(list) {
+  var out = 0
+  for(var i = 0, len = list.length; i < len; ++i) {
+    out |= list[i] << ((len - i - 1) * 6)
+  }
+  return out
+}
+
+},{}]},{},[10,12,15,1,2,16,17,13,20,26,11,18,21,24,19,25,27,3,23,28,4,22,6])
 ;
