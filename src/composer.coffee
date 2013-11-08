@@ -8,7 +8,7 @@ class @ComposerError extends MarkedYAMLError
 
 class @Composer
 
-  constructor: (@settings = { validate: true, transform: true }) ->
+  constructor: ->
     @anchors = {}
     @filesToRead = []
 
