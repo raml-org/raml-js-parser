@@ -83,8 +83,7 @@ class @Composer
     if @check_event events.AliasEvent
       event = @get_event()
       anchor = event.anchor
-      throw new exports.ComposerError null, null, \
-        "found undefined alias #{anchor}", event.start_mark \
+      throw new exports.ComposerError null, null, "found undefined alias #{anchor}", event.start_mark \
         if anchor not of @anchors
       return @anchors[anchor]
 
@@ -128,9 +127,7 @@ class @Composer
       extension = event.value.split(".").pop()
       if extension in ['yaml', 'yml', 'raml']
         fileType = 'fragment'
-        raml.start_mark = event.start_mark
       else
-        raml.start_mark = event.start_mark
         fileType = 'scalar'
 
       @filesToRead.push({

@@ -3293,9 +3293,7 @@ window.RAML.Parser = require('../lib/raml')
         extension = event.value.split(".").pop();
         if (extension === 'yaml' || extension === 'yml' || extension === 'raml') {
           fileType = 'fragment';
-          raml.start_mark = event.start_mark;
         } else {
-          raml.start_mark = event.start_mark;
           fileType = 'scalar';
         }
         this.filesToRead.push({
@@ -9513,108 +9511,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./util":4}],25:[function(require,module,exports){
-(function() {
-  var MarkedYAMLError, nodes, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
-
-  nodes = require('./nodes');
-
-  /*
-  The Schemas throws these.
-  */
-
-
-  this.SchemaError = (function(_super) {
-    __extends(SchemaError, _super);
-
-    function SchemaError() {
-      _ref = SchemaError.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    return SchemaError;
-
-  })(MarkedYAMLError);
-
-  /*
-    The Schemas class deals with applying schemas to resources according to the spec
-  */
-
-
-  this.Schemas = (function() {
-    function Schemas() {
-      this.get_schemas_used = __bind(this.get_schemas_used, this);
-      this.apply_schemas = __bind(this.apply_schemas, this);
-      this.get_all_schemas = __bind(this.get_all_schemas, this);
-      this.has_schemas = __bind(this.has_schemas, this);
-      this.load_schemas = __bind(this.load_schemas, this);
-      this.declaredSchemas = {};
-    }
-
-    Schemas.prototype.load_schemas = function(node) {
-      var allSchemas,
-        _this = this;
-      if (this.has_property(node, "schemas")) {
-        allSchemas = this.property_value(node, "schemas");
-        if (allSchemas && typeof allSchemas === "object") {
-          return allSchemas.forEach(function(schema_entry) {
-            if (schema_entry && typeof schema_entry === "object" && typeof schema_entry.value === "object") {
-              return schema_entry.value.forEach(function(schema) {
-                return _this.declaredSchemas[schema[0].value] = schema;
-              });
-            }
-          });
-        }
-      }
-    };
-
-    Schemas.prototype.has_schemas = function(node) {
-      if (this.declaredSchemas.length === 0 && this.has_property(node, "schemas")) {
-        this.load_schemas(node);
-      }
-      return Object.keys(this.declaredSchemas).length > 0;
-    };
-
-    Schemas.prototype.get_all_schemas = function() {
-      return this.declaredSchemas;
-    };
-
-    Schemas.prototype.apply_schemas = function(node) {
-      var resources, schemas,
-        _this = this;
-      resources = this.child_resources(node);
-      schemas = this.get_schemas_used(resources);
-      return schemas.forEach(function(schema) {
-        if (schema[1].value in _this.declaredSchemas) {
-          return schema[1].value = _this.declaredSchemas[schema[1].value][1].value;
-        }
-      });
-    };
-
-    Schemas.prototype.get_schemas_used = function(resources) {
-      var schemas,
-        _this = this;
-      schemas = [];
-      resources.forEach(function(resource) {
-        var properties;
-        properties = _this.get_properties(resource[1], "schema");
-        return schemas = schemas.concat(properties);
-      });
-      return schemas;
-    };
-
-    return Schemas;
-
-  })();
-
-}).call(this);
-
-},{"./errors":1,"./nodes":13}],19:[function(require,module,exports){
+},{"./errors":1,"./nodes":13,"./util":4}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11118,7 +11015,108 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./tokens":3,"./util":4}],27:[function(require,module,exports){
+},{"./errors":1,"./tokens":3,"./util":4}],25:[function(require,module,exports){
+(function() {
+  var MarkedYAMLError, nodes, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  MarkedYAMLError = require('./errors').MarkedYAMLError;
+
+  nodes = require('./nodes');
+
+  /*
+  The Schemas throws these.
+  */
+
+
+  this.SchemaError = (function(_super) {
+    __extends(SchemaError, _super);
+
+    function SchemaError() {
+      _ref = SchemaError.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    return SchemaError;
+
+  })(MarkedYAMLError);
+
+  /*
+    The Schemas class deals with applying schemas to resources according to the spec
+  */
+
+
+  this.Schemas = (function() {
+    function Schemas() {
+      this.get_schemas_used = __bind(this.get_schemas_used, this);
+      this.apply_schemas = __bind(this.apply_schemas, this);
+      this.get_all_schemas = __bind(this.get_all_schemas, this);
+      this.has_schemas = __bind(this.has_schemas, this);
+      this.load_schemas = __bind(this.load_schemas, this);
+      this.declaredSchemas = {};
+    }
+
+    Schemas.prototype.load_schemas = function(node) {
+      var allSchemas,
+        _this = this;
+      if (this.has_property(node, "schemas")) {
+        allSchemas = this.property_value(node, "schemas");
+        if (allSchemas && typeof allSchemas === "object") {
+          return allSchemas.forEach(function(schema_entry) {
+            if (schema_entry && typeof schema_entry === "object" && typeof schema_entry.value === "object") {
+              return schema_entry.value.forEach(function(schema) {
+                return _this.declaredSchemas[schema[0].value] = schema;
+              });
+            }
+          });
+        }
+      }
+    };
+
+    Schemas.prototype.has_schemas = function(node) {
+      if (this.declaredSchemas.length === 0 && this.has_property(node, "schemas")) {
+        this.load_schemas(node);
+      }
+      return Object.keys(this.declaredSchemas).length > 0;
+    };
+
+    Schemas.prototype.get_all_schemas = function() {
+      return this.declaredSchemas;
+    };
+
+    Schemas.prototype.apply_schemas = function(node) {
+      var resources, schemas,
+        _this = this;
+      resources = this.child_resources(node);
+      schemas = this.get_schemas_used(resources);
+      return schemas.forEach(function(schema) {
+        if (schema[1].value in _this.declaredSchemas) {
+          return schema[1].value = _this.declaredSchemas[schema[1].value][1].value;
+        }
+      });
+    };
+
+    Schemas.prototype.get_schemas_used = function(resources) {
+      var schemas,
+        _this = this;
+      schemas = [];
+      resources.forEach(function(resource) {
+        var properties;
+        properties = _this.get_properties(resource[1], "schema");
+        return schemas = schemas.concat(properties);
+      });
+      return schemas;
+    };
+
+    return Schemas;
+
+  })();
+
+}).call(this);
+
+},{"./errors":1,"./nodes":13}],27:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11521,8 +11519,7 @@ function decode(str) {
 (function() {
   var defaultSettings, _ref,
     __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   this.composer = require('./composer');
 
@@ -11649,21 +11646,14 @@ function decode(str) {
   })();
 
   /*
-  Implements a class that knows how to parse ramlFiles and returns the desired output
-  If settings.compose == true
-    returns a RAML object output
-  If settings.compose == false
-    returns the AST of the RAML file (validated)
+  OO version of the parser, static functions will be removed after consumers move on to use the OO version
+  OO will offer caching
   */
 
 
   this.RamlParser = (function() {
     function RamlParser(settings) {
       this.settings = settings != null ? settings : defaultSettings;
-      this.getPendingFile = __bind(this.getPendingFile, this);
-      this.getPendingFiles = __bind(this.getPendingFiles, this);
-      this.parseStream = __bind(this.parseStream, this);
-      this.loadDefaultSettings = __bind(this.loadDefaultSettings, this);
       this.q = require('q');
       this.url = require('url');
       this.nodes = require('./nodes');
@@ -11727,15 +11717,6 @@ function decode(str) {
         } else {
           return fullyAssembledTree;
         }
-      })["catch"](function(error) {
-        switch (error != null ? error.constructor.name : void 0) {
-          case "FileError":
-            if (!error.problem_mark) {
-              error.problem_mark = loader.start_mark;
-            }
-        }
-        console.log(loader);
-        throw error;
       });
     };
 
@@ -11762,7 +11743,7 @@ function decode(str) {
     };
 
     RamlParser.prototype.getPendingFile = function(loader, fileInfo) {
-      var event, fileUri, key, node,
+      var error, event, fileUri, key, node,
         _this = this;
       node = fileInfo.parentNode;
       event = fileInfo.event;
@@ -11774,22 +11755,42 @@ function decode(str) {
       if (loader.parent && this.isInIncludeTagsStack(fileUri, loader)) {
         throw new exports.FileError('while composing scalar out of !include', null, "detected circular !include of " + event.value, event.start_mark);
       }
-      if (fileInfo.type === 'fragment') {
-        return this.settings.reader.readFileAsync(fileUri).then(function(result) {
-          return _this.compose(result, fileUri, {
-            validate: false,
-            transform: false,
-            compose: true
-          }, loader);
-        }).then(function(value) {
-          return _this.appendNewNodeToParent(node, key, value);
-        });
+      try {
+        if (fileInfo.type === 'fragment') {
+          return this.settings.reader.readFileAsync(fileUri).then(function(result) {
+            return _this.compose(result, fileUri, {
+              validate: false,
+              transform: false,
+              compose: true
+            }, loader);
+          }).then(function(value) {
+            return _this.appendNewNodeToParent(node, key, value);
+          })["catch"](function(error) {
+            return _this.addContextToError(error, event);
+          });
+        } else {
+          return this.settings.reader.readFileAsync(fileUri).then(function(result) {
+            var value;
+            value = new _this.nodes.ScalarNode('tag:yaml.org,2002:str', result, event.start_mark, event.end_mark, event.style);
+            return _this.appendNewNodeToParent(node, key, value);
+          })["catch"](function(error) {
+            return _this.addContextToError(error, event);
+          });
+        }
+      } catch (_error) {
+        error = _error;
+        return this.addContextToError(error, event);
+      }
+    };
+
+    RamlParser.prototype.addContextToError = function(error, event) {
+      if (error.constructor.name === "FileError") {
+        if (!error.problem_mark) {
+          error.problem_mark = event.start_mark;
+        }
+        throw error;
       } else {
-        return this.settings.reader.readFileAsync(fileUri).then(function(result) {
-          var value;
-          value = new _this.nodes.ScalarNode('tag:yaml.org,2002:str', result, event.start_mark, event.end_mark, event.style);
-          return _this.appendNewNodeToParent(node, key, value);
-        });
+        throw new exports.FileError('while reading file', null, "error: " + error, event.start_mark);
       }
     };
 

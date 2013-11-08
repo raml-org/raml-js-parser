@@ -76,13 +76,9 @@ class @FileReader
     catch error
       throw new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{error})", @start_mark
 
-
 ###
-Implements a class that knows how to parse ramlFiles and returns the desired output
-If settings.compose == true
-  returns a RAML object output
-If settings.compose == false
-  returns the AST of the RAML file (validated)
+OO version of the parser, static functions will be removed after consumers move on to use the OO version
+OO will offer caching
 ###
 class @RamlParser
   constructor: (@settings = defaultSettings) ->
@@ -91,7 +87,7 @@ class @RamlParser
     @nodes= require './nodes'
     @loadDefaultSettings(settings)
 
-  loadDefaultSettings: (settings) =>
+  loadDefaultSettings: (settings) ->
     Object.keys(defaultSettings).forEach (settingName) =>
       unless settingName of settings
         settings[settingName] = defaultSettings[settingName]
@@ -114,7 +110,7 @@ class @RamlParser
     settings.compose = true
     @parseStream(stream, location, settings, null)
 
-  parseStream: (stream, location, settings = @settings, parent) =>
+  parseStream: (stream, location, settings = @settings, parent) ->
     loader = new exports.loader.Loader stream, location, settings, parent
 
     return @q.fcall =>
@@ -134,15 +130,8 @@ class @RamlParser
           return null
       else
         return fullyAssembledTree
-    .catch (error) =>
-      switch error?.constructor.name
-        when "FileError"
-          unless error.problem_mark
-            error.problem_mark = loader.start_mark
-      console.log loader
-      throw error
 
-  getPendingFiles: (loader, node, files) =>
+  getPendingFiles: (loader, node, files) ->
     loc = []
     lastVisitedNode = undefined
     for file in files
@@ -153,7 +142,7 @@ class @RamlParser
             lastVisitedNode = overwritingnode
     return @q.all(loc).then => return if lastVisitedNode then lastVisitedNode else node
 
-  getPendingFile: (loader, fileInfo) =>
+  getPendingFile: (loader, fileInfo) ->
     node    = fileInfo.parentNode
     event   = fileInfo.event
     key     = fileInfo.parentKey
@@ -165,17 +154,35 @@ class @RamlParser
     if loader.parent and @isInIncludeTagsStack(fileUri, loader)
       throw new exports.FileError 'while composing scalar out of !include', null, "detected circular !include of #{event.value}", event.start_mark
 
-    if fileInfo.type is 'fragment'
-      return @settings.reader.readFileAsync(fileUri)
-      .then (result) =>
-        return @compose(result, fileUri, { validate: false, transform: false, compose: true }, loader)
-      .then (value) =>
-        return @appendNewNodeToParent(node, key, value)
-    else
-      return @settings.reader.readFileAsync(fileUri)
+    try
+      # This handles included files that are expected to be a YAML structure
+      if fileInfo.type is 'fragment'
+        return @settings.reader.readFileAsync(fileUri)
+        .then (result) =>
+          return @compose(result, fileUri, { validate: false, transform: false, compose: true }, loader)
+        .then (value) =>
+          return @appendNewNodeToParent(node, key, value)
+        .catch (error) =>
+          @addContextToError(error, event)
+      # This handles included files that are expected to be scalars
+      else
+        return @settings.reader.readFileAsync(fileUri)
         .then (result) =>
           value = new @nodes.ScalarNode('tag:yaml.org,2002:str', result, event.start_mark, event.end_mark, event.style)
           return @appendNewNodeToParent(node, key, value)
+        .catch (error) =>
+          @addContextToError(error, event)
+    catch error
+      # Why you ask? in-browser q.catch() will not be called
+      @addContextToError(error, event)
+
+  addContextToError: (error, event) ->
+    if error.constructor.name == "FileError"
+      unless error.problem_mark
+        error.problem_mark = event.start_mark
+      throw error
+    else
+      throw new exports.FileError 'while reading file', null, "error: #{error}", event.start_mark
 
   # detect
   isInIncludeTagsStack:  (include, parent) ->
