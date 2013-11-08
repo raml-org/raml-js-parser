@@ -3132,10 +3132,6 @@ function parseHost(host) {
 // nothing to see here... no file methods for the browser
 
 },{}],10:[function(require,module,exports){
-window.RAML = {}
-
-window.RAML.Parser = require('../lib/raml')
-},{"../lib/raml":11}],12:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, events, nodes, raml, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -3368,7 +3364,7 @@ window.RAML.Parser = require('../lib/raml')
 
 }).call(this);
 
-},{"./errors":1,"./events":2,"./nodes":13,"./raml":11,"./util":4}],14:[function(require,module,exports){
+},{"./errors":1,"./events":2,"./nodes":11,"./raml":12,"./util":4}],13:[function(require,module,exports){
 require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{1:[function(require,module,exports){
 exports.readIEEE754 = function(buffer, offset, isBE, mLen, nBytes) {
   var e, m,
@@ -7233,7 +7229,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 },{}]},{},[])
 ;;module.exports=require("buffer-browserify")
 
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 (function(Buffer){(function() {
   var MarkedYAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -7803,7 +7799,11 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 }).call(this);
 
 })(require("__browserify_buffer").Buffer)
-},{"./errors":1,"./nodes":13,"./util":4,"__browserify_buffer":14}],16:[function(require,module,exports){
+},{"./errors":1,"./nodes":11,"./util":4,"__browserify_buffer":13}],15:[function(require,module,exports){
+window.RAML = {}
+
+window.RAML.Parser = require('../lib/raml')
+},{"../lib/raml":12}],16:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -7913,7 +7913,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],17:[function(require,module,exports){
+},{"./errors":1,"./nodes":11}],17:[function(require,module,exports){
 (function() {
   var composer, construct, joiner, parser, protocols, reader, resolver, scanner, schemas, securitySchemes, traits, transformations, types, util, validator;
 
@@ -8028,7 +8028,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./composer":12,"./construct":15,"./joiner":16,"./parser":20,"./protocols":26,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./securitySchemes":27,"./traits":23,"./transformations":28,"./util":4,"./validator":22}],13:[function(require,module,exports){
+},{"./composer":10,"./construct":14,"./joiner":16,"./parser":20,"./protocols":26,"./reader":18,"./resolver":21,"./resourceTypes":24,"./scanner":19,"./schemas":25,"./securitySchemes":27,"./traits":23,"./transformations":28,"./util":4,"./validator":22}],11:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
@@ -9010,7 +9010,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./util":4,"url":7}],18:[function(require,module,exports){
+},{"./errors":1,"./nodes":11,"./util":4,"url":7}],18:[function(require,module,exports){
 (function() {
   var Mark, MarkedYAMLError, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -9322,7 +9322,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./util":4}],24:[function(require,module,exports){
+},{"./errors":1,"./nodes":11,"./util":4}],24:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -9511,7 +9511,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./util":4}],19:[function(require,module,exports){
+},{"./errors":1,"./nodes":11,"./util":4}],19:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11116,7 +11116,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],27:[function(require,module,exports){
+},{"./errors":1,"./nodes":11}],27:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11196,7 +11196,7 @@ SlowBuffer.prototype.writeDoubleBE = Buffer.prototype.writeDoubleBE;
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13}],8:[function(require,module,exports){
+},{"./errors":1,"./nodes":11}],8:[function(require,module,exports){
 
 /**
  * Object#toString() ref for stringify().
@@ -11515,7 +11515,7 @@ function decode(str) {
   }
 }
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 (function() {
   var defaultSettings, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -11921,7 +11921,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./loader":17,"./nodes":13,"fs":9,"q":6,"url":7,"xmlhttprequest":29}],28:[function(require,module,exports){
+},{"./errors":1,"./loader":17,"./nodes":11,"fs":9,"q":6,"url":7,"xmlhttprequest":29}],28:[function(require,module,exports){
 (function() {
   var nodes, uritemplate, url, util,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -11941,10 +11941,7 @@ function decode(str) {
 
   this.Transformations = (function() {
     function Transformations(settings) {
-      this.settings = settings != null ? settings : {
-        validate: true,
-        transform: true
-      };
+      this.settings = settings;
       this.isContentTypeString = __bind(this.isContentTypeString, this);
       this.add_key_value_to_node = __bind(this.add_key_value_to_node, this);
       this.apply_default_media_type_to_resource = __bind(this.apply_default_media_type_to_resource, this);
@@ -12434,7 +12431,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./nodes":13,"./util":4,"uritemplate":30,"url":7}],22:[function(require,module,exports){
+},{"./nodes":11,"./util":4,"uritemplate":30,"url":7}],22:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, nodes, traits, uritemplate, url, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -13904,7 +13901,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./traits":23,"./util":4,"uritemplate":30,"url":7}],23:[function(require,module,exports){
+},{"./errors":1,"./nodes":11,"./traits":23,"./util":4,"uritemplate":30,"url":7}],23:[function(require,module,exports){
 (function() {
   var MarkedYAMLError, inflection, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -14162,7 +14159,7 @@ function decode(str) {
 
 }).call(this);
 
-},{"./errors":1,"./nodes":13,"./util":4,"inflection":31}],29:[function(require,module,exports){
+},{"./errors":1,"./nodes":11,"./util":4,"inflection":31}],29:[function(require,module,exports){
 (function(process,Buffer){/**
  * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
  *
@@ -14728,7 +14725,7 @@ exports.XMLHttpRequest = function() {
 };
 
 })(require("__browserify_process"),require("__browserify_buffer").Buffer)
-},{"__browserify_buffer":14,"__browserify_process":5,"child_process":32,"fs":9,"http":33,"https":34,"url":7}],30:[function(require,module,exports){
+},{"__browserify_buffer":13,"__browserify_process":5,"child_process":32,"fs":9,"http":33,"https":34,"url":7}],30:[function(require,module,exports){
 (function(global){/*global unescape, module, define, window, global*/
 
 /*
@@ -17156,7 +17153,7 @@ var indexOf = function (xs, x) {
     return -1;
 };
 
-},{"./response":40,"Base64":41,"concat-stream":42,"stream":38,"util":39}],41:[function(require,module,exports){
+},{"./response":40,"Base64":42,"concat-stream":41,"stream":38,"util":39}],42:[function(require,module,exports){
 ;(function () {
 
   var
@@ -17213,7 +17210,7 @@ var indexOf = function (xs, x) {
 
 }());
 
-},{}],42:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 var stream = require('stream')
 var bops = require('bops')
 var util = require('util')
@@ -17285,7 +17282,7 @@ function mix(from, into) {
   }
 }
 
-},{"./copy.js":50,"./create.js":49,"./from.js":44,"./is.js":46,"./join.js":48,"./read.js":51,"./subarray.js":47,"./to.js":45,"./write.js":52}],46:[function(require,module,exports){
+},{"./copy.js":49,"./create.js":50,"./from.js":44,"./is.js":46,"./join.js":48,"./read.js":51,"./subarray.js":47,"./to.js":45,"./write.js":52}],46:[function(require,module,exports){
 
 module.exports = function(buffer) {
   return buffer instanceof Uint8Array;
@@ -17337,11 +17334,6 @@ function get_length(targets) {
 }
 
 },{}],49:[function(require,module,exports){
-module.exports = function(size) {
-  return new Uint8Array(size)
-}
-
-},{}],50:[function(require,module,exports){
 module.exports = copy
 
 var slice = [].slice
@@ -17393,6 +17385,11 @@ function slow_copy(from, to, j, i, jend) {
   for(; i < iend; ++i, ++x) {
     to[j++] = tmp[x]
   }
+}
+
+},{}],50:[function(require,module,exports){
+module.exports = function(size) {
+  return new Uint8Array(size)
 }
 
 },{}],51:[function(require,module,exports){
@@ -17853,5 +17850,5 @@ function reduced(list) {
   return out
 }
 
-},{}]},{},[10,12,15,1,2,16,17,13,20,26,11,18,21,24,19,25,27,3,23,28,4,22,6])
+},{}]},{},[15,10,14,1,2,16,17,11,20,26,12,18,21,24,19,25,27,3,23,28,4,22,6])
 ;

@@ -7,7 +7,7 @@ util              = require './util'
    Applies transformations to the RAML
 ###
 class @Transformations
-  constructor: (@settings = { validate: true, transform: true }) ->
+  constructor: (@settings) ->
     @declaredSchemas = {}
 
   applyTransformations: (rootObject) =>
