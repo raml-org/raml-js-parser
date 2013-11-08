@@ -1,13 +1,5 @@
-@composer    = require './composer'
-@constructor = require './construct'
 @errors      = require './errors'
-@events      = require './events'
 @loader      = require './loader'
-@parser      = require './parser'
-@reader      = require './reader'
-@resolver    = require './resolver'
-@scanner     = require './scanner'
-@tokens      = require './tokens'
 
 class @FileError extends @errors.MarkedYAMLError
 
