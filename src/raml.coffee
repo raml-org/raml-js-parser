@@ -84,23 +84,33 @@ class @RamlParser
       unless settingName of settings
         settings[settingName] = defaultSettings[settingName]
 
-  loadFile: (file, settings) ->
-    return settings.reader.readFileAsync(file)
-    .then (stream) =>
-      @load stream, file, settings
+  loadFile: (file, settings = @settings) ->
+    try
+      return settings.reader.readFileAsync(file)
+      .then (stream) =>
+        @load stream, file, settings
+    catch error
+      # return a promise that throws the error
+      return @q.fcall =>
+        throw new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{error})", null
 
-  composeFile: (file, settings, parent) ->
-    return settings.reader.readFileAsync(file)
-    .then (stream) =>
-      @compose stream, file, settings, parent
+  composeFile: (file, settings = @settings) ->
+    try
+      return settings.reader.readFileAsync(file)
+      .then (stream) =>
+        @compose stream, file, settings, parent
+    catch error
+      # return a promise that throws the error
+      return @q.fcall =>
+        throw new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{error})", null
 
-  compose: (stream, location, settings, parent) ->
+  compose: (stream, location, settings = @settings, parent = { src: location}) ->
     settings.compose = false
     @parseStream(stream, location, settings, parent)
 
-  load: (stream, location, settings) ->
+  load: (stream, location, settings = @settings) ->
     settings.compose = true
-    @parseStream(stream, location, settings, null)
+    @parseStream(stream, location, settings,  { src: location})
 
   parseStream: (stream, location, settings = @settings, parent) ->
     loader = new exports.loader.Loader stream, location, settings, parent
@@ -211,15 +221,15 @@ Javascript object.
 Parse the first RAML document in a file and produce the corresponding
 representation tree.
 ###
-@composeFile = (file, settings = defaultSettings, parent) ->
+@composeFile = (file, settings = defaultSettings, parent = file) ->
   parser = new exports.RamlParser(settings)
-  parser.compose(file, settings, parent)
+  parser.composeFile(file, settings, parent)
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
 representation tree.
 ###
-@compose = (stream, location, settings = defaultSettings, parent) ->
+@compose = (stream, location, settings = defaultSettings, parent = location) ->
   parser = new exports.RamlParser(settings)
   parser.compose(stream, location, settings, parent)
 

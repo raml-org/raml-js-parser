@@ -11654,27 +11654,62 @@ function decode(str) {
     };
 
     RamlParser.prototype.loadFile = function(file, settings) {
-      var _this = this;
-      return settings.reader.readFileAsync(file).then(function(stream) {
-        return _this.load(stream, file, settings);
-      });
+      var error,
+        _this = this;
+      if (settings == null) {
+        settings = this.settings;
+      }
+      try {
+        return settings.reader.readFileAsync(file).then(function(stream) {
+          return _this.load(stream, file, settings);
+        });
+      } catch (_error) {
+        error = _error;
+        return this.q.fcall(function() {
+          throw new exports.FileError("while fetching " + file, null, "cannot fetch " + file + " (" + error + ")", null);
+        });
+      }
     };
 
-    RamlParser.prototype.composeFile = function(file, settings, parent) {
-      var _this = this;
-      return settings.reader.readFileAsync(file).then(function(stream) {
-        return _this.compose(stream, file, settings, parent);
-      });
+    RamlParser.prototype.composeFile = function(file, settings) {
+      var error,
+        _this = this;
+      if (settings == null) {
+        settings = this.settings;
+      }
+      try {
+        return settings.reader.readFileAsync(file).then(function(stream) {
+          return _this.compose(stream, file, settings, parent);
+        });
+      } catch (_error) {
+        error = _error;
+        return this.q.fcall(function() {
+          throw new exports.FileError("while fetching " + file, null, "cannot fetch " + file + " (" + error + ")", null);
+        });
+      }
     };
 
     RamlParser.prototype.compose = function(stream, location, settings, parent) {
+      if (settings == null) {
+        settings = this.settings;
+      }
+      if (parent == null) {
+        parent = {
+          src: location
+        };
+      }
       settings.compose = false;
       return this.parseStream(stream, location, settings, parent);
     };
 
     RamlParser.prototype.load = function(stream, location, settings) {
+      if (settings == null) {
+        settings = this.settings;
+      }
       settings.compose = true;
-      return this.parseStream(stream, location, settings, null);
+      return this.parseStream(stream, location, settings, {
+        src: location
+      });
     };
 
     RamlParser.prototype.parseStream = function(stream, location, settings, parent) {
@@ -11844,8 +11879,11 @@ function decode(str) {
     if (settings == null) {
       settings = defaultSettings;
     }
+    if (parent == null) {
+      parent = file;
+    }
     parser = new exports.RamlParser(settings);
-    return parser.compose(file, settings, parent);
+    return parser.composeFile(file, settings, parent);
   };
 
   /*
@@ -11858,6 +11896,9 @@ function decode(str) {
     var parser;
     if (settings == null) {
       settings = defaultSettings;
+    }
+    if (parent == null) {
+      parent = location;
     }
     parser = new exports.RamlParser(settings);
     return parser.compose(stream, location, settings, parent);
@@ -17115,7 +17156,7 @@ var indexOf = function (xs, x) {
     return -1;
 };
 
-},{"./response":40,"Base64":42,"concat-stream":41,"stream":38,"util":39}],42:[function(require,module,exports){
+},{"./response":40,"Base64":41,"concat-stream":42,"stream":38,"util":39}],41:[function(require,module,exports){
 ;(function () {
 
   var
@@ -17172,7 +17213,7 @@ var indexOf = function (xs, x) {
 
 }());
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 var stream = require('stream')
 var bops = require('bops')
 var util = require('util')
@@ -17244,7 +17285,7 @@ function mix(from, into) {
   }
 }
 
-},{"./copy.js":49,"./create.js":50,"./from.js":44,"./is.js":46,"./join.js":48,"./read.js":51,"./subarray.js":47,"./to.js":45,"./write.js":52}],46:[function(require,module,exports){
+},{"./copy.js":50,"./create.js":49,"./from.js":44,"./is.js":46,"./join.js":48,"./read.js":51,"./subarray.js":47,"./to.js":45,"./write.js":52}],46:[function(require,module,exports){
 
 module.exports = function(buffer) {
   return buffer instanceof Uint8Array;
@@ -17296,6 +17337,11 @@ function get_length(targets) {
 }
 
 },{}],49:[function(require,module,exports){
+module.exports = function(size) {
+  return new Uint8Array(size)
+}
+
+},{}],50:[function(require,module,exports){
 module.exports = copy
 
 var slice = [].slice
@@ -17347,11 +17393,6 @@ function slow_copy(from, to, j, i, jend) {
   for(; i < iend; ++i, ++x) {
     to[j++] = tmp[x]
   }
-}
-
-},{}],50:[function(require,module,exports){
-module.exports = function(size) {
-  return new Uint8Array(size)
 }
 
 },{}],51:[function(require,module,exports){
