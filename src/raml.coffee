@@ -1,121 +1,242 @@
-@composer    = require './composer'
-@constructor = require './construct'
 @errors      = require './errors'
-@events      = require './events'
 @loader      = require './loader'
-@nodes       = require './nodes'
-@parser      = require './parser'
-@reader      = require './reader'
-@resolver    = require './resolver'
-@scanner     = require './scanner'
-@tokens      = require './tokens'
-@q           = require 'q'
 
 class @FileError extends @errors.MarkedYAMLError
 
-###
-Scan a RAML stream and produce scanning tokens.
-###
-@scan = (stream, location) ->
-  loader = new exports.loader.Loader stream, location, false
-  loader.get_token() while loader.check_token()
+class @FileReader
+  constructor: (readFileAsyncOverride) ->
+    @q    = require 'q'
+    @url  = require 'url'
+
+    if readFileAsyncOverride
+      @readFileAsyncOverride = readFileAsyncOverride
+
+  ###
+  Read file either locally or from the network.
+  ###
+  readFileAsync: (file) ->
+    if @readFileAsyncOverride
+      return @readFileAsyncOverride(file)
+
+    targerUrl = @url.parse(file)
+    if targerUrl.protocol?
+      unless targerUrl.protocol.match(/^https?/i)
+        throw new exports.FileError "while reading #{file}", null, "unknown protocol #{targerUrl.protocol}", @start_mark
+      else
+        return @fetchFileAsync file
+    else
+      if window?
+        return @fetchFileAsync file
+      else
+        return @fetchLocalFileAsync file
+
+  ###
+  Read file from the disk.
+  ###
+  fetchLocalFileAsync: (file) ->
+    deferred = @q.defer()
+    require('fs').readFile file, (err, data) =>
+      if (err)
+        deferred.reject(new exports.FileError "while reading #{file}", null, "cannot read #{file} (#{err})", @start_mark)
+      else
+        deferred.resolve(data.toString())
+    return deferred.promise
+
+  ###
+  Read file from the network.
+  ###
+  fetchFileAsync: (file) ->
+    deferred = @q.defer()
+
+    if window?
+      xhr = new XMLHttpRequest()
+    else
+      xhr = new (require('xmlhttprequest').XMLHttpRequest)()
+
+    try
+      xhr.open 'GET', file, false
+      xhr.setRequestHeader 'Accept', 'application/raml+yaml, */*'
+      xhr.onreadystatechange = () =>
+        if(xhr.readyState == 4)
+          if (typeof xhr.status is 'number' and xhr.status == 200) or
+          (typeof xhr.status is 'string' and xhr.status.match /^200/i)
+            deferred.resolve(xhr.responseText)
+          else
+            deferred.reject(new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{xhr.statusText})", @start_mark)
+      xhr.send null
+      return deferred.promise
+    catch error
+      throw new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{error})", @start_mark
 
 ###
-Parse a RAML stream and produce parsing events.
+OO version of the parser, static functions will be removed after consumers move on to use the OO version
+OO will offer caching
 ###
-@parse = (stream, location) ->
-  loader = new exports.loader.Loader stream, location, false
-  loader.get_event() while loader.check_event()
+class @RamlParser
+  constructor: (@settings = defaultSettings) ->
+    @q    = require 'q'
+    @url  = require 'url'
+    @nodes= require './nodes'
+    @loadDefaultSettings(settings)
+
+  loadDefaultSettings: (settings) ->
+    Object.keys(defaultSettings).forEach (settingName) =>
+      unless settingName of settings
+        settings[settingName] = defaultSettings[settingName]
+
+  loadFile: (file, settings = @settings) ->
+    try
+      return settings.reader.readFileAsync(file)
+      .then (stream) =>
+        @load stream, file, settings
+    catch error
+      # return a promise that throws the error
+      return @q.fcall =>
+        throw new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{error})", null
+
+  composeFile: (file, settings = @settings) ->
+    try
+      return settings.reader.readFileAsync(file)
+      .then (stream) =>
+        @compose stream, file, settings, parent
+    catch error
+      # return a promise that throws the error
+      return @q.fcall =>
+        throw new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{error})", null
+
+  compose: (stream, location, settings = @settings, parent = { src: location}) ->
+    settings.compose = false
+    @parseStream(stream, location, settings, parent)
+
+  load: (stream, location, settings = @settings) ->
+    settings.compose = true
+    @parseStream(stream, location, settings,  { src: location})
+
+  parseStream: (stream, location, settings = @settings, parent) ->
+    loader = new exports.loader.Loader stream, location, settings, parent
+
+    return @q.fcall =>
+      return loader.getYamlRoot()
+
+    .then (partialTree) =>
+      files = loader.getPendingFilesList()
+      @getPendingFiles(loader, partialTree, files)
+
+    .then (fullyAssembledTree) =>
+      loader.composeRamlTree(fullyAssembledTree, settings)
+
+      if settings.compose
+        if fullyAssembledTree?
+          return loader.construct_document(fullyAssembledTree)
+        else
+          return null
+      else
+        return fullyAssembledTree
+
+  getPendingFiles: (loader, node, files) ->
+    loc = []
+    lastVisitedNode = undefined
+    for file in files
+      loc.push @getPendingFile(loader, file)
+        .then (overwritingnode) =>
+          # we should be able to handle parentless children, but only the last one
+          if overwritingnode and !lastVisitedNode
+            lastVisitedNode = overwritingnode
+    return @q.all(loc).then => return if lastVisitedNode then lastVisitedNode else node
+
+  getPendingFile: (loader, fileInfo) ->
+    node    = fileInfo.parentNode
+    event   = fileInfo.event
+    key     = fileInfo.parentKey
+    fileUri = fileInfo.targetFileUri
+
+    if fileInfo.includingContext
+      fileUri = @url.resolve(fileInfo.includingContext, fileInfo.targetFileUri)
+
+    if loader.parent and @isInIncludeTagsStack(fileUri, loader)
+      throw new exports.FileError 'while composing scalar out of !include', null, "detected circular !include of #{event.value}", event.start_mark
+
+    try
+      # This handles included files that are expected to be a YAML structure
+      if fileInfo.type is 'fragment'
+        return @settings.reader.readFileAsync(fileUri)
+        .then (result) =>
+          return @compose(result, fileUri, { validate: false, transform: false, compose: true }, loader)
+        .then (value) =>
+          return @appendNewNodeToParent(node, key, value)
+        .catch (error) =>
+          @addContextToError(error, event)
+      # This handles included files that are expected to be scalars
+      else
+        return @settings.reader.readFileAsync(fileUri)
+        .then (result) =>
+          value = new @nodes.ScalarNode('tag:yaml.org,2002:str', result, event.start_mark, event.end_mark, event.style)
+          return @appendNewNodeToParent(node, key, value)
+        .catch (error) =>
+          @addContextToError(error, event)
+    catch error
+      # Why you ask? in-browser q.catch() will not be called
+      @addContextToError(error, event)
+
+  addContextToError: (error, event) ->
+    if error.constructor.name == "FileError"
+      unless error.problem_mark
+        error.problem_mark = event.start_mark
+      throw error
+    else
+      throw new exports.FileError 'while reading file', null, "error: #{error}", event.start_mark
+
+  # detect
+  isInIncludeTagsStack:  (include, parent) ->
+    while parent = parent.parent
+      if parent.src is include
+        return true
+    return false
+
+  appendNewNodeToParent: (node, key, value) ->
+    if node
+      if key?
+        item = [key, value]
+      else
+        item = [value]
+      node.value.push(item)
+      return null
+    else
+      return value
 
 ###
-Parse the first RAML document in a stream and produce the corresponding
-representation tree.
+  validate controls whether the stream must be processed as a
 ###
-@compose = (stream, validate = true, apply = true, join = true, location, parent) ->
-  loader = new exports.loader.Loader stream, location, validate, parent
-  return loader.get_single_node(validate, apply, join)
+defaultSettings = { validate: true, transform: true, compose: true, reader: new exports.FileReader(null) }
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
 Javascript object.
 ###
-@load = (stream, validate = true, location) ->
-  @q.fcall =>
-    loader = new exports.loader.Loader stream, location, validate
-    return loader.get_single_data()
-
-###
-Parse the first RAML document in a stream and produce a list of
-all the absolute URIs for all resources.
-###
-@resources = (stream, validate = true, location) ->
-  @q.fcall =>
-    loader = new exports.loader.Loader stream, location, validate
-    return loader.resources()
-
-###
-Parse the first RAML document in a stream and produce the corresponding
-Javascript object.
-###
-@loadFile = (file, validate = true) ->
-  @q.fcall =>
-    stream = @readFile file
-    return @load stream, validate, file
+@loadFile = (file, settings = defaultSettings) ->
+  parser = new exports.RamlParser(settings)
+  parser.loadFile(file, settings)
 
 ###
 Parse the first RAML document in a file and produce the corresponding
 representation tree.
 ###
-@composeFile = (file, validate = true, apply = true, join = true, parent) ->
-  stream = @readFile file
-  return @compose stream, validate, apply, join, file, parent
+@composeFile = (file, settings = defaultSettings, parent = file) ->
+  parser = new exports.RamlParser(settings)
+  parser.composeFile(file, settings, parent)
 
 ###
-Parse the first RAML document in a file and produce a list of
-all the absolute URIs for all resources.
+Parse the first RAML document in a stream and produce the corresponding
+representation tree.
 ###
-@resourcesFile = (file, validate = true) ->
-  stream = @readFile file
-  return @resources stream, validate, file
-
-###
-Read file either locally or from the network.
-###
-@readFile = (file) ->
-  url = require('url').parse(file)
-
-  if url.protocol?
-    unless url.protocol.match(/^https?/i)
-      throw new exports.FileError "while reading #{file}", null, "unknown protocol #{url.protocol}", @start_mark
-    else
-      return @fetchFile file
-  else
-    if window?
-      return @fetchFile file
-    else
-      try
-        return require('fs').readFileSync(file).toString()
-      catch error
-        throw new exports.FileError "while reading #{file}", null, "cannot read #{file} (#{error})", @start_mark
+@compose = (stream, location, settings = defaultSettings, parent = location) ->
+  parser = new exports.RamlParser(settings)
+  parser.compose(stream, location, settings, parent)
 
 ###
-Read file from the network.
+Parse the first RAML document in a stream and produce the corresponding
+Javascript object.
 ###
-@fetchFile = (file) ->
-  if window?
-    xhr = new XMLHttpRequest()
-  else
-    xhr = new (require('xmlhttprequest').XMLHttpRequest)()
-
-  try
-    xhr.open 'GET', file, false
-    xhr.setRequestHeader 'Accept', 'application/raml+yaml, */*'
-    xhr.send null
-
-    if (typeof xhr.status is 'number' and xhr.status == 200) or
-       (typeof xhr.status is 'string' and xhr.status.match /^200/i)
-      return xhr.responseText
-
-    throw new Error("HTTP #{xhr.status} #{xhr.statusText}")
-  catch error
-    throw new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{error})", @start_mark
+@load = (stream, location, settings = defaultSettings) ->
+  parser = new exports.RamlParser(settings)
+  parser.load(stream, location, settings, null)

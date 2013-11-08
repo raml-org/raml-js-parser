@@ -7,16 +7,18 @@ util              = require './util'
    Applies transformations to the RAML
 ###
 class @Transformations
-  constructor: ->
+  constructor: (@settings) ->
     @declaredSchemas = {}
 
   applyTransformations: (rootObject) =>
-    @applyTransformationsToRoot rootObject
-    resources = rootObject.resources
-    @applyTransformationsToResources(rootObject, resources)
+    if @settings.transform
+      @applyTransformationsToRoot rootObject
+      resources = rootObject.resources
+      @applyTransformationsToResources(rootObject, resources)
 
   applyAstTransformations: (document) =>
-    @transform_document(document)
+    if @settings.transform
+      @transform_document(document)
 
   load_default_media_type: (node) =>
     return unless util.isMapping node or node?.value

@@ -12,6 +12,17 @@ module.exports = function (grunt) {
       }
     },
 
+    watch: {
+      coffee: {
+        files: ['src/*.coffee'],
+        tasks: ['coffee']
+      },
+      javascript: {
+        files: ['lib/*.js', 'src/browserify.js'],
+        tasks: ['browserify']
+      }
+    },
+
     browserify: {
       'dist/raml-parser.js': ['src/browserify.js', 'lib/*.js', 'node_modules/q/q.js']
     },
@@ -74,12 +85,14 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-coffee');
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-mocha-cli');
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
 
   grunt.registerTask('compile', ['coffeelint', 'coffee']);
   grunt.registerTask('test', ['default', 'connect', 'mochacli', 'mocha_phantomjs']);
   grunt.registerTask('test-ui-only', ['coffee', 'browserify', 'uglify', 'connect', 'mocha_phantomjs']);
+  grunt.registerTask('server', ['default', 'connect', 'watch']);
 
   grunt.registerTask('default', ['coffeelint', 'coffee', 'browserify', 'uglify']);
 };

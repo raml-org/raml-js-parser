@@ -61,7 +61,6 @@ describe('Parser', function() {
 
     raml.load(definition).should.be.rejected.with(/missing title/).and.notify(done);
     });
-
     it('should fail if title is array', function(done) {
         var definition = [
             '#%RAML 0.8',
@@ -72,7 +71,90 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/title must be a string/).and.notify(done);
     });
+    describe('feature flags', function (){
+        it('should not validate title if flag is set not to validate', function(done) {
+            var definition = [
+                '#%RAML 0.8',
+                '---',
+                'title: ["title", "title line 2", "title line 3"]',
+                'baseUri: http://myapi.com'
+            ].join('\n');
+            raml.load(definition, 'filename.yml', {validate: false, transform: false, compose: true}).should.be.fulfilled.and.notify(done);
+        });
+        it('should not validate title if flag is set not to validate', function(done) {
+            var definition = [
+                '#%RAML 0.8',
+                '---',
+                'title: ["title", "title line 2", "title line 3"]',
+                'baseUri: http://myapi.com'
+            ].join('\n');
+            raml.load(definition, 'filename.yml', {validate: false, transform: true, compose: true}).should.be.fulfilled.and.notify(done);
+        });
+        it('should not apply transformations if flag is set to ignore', function(done) {
+            var definition = [
+                '#%RAML 0.8',
+                '---',
+                'title: some title',
+                'baseUri: http://myapi.com/'
+            ].join('\n');
 
+            var expected = {
+                title: "some title",
+                baseUri: "http://myapi.com/"
+            };
+
+            raml.load(definition, 'filename.yml',  {validate: false, transform: false, compose: true}).should.become(expected).and.notify(done);
+        });
+        it('should not apply transformations if flag is set to ignore', function(done) {
+            var definition = [
+                '#%RAML 0.8',
+                '---',
+                'title: some title',
+                'baseUri: http://myapi.com/'
+            ].join('\n');
+
+            var expected = {
+                title: "some title",
+                baseUri: "http://myapi.com/"
+            };
+
+            raml.load(definition, 'filename.yml',  {validate: true, transform: false, compose: true}).should.become(expected).and.notify(done);
+        });
+        it('should apply transformations if flag is set to ignore', function(done) {
+            var definition = [
+                '#%RAML 0.8',
+                '---',
+                'title: some title',
+                'baseUri: http://myapi.com/'
+            ].join('\n');
+
+            var expected = {
+                title: "some title",
+                baseUri: "http://myapi.com/",
+                protocols: ['HTTP']
+            };
+
+            raml.load(definition, 'filename.yml',  {validate: true, transform: true, compose: true}).should.become(expected).and.notify(done);
+        });
+        it('should apply transformations if flag is set to ignore', function(done) {
+            var definition = [
+                '#%RAML 0.8',
+                '---',
+                'title: some title',
+                'baseUri: http://myapi.com/'
+            ].join('\n');
+
+            var expected = {
+                title: "some title",
+                baseUri: "http://myapi.com/",
+                protocols: ['HTTP']
+            };
+
+            raml.load(definition, 'filename.yml',  {validate: true, transform: true}).should.become(expected).and.notify(done);
+        });
+
+
+    });
     it('should fail if title is map', function(done) {
         var definition = [
             '#%RAML 0.8',
@@ -83,7 +165,6 @@ describe('Parser', function() {
 
         raml.load(definition).should.be.rejected.with(/title must be a string/).and.notify(done);
     });
-
     it('should succeed if title is longer than 48 chars', function(done) {
         var definition = [
             '#%RAML 0.8',
@@ -1968,56 +2049,6 @@ describe('Parser', function() {
   });
 
   describe('Resources', function() {
-    it('should succeed extracting resource information', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: Test',
-        '/a:',
-        '  displayName: A',
-        '  get:',
-        '  /b:',
-        '    displayName: AB',
-        '    get:',
-        '    put:',
-        '/a/c:',
-        '  displayName: AC',
-        '  post:',
-        ''
-      ].join('\n');
-
-      raml.resources(definition).should.become([
-        {
-          "methods": [
-            "get"
-          ],
-          "uri": "/a",
-          "displayName": "A",
-          "line": 4,
-          "column": 1
-        },
-        {
-          "methods": [
-            "get",
-            "put"
-          ],
-          "uri": "/a/b",
-          "displayName": "AB",
-          "line": 7,
-          "column": 3
-        },
-        {
-          "methods": [
-            "post"
-          ],
-          "uri": "/a/c",
-          "displayName": "AC",
-          "line": 11,
-          "column": 1
-        }
-      ]).and.notify(done);
-    });
-
     it('should fail on duplicate absolute URIs', function(done) {
       var definition = [
         '#%RAML 0.8',

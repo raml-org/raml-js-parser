@@ -24,25 +24,6 @@ class @BaseConstructor
     @constructing_nodes    = []
     @deferred_constructors = []
 
-  ###
-  Are there more documents available?
-  ###
-  check_data: -> @check_node()
-
-  ###
-  Construct and return the next document.
-  ###
-  get_data: ->
-    return @construct_document @get_node() if @check_node()
-
-  ###
-  Ensure that the stream contains a single document and construct it.
-  ###
-  get_single_data: (validate = true, apply = true, join = true) ->
-    node = @get_single_node(validate, apply, join)
-    return @construct_document node if node?
-    return null
-
   construct_document: (node) ->
     @applyAstTransformations node
 

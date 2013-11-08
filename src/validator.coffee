@@ -311,7 +311,7 @@ class @Validator
     rootProperties = {}
 
     if node?.value
-      node.value.forEach (property) =>
+      for property in node.value
         if property[0].value.match(/^\//)
           @trackRepeatedProperties(rootProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating root properties', "resource already declared")
         else
@@ -379,14 +379,14 @@ class @Validator
   validate_documentation: (documentation_property) ->
     unless documentation_property.value.length
       throw new exports.ValidationError 'while validating documentation section', null, 'there must be at least one document in the documentation section', documentation_property.start_mark
-    documentation_property.value.forEach (docSection) =>
+    for docSection in documentation_property.value
       @validate_doc_section docSection
 
   validate_doc_section: (docSection) ->
     unless util.isMapping docSection
       throw new exports.ValidationError 'while validating documentation section', null, 'each documentation section must be a map', docSection.start_mark
     docProperties = {}
-    docSection.value.forEach (property) =>
+    for property in docSection.value
       @trackRepeatedProperties(docProperties, property[0].value, property[0].start_mark, 'while validating documentation section', "property already used")
       switch property[0].value
         when "title"
@@ -422,7 +422,7 @@ class @Validator
 
     if resource[1].value
       resourceProperties = {}
-      resource[1].value.forEach (property) =>
+      for property in resource[1].value
         if property[0].value.match(/^\//)
           @trackRepeatedProperties(resourceProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating resource', "resource already declared")
         else if @isHttpMethod property[0].value, allowParameterKeys
@@ -513,7 +513,7 @@ class @Validator
       throw new exports.ValidationError 'while validating resource type consumption', null, "there is no resource type named #{typeName}", property[1].start_mark
 
     if util.isMapping property[1]
-      property[1].value.forEach (parameter) =>
+      for parameter in property[1].value
         unless util.isNull(parameter[1]) or util.isMapping(parameter[1])
           throw new exports.ValidationError 'while validating resource consumption', null, 'resource type parameters must be in a map', parameter[1].start_mark
 
@@ -627,7 +627,7 @@ class @Validator
     if util.isSequence response[0]
       unless response[0].value.length
         throw new exports.ValidationError 'while validating responses', null, 'there must be at least one response code', response[0].start_mark
-      response[0].value.forEach (responseCode) =>
+      for responseCode in response[0].value
         unless @isParameterKey(responseCode) or util.isInteger(responseCode) or !isNaN(@canonicalizePropertyName(responseCode, allowParameterKeys))
           throw new exports.ValidationError 'while validating responses', null, "each response key must be an integer", responseCode.start_mark
     else unless @isParameterKey(response) or util.isInteger(response[0]) or !isNaN(@canonicalizePropertyName(response[0].value, allowParameterKeys))
@@ -829,55 +829,17 @@ class @Validator
           properties = properties.concat @get_properties prop[1], property
     return properties
 
-  resources: ( node = @get_single_node(true, true, false), parentPath ) ->
-    response = []
-    child_resources = @child_resources node
-    child_resources.forEach (childResource) =>
-      resourceResponse = {}
-      resourceResponse.methods = []
-
-      if parentPath?
-        resourceResponse.uri = parentPath + childResource[0].value
-      else
-        resourceResponse.uri = childResource[0].value
-
-      if @has_property childResource[1], "displayName"
-        resourceResponse.displayName = @property_value childResource[1], "displayName"
-
-      if @has_property childResource[1], "get"
-        resourceResponse.methods.push 'get'
-      if @has_property childResource[1], "post"
-        resourceResponse.methods.push 'post'
-      if @has_property childResource[1], "put"
-        resourceResponse.methods.push 'put'
-      if @has_property childResource[1], "patch"
-        resourceResponse.methods.push 'patch'
-      if @has_property childResource[1], "delete"
-        resourceResponse.methods.push 'delete'
-      if @has_property childResource[1], "head"
-        resourceResponse.methods.push 'head'
-      if @has_property childResource[1], "options"
-        resourceResponse.methods.push 'options'
-
-      resourceResponse.line = childResource[0].start_mark.line + 1
-      resourceResponse.column = childResource[0].start_mark.column + 1
-      if childResource[0].start_mark.name?
-        resourceResponse.src = childResource[0].start_mark.name
-      response.push resourceResponse
-      response = response.concat( @resources(childResource[1], resourceResponse.uri) )
-    return response
-
   valid_absolute_uris: (node ) ->
     uris = @get_absolute_uris node
     if repeatedUri = @hasDuplicatesUris(uris)
       throw new exports.ValidationError 'while validating trait consumption', null, "two resources share same URI #{repeatedUri.uri}", repeatedUri.mark
 
-  get_absolute_uris: ( node = @get_single_node(true, true, false), parentPath ) ->
+  get_absolute_uris: ( node, parentPath ) ->
     response = []
     unless util.isNullableMapping node
       throw new exports.ValidationError 'while validating resources', null, 'resource is not a map', node.start_mark
     child_resources = @child_resources node
-    child_resources.forEach (childResource) =>
+    for childResource in child_resources
       if parentPath?
         uri = parentPath + childResource[0].value
       else
