@@ -1723,7 +1723,7 @@ describe('Parser', function() {
 
     describe('Named parameters in form parameters', function(){
       it('should fail if formParameters is used in a response', function(done){
-        var definition = [
+        raml.load([
           '#%RAML 0.8',
           '---',
           'title: Test',
@@ -1735,13 +1735,18 @@ describe('Parser', function() {
           '        body:',
           '          application/json:',
           '            formParameters:',
-        ].join('\n');
-
-        raml.load(definition).should.be.rejected.with(/formParameters cannot be used to describe response bodies/).and.notify(done);
+        ].join('\n')).then(function () {}, function (error) {
+          setTimeout(function () {
+            error.message.should.contain('formParameters cannot be used to describe response bodies');
+            error.problem_mark.line.should.be.equal(10);
+            error.problem_mark.column.should.be.equal(12);
+            done();
+          }, 0);
+        });
       });
 
       it('should fail if formParameters is used together with schema', function(done){
-        var definition = [
+        raml.load([
             '#%RAML 0.8',
             '---',
             'title: Test',
@@ -1752,12 +1757,18 @@ describe('Parser', function() {
             '      application/json:',
             '        formParameters:',
             '        schema:',
-        ].join('\n');
-        raml.load(definition).should.be.rejected.with(/formParameters cannot be used together with the example or schema properties/).and.notify(done);
+        ].join('\n')).then(function () {}, function (error) {
+          setTimeout(function () {
+            error.message.should.contain('formParameters cannot be used together with the example or schema properties');
+            error.problem_mark.line.should.be.equal(8);
+            error.problem_mark.column.should.be.equal(8);
+            done();
+          }, 0);
+        });
       });
 
       it('should fail if formParameters is used together with example', function(done){
-        var definition = [
+        raml.load([
             '#%RAML 0.8',
             '---',
             'title: Test',
@@ -1768,8 +1779,14 @@ describe('Parser', function() {
             '      application/json:',
             '        formParameters:',
             '        example:',
-        ].join('\n');
-        raml.load(definition).should.be.rejected.with(/formParameters cannot be used together with the example or schema properties/).and.notify(done);
+        ].join('\n')).then(function () {}, function (error) {
+          setTimeout(function () {
+            error.message.should.contain('formParameters cannot be used together with the example or schema properties');
+            error.problem_mark.line.should.be.equal(8);
+            error.problem_mark.column.should.be.equal(8);
+            done();
+          }, 0);
+        });
       });
 
       it('should succeed null form parameters', function(done) {

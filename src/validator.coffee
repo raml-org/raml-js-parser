@@ -47,17 +47,17 @@ class @Validator
 
         @validate_security_scheme scheme[1]
 
-  trackRepeatedProperties: (properties, property, mark, section = "RAML", errorMessage = "a property with the same name already exists") ->
-    if property of properties
-      throw new exports.ValidationError "while validating #{section}", null, errorMessage + ": '#{property}'", mark
-    properties[property] = true
+  trackRepeatedProperties: (properties, key, property, section = "RAML", errorMessage = "a property with the same name already exists") ->
+    if key of properties
+      throw new exports.ValidationError "while validating #{section}", null, "#{errorMessage}: '#{key}'", property.start_mark
+    properties[key] = property
 
   validate_security_scheme: (scheme) ->
     type = null
     settings = null
     schemeProperties = {}
     for property in scheme.value
-      @trackRepeatedProperties(schemeProperties, property[0].value, property[0].start_mark, 'while validating security scheme', "property already used in security scheme")
+      @trackRepeatedProperties(schemeProperties, property[0].value, property[0], 'while validating security scheme', "property already used in security scheme")
 
       switch property[0].value
         when "description"
@@ -91,7 +91,7 @@ class @Validator
     settingProperties = {}
 
     for property in settings[1].value
-      @trackRepeatedProperties(settingProperties, property[0].value, property[0].start_mark, 'while validating security scheme', "setting with the same name already exists")
+      @trackRepeatedProperties(settingProperties, property[0].value, property[0], 'while validating security scheme', "setting with the same name already exists")
 
       switch property[0].value
         when "authorizationUri"
@@ -110,7 +110,7 @@ class @Validator
     settingProperties = {}
 
     for property in settings[1].value
-      @trackRepeatedProperties(settingProperties, property[0].value, property[0].start_mark, 'while validating security scheme', "setting with the same name already exists")
+      @trackRepeatedProperties(settingProperties, property[0].value, property[0], 'while validating security scheme', "setting with the same name already exists")
 
       switch property[0].value
         when "requestTokenUri"
@@ -166,7 +166,7 @@ class @Validator
     if typeof uriProperty.value is "object"
       for uriParameter in uriProperty.value
         parameterName = @canonicalizePropertyName(uriParameter[0].value, allowParameterKeys)
-        @trackRepeatedProperties(uriParameters, parameterName, uriProperty.start_mark, 'while validating URI parameters', "URI parameter with the same name already exists")
+        @trackRepeatedProperties(uriParameters, parameterName, uriProperty, 'while validating URI parameters', "URI parameter with the same name already exists")
 
         if parameterName in reservedNames
           throw new exports.ValidationError 'while validating baseUri', null, uriParameter[0].value + ' parameter not allowed here', uriParameter[0].start_mark
@@ -248,7 +248,7 @@ class @Validator
     for childNode in node.value
       propertyName = childNode[0].value
       propertyValue = childNode[1].value
-      @trackRepeatedProperties(parameterProperties, @canonicalizePropertyName(childNode[0].value, true), childNode[0].start_mark, 'while validating parameter properties', "parameter property already used")
+      @trackRepeatedProperties(parameterProperties, @canonicalizePropertyName(childNode[0].value, true), childNode[0], 'while validating parameter properties', "parameter property already used")
       booleanValues = ["true", "false"]
       continue if allowParameterKeys && @isParameterKey(childNode)
 
@@ -313,9 +313,9 @@ class @Validator
     if node?.value
       for property in node.value
         if property[0].value.match(/^\//)
-          @trackRepeatedProperties(rootProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating root properties', "resource already declared")
+          @trackRepeatedProperties(rootProperties, @canonicalizePropertyName(property[0].value, true), property[0], 'while validating root properties', "resource already declared")
         else
-          @trackRepeatedProperties(rootProperties, property[0].value, property[0].start_mark, 'while validating root properties', 'root property already used')
+          @trackRepeatedProperties(rootProperties, property[0].value, property[0], 'while validating root properties', 'root property already used')
 
         switch property[0].value
           when 'title'
@@ -387,7 +387,7 @@ class @Validator
       throw new exports.ValidationError 'while validating documentation section', null, 'each documentation section must be a map', docSection.start_mark
     docProperties = {}
     for property in docSection.value
-      @trackRepeatedProperties(docProperties, property[0].value, property[0].start_mark, 'while validating documentation section', "property already used")
+      @trackRepeatedProperties(docProperties, property[0].value, property[0], 'while validating documentation section', "property already used")
       switch property[0].value
         when "title"
           unless util.isScalar(property[1]) and not util.isNull(property[1])
@@ -424,11 +424,11 @@ class @Validator
       resourceProperties = {}
       for property in resource[1].value
         if property[0].value.match(/^\//)
-          @trackRepeatedProperties(resourceProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating resource', "resource already declared")
+          @trackRepeatedProperties(resourceProperties, @canonicalizePropertyName(property[0].value, true), property[0], 'while validating resource', "resource already declared")
         else if @isHttpMethod property[0].value, allowParameterKeys
-          @trackRepeatedProperties(resourceProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating resource', "method already declared")
+          @trackRepeatedProperties(resourceProperties, @canonicalizePropertyName(property[0].value, true), property[0], 'while validating resource', "method already declared")
         else
-          @trackRepeatedProperties(resourceProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating resource', "property already used")
+          @trackRepeatedProperties(resourceProperties, @canonicalizePropertyName(property[0].value, true), property[0], 'while validating resource', "property already used")
 
         unless @validate_common_properties property, allowParameterKeys
           if property[0].value.match(/^\//)
@@ -526,7 +526,7 @@ class @Validator
 
     methodProperties = {}
     for property in method[1].value
-      @trackRepeatedProperties(methodProperties, @canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating method', "property already used")
+      @trackRepeatedProperties(methodProperties, @canonicalizePropertyName(property[0].value, true), property[0], 'while validating method', "property already used")
       continue if @validate_common_properties property, allowParameterKeys, context
 
       key          = property[0].value
@@ -584,7 +584,7 @@ class @Validator
     for response in responses[1].value
       unless util.isNullableMapping response[1]
         throw new exports.ValidationError 'while validating responses', null, 'each response must be a map', response[1].start_mark
-      @trackRepeatedProperties(responseValues, @canonicalizePropertyName(response[0].value, true), response[0].start_mark, 'while validating responses', "response code already used")
+      @trackRepeatedProperties(responseValues, @canonicalizePropertyName(response[0].value, true), response[0], 'while validating responses', "response code already used")
       @validate_response response, allowParameterKeys
 
   validate_query_params: (property, allowParameterKeys) ->
@@ -596,7 +596,7 @@ class @Validator
     for param in property[1].value
       unless util.isNullableMapping(param[1]) or util.isNullableSequence(param[1])
         throw new exports.ValidationError 'while validating query parameters', null, "each query parameter must be a map", param[1].start_mark
-      @trackRepeatedProperties(queryParameters, @canonicalizePropertyName(param[0].value, true), param[0].start_mark, 'while validating query parameter', "parameter name already used")
+      @trackRepeatedProperties(queryParameters, @canonicalizePropertyName(param[0].value, true), param[0], 'while validating query parameter', "parameter name already used")
       @valid_common_parameter_properties param[1], allowParameterKeys
 
   validate_form_params: (property, allowParameterKeys) ->
@@ -608,7 +608,7 @@ class @Validator
     for param in property[1].value
       unless util.isNullableMapping(param[1]) or util.isNullableSequence(param[1])
         throw new exports.ValidationError 'while validating query parameters', null, 'each form parameter must be a map', param[1].start_mark
-      @trackRepeatedProperties(formParameters, @canonicalizePropertyName(param[0].value, true), param[0].start_mark, 'while validating form parameter', "parameter name already used")
+      @trackRepeatedProperties(formParameters, @canonicalizePropertyName(param[0].value, true), param[0], 'while validating form parameter', "parameter name already used")
       @valid_common_parameter_properties param[1], allowParameterKeys
 
   validate_headers: (property, allowParameterKeys) ->
@@ -620,7 +620,7 @@ class @Validator
     for param in property[1].value
       unless util.isNullableMapping(param[1]) or util.isNullableSequence(param[1])
         throw new exports.ValidationError 'while validating query parameters', null, "each header must be a map", param[1].start_mark
-      @trackRepeatedProperties(headerNames, @canonicalizePropertyName(param[0].value, true), param[0].start_mark, 'while validating headers', "header name already used")
+      @trackRepeatedProperties(headerNames, @canonicalizePropertyName(param[0].value, true), param[0], 'while validating headers', "header name already used")
       @valid_common_parameter_properties param[1], allowParameterKeys
 
   validate_response: (response, allowParameterKeys) ->
@@ -639,7 +639,7 @@ class @Validator
       responseProperties = {}
       for property in response[1].value
         canonicalKey = @canonicalizePropertyName(property[0].value, allowParameterKeys)
-        @trackRepeatedProperties(responseProperties, canonicalKey, property[0].start_mark, 'while validating responses', "property already used")
+        @trackRepeatedProperties(responseProperties, canonicalKey, property[0], 'while validating responses', "property already used")
         unless @isParameterKey(property)
           switch canonicalKey
             when "body"
@@ -693,7 +693,7 @@ class @Validator
     implicitMode = ["implicit", "forcedImplicit"]
     bodyProperties = {}
     for bodyProperty in property[1].value
-      @trackRepeatedProperties(bodyProperties, @canonicalizePropertyName(bodyProperty[0].value, true), bodyProperty[0].start_mark, 'while validating body', "property already used")
+      @trackRepeatedProperties(bodyProperties, @canonicalizePropertyName(bodyProperty[0].value, true), bodyProperty[0], 'while validating body', "property already used")
 
       if @isParameterKey(bodyProperty)
         unless allowParameterKeys
@@ -726,11 +726,16 @@ class @Validator
               throw new exports.ValidationError 'while validating body', null, "schema must be a string", bodyProperty[0].start_mark
           else
             throw new exports.ValidationError 'while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark
+
     if "formParameters" of bodyProperties
+      start_mark = bodyProperties.formParameters.start_mark
+
       if isResponseBody
-        throw new exports.ValidationError 'while validating body', null, "formParameters cannot be used to describe response bodies", property[0].start_mark
+        throw new exports.ValidationError 'while validating body', null, "formParameters cannot be used to describe response bodies", start_mark
+
       if "schema" of bodyProperties or "example" of bodyProperties
-        throw new exports.ValidationError 'while validating body', null, "formParameters cannot be used together with the example or schema properties", property[0].start_mark
+        throw new exports.ValidationError 'while validating body', null, "formParameters cannot be used together with the example or schema properties", start_mark
+
     if bodyMode is "implicit"
       unless @get_media_type()
         throw new exports.ValidationError 'while validating body', null, "body tries to use default Media Type, but mediaType is null", property[0].start_mark
