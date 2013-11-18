@@ -22,7 +22,7 @@ describe('Validator', function () {
       '---',
       'title: Example',
       'baseUriParameters:'
-    ].join('\n')).should.be.rejected.with('uri parameters defined when there is no baseUri').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('uri parameters defined when there is no baseUri').and.notify(done);
   });
 
   it('should allow protocols at root level', function (done) {
@@ -44,7 +44,7 @@ describe('Validator', function () {
       'title: Example',
       'baseUri: http://api.com',
       'protocols: HTTP, HTTPS'
-    ].join('\n')).should.be.rejected.with('property must be an array').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('property must be an array').and.notify(done);
   });
 
   it('should fail if protocols property contains not-a-string values at root level', function (done) {
@@ -93,7 +93,7 @@ describe('Validator', function () {
       'protocols:',
       '   - HtTp',
       '   - hTtPs'
-    ].join('\n')).should.be.rejected.with('only HTTP and HTTPS values are allowed').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('only HTTP and HTTPS values are allowed').and.notify(done);
   });
 
   it('should allow protocols at method level', function (done) {
@@ -119,7 +119,7 @@ describe('Validator', function () {
       '/:',
       '   get:',
       '       protocols: HTTP, HTTPS'
-    ].join('\n')).should.be.rejected.with('property must be an array').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('property must be an array').and.notify(done);
   });
 
   it('should fail if protocols property contains not-a-string values at method level', function (done) {
@@ -173,7 +173,7 @@ describe('Validator', function () {
       '   get:',
       '       protocols:',
       '           - HtTp'
-    ].join('\n')).should.be.rejected.with('only HTTP and HTTPS values are allowed').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('only HTTP and HTTPS values are allowed').and.notify(done);
   });
 
   it('should allow protocols in traits', function (done) {
@@ -198,7 +198,7 @@ describe('Validator', function () {
       '/:',
       '   protocols:',
       '       - HTTP'
-    ].join('\n')).should.be.rejected.with('property: \'protocols\' is invalid in a resource').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('property: \'protocols\' is invalid in a resource').and.notify(done);
   });
 
   it('should not allow parameter key to be used as a name for resource type', function (done) {
@@ -208,7 +208,7 @@ describe('Validator', function () {
       'title: Example',
       'resourceTypes:',
       '   - <<resourceTypeName>>: {}'
-    ].join('\n')).should.be.rejected.with('parameter key cannot be used as a resource type name').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('parameter key cannot be used as a resource type name').and.notify(done);
   });
 
   it('should not allow parameter key to be used as a name for trait', function (done) {
@@ -218,7 +218,7 @@ describe('Validator', function () {
       'title: Example',
       'traits:',
       '   - <<traitName>>: {}'
-    ].join('\n')).should.be.rejected.with('parameter key cannot be used as a trait name').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('parameter key cannot be used as a trait name').and.notify(done);
   });
 
   it('should allow use parameter key as a trait name within resource type', function (done) {
@@ -250,7 +250,7 @@ describe('Validator', function () {
       '---',
       'title: Example',
       'baseUri:'
-    ].join('\n')).should.be.rejected.with('baseUri must have a value').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('baseUri must have a value').and.notify(done);
   });
 
   it('should allow only HTTP and HTTPS protocols to be used in baseUri', function (done) {
@@ -259,7 +259,7 @@ describe('Validator', function () {
       '---',
       'title: Example',
       'baseUri: ftp://api.com'
-    ].join('\n')).should.be.rejected.with('baseUri protocol must be either HTTP or HTTPS').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('baseUri protocol must be either HTTP or HTTPS').and.notify(done);
   });
 
   it('should report correct line/column for scheme entry that is not a map', function (done) {
@@ -385,7 +385,7 @@ describe('Validator', function () {
       '       is:',
       '         - trait1:',
       '           - 1'
-    ].join('\n')).should.be.rejected.with('trait must be a map').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('trait must be a map').and.notify(done);
   });
 
   it('should allow only scalar values to be used for parameters when applying traits #1', function (done) {
@@ -401,7 +401,7 @@ describe('Validator', function () {
       '       is:',
       '         - trait1:',
       '             param1: []'
-    ].join('\n')).should.be.rejected.with('parameter value must be a scalar').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('parameter value must be a scalar').and.notify(done);
   });
 
   it('should allow only scalar values to be used for parameters when applying traits #2', function (done) {
@@ -417,7 +417,7 @@ describe('Validator', function () {
       '       is:',
       '         - trait1:',
       '             param1: {}'
-    ].join('\n')).should.be.rejected.with('parameter value must be a scalar').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('parameter value must be a scalar').and.notify(done);
   });
 
   it('should allow only scalar values to be used for parameters when applying resource types #1', function (done) {
@@ -433,7 +433,7 @@ describe('Validator', function () {
       '       is:',
       '         - trait1:',
       '             param1: []'
-    ].join('\n')).should.be.rejected.with('parameter value must be a scalar').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('parameter value must be a scalar').and.notify(done);
   });
 
   it('should allow only scalar values to be used for parameters when applying resouce types #2', function (done) {
@@ -449,7 +449,7 @@ describe('Validator', function () {
       '       is:',
       '         - trait1:',
       '             param1: {}'
-    ].join('\n')).should.be.rejected.with('parameter value must be a scalar').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('parameter value must be a scalar').and.notify(done);
   });
 
   it('should check for empty trait name within resource method', function (done) {
@@ -461,7 +461,7 @@ describe('Validator', function () {
       '   get:',
       '       is:',
       '         -'
-    ].join('\n')).should.be.rejected.with('trait name must be provided').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('trait name must be provided').and.notify(done);
   });
 
   it('should check for empty trait name within resource type method', function (done) {
@@ -474,7 +474,7 @@ describe('Validator', function () {
       '      get:',
       '        is:',
       '          -'
-    ].join('\n')).should.be.rejected.with('trait name must be provided').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('trait name must be provided').and.notify(done);
   });
 
   it('should check for empty trait name filled with whitespaces only within resource method', function (done) {
@@ -486,7 +486,7 @@ describe('Validator', function () {
       '   get:',
       '       is:',
       '         -  '
-    ].join('\n')).should.be.rejected.with('trait name must be provided').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('trait name must be provided').and.notify(done);
   });
 
   it('should check for empty trait name filled with whitespaces only within resource type method', function (done) {
@@ -499,7 +499,7 @@ describe('Validator', function () {
       '      get:',
       '        is:',
       '          -  '
-    ].join('\n')).should.be.rejected.with('trait name must be provided').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('trait name must be provided').and.notify(done);
   });
 
   it('should check for empty resource type name', function (done) {
@@ -509,7 +509,7 @@ describe('Validator', function () {
       'title: Title',
       '/:',
       '  type: " "'
-    ].join('\n')).should.be.rejected.with('resource type name must be provided').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('resource type name must be provided').and.notify(done);
   });
 
   (function () {

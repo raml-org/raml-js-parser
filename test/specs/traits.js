@@ -32,7 +32,7 @@ describe('Traits', function () {
       '           - trait1:',
       '               param1: value1',
       '               param2: value2'
-    ].join('\n')).should.be.rejected.with('unused parameter: param2').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('unused parameter: param2').and.notify(done);
   });
 
   it('should detect unused resource type parameters and throw an exception', function (done) {
@@ -51,7 +51,7 @@ describe('Traits', function () {
       '       resourceType1:',
       '           param1: value1',
       '           param2: value2'
-    ].join('\n')).should.be.rejected.with('unused parameter: param2').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('unused parameter: param2').and.notify(done);
   });
 
   it('should be applied via resource type and parameter key', function (done) {
@@ -131,7 +131,7 @@ describe('Traits', function () {
       '       is:',
       '         - trait1:',
       '             methodName: does-not-matter'
-    ].join('\n')).should.be.rejected.with('invalid parameter name: methodName is reserved').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('invalid parameter name: methodName is reserved').and.notify(done);
   });
 
   it('should not allow reserved parameters: resourcePath', function (done) {
@@ -147,7 +147,7 @@ describe('Traits', function () {
       '       is:',
       '         - trait1:',
       '             resourcePath: does-not-matter'
-    ].join('\n')).should.be.rejected.with('invalid parameter name: resourcePath is reserved').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('invalid parameter name: resourcePath is reserved').and.notify(done);
   });
 
   it('should not crash if applied trait has value of null (RT-364)', function (done) {
@@ -224,6 +224,6 @@ describe('Traits', function () {
       '  type:',
       '    resourceType1:',
       '      traitName:'
-    ].join('\n')).should.be.rejected.with('trait name must be provided').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('trait name must be provided').and.notify(done);
   });
 });

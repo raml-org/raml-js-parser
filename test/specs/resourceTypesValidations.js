@@ -228,7 +228,7 @@ describe('Resource Types Validations', function () {
       '  get:',
       '    description: Get'
     ]);
-    raml.load(definition).should.be.rejected.with(/resource type cannot define child resources/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/resource type cannot define child resources/).and.notify(done);
   });
 
   it('should succeed when given a usage property', function (done) {
@@ -243,7 +243,7 @@ describe('Resource Types Validations', function () {
       'post:',
       '  usage: This resourceType should be used for any collection of items'
     ]);
-    raml.load(definition).should.be.rejected.with(/property: 'usage' is invalid in a method/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/property: 'usage' is invalid in a method/).and.notify(done);
   });
 
   describe('Optional Properties', function () {
@@ -297,7 +297,7 @@ describe('Resource Types Validations', function () {
           '  nonExistingParameter:',
           '    enum: [ "api-content" ]'
         ]);
-        raml.load(definition).should.be.rejected.with(/uri parameter unused/).and.notify(done);
+        raml.load(definition).should.be.rejectedWith(/uri parameter unused/).and.notify(done);
       });
 
       it('should succeed when given a "baseUriParameters?" property', function (done) {
@@ -446,19 +446,19 @@ describe('Resource Types Validations', function () {
 
     it('should fail when given a "type?" property', function (done) {
       var definition = resourceTypeSnippet([ 'type?: collection']);
-      raml.load(definition).should.be.rejected.with(/property: 'type\?' is invalid in a resource type/).and.notify(done);
+      raml.load(definition).should.be.rejectedWith(/property: 'type\?' is invalid in a resource type/).and.notify(done);
     });
 
     it('should fail when given an "is?" property', function (done) {
       var definition = resourceTypeSnippet([ 'is?: [secured]']);
-      raml.load(definition).should.be.rejected.with(/property: 'is\?' is invalid in a resource type/).and.notify(done);
+      raml.load(definition).should.be.rejectedWith(/property: 'is\?' is invalid in a resource type/).and.notify(done);
     });
 
     it('should fail when given a "usage?" property', function (done) {
       var definition = resourceTypeSnippet([
         'usage?: This resourceType should be used for any collection of items'
       ]);
-      raml.load(definition).should.be.rejected.with(/property: 'usage\?' is invalid in a resource type/).and.notify(done);
+      raml.load(definition).should.be.rejectedWith(/property: 'usage\?' is invalid in a resource type/).and.notify(done);
     });
 
     it('should fail when given a nested resource that ends with ?', function (done) {
@@ -467,7 +467,7 @@ describe('Resource Types Validations', function () {
         '  get:',
         '    summary: Get'
       ]);
-      raml.load(definition).should.be.rejected.with(/resource type cannot define child resources/).and.notify(done);
+      raml.load(definition).should.be.rejectedWith(/resource type cannot define child resources/).and.notify(done);
     });
   });
 
@@ -617,17 +617,17 @@ describe('Trait Validations', function () {
 
   it('should fail when given an unknown property', function (done) {
     var definition = traitSnippet([ 'unknown: Some value']);
-    raml.load(definition).should.be.rejected.with(/property: 'unknown' is invalid in a trait/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/property: 'unknown' is invalid in a trait/).and.notify(done);
   });
 
   it('should fail when given an "is" property', function (done) {
     var definition = traitSnippet([ 'is: [someTrait]']);
-    raml.load(definition).should.be.rejected.with(/property: 'is' is invalid in a trait/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/property: 'is' is invalid in a trait/).and.notify(done);
   });
 
   it('should fail when given a "type" property', function (done) {
     var definition = traitSnippet([ 'type: [someType]']);
-    raml.load(definition).should.be.rejected.with(/property: 'type' is invalid in a trait/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/property: 'type' is invalid in a trait/).and.notify(done);
   });
 
   describe('Optional Properties', function () {
@@ -635,17 +635,17 @@ describe('Trait Validations', function () {
       var definition = traitSnippet([
         'usage?: This trait should be used for ...'
       ]);
-      raml.load(definition).should.be.rejected.with(/property: 'usage\?' is invalid in a trait/).and.notify(done);
+      raml.load(definition).should.be.rejectedWith(/property: 'usage\?' is invalid in a trait/).and.notify(done);
     });
 
     it('should fail when given a "type?" property', function (done) {
       var definition = traitSnippet([ 'type?: collection']);
-      raml.load(definition).should.be.rejected.with(/property: 'type\?' is invalid in a trait/).and.notify(done);
+      raml.load(definition).should.be.rejectedWith(/property: 'type\?' is invalid in a trait/).and.notify(done);
     });
 
     it('should fail when given an "is?" property', function (done) {
       var definition = traitSnippet([ 'is?: [secured]']);
-      raml.load(definition).should.be.rejected.with(/property: 'is\?' is invalid in a trait/).and.notify(done);
+      raml.load(definition).should.be.rejectedWith(/property: 'is\?' is invalid in a trait/).and.notify(done);
     });
 
     describe('method properties', function () {

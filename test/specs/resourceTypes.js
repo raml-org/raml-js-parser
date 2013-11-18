@@ -34,7 +34,7 @@ describe('Resource Types', function () {
       '/:',
       '   type: a'
     ].join('\n');
-    raml.load(definition).should.be.rejected.with('circular reference of "a" has been detected: a -> b -> c -> a').and.notify(done);
+    raml.load(definition).should.be.rejectedWith('circular reference of "a" has been detected: a -> b -> c -> a').and.notify(done);
   });
 
   it('should inherit properties when applied with parameters at at least second level (RT-295)', function (done) {
@@ -159,7 +159,7 @@ describe('Resource Types', function () {
       '   type:',
       '       type1:',
       '           typeName: type2'
-    ].join('\n')).should.be.rejected.with('there is no resource type named type2').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('there is no resource type named type2').and.notify(done);
   });
 
   it('should not allow reserved parameters', function (done) {
@@ -174,7 +174,7 @@ describe('Resource Types', function () {
       '   type:',
       '       type1:',
       '           resourcePath: does-not-matter'
-    ].join('\n')).should.be.rejected.with('invalid parameter name: resourcePath is reserved').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('invalid parameter name: resourcePath is reserved').and.notify(done);
   });
 
   it('should provide reserved <<resourcePathName>> parameter', function (done) {
@@ -228,6 +228,6 @@ describe('Resource Types', function () {
       '  type:',
       '    resourceType1:',
       '      resourceTypeName:'
-    ].join('\n')).should.be.rejected.with('resource type name must be provided').and.notify(done);
+    ].join('\n')).should.be.rejectedWith('resource type name must be provided').and.notify(done);
   });
 });

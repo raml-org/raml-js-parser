@@ -21,7 +21,7 @@ describe('Regressions', function () {
       '#%RAML 0.1'
     ].join('\n');
 
-    raml.load(definition).should.be.rejected.with(/Unsupported RAML version: \'#%RAML 0.1\'/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/Unsupported RAML version: \'#%RAML 0.1\'/).and.notify(done);
   });
 
   it('should fail with correct error message on hex values', function (done) {
@@ -30,7 +30,7 @@ describe('Regressions', function () {
       'some_key: "some value \\x0t"'
     ].join('\n');
 
-    raml.load(definition).should.be.rejected.with(/expected escape sequence of 2 hexadecimal numbers, but found t/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/expected escape sequence of 2 hexadecimal numbers, but found t/).and.notify(done);
   });
 
   it('should fail with correct error message on hex values', function (done) {
@@ -39,7 +39,7 @@ describe('Regressions', function () {
       'some_key: ? something : something'
     ].join('\n');
 
-    raml.load(definition).should.be.rejected.with(/mapping keys are not allowed here/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/mapping keys are not allowed here/).and.notify(done);
   });
 
   it('should fail with correct error message on hex values', function (done) {
@@ -50,7 +50,7 @@ describe('Regressions', function () {
       '---'
     ].join('\n');
 
-    raml.load(definition).should.be.rejected.with(/found unexpected document separator/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/found unexpected document separator/).and.notify(done);
   });
   it('should fail if baseUriParameter is not a map', function (done) {
     var definition = [
@@ -64,7 +64,7 @@ describe('Regressions', function () {
       '      description'
     ].join('\n');
 
-    raml.load(definition).should.be.rejected.with(/parameter must be a map/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/parameter must be a map/).and.notify(done);
   });
 
   it('should not fail to parse an empty trait', function (done) {
@@ -76,7 +76,7 @@ describe('Regressions', function () {
       '    otherTrait:',
       '      description: Some description',
     ].join('\n');
-    raml.load(definition).should.be.rejected.with(/invalid trait definition, it must be a map/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/invalid trait definition, it must be a map/).and.notify(done);
   });
 
   it('should not fail to parse an empty trait list', function (done) {
@@ -88,7 +88,7 @@ describe('Regressions', function () {
       'version: v1.1',
       'traits:'
     ].join('\n');
-    raml.load(definition).should.be.rejected.with(/invalid traits definition, it must be an array/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/invalid traits definition, it must be an array/).and.notify(done);
   });
 
   it('should fail to parse a RAML header ', function (done) {
@@ -110,7 +110,7 @@ describe('Regressions', function () {
       '#%RAML 0.8',
       '---'
     ].join('\n');
-    raml.load(definition).should.be.rejected.with(/document must be a map/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/document must be a map/).and.notify(done);
   });
 
   it('should not fail to parse a RAML null uriParameters. RT-178', function (done) {
@@ -151,7 +151,7 @@ describe('Regressions', function () {
       'baseUriParameters:',
       ' version:'
     ].join('\n');
-    raml.load(definition).should.be.rejected.with(/version parameter not allowed here/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/version parameter not allowed here/).and.notify(done);
   });
 
   it('should fail if resource URI is invalid', function (done) {
@@ -162,7 +162,7 @@ describe('Regressions', function () {
       'version: v0.1',
       '/resourceName{}:'
     ].join('\n');
-    raml.load(definition).should.be.rejected.with(/Resource name is invalid:/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/Resource name is invalid:/).and.notify(done);
   });
 
   it('should fail if resource URI is invalid', function (done) {
@@ -173,7 +173,7 @@ describe('Regressions', function () {
       'version: v0.1',
       '/resourceName{}:'
     ].join('\n');
-    raml.load(definition).should.be.rejected.with(/Resource name is invalid:/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/Resource name is invalid:/).and.notify(done);
   });
 
   it('should reject RAML with more than one YAML document', function (done) {
@@ -184,7 +184,7 @@ describe('Regressions', function () {
       'version: v0.1',
       '---'
     ].join('\n');
-    raml.load(definition).should.be.rejected.with(/expected a single document in the stream but found another document/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/expected a single document in the stream but found another document/).and.notify(done);
   });
 
   it('should inject exception coontext into message when message is null', function (done) {
@@ -196,7 +196,7 @@ describe('Regressions', function () {
       '...',
       'somepropertyName'
     ].join('\n');
-    raml.load(definition).should.be.rejected.with(/expected '<document start>', but found <scalar>/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/expected '<document start>', but found <scalar>/).and.notify(done);
   });
 
   it('should fail if baseUriParameters is a string - RT-274', function (done) {
@@ -209,7 +209,7 @@ describe('Regressions', function () {
       'baseUriParameters:',
       '  someparam'
     ].join('\n');
-    raml.load(definition).should.be.rejected.with(/base uri parameters must be a map/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/base uri parameters must be a map/).and.notify(done);
   });
 
   it('should fail if baseUriParameters is a string - RT-274 - with proper line numbering', function (done) {
@@ -245,7 +245,7 @@ describe('Regressions', function () {
       '  baseUriParameters:',
       '    someparam'
     ].join('\n');
-    raml.load(definition).should.be.rejected.with(/base uri parameters must be a map/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/base uri parameters must be a map/).and.notify(done);
   });
 
   it('should fail if baseUriParameters in a resource is a string - RT-274', function (done) {
@@ -259,7 +259,7 @@ describe('Regressions', function () {
       '  uriParameters:',
       '    someparam'
     ].join('\n');
-    raml.load(definition).should.be.rejected.with(/uri parameters must be a map/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/uri parameters must be a map/).and.notify(done);
   });
 
   it('should report correct line (RT-244)', function (done) {
@@ -537,7 +537,7 @@ describe('Regressions', function () {
       'title: !include'
     ].join('\n');
 
-    raml.load(definition).should.be.rejected.with(/file name\/URL cannot be null/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/file name\/URL cannot be null/).and.notify(done);
   });
 
   it('should not download a file named with blanks. RT-259', function (done) {
@@ -547,7 +547,7 @@ describe('Regressions', function () {
       'title: !include             '
     ].join('\n');
 
-    raml.load(definition).should.be.rejected.with(/file name\/URL cannot be null/).and.notify(done);
+    raml.load(definition).should.be.rejectedWith(/file name\/URL cannot be null/).and.notify(done);
   });
 
   it('add a regression test for a complex RAML file', function (done) {

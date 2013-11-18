@@ -1,6 +1,5 @@
 uritemplate = require 'uritemplate'
 nodes       = require './nodes'
-url         = require 'url'
 util              = require './util'
 
 ###
@@ -58,8 +57,7 @@ class @Transformations
               if inheritedSecScheme
                 method.securedBy = inheritedSecScheme
 
-        relativeUri = url.parse resource.relativeUri
-        pathParts = relativeUri.path.split('\/')
+        pathParts = resource.relativeUri.split('\/')
         pathParts.shift() while !pathParts[0] and pathParts.length
         resource.relativeUriPathSegments = pathParts
 
