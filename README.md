@@ -1,6 +1,7 @@
 # RAML Parser
 
 [![Build Status](https://travis-ci.org/raml-org/raml-js-parser.png)](https://travis-ci.org/raml-org/raml-js-parser)
+[![Dependency Status](https://david-dm.org/raml-org/raml-js-parser.png)](https://david-dm.org/raml-org/raml-js-parser)
 
 This project contains a RAML parser capable (at this moment) to parser v0.8 version
 of the RAML specification. The parser is written in CoffeeScript and its capable
