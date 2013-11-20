@@ -61,12 +61,12 @@ function itShouldBehaveLikeAnOptionalStructureNamedParameter(initialRaml) {
   });
 
   it('should succeed when given a "minimum?" property', function (done) {
-    var definition = generateRaml(['minimum?: 20']);
+    var definition = generateRaml(['type: number', 'minimum?: 20']);
     raml.load(definition).should.be.fulfilled.and.notify(done);
   });
 
   it('should succeed when given a "maximum?" property', function (done) {
-    var definition = generateRaml(['maximum?: 100']);
+    var definition = generateRaml(['type: number', 'maximum?: 100']);
     raml.load(definition).should.be.fulfilled.and.notify(done);
   });
 
