@@ -245,6 +245,7 @@ class @Validator
 
   validate_named_parameter: (node, allowParameterKeys) ->
     parameterProperties = {}
+    parameterType = "string"
     for childNode in node.value
       propertyName = childNode[0].value
       propertyValue = childNode[1].value
@@ -291,6 +292,7 @@ class @Validator
           if isNaN(propertyValue)
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of maximum must be a number', childNode[1].start_mark
         when "type"
+          parameterType = propertyValue
           validTypes = ['string', 'number', 'integer', 'date', 'boolean', 'file']
           unless  propertyValue in validTypes
             throw new exports.ValidationError 'while validating parameter properties', null, 'type can be either of: string, number, integer, file, date or boolean ', childNode[1].start_mark
@@ -301,7 +303,19 @@ class @Validator
           unless propertyValue in booleanValues
             throw new exports.ValidationError 'while validating parameter properties', null, 'repeat can be any either true or false', childNode[1].start_mark
         else
-          throw new exports.ValidationError 'while validating parameter properties', null, 'unknown property ' + propertyName, childNode[0].start_mark
+          throw new exports.ValidationError 'while validating parameter properties', null, "unknown property #{propertyName}", childNode[0].start_mark
+
+    # Validate that we are not using incorrect properties for a non string
+    unless parameterType is "string"
+      for unusableProperty in ['enum', 'pattern', 'minLength', 'maxLength']
+        if unusableProperty of parameterProperties
+          throw new exports.ValidationError 'while validating parameter properties', null, "property #{unusableProperty} can only be used if type is 'string'", parameterProperties[unusableProperty].start_mark
+
+    # Validate that we are not using incorrect properties for a non numeric parameter
+    unless parameterType is "number" or parameterType is "integer"
+      for unusableProperty in ['minimum', 'maximum']
+        if unusableProperty of parameterProperties
+          throw new exports.ValidationError 'while validating parameter properties', null, "property #{unusableProperty} can only be used if type is 'number' or 'integer'", parameterProperties[unusableProperty].start_mark
 
   get_list_values: (node) =>
     return node.map (item) => item.value

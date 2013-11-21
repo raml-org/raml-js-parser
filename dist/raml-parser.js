@@ -6185,17 +6185,17 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
       return _results;
     };
 
-    Validator.prototype.trackRepeatedProperties = function(properties, property, mark, section, errorMessage) {
+    Validator.prototype.trackRepeatedProperties = function(properties, key, property, section, errorMessage) {
       if (section == null) {
         section = "RAML";
       }
       if (errorMessage == null) {
         errorMessage = "a property with the same name already exists";
       }
-      if (property in properties) {
-        throw new exports.ValidationError("while validating " + section, null, errorMessage + (": '" + property + "'"), mark);
+      if (key in properties) {
+        throw new exports.ValidationError("while validating " + section, null, "" + errorMessage + ": '" + key + "'", property.start_mark);
       }
-      return properties[property] = true;
+      return properties[key] = property;
     };
 
     Validator.prototype.validate_security_scheme = function(scheme) {
@@ -6206,7 +6206,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
       _ref1 = scheme.value;
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         property = _ref1[_i];
-        this.trackRepeatedProperties(schemeProperties, property[0].value, property[0].start_mark, 'while validating security scheme', "property already used in security scheme");
+        this.trackRepeatedProperties(schemeProperties, property[0].value, property[0], 'while validating security scheme', "property already used in security scheme");
         switch (property[0].value) {
           case "description":
             if (!util.isScalar(property[1])) {
@@ -6253,7 +6253,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
       _ref1 = settings[1].value;
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         property = _ref1[_i];
-        this.trackRepeatedProperties(settingProperties, property[0].value, property[0].start_mark, 'while validating security scheme', "setting with the same name already exists");
+        this.trackRepeatedProperties(settingProperties, property[0].value, property[0], 'while validating security scheme', "setting with the same name already exists");
         switch (property[0].value) {
           case "authorizationUri":
             if (!util.isString(property[1])) {
@@ -6285,7 +6285,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
       _ref1 = settings[1].value;
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         property = _ref1[_i];
-        this.trackRepeatedProperties(settingProperties, property[0].value, property[0].start_mark, 'while validating security scheme', "setting with the same name already exists");
+        this.trackRepeatedProperties(settingProperties, property[0].value, property[0], 'while validating security scheme', "setting with the same name already exists");
         switch (property[0].value) {
           case "requestTokenUri":
             if (!util.isString(property[1])) {
@@ -6379,7 +6379,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
         for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
           uriParameter = _ref2[_i];
           parameterName = this.canonicalizePropertyName(uriParameter[0].value, allowParameterKeys);
-          this.trackRepeatedProperties(uriParameters, parameterName, uriProperty.start_mark, 'while validating URI parameters', "URI parameter with the same name already exists");
+          this.trackRepeatedProperties(uriParameters, parameterName, uriProperty, 'while validating URI parameters', "URI parameter with the same name already exists");
           if (__indexOf.call(reservedNames, parameterName) >= 0) {
             throw new exports.ValidationError('while validating baseUri', null, uriParameter[0].value + ' parameter not allowed here', uriParameter[0].start_mark);
           }
@@ -6514,15 +6514,15 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
     };
 
     Validator.prototype.validate_named_parameter = function(node, allowParameterKeys) {
-      var booleanValues, canonicalPropertyName, childNode, enumValues, parameterProperties, propertyName, propertyValue, validTypes, _i, _len, _ref1, _results;
+      var booleanValues, canonicalPropertyName, childNode, enumValues, parameterProperties, parameterType, propertyName, propertyValue, unusableProperty, validTypes, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3, _results;
       parameterProperties = {};
+      parameterType = "string";
       _ref1 = node.value;
-      _results = [];
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         childNode = _ref1[_i];
         propertyName = childNode[0].value;
         propertyValue = childNode[1].value;
-        this.trackRepeatedProperties(parameterProperties, this.canonicalizePropertyName(childNode[0].value, true), childNode[0].start_mark, 'while validating parameter properties', "parameter property already used");
+        this.trackRepeatedProperties(parameterProperties, this.canonicalizePropertyName(childNode[0].value, true), childNode[0], 'while validating parameter properties', "parameter property already used");
         booleanValues = ["true", "false"];
         if (allowParameterKeys && this.isParameterKey(childNode)) {
           continue;
@@ -6532,22 +6532,16 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
           case "displayName":
             if (!util.isScalar(childNode[1])) {
               throw new exports.ValidationError('while validating parameter properties', null, 'the value of displayName must be a scalar', childNode[1].start_mark);
-            } else {
-              _results.push(void 0);
             }
             break;
           case "pattern":
             if (!util.isScalar(childNode[1])) {
               throw new exports.ValidationError('while validating parameter properties', null, 'the value of pattern must be a scalar', childNode[1].start_mark);
-            } else {
-              _results.push(void 0);
             }
             break;
           case "default":
             if (!util.isScalar(childNode[1])) {
               throw new exports.ValidationError('while validating parameter properties', null, 'the value of default must be a scalar', childNode[1].start_mark);
-            } else {
-              _results.push(void 0);
             }
             break;
           case "enum":
@@ -6560,79 +6554,81 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
             enumValues = this.get_list_values(childNode[1].value);
             if (this.hasDuplicates(enumValues)) {
               throw new exports.ValidationError('while validating parameter properties', null, 'enum contains duplicated values', childNode[1].start_mark);
-            } else {
-              _results.push(void 0);
             }
             break;
           case "description":
             if (!util.isScalar(childNode[1])) {
               throw new exports.ValidationError('while validating parameter properties', null, 'the value of description must be a scalar', childNode[1].start_mark);
-            } else {
-              _results.push(void 0);
             }
             break;
           case "example":
             if (!util.isScalar(childNode[1])) {
               throw new exports.ValidationError('while validating parameter properties', null, 'the value of example must be a scalar', childNode[1].start_mark);
-            } else {
-              _results.push(void 0);
             }
             break;
           case "minLength":
             if (isNaN(propertyValue)) {
               throw new exports.ValidationError('while validating parameter properties', null, 'the value of minLength must be a number', childNode[1].start_mark);
-            } else {
-              _results.push(void 0);
             }
             break;
           case "maxLength":
             if (isNaN(propertyValue)) {
               throw new exports.ValidationError('while validating parameter properties', null, 'the value of maxLength must be a number', childNode[1].start_mark);
-            } else {
-              _results.push(void 0);
             }
             break;
           case "minimum":
             if (isNaN(propertyValue)) {
               throw new exports.ValidationError('while validating parameter properties', null, 'the value of minimum must be a number', childNode[1].start_mark);
-            } else {
-              _results.push(void 0);
             }
             break;
           case "maximum":
             if (isNaN(propertyValue)) {
               throw new exports.ValidationError('while validating parameter properties', null, 'the value of maximum must be a number', childNode[1].start_mark);
-            } else {
-              _results.push(void 0);
             }
             break;
           case "type":
+            parameterType = propertyValue;
             validTypes = ['string', 'number', 'integer', 'date', 'boolean', 'file'];
             if (__indexOf.call(validTypes, propertyValue) < 0) {
               throw new exports.ValidationError('while validating parameter properties', null, 'type can be either of: string, number, integer, file, date or boolean ', childNode[1].start_mark);
-            } else {
-              _results.push(void 0);
             }
             break;
           case "required":
             if (__indexOf.call(booleanValues, propertyValue) < 0) {
               throw new exports.ValidationError('while validating parameter properties', null, 'required can be any either true or false', childNode[1].start_mark);
-            } else {
-              _results.push(void 0);
             }
             break;
           case "repeat":
             if (__indexOf.call(booleanValues, propertyValue) < 0) {
               throw new exports.ValidationError('while validating parameter properties', null, 'repeat can be any either true or false', childNode[1].start_mark);
-            } else {
-              _results.push(void 0);
             }
             break;
           default:
-            throw new exports.ValidationError('while validating parameter properties', null, 'unknown property ' + propertyName, childNode[0].start_mark);
+            throw new exports.ValidationError('while validating parameter properties', null, "unknown property " + propertyName, childNode[0].start_mark);
         }
       }
-      return _results;
+      if (parameterType !== "string") {
+        _ref2 = ['enum', 'pattern', 'minLength', 'maxLength'];
+        for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+          unusableProperty = _ref2[_j];
+          if (unusableProperty in parameterProperties) {
+            throw new exports.ValidationError('while validating parameter properties', null, "property " + unusableProperty + " can only be used if type is 'string'", parameterProperties[unusableProperty].start_mark);
+          }
+        }
+      }
+      if (!(parameterType === "number" || parameterType === "integer")) {
+        _ref3 = ['minimum', 'maximum'];
+        _results = [];
+        for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
+          unusableProperty = _ref3[_k];
+          if (unusableProperty in parameterProperties) {
+            throw new exports.ValidationError('while validating parameter properties', null, "property " + unusableProperty + " can only be used if type is 'number' or 'integer'", parameterProperties[unusableProperty].start_mark);
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      }
     };
 
     Validator.prototype.get_list_values = function(node) {
@@ -6651,9 +6647,9 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
         for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
           property = _ref1[_i];
           if (property[0].value.match(/^\//)) {
-            this.trackRepeatedProperties(rootProperties, this.canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating root properties', "resource already declared");
+            this.trackRepeatedProperties(rootProperties, this.canonicalizePropertyName(property[0].value, true), property[0], 'while validating root properties', "resource already declared");
           } else {
-            this.trackRepeatedProperties(rootProperties, property[0].value, property[0].start_mark, 'while validating root properties', 'root property already used');
+            this.trackRepeatedProperties(rootProperties, property[0].value, property[0], 'while validating root properties', 'root property already used');
           }
           switch (property[0].value) {
             case 'title':
@@ -6749,7 +6745,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
       _ref1 = docSection.value;
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         property = _ref1[_i];
-        this.trackRepeatedProperties(docProperties, property[0].value, property[0].start_mark, 'while validating documentation section', "property already used");
+        this.trackRepeatedProperties(docProperties, property[0].value, property[0], 'while validating documentation section', "property already used");
         switch (property[0].value) {
           case "title":
             if (!(util.isScalar(property[1]) && !util.isNull(property[1]))) {
@@ -6813,11 +6809,11 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
         for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
           property = _ref2[_i];
           if (property[0].value.match(/^\//)) {
-            this.trackRepeatedProperties(resourceProperties, this.canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating resource', "resource already declared");
+            this.trackRepeatedProperties(resourceProperties, this.canonicalizePropertyName(property[0].value, true), property[0], 'while validating resource', "resource already declared");
           } else if (this.isHttpMethod(property[0].value, allowParameterKeys)) {
-            this.trackRepeatedProperties(resourceProperties, this.canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating resource', "method already declared");
+            this.trackRepeatedProperties(resourceProperties, this.canonicalizePropertyName(property[0].value, true), property[0], 'while validating resource', "method already declared");
           } else {
-            this.trackRepeatedProperties(resourceProperties, this.canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating resource', "property already used");
+            this.trackRepeatedProperties(resourceProperties, this.canonicalizePropertyName(property[0].value, true), property[0], 'while validating resource', "property already used");
           }
           if (!this.validate_common_properties(property, allowParameterKeys)) {
             if (property[0].value.match(/^\//)) {
@@ -6979,7 +6975,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
       _results = [];
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         property = _ref1[_i];
-        this.trackRepeatedProperties(methodProperties, this.canonicalizePropertyName(property[0].value, true), property[0].start_mark, 'while validating method', "property already used");
+        this.trackRepeatedProperties(methodProperties, this.canonicalizePropertyName(property[0].value, true), property[0], 'while validating method', "property already used");
         if (this.validate_common_properties(property, allowParameterKeys, context)) {
           continue;
         }
@@ -7052,7 +7048,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
         if (!util.isNullableMapping(response[1])) {
           throw new exports.ValidationError('while validating responses', null, 'each response must be a map', response[1].start_mark);
         }
-        this.trackRepeatedProperties(responseValues, this.canonicalizePropertyName(response[0].value, true), response[0].start_mark, 'while validating responses', "response code already used");
+        this.trackRepeatedProperties(responseValues, this.canonicalizePropertyName(response[0].value, true), response[0], 'while validating responses', "response code already used");
         _results.push(this.validate_response(response, allowParameterKeys));
       }
       return _results;
@@ -7074,7 +7070,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
         if (!(util.isNullableMapping(param[1]) || util.isNullableSequence(param[1]))) {
           throw new exports.ValidationError('while validating query parameters', null, "each query parameter must be a map", param[1].start_mark);
         }
-        this.trackRepeatedProperties(queryParameters, this.canonicalizePropertyName(param[0].value, true), param[0].start_mark, 'while validating query parameter', "parameter name already used");
+        this.trackRepeatedProperties(queryParameters, this.canonicalizePropertyName(param[0].value, true), param[0], 'while validating query parameter', "parameter name already used");
         _results.push(this.valid_common_parameter_properties(param[1], allowParameterKeys));
       }
       return _results;
@@ -7096,7 +7092,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
         if (!(util.isNullableMapping(param[1]) || util.isNullableSequence(param[1]))) {
           throw new exports.ValidationError('while validating query parameters', null, 'each form parameter must be a map', param[1].start_mark);
         }
-        this.trackRepeatedProperties(formParameters, this.canonicalizePropertyName(param[0].value, true), param[0].start_mark, 'while validating form parameter', "parameter name already used");
+        this.trackRepeatedProperties(formParameters, this.canonicalizePropertyName(param[0].value, true), param[0], 'while validating form parameter', "parameter name already used");
         _results.push(this.valid_common_parameter_properties(param[1], allowParameterKeys));
       }
       return _results;
@@ -7118,7 +7114,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
         if (!(util.isNullableMapping(param[1]) || util.isNullableSequence(param[1]))) {
           throw new exports.ValidationError('while validating query parameters', null, "each header must be a map", param[1].start_mark);
         }
-        this.trackRepeatedProperties(headerNames, this.canonicalizePropertyName(param[0].value, true), param[0].start_mark, 'while validating headers', "header name already used");
+        this.trackRepeatedProperties(headerNames, this.canonicalizePropertyName(param[0].value, true), param[0], 'while validating headers', "header name already used");
         _results.push(this.valid_common_parameter_properties(param[1], allowParameterKeys));
       }
       return _results;
@@ -7150,7 +7146,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
         for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
           property = _ref2[_j];
           canonicalKey = this.canonicalizePropertyName(property[0].value, allowParameterKeys);
-          this.trackRepeatedProperties(responseProperties, canonicalKey, property[0].start_mark, 'while validating responses', "property already used");
+          this.trackRepeatedProperties(responseProperties, canonicalKey, property[0], 'while validating responses', "property already used");
           if (!this.isParameterKey(property)) {
             switch (canonicalKey) {
               case "body":
@@ -7209,7 +7205,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
     };
 
     Validator.prototype.validate_body = function(property, allowParameterKeys, bodyMode, isResponseBody) {
-      var bodyProperties, bodyProperty, canonicalProperty, implicitMode, key, _i, _len, _ref1;
+      var bodyProperties, bodyProperty, canonicalProperty, implicitMode, key, start_mark, _i, _len, _ref1;
       if (bodyMode == null) {
         bodyMode = null;
       }
@@ -7224,7 +7220,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
       _ref1 = property[1].value;
       for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
         bodyProperty = _ref1[_i];
-        this.trackRepeatedProperties(bodyProperties, this.canonicalizePropertyName(bodyProperty[0].value, true), bodyProperty[0].start_mark, 'while validating body', "property already used");
+        this.trackRepeatedProperties(bodyProperties, this.canonicalizePropertyName(bodyProperty[0].value, true), bodyProperty[0], 'while validating body', "property already used");
         if (this.isParameterKey(bodyProperty)) {
           if (!allowParameterKeys) {
             throw new exports.ValidationError('while validating body', null, "property '" + bodyProperty[0].value + "' is invalid in a resource", bodyProperty[0].start_mark);
@@ -7276,11 +7272,12 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
         }
       }
       if ("formParameters" in bodyProperties) {
+        start_mark = bodyProperties.formParameters.start_mark;
         if (isResponseBody) {
-          throw new exports.ValidationError('while validating body', null, "formParameters cannot be used to describe response bodies", property[0].start_mark);
+          throw new exports.ValidationError('while validating body', null, "formParameters cannot be used to describe response bodies", start_mark);
         }
         if ("schema" in bodyProperties || "example" in bodyProperties) {
-          throw new exports.ValidationError('while validating body', null, "formParameters cannot be used together with the example or schema properties", property[0].start_mark);
+          throw new exports.ValidationError('while validating body', null, "formParameters cannot be used together with the example or schema properties", start_mark);
         }
       }
       if (bodyMode === "implicit") {

@@ -539,4 +539,80 @@ describe('Validator', function () {
       })(httpMethod);
     });
   })();
+
+  (function(){
+    [
+      'number',
+      'integer',
+      'date',
+      'boolean',
+      'file'
+    ].forEach(function(type){
+      [
+        ['enum', '["value1"]'],
+        ['pattern', 'somevalue'],
+        ['minLength', '1'],
+        ['maxLength', '3']
+      ].forEach(function(property){
+        it('should reject because string property is unusable for the type ' + type, function (done) {
+          raml.load([
+            '#%RAML 0.8',
+            'title: Title',
+            '/{param}:',
+            '  uriParameters:',
+            '    param:',
+            '      type: ' + type,
+            '      ' + property[0] + ': ' + property[1]
+          ].join('\n')).should.be.rejectedWith('property ' + property[0] + ' can only be used if type is \'string\'').and.notify(done);
+        });
+
+      });
+    });
+  })();
+
+  (function(){
+    [
+      'string',
+      'date',
+      'boolean',
+      'file'
+    ].forEach(function(type){
+      [
+        ['minimum', '1'],
+        ['maximum', '3']
+      ].forEach(function(property){
+        it('should reject because number|integer property is unusable for the type ' + type, function (done) {
+          raml.load([
+            '#%RAML 0.8',
+            'title: Title',
+            '/{param}:',
+            '  uriParameters:',
+            '    param:',
+            '      type: ' + type,
+            '      ' + property[0] + ': ' + property[1]
+          ].join('\n')).should.be.rejectedWith('property ' + property[0] + ' can only be used if type is \'number\' or \'integer\'').and.notify(done);
+        });
+      });
+    });
+  })();
+
+  (function(){
+    [
+      ['enum', '["value1"]'],
+      ['pattern', 'somevalue'],
+      ['minLength', '1'],
+      ['maxLength', '3']
+    ].forEach(function(property){
+      it('should succeed because default type is string', function (done) {
+        raml.load([
+          '#%RAML 0.8',
+          'title: Title',
+          '/{param}:',
+          '  uriParameters:',
+          '    param:',
+          '      ' + property[0] + ': ' + property[1]
+        ].join('\n')).should.be.fulfilled.and.notify(done);
+      });
+    });
+  })();
 });

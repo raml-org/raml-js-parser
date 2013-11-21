@@ -569,6 +569,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'baseUriParameters:',
         '  a:',
+        '    type: number',
         '    displayName: A',
         '    description: This is A',
         '    minimum: 123'
@@ -585,6 +586,7 @@ describe('Parser', function() {
         'baseUri: http://{a}.myapi.org',
         'baseUriParameters:',
         '  a:',
+        '    type: number',
         '    displayName: A',
         '    description: This is A',
         '    maximum: 123'
