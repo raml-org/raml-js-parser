@@ -15,6 +15,14 @@ if (typeof window === 'undefined') {
 }
 
 describe('Parser', function() {
+  it('should be tolerant to whitespaces around version', function (done) {
+    raml.load([
+      ' #%RAML 0.8 ',
+      '---',
+      'title: MyApi'
+    ].join('\n')).should.be.fulfilled.and.notify(done);
+  });
+
   describe('Basic Information', function() {
     it('should fail unsupported yaml version', function(done) {
       var definition = [

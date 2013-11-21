@@ -3934,7 +3934,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
 
 
     Scanner.prototype.scan_to_next_token = function() {
-      var comment, found, _ref1, _results;
+      var comment, found, trimmedComment, _ref1, _results;
       if (this.index === 0 && this.peek() === '\uFEFF') {
         this.forward();
       }
@@ -3954,8 +3954,9 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
           }
         }
         if (!this.ramlHeaderFound) {
-          if (comment && RAML_VERSION_RE.test(comment)) {
-            if (comment === RAML_VERSION) {
+          trimmedComment = comment.trim();
+          if (trimmedComment && RAML_VERSION_RE.test(trimmedComment)) {
+            if (trimmedComment === RAML_VERSION) {
               this.ramlHeaderFound = true;
             } else {
               throw new exports.ScannerError('version validation', null, "Unsupported RAML version: '" + comment + "'", this.create_mark(0, 0));

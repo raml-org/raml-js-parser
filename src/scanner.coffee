@@ -701,8 +701,9 @@ class @Scanner
 
       # the first bytes in a RAML file MUST be the RAML version
       unless @ramlHeaderFound
-        if comment and RAML_VERSION_RE.test(comment)
-          if comment is RAML_VERSION
+        trimmedComment = comment.trim()
+        if trimmedComment and RAML_VERSION_RE.test(trimmedComment)
+          if trimmedComment is RAML_VERSION
             @ramlHeaderFound = true
           else
             throw new exports.ScannerError 'version validation', null, "Unsupported RAML version: '#{comment}'", @create_mark(0, 0)
