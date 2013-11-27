@@ -7,7 +7,8 @@
     "inflection": "1.2.6",
     "q": "0.9.7",
     "uritemplate": "0.3.4",
-    "xmlhttprequest": "1.6.0"
+    "xmlhttprequest": "1.6.0",
+    "json-lint": "~0.1.0"
   },
   "repository": {
     "type": "git",

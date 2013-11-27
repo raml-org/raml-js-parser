@@ -4,6 +4,7 @@ uritemplate       = require 'uritemplate'
 nodes             = require './nodes'
 traits            = require './traits'
 util              = require './util'
+jsonlint          = require 'json-lint'
 
 ###
 The Validator throws these.
@@ -36,7 +37,6 @@ class @Validator
     unless util.isSequence schemesProperty
       throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security schemes property, it must be an array', schemesProperty.start_mark
 
-    schemeNamesTrack = {}
     for scheme_entry in schemesProperty.value
       unless util.isMapping scheme_entry
         throw new exports.ValidationError 'while validating securitySchemes', null, 'invalid security scheme property, it must be a map', scheme_entry.start_mark
@@ -136,6 +136,7 @@ class @Validator
     for schemaName, schema of schemaList
       unless schema[1].tag and util.isString schema[1]
         throw new exports.ValidationError 'while validating schemas', null, 'schema ' + schemaName + ' must be a string', schema[0].start_mark
+      @validateSchema schema[1]
 
   validate_root: (node) ->
     unless node or util.isNull node
@@ -738,6 +739,8 @@ class @Validator
             bodyMode ?= "implicit"
             unless util.isScalar(bodyProperty[1])
               throw new exports.ValidationError 'while validating body', null, "schema must be a string", bodyProperty[0].start_mark
+
+            @validateSchema bodyProperty[1]
           else
             throw new exports.ValidationError 'while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark
 
@@ -753,6 +756,34 @@ class @Validator
     if bodyMode is "implicit"
       unless @get_media_type()
         throw new exports.ValidationError 'while validating body', null, "body tries to use default Media Type, but mediaType is null", property[0].start_mark
+
+  validateSchema: (property) ->
+    # validate schema here
+    if @isXmlSchema property.value
+      undefined #noop
+    else if @isJsonSchema property.value
+      lint = jsonlint(property.value)
+      if lint.error
+        mark = @create_mark(property.start_mark.line + lint.line, 0)
+        if property.end_mark.line is mark.line and property.end_mark.column is 0
+          # The error is beyond the scope of the current property
+          # rewind the error, make sure that it does
+          mark.line--
+        throw new exports.ValidationError 'while validating body', null, "schema is not valid JSON error: '#{lint.error}'", mark
+
+      try
+        schema = JSON.parse(property.value)
+      catch error
+        throw new exports.ValidationError 'while validating body', null, "schema is not valid JSON error: '#{error}'", property.start_mark
+
+  isJsonSchema: (string) ->
+    return string?.match(/^\s*\{/)
+
+  isXmlSchema: (string) ->
+    # Does it match something of the form?
+    # <?xml?>
+    # <xs:schema
+    return string?.match(/^\s*(<\?xml[^>]+>)?[\s\n]*<xs:sxhema/)
 
   validate_common_properties: (property, allowParameterKeys, context) ->
     if @isParameterKey(property)
