@@ -512,6 +512,63 @@ describe('Validator', function () {
     ].join('\n')).should.be.rejectedWith('resource type name must be provided').and.notify(done);
   });
 
+  describe('JSON Schema', function(){
+
+    it('should report an error in the middle of the string', function (done) {
+      raml.load([
+          '#%RAML 0.8',
+          '---',
+          'title: Title',
+          'schemas:',
+          '  - schema: |',
+          '      {',
+          '        ": ""',
+          '      }'
+      ].join('\n')).then(function () {}, function (error) {
+        setTimeout(function () {
+          error.message.should.contain('schema is not valid JSON error: \'Unknown Character \'"\', expecting a semicolon.\'');
+          error.problem_mark.line.should.be.equal(6);
+          error.problem_mark.column.should.be.equal(0);
+          done();
+        }, 0);
+      });
+    });
+
+    it('should not detect a JSON schema if character is not a {', function (done) {
+      raml.load([
+          '#%RAML 0.8',
+          '---',
+          'title: Title',
+          'schemas:',
+          '  - schema: |',
+          '      a{',
+          '        "": ""',
+          '      }'
+      ].join('\n')).should.be.fulfilled.and.notify(done);
+    });
+
+    it('should report an error at the end of the schema if there is a missing }', function (done) {
+      raml.load([
+          '#%RAML 0.8',
+          '---',
+          'title: Title',
+          'schemas:',
+          '  - schema: |',
+          '      {',
+          '        "": ""',
+          'baseUri: http://pepe.com'
+      ].join('\n')).then(function () {}, function (error) {
+        setTimeout(function () {
+          error.message.should.contain('schema is not valid JSON error: \'EOF Error, expecting closing \'}\'.\'');
+          error.problem_mark.line.should.be.equal(6);
+          error.problem_mark.column.should.be.equal(0);
+          done();
+        }, 0);
+      });
+    });
+
+  });
+
   (function () {
     [
       // RFC2616
