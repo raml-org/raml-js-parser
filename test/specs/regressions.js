@@ -529,7 +529,55 @@ describe('Regressions', function () {
     };
     raml.load(definition).should.become(expected).and.notify(done);
   });
+  it('should clone references instead of using reference', function (done) {
+    var definition = [
+      '#%RAML 0.8',
+      'title: My api',
+      'version: v1',
+      '/res1: &res1',
+      '  description: this is res1 description',
+      '  displayName: resource 1',
+      '  get:',
+      '    description: get into resource 1',
+      '/res2: *res1'
+    ].join('\n');
 
+    var expected =  {
+      "title": "My api",
+      "version": "v1",
+      "resources": [
+        {
+          "description": "this is res1 description",
+          "displayName": "resource 1",
+          "relativeUri": "/res1",
+          "methods": [
+            {
+              "description": "get into resource 1",
+              "method": "get"
+            }
+          ],
+          "relativeUriPathSegments": [
+            "res1"
+          ]
+        },
+        {
+          "description": "this is res1 description",
+          "displayName": "resource 1",
+          "relativeUri": "/res2",
+          "methods": [
+            {
+              "description": "get into resource 1",
+              "method": "get"
+            }
+          ],
+          "relativeUriPathSegments": [
+            "res2"
+          ]
+        }
+      ]
+    };
+    raml.load(definition).should.become(expected).and.notify(done);
+  });
   it('should not download a null named file. RT-259', function (done) {
     var definition = [
       '#%RAML 0.8',

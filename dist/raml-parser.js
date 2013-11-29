@@ -108,7 +108,7 @@
         if (!(anchor in this.anchors)) {
           throw new exports.ComposerError(null, null, "found undefined alias " + anchor, event.start_mark);
         }
-        return this.anchors[anchor];
+        return this.anchors[anchor].clone();
       }
       event = this.peek_event();
       anchor = event.anchor;
