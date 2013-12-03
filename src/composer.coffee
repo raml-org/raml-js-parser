@@ -85,7 +85,7 @@ class @Composer
       anchor = event.anchor
       throw new exports.ComposerError null, null, "found undefined alias #{anchor}", event.start_mark \
         if anchor not of @anchors
-      return @anchors[anchor]
+      return @anchors[anchor].clone()
 
     event = @peek_event()
     anchor = event.anchor
