@@ -149,7 +149,7 @@
         if (event.value.match(/^\s*$/)) {
           throw new exports.ComposerError('while composing scalar out of !include', null, "file name/URL cannot be null", event.start_mark);
         }
-        extension = event.value.split(".").pop();
+        extension = event.value.split('.').pop();
         if (extension === 'yaml' || extension === 'yml' || extension === 'raml') {
           fileType = 'fragment';
         } else {
@@ -168,14 +168,14 @@
       } else {
         node = new nodes.ScalarNode(tag, event.value, event.start_mark, event.end_mark, event.style);
       }
-      if (anchor !== null) {
+      if (anchor && node) {
         this.anchors[anchor] = node;
       }
       return node;
     };
 
     Composer.prototype.compose_sequence_node = function(anchor) {
-      var end_event, index, node, start_event, tag;
+      var end_event, node, start_event, tag, value;
       start_event = this.get_event();
       tag = start_event.tag;
       if (tag === null || tag === '!') {
@@ -185,10 +185,10 @@
       if (anchor !== null) {
         this.anchors[anchor] = node;
       }
-      index = 0;
       while (!this.check_event(events.SequenceEndEvent)) {
-        node.value.push(this.compose_node(node, index));
-        index++;
+        if (value = this.compose_node(node)) {
+          node.value.push(value);
+        }
       }
       end_event = this.get_event();
       node.end_mark = end_event.end_mark;
@@ -211,8 +211,7 @@
         if (!util.isScalar(item_key)) {
           throw new exports.ComposerError('while composing mapping key', null, "only scalar map keys are allowed in RAML", item_key.start_mark);
         }
-        item_value = this.compose_node(node, item_key);
-        if (item_value !== void 0) {
+        if (item_value = this.compose_node(node, item_key)) {
           node.value.push([item_key, item_value]);
         }
       }
@@ -2334,13 +2333,15 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
 
 },{"./errors":3,"./nodes":7,"./util":20,"url":37}],10:[function(require,module,exports){
 (function() {
-  var defaultSettings, _ref,
+  var defaultSettings, util, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   this.errors = require('./errors');
 
   this.loader = require('./loader');
+
+  util = require('./util');
 
   this.FileError = (function(_super) {
     __extends(FileError, _super);
@@ -2640,14 +2641,12 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
     };
 
     RamlParser.prototype.appendNewNodeToParent = function(node, key, value) {
-      var item;
       if (node) {
-        if (key != null) {
-          item = [key, value];
+        if (util.isSequence(node)) {
+          node.value.push(value);
         } else {
-          item = [value];
+          node.value.push([key, value]);
         }
-        node.value.push(item);
         return null;
       } else {
         return value;
@@ -2738,7 +2737,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
 
 }).call(this);
 
-},{"./errors":3,"./loader":6,"./nodes":7,"fs":31,"q":64,"url":37,"xmlhttprequest":66}],11:[function(require,module,exports){
+},{"./errors":3,"./loader":6,"./nodes":7,"./util":20,"fs":31,"q":64,"url":37,"xmlhttprequest":66}],11:[function(require,module,exports){
 (function() {
   var Mark, MarkedYAMLError, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,

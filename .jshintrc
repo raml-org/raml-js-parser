@@ -21,15 +21,15 @@
   "expr": true,
   "globals": {
     "angular": false,
-    "describe": false,
-    "should": false,
-    "it": false,
     "beforeEach": false,
-    "inject": false,
-    "mock": false,
-    "sinon": false,
+    "describe": false,
     "getEditor": false,
-    "prompt": false
+    "inject": false,
+    "it": false,
+    "mock": false,
+    "prompt": false,
+    "RAML": false,
+    "should": false,
+    "sinon": false
   }
 }
-
