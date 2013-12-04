@@ -1,5 +1,6 @@
-@errors      = require './errors'
-@loader      = require './loader'
+@errors = require './errors'
+@loader = require './loader'
+util    = require './util'
 
 class @FileError extends @errors.MarkedYAMLError
 
@@ -195,11 +196,10 @@ class @RamlParser
 
   appendNewNodeToParent: (node, key, value) ->
     if node
-      if key?
-        item = [key, value]
+      if util.isSequence(node)
+        node.value.push value
       else
-        item = [value]
-      node.value.push(item)
+        node.value.push [key, value]
       return null
     else
       return value

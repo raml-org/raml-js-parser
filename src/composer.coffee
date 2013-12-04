@@ -114,8 +114,8 @@ class @Composer
 
   compose_scalar_node: (anchor, parent, key) ->
     event = @get_event()
-    tag = event.tag
-    node = {}
+    tag   = event.tag
+    node  = {}
 
     if tag is null or tag is '!'
       tag = @resolve nodes.ScalarNode, event.value, event.implicit
@@ -124,7 +124,7 @@ class @Composer
       if event.value.match(/^\s*$/)
         throw new exports.ComposerError 'while composing scalar out of !include', null, "file name/URL cannot be null", event.start_mark
 
-      extension = event.value.split(".").pop()
+      extension = event.value.split('.').pop()
       if extension in ['yaml', 'yml', 'raml']
         fileType = 'fragment'
       else
@@ -139,12 +139,14 @@ class @Composer
         includingContext: @src,
         targetFileUri: event.value
       })
-      node = undefined
 
+      node = undefined
     else
       node = new nodes.ScalarNode tag, event.value, event.start_mark, event.end_mark, event.style
 
-    @anchors[anchor] = node if anchor isnt null
+    if anchor and node
+      @anchors[anchor] = node
+
     return node
 
   compose_sequence_node: (anchor) ->
@@ -153,13 +155,14 @@ class @Composer
     if tag is null or tag is '!'
       tag = @resolve nodes.SequenceNode, null, start_event.implicit
 
-    node = new nodes.SequenceNode tag, [], start_event.start_mark, null,
-      start_event.flow_style
+    node = new nodes.SequenceNode tag, [], start_event.start_mark, null, start_event.flow_style
     @anchors[anchor] = node if anchor isnt null
-    index = 0
+
     while not @check_event events.SequenceEndEvent
-      node.value.push @compose_node node, index
-      index++
+      # value is undefined in case it's being added later (deferred)
+      if value = @compose_node node
+        node.value.push value
+
     end_event = @get_event()
     node.end_mark = end_event.end_mark
     return node
@@ -175,12 +178,13 @@ class @Composer
       start_event.flow_style
     @anchors[anchor] = node if anchor isnt null
     while not @check_event events.MappingEndEvent
-      item_key   = @compose_node node
+      item_key = @compose_node node
       unless util.isScalar(item_key)
         throw new exports.ComposerError 'while composing mapping key', null, "only scalar map keys are allowed in RAML" , item_key.start_mark
-      item_value = @compose_node node, item_key
-      # if item_value us undefined, then the key is added derefed
-      node.value.push [item_key, item_value] unless item_value is undefined
+
+      # item_value is undefined in case it's being added later (deferred)
+      if item_value = @compose_node node, item_key
+        node.value.push [item_key, item_value]
 
     end_event = @get_event()
     node.end_mark = end_event.end_mark
