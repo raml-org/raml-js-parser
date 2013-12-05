@@ -154,22 +154,79 @@ describe('Include resolution injection', function() {
       '  - !include trait.raml'
     ].join('\n');
 
-    var reader = new raml.FileReader(function() {
+    var reader = new raml.FileReader(function () {
       return q('trait: {}');
     });
 
-    raml.load(document, '/', {reader: reader}).then(
-      function (value) {
+    raml.load(document, '', {reader: reader}).then(function (value) {
+      setTimeout(function () {
         value.traits.should.be.deep.equal([
-          {trait: {}}
+            {trait: {}}
+          ]);
+
+        done();
+      });
+    });
+  });
+
+  it('should resolve !include tags in proper order', function (done) {
+    var document = [
+      '#%RAML 0.8',
+      'title: title',
+      'traits:',
+      '  - !include trait1.raml',
+      '  - !include trait2.raml'
+    ].join('\n');
+
+    var defer  = q.defer();
+    var reader = new raml.FileReader(function (file) {
+      if (file === 'trait2.raml') {
+        return q('trait2: {}');
+      }
+
+      setTimeout(function () {
+        defer.resolve('trait1: {}');
+      });
+
+      return defer.promise;
+    });
+
+    raml.load(document, '', {reader: reader}).then(function (value) {
+      setTimeout(function () {
+        value.traits.should.be.deep.equal([
+          {trait1: {}},
+          {trait2: {}}
         ]);
 
         done();
-      },
+      });
+    });
+  });
 
-      function (error) {
-        done(error);
-      }
-    );
+  it('should resolve mixed !include tags (in-place and deferred)', function (done) {
+    var document = [
+      '#%RAML 0.8',
+      'title: title',
+      'traits:',
+      '  - trait1: {}',
+      '  - !include trait2.raml',
+      '  - trait3: {}'
+    ].join('\n');
+
+    var reader = new raml.FileReader(function () {
+      return q('trait2: {}');
+    });
+
+    raml.load(document, '', {reader: reader}).then(function (value) {
+      setTimeout(function () {
+        value.traits.should.be.deep.equal([
+          {trait1: {}},
+          {trait2: {}},
+          {trait3: {}}
+        ]);
+
+        done();
+      });
+    });
   });
 });

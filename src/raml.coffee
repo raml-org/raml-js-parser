@@ -197,7 +197,7 @@ class @RamlParser
   appendNewNodeToParent: (node, key, value) ->
     if node
       if util.isSequence(node)
-        node.value.push value
+        node.value[key] = value
       else
         node.value.push [key, value]
       return null
