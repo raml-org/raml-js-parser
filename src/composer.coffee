@@ -151,20 +151,27 @@ class @Composer
 
   compose_sequence_node: (anchor) ->
     start_event = @get_event()
-    tag = start_event.tag
+    tag         = start_event.tag
+
     if tag is null or tag is '!'
       tag = @resolve nodes.SequenceNode, null, start_event.implicit
 
-    node = new nodes.SequenceNode tag, [], start_event.start_mark, null, start_event.flow_style
-    @anchors[anchor] = node if anchor isnt null
+    node  = new nodes.SequenceNode tag, [], start_event.start_mark, null, start_event.flow_style
+    index = 0
+
+    if anchor
+      @anchors[anchor] = node
 
     while not @check_event events.SequenceEndEvent
       # value is undefined in case it's being added later (deferred)
-      if value = @compose_node node
-        node.value.push value
+      if value = @compose_node node, index
+        node.value[index] = value
 
-    end_event = @get_event()
+      index++
+
+    end_event     = @get_event()
     node.end_mark = end_event.end_mark
+
     return node
 
   compose_mapping_node: (anchor) ->
