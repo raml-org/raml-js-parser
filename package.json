@@ -1,6 +1,6 @@
 {
   "name": "raml-parser",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "main": "./lib/raml.js",
   "description": "A RAML parser based on PyYAML written in CoffeScript and available for use as NodeJs module or in-browser.",
   "dependencies": {
