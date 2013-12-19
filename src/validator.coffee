@@ -252,7 +252,9 @@ class @Validator
       propertyValue = childNode[1].value
       @trackRepeatedProperties(parameterProperties, @canonicalizePropertyName(childNode[0].value, true), childNode[0], 'while validating parameter properties', "parameter property already used")
       booleanValues = ["true", "false"]
-      continue if allowParameterKeys && @isParameterKey(childNode)
+
+      if allowParameterKeys
+        continue if @isParameterKey(childNode) or @isParameterValue(childNode)
 
       canonicalPropertyName = @canonicalizePropertyName propertyName, allowParameterKeys
 
@@ -687,10 +689,18 @@ class @Validator
       ]
     return false
 
-  isParameterKey: (property) ->
-    if @isParameterKeyValue property[0].value
+  isParameterValue: (property) ->
+    return @isParameterKey(property, false)
+
+  isParameterKey: (property, checkKey = true) ->
+    offset = if checkKey then 0 else 1
+    unless checkKey or util.isScalar(property[1])
+      return false
+
+    # Check key or property
+    if @isParameterKeyValue property[offset].value
       return true
-    else if property[0].value.match(/<<\s*([^\|\s>]+)\s*\|.*\s*>>/g)
+    else if property[offset].value.match(/<<\s*([^\|\s>]+)\s*\|.*\s*>>/g)
       throw new exports.ValidationError 'while validating parameter', null, "unknown function applied to property name" , property[0].start_mark
     return false
 
