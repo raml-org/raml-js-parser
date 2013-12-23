@@ -122,14 +122,9 @@ class @BaseConstructor
     return pairs
 
 class @Constructor extends @BaseConstructor
-
   BOOL_VALUES =
-    on   : true
-    off  : false
-    true : true
+    true:  true
     false: false
-    yes  : true
-    no   : false
 
   TIMESTAMP_REGEX = \
     ///
@@ -160,6 +155,7 @@ class @Constructor extends @BaseConstructor
     )?
     $
     ///
+
   TIMESTAMP_PARTS =
     year     : 1
     month    : 2
