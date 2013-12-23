@@ -5627,18 +5627,25 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
 
 
     Transformations.prototype.apply_default_media_type_to_resource = function(resource) {
-      var methods,
-        _this = this;
+      var childResource, method, _i, _j, _len, _len1, _ref, _ref1, _results;
       if (!this.mediaType) {
         return;
       }
       if (!util.isMapping(resource)) {
         return;
       }
-      methods = this.child_methods(resource);
-      return methods.forEach(function(method) {
-        return _this.apply_default_media_type_to_method(method[1]);
-      });
+      _ref = this.child_resources(resource);
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        childResource = _ref[_i];
+        this.apply_default_media_type_to_resource(childResource[1]);
+      }
+      _ref1 = this.child_methods(resource);
+      _results = [];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        method = _ref1[_j];
+        _results.push(this.apply_default_media_type_to_method(method[1]));
+      }
+      return _results;
     };
 
     Transformations.prototype.apply_default_media_type_to_method = function(method) {
@@ -6522,8 +6529,10 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
         propertyValue = childNode[1].value;
         this.trackRepeatedProperties(parameterProperties, this.canonicalizePropertyName(childNode[0].value, true), childNode[0], 'while validating parameter properties', "parameter property already used");
         booleanValues = ["true", "false"];
-        if (allowParameterKeys && this.isParameterKey(childNode)) {
-          continue;
+        if (allowParameterKeys) {
+          if (this.isParameterKey(childNode) || this.isParameterValue(childNode)) {
+            continue;
+          }
         }
         canonicalPropertyName = this.canonicalizePropertyName(propertyName, allowParameterKeys);
         switch (canonicalPropertyName) {
@@ -7186,10 +7195,22 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
       return false;
     };
 
-    Validator.prototype.isParameterKey = function(property) {
-      if (this.isParameterKeyValue(property[0].value)) {
+    Validator.prototype.isParameterValue = function(property) {
+      return this.isParameterKey(property, false);
+    };
+
+    Validator.prototype.isParameterKey = function(property, checkKey) {
+      var offset;
+      if (checkKey == null) {
+        checkKey = true;
+      }
+      offset = checkKey ? 0 : 1;
+      if (!(checkKey || util.isScalar(property[1]))) {
+        return false;
+      }
+      if (this.isParameterKeyValue(property[offset].value)) {
         return true;
-      } else if (property[0].value.match(/<<\s*([^\|\s>]+)\s*\|.*\s*>>/g)) {
+      } else if (property[offset].value.match(/<<\s*([^\|\s>]+)\s*\|.*\s*>>/g)) {
         throw new exports.ValidationError('while validating parameter', null, "unknown function applied to property name", property[0].start_mark);
       }
       return false;

@@ -7883,6 +7883,22 @@ describe('Parser', function() {
         };
         raml.load(definition).should.become(expected).and.notify(done);
       });
+
+      it('should be applied to nested resources', function (done) {
+        raml.load(
+          [
+            '#%RAML 0.8',
+            '---',
+            'title: MyApi',
+            'mediaType: application/json',
+            '/1:',
+            '  /2:',
+            '    get:',
+            '        body:',
+            '          example:'
+          ].join('\n')
+        ).should.eventually.have.deep.property('resources[0].resources[0].methods[0].body.application/json').and.notify(done);
+      });
     });
 
     describe('Default Media Type in response body', function(){
@@ -8204,6 +8220,24 @@ describe('Parser', function() {
           ]
         };
         raml.load(definition).should.become(expected).and.notify(done);
+      });
+
+      it('should be applied to nested resources', function (done) {
+        raml.load(
+          [
+            '#%RAML 0.8',
+            '---',
+            'title: MyApi',
+            'mediaType: application/json',
+            '/1:',
+            '  /2:',
+            '    get:',
+            '      responses:',
+            '        200:',
+            '          body:',
+            '            example:'
+          ].join('\n')
+        ).should.eventually.have.deep.property('resources[0].resources[0].methods[0].responses.200.body.application/json').and.notify(done);
       });
     });
   });

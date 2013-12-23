@@ -84,9 +84,12 @@ class @Transformations
   apply_default_media_type_to_resource: (resource) =>
     return unless @mediaType
     return unless util.isMapping resource
-    methods = @child_methods resource
-    methods.forEach (method) =>
-      @apply_default_media_type_to_method(method[1])
+
+    for childResource in @child_resources resource
+      @apply_default_media_type_to_resource childResource[1]
+
+    for method in @child_methods resource
+      @apply_default_media_type_to_method method[1]
 
   apply_default_media_type_to_method: (method) ->
     return unless @mediaType
