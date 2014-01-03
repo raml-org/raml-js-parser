@@ -359,6 +359,56 @@ describe('Validator', function () {
     });
   });
 
+  it('should parameters in a resource type in a named parameter that should be a non-string', function (done) {
+    raml.load([
+      '#%RAML 0.8',
+      'title: Title',
+      'resourceTypes:',
+      '  - type1:',
+      '      uriParameters:',
+      '        param1:',
+      '          type: number',
+      '          maximum: <<parameterName>>'
+    ].join('\n')).should.be.fulfilled.and.notify(done);
+  });
+
+  it('should parameters in a resource type in a named parameter that should be a non-string', function (done) {
+    raml.load([
+      '#%RAML 0.8',
+      'title: Title',
+      'resourceTypes:',
+      '  - type1:',
+      '      uriParameters:',
+      '        param1:',
+      '          required: <<parameterName>>'
+    ].join('\n')).should.be.fulfilled.and.notify(done);
+  });
+
+  it('should parameters in a trait in a named parameter that should be a non-string', function (done) {
+    raml.load([
+      '#%RAML 0.8',
+      'title: Title',
+      'traits:',
+      '  - trait:',
+      '      headers:',
+      '        param1:',
+      '          type: number',
+      '          maximum: <<parameterName>>'
+    ].join('\n')).should.be.fulfilled.and.notify(done);
+  });
+
+  it('should parameters in a trait in a named parameter that should be a non-string', function (done) {
+    raml.load([
+      '#%RAML 0.8',
+      'title: Title',
+      'traits:',
+      '  - trait:',
+      '      headers:',
+      '        param1:',
+      '          required: <<parameterName>>'
+    ].join('\n')).should.be.fulfilled.and.notify(done);
+  });
+
   it('should allow applied trait to be a null (implicit empty map)', function (done) {
     raml.load([
       '#%RAML 0.8',

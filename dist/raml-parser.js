@@ -414,12 +414,8 @@ var Buffer=require("__browserify_Buffer");(function() {
     }
 
     BOOL_VALUES = {
-      on: true,
-      off: false,
       "true": true,
-      "false": false,
-      yes: true,
-      no: false
+      "false": false
     };
 
     TIMESTAMP_REGEX = /^([0-9][0-9][0-9][0-9])-([0-9][0-9]?)-([0-9][0-9]?)(?:(?:[Tt]|[\x20\t]+)([0-9][0-9]?):([0-9][0-9]):([0-9][0-9])(?:\.([0-9]*))?(?:[\x20\t]*(Z|([-+])([0-9][0-9]?)(?::([0-9][0-9]))?))?)?$/;
@@ -3033,7 +3029,7 @@ var Buffer=require("__browserify_Buffer");(function() {
 
   })(this.BaseResolver);
 
-  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:bool', /^(?:yes|Yes|YES|true|True|TRUE|on|On|ON|no|No|NO|false|False|FALSE|off|Off|OFF)$/, 'yYnNtTfFoO');
+  this.Resolver.add_implicit_resolver('tag:yaml.org,2002:bool', /^(?:true|True|TRUE|false|False|FALSE)$/, 'tTfF');
 
   this.Resolver.add_implicit_resolver('tag:yaml.org,2002:float', /^(?:[-+]?(?:[0-9][0-9_]*)\.[0-9_]*(?:[eE][-+][0-9]+)?|\.[0-9_]+(?:[eE][-+][0-9]+)?|[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*|[-+]?\.(?:inf|Inf|INF)|\.(?:nan|NaN|NAN))$/, '-+0123456789.');
 
@@ -5631,18 +5627,25 @@ var Buffer=require("__browserify_Buffer");(function() {
 
 
     Transformations.prototype.apply_default_media_type_to_resource = function(resource) {
-      var methods,
-        _this = this;
+      var childResource, method, _i, _j, _len, _len1, _ref, _ref1, _results;
       if (!this.mediaType) {
         return;
       }
       if (!util.isMapping(resource)) {
         return;
       }
-      methods = this.child_methods(resource);
-      return methods.forEach(function(method) {
-        return _this.apply_default_media_type_to_method(method[1]);
-      });
+      _ref = this.child_resources(resource);
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        childResource = _ref[_i];
+        this.apply_default_media_type_to_resource(childResource[1]);
+      }
+      _ref1 = this.child_methods(resource);
+      _results = [];
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        method = _ref1[_j];
+        _results.push(this.apply_default_media_type_to_method(method[1]));
+      }
+      return _results;
     };
 
     Transformations.prototype.apply_default_media_type_to_method = function(method) {
@@ -6526,8 +6529,10 @@ var Buffer=require("__browserify_Buffer");(function() {
         propertyValue = childNode[1].value;
         this.trackRepeatedProperties(parameterProperties, this.canonicalizePropertyName(childNode[0].value, true), childNode[0], 'while validating parameter properties', "parameter property already used");
         booleanValues = ["true", "false"];
-        if (allowParameterKeys && this.isParameterKey(childNode)) {
-          continue;
+        if (allowParameterKeys) {
+          if (this.isParameterKey(childNode) || this.isParameterValue(childNode)) {
+            continue;
+          }
         }
         canonicalPropertyName = this.canonicalizePropertyName(propertyName, allowParameterKeys);
         switch (canonicalPropertyName) {
@@ -7190,10 +7195,22 @@ var Buffer=require("__browserify_Buffer");(function() {
       return false;
     };
 
-    Validator.prototype.isParameterKey = function(property) {
-      if (this.isParameterKeyValue(property[0].value)) {
+    Validator.prototype.isParameterValue = function(property) {
+      return this.isParameterKey(property, false);
+    };
+
+    Validator.prototype.isParameterKey = function(property, checkKey) {
+      var offset;
+      if (checkKey == null) {
+        checkKey = true;
+      }
+      offset = checkKey ? 0 : 1;
+      if (!(checkKey || util.isScalar(property[1]))) {
+        return false;
+      }
+      if (this.isParameterKeyValue(property[offset].value)) {
         return true;
-      } else if (property[0].value.match(/<<\s*([^\|\s>]+)\s*\|.*\s*>>/g)) {
+      } else if (property[offset].value.match(/<<\s*([^\|\s>]+)\s*\|.*\s*>>/g)) {
         throw new exports.ValidationError('while validating parameter', null, "unknown function applied to property name", property[0].start_mark);
       }
       return false;
@@ -20525,5 +20542,5 @@ exports.XMLHttpRequest = function() {
 window.RAML = {}
 
 window.RAML.Parser = require('../lib/raml')
-},{"../lib/raml":10}]},{},[55,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,52])
+},{"../lib/raml":10}]},{},[55,1,2,3,4,5,6,8,7,9,10,11,12,13,14,15,16,17,18,19,20,21,52])
 ;
