@@ -598,6 +598,17 @@ describe('Regressions', function () {
     raml.load(definition).should.be.rejectedWith(/file name\/URL cannot be null/).and.notify(done);
   });
 
+  it('should not fail with null responses', function (done) {
+    var definition = [
+      '#%RAML 0.8',
+      'title: GitHub API',
+      '/res:',
+      '  get:',
+      '    responses:'
+    ].join('\n');
+    raml.load(definition).should.be.fulfilled.and.notify(done);
+  });
+
   it('add a regression test for a complex RAML file', function (done) {
     var definition = [
       '#%RAML 0.8',

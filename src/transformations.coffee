@@ -101,6 +101,7 @@ class @Transformations
     # resource->methods->responses->items->body
     if @has_property(method, "responses")
       responses = @get_property method, "responses"
+      return unless responses and responses.value
       responses.value.forEach (response) =>
         if @has_property(response[1], "body")
           @apply_default_media_type_to_body @get_property(response[1], "body")
