@@ -25,19 +25,19 @@ function itShouldBehaveLikeAnOptionalStructureNamedParameter(initialRaml) {
     return initialRaml + '\n' + snippetRaml.join('\n');
   }
 
-  it('should succeed when given a "displayName?" property', function (done) {
+  it('should fail when given a "displayName?" property', function (done) {
     var definition = generateRaml(['displayName?: Display Name']);
-    raml.load(definition).should.be.fulfilled.and.notify(done);
+    raml.load(definition).should.be.rejected.and.notify(done);
   });
 
-  it('should succeed when given a "description?" property', function (done) {
+  it('should fail when given a "description?" property', function (done) {
     var definition = generateRaml(['description?: A description of the header']);
-    raml.load(definition).should.be.fulfilled.and.notify(done);
+    raml.load(definition).should.be.rejected.and.notify(done);
   });
 
-  it('should succeed when given a "type?" property', function (done) {
+  it('should fail when given a "type?" property', function (done) {
     var definition = generateRaml(['type?: integer']);
-    raml.load(definition).should.be.fulfilled.and.notify(done);
+    raml.load(definition).should.be.rejected.and.notify(done);
   });
 
   it('should succeed when given a "enum?" property', function (done) {
@@ -45,49 +45,49 @@ function itShouldBehaveLikeAnOptionalStructureNamedParameter(initialRaml) {
     raml.load(definition).should.be.fulfilled.and.notify(done);
   });
 
-  it('should succeed when given a "pattern?" property', function (done) {
+  it('should fail when given a "pattern?" property', function (done) {
     var definition = generateRaml(['pattern?: ']);
-    raml.load(definition).should.be.fulfilled.and.notify(done);
+    raml.load(definition).should.be.rejected.and.notify(done);
   });
 
-  it('should succeed when given a "minLength?" property', function (done) {
+  it('should fail when given a "minLength?" property', function (done) {
     var definition = generateRaml(['minLength?: 3']);
-    raml.load(definition).should.be.fulfilled.and.notify(done);
+    raml.load(definition).should.be.rejected.and.notify(done);
   });
 
-  it('should succeed when given a "maxLength?" property', function (done) {
+  it('should fail when given a "maxLength?" property', function (done) {
     var definition = generateRaml(['maxLength?: 16']);
-    raml.load(definition).should.be.fulfilled.and.notify(done);
+    raml.load(definition).should.be.rejected.and.notify(done);
   });
 
-  it('should succeed when given a "minimum?" property', function (done) {
+  it('should fail when given a "minimum?" property', function (done) {
     var definition = generateRaml(['type: number', 'minimum?: 20']);
-    raml.load(definition).should.be.fulfilled.and.notify(done);
+    raml.load(definition).should.be.rejected.and.notify(done);
   });
 
-  it('should succeed when given a "maximum?" property', function (done) {
+  it('should fail when given a "maximum?" property', function (done) {
     var definition = generateRaml(['type: number', 'maximum?: 100']);
-    raml.load(definition).should.be.fulfilled.and.notify(done);
+    raml.load(definition).should.be.rejected.and.notify(done);
   });
 
-  it('should succeed when given a "example?" property', function (done) {
+  it('should fail when given a "example?" property', function (done) {
     var definition = generateRaml(['example?: 5']);
-    raml.load(definition).should.be.fulfilled.and.notify(done);
+    raml.load(definition).should.be.rejected.and.notify(done);
   });
 
-  it('should succeed when given a "repeat?" property', function (done) {
+  it('should fail when given a "repeat?" property', function (done) {
     var definition = generateRaml(['repeat?: true']);
-    raml.load(definition).should.be.fulfilled.and.notify(done);
+    raml.load(definition).should.be.rejected.and.notify(done);
   });
 
-  it('should succeed when given a "required?" property', function (done) {
+  it('should fail when given a "required?" property', function (done) {
     var definition = generateRaml(['required?: true']);
-    raml.load(definition).should.be.fulfilled.and.notify(done);
+    raml.load(definition).should.be.rejected.and.notify(done);
   });
 
-  it('should succeed when given a "default?" property', function (done) {
+  it('should fail when given a "default?" property', function (done) {
     var definition = generateRaml(['default?: Untitled']);
-    raml.load(definition).should.be.fulfilled.and.notify(done);
+    raml.load(definition).should.be.rejected.and.notify(done);
   });
 }
 
@@ -247,14 +247,14 @@ describe('Resource Types Validations', function () {
   });
 
   describe('Optional Properties', function () {
-    it('should succeed when given a "displayName?" property', function (done) {
+    it('should fail when given a "displayName?" property', function (done) {
       var definition = resourceTypeSnippet([ 'displayName?: Display Name']);
-      raml.load(definition).should.be.fulfilled.and.notify(done);
+      raml.load(definition).should.be.rejected.and.notify(done);
     });
 
     it('should succeed when given a "description?" property', function (done) {
       var definition = resourceTypeSnippet([ 'description?: Description text']);
-      raml.load(definition).should.be.fulfilled.and.notify(done);
+      raml.load(definition).should.be.rejected.and.notify(done);
     });
 
     describe('uriParameters', function () {
@@ -344,12 +344,12 @@ describe('Resource Types Validations', function () {
       });
 
       describe('method properties', function () {
-        it('should succeed when given a "description?" property', function (done) {
+        it('should fail when given a "description?" property', function (done) {
           var definition = resourceTypeSnippet([
             'get:',
             '  description?: A description of the get, if it exists'
           ]);
-          raml.load(definition).should.be.fulfilled.and.notify(done);
+          raml.load(definition).should.be.rejected.and.notify(done);
         });
 
         it('should succeed when given a "headers?" property', function (done) {
@@ -649,11 +649,11 @@ describe('Trait Validations', function () {
     });
 
     describe('method properties', function () {
-      it('should succeed when given a "description?" property', function (done) {
+      it('should fail when given a "description?" property', function (done) {
         var definition = traitSnippet([
           'description?: A description of the get, if it exists'
         ]);
-        raml.load(definition).should.be.fulfilled.and.notify(done);
+        raml.load(definition).should.be.rejected.and.notify(done);
       });
 
       it('should succeed when given a "headers?" property', function (done) {
