@@ -145,7 +145,7 @@ class @Validator
     unless util.isMapping node
       throw new exports.ValidationError 'while validating root', null, 'document must be a map', node.start_mark
 
-  validate_base_uri_parameters: (node) ->
+  validate_base_uri_parameters: () ->
     unless @baseUriParameters
       return
 
@@ -180,7 +180,6 @@ class @Validator
 
   validate_types: (typeProperty) ->
     types = typeProperty.value
-    typesNamesTrack = {}
     unless util.isSequence typeProperty
       throw new exports.ValidationError 'while validating resource types', null, 'invalid resourceTypes definition, it must be an array', typeProperty.start_mark
 
@@ -199,7 +198,6 @@ class @Validator
 
   validate_traits: (traitProperty) ->
     traits = traitProperty.value
-    traitNamesTrack = {}
     unless Array.isArray traits
       throw new exports.ValidationError 'while validating traits', null, 'invalid traits definition, it must be an array', traitProperty.start_mark
 
@@ -257,8 +255,9 @@ class @Validator
         continue if @isParameterKey(childNode) or @isParameterValue(childNode)
 
       canonicalPropertyName = @canonicalizePropertyName propertyName, allowParameterKeys
+      valid = true
 
-      switch canonicalPropertyName
+      switch propertyName
         when "displayName"
           unless util.isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of displayName must be a scalar', childNode[1].start_mark
@@ -268,14 +267,6 @@ class @Validator
         when "default"
           unless util.isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of default must be a scalar', childNode[1].start_mark
-        when "enum"
-          unless util.isNullableSequence(childNode[1])
-            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of enum must be an array', childNode[1].start_mark
-          unless childNode[1].value.length
-            throw new exports.ValidationError 'while validating parameter properties', null, 'enum is empty', childNode[1].start_mark
-          enumValues = @get_list_values (childNode[1].value)
-          if @hasDuplicates(enumValues)
-            throw new exports.ValidationError 'while validating parameter properties', null, 'enum contains duplicated values', childNode[1].start_mark
         when "description"
           unless util.isScalar (childNode[1])
             throw new exports.ValidationError 'while validating parameter properties', null, 'the value of description must be a scalar', childNode[1].start_mark
@@ -306,7 +297,20 @@ class @Validator
           unless propertyValue in booleanValues
             throw new exports.ValidationError 'while validating parameter properties', null, 'repeat can be any either true or false', childNode[1].start_mark
         else
-          throw new exports.ValidationError 'while validating parameter properties', null, "unknown property #{propertyName}", childNode[0].start_mark
+          valid = false
+
+      switch canonicalPropertyName
+        when "enum"
+          unless util.isNullableSequence(childNode[1])
+            throw new exports.ValidationError 'while validating parameter properties', null, 'the value of enum must be an array', childNode[1].start_mark
+          unless childNode[1].value.length
+            throw new exports.ValidationError 'while validating parameter properties', null, 'enum is empty', childNode[1].start_mark
+          enumValues = @get_list_values (childNode[1].value)
+          if @hasDuplicates(enumValues)
+            throw new exports.ValidationError 'while validating parameter properties', null, 'enum contains duplicated values', childNode[1].start_mark
+        else
+          unless valid
+            throw new exports.ValidationError 'while validating parameter properties', null, "unknown property #{propertyName}", childNode[0].start_mark
 
     # Validate that we are not using incorrect properties for a non string
     unless parameterType is "string"
@@ -409,11 +413,9 @@ class @Validator
         when "title"
           unless util.isScalar(property[1]) and not util.isNull(property[1])
             throw new exports.ValidationError 'while validating documentation section', null, 'title must be a string', property[0].start_mark
-          hasTitle = true
         when "content"
           unless util.isScalar(property[1]) and not util.isNull(property[1])
             throw new exports.ValidationError 'while validating documentation section', null, 'content must be a string', property[0].start_mark
-          hasContent = true
         else
           throw new exports.ValidationError 'while validating root properties', null, 'unknown property ' + property[0].value, property[0].start_mark
     unless "content" of docProperties
@@ -514,7 +516,7 @@ class @Validator
       unless protocol.value in ['HTTP', 'HTTPS']
         throw new exports.ValidationError 'while validating protocols', null, 'only HTTP and HTTPS values are allowed', protocol.start_mark
 
-  validate_type_property: (property, allowParameterKeys) ->
+  validate_type_property: (property) ->
     unless util.isMapping(property[1]) or util.isString(property[1])
       throw new exports.ValidationError 'while validating resource types', null, "property 'type' must be a string or a map", property[0].start_mark
 
@@ -564,14 +566,6 @@ class @Validator
         when 'responses'
           @validate_responses property, allowParameterKeys
 
-        else
-          valid = false
-
-      # property securedBy in a trait/type does not get passed to the resource
-      switch key
-        when 'securedBy'
-          @validate_secured_by property
-
         when 'baseUriParameters'
           unless @baseUri
             throw new exports.ValidationError 'while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark
@@ -581,12 +575,20 @@ class @Validator
 
           @validate_uri_parameters @baseUri, property[1], allowParameterKeys
 
+        when 'protocols'
+          @validate_protocols_property property
+
+        else
+          valid = false
+
+      # property securedBy in a trait/type does not get passed to the resource
+      switch key
+        when 'securedBy'
+          @validate_secured_by property
+
         when 'usage'
           unless allowParameterKeys and context is 'trait'
             throw new exports.ValidationError 'while validating resources', null, "property: 'usage' is invalid in a #{context}", property[0].start_mark
-
-        when 'protocols'
-          @validate_protocols_property property
 
         else
           unless valid
@@ -657,19 +659,25 @@ class @Validator
       for property in response[1].value
         canonicalKey = @canonicalizePropertyName(property[0].value, allowParameterKeys)
         @trackRepeatedProperties(responseProperties, canonicalKey, property[0], 'while validating responses', "property already used")
+        valid = true
         unless @isParameterKey(property)
-          switch canonicalKey
-            when "body"
-              @validate_body property, allowParameterKeys, null, true
+          switch property[0].value
             when "description"
               unless util.isScalar(property[1])
                 throw new exports.ValidationError 'while validating responses', null, 'property description must be a string', response[0].start_mark
+            else
+              valid = false
+
+          switch canonicalKey
+            when "body"
+              @validate_body property, allowParameterKeys, null, true
             when "headers"
               unless util.isNullableMapping(property[1])
                 throw new exports.ValidationError 'while validating resources', null, "property 'headers' must be a map", property[0].start_mark
               @validate_headers property
             else
-              throw new exports.ValidationError 'while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
+              unless valid
+                throw new exports.ValidationError 'while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark
 
   isHttpMethod: (value, allowParameterKeys = false) ->
     if value
@@ -731,12 +739,17 @@ class @Validator
       else
         key = bodyProperty[0].value
         canonicalProperty = @canonicalizePropertyName( key, allowParameterKeys)
+        valid = true
         switch canonicalProperty
           when "formParameters"
             if bodyMode and bodyMode not in implicitMode
               throw new exports.ValidationError 'while validating body', null, "not compatible with explicit Media Type", bodyProperty[0].start_mark
             bodyMode ?= "implicit"
             @validate_form_params bodyProperty, allowParameterKeys
+          else
+            valid = false
+
+        switch key
           when "example"
             if bodyMode and bodyMode not in implicitMode
               throw new exports.ValidationError 'while validating body', null, "not compatible with explicit Media Type", bodyProperty[0].start_mark
@@ -752,7 +765,8 @@ class @Validator
 
             @validateSchema bodyProperty[1]
           else
-            throw new exports.ValidationError 'while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark
+            unless valid
+              throw new exports.ValidationError 'while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark
 
     if "formParameters" of bodyProperties
       start_mark = bodyProperties.formParameters.start_mark
@@ -801,16 +815,12 @@ class @Validator
         throw new exports.ValidationError 'while validating resources', null, "property '" + property[0].value + "' is invalid in a resource", property[0].start_mark
       return true
     else
-      key = property[0].value
-      canonicalProperty = @canonicalizePropertyName( key, allowParameterKeys)
-      switch canonicalProperty
+      switch property[0].value
         when "displayName"
           if context is 'method'
             return false
-
           unless util.isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'displayName' must be a string", property[0].start_mark
-
           return true
 
         when "description"
@@ -818,7 +828,6 @@ class @Validator
             throw new exports.ValidationError 'while validating resources', null, "property 'description' must be a string", property[0].start_mark
           return true
 
-      switch key
         when "is"
           unless util.isSequence property[1]
             throw new exports.ValidationError 'while validating resources', null, "property 'is' must be an array", property[0].start_mark

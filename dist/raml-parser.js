@@ -3820,7 +3820,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
         return deferred.promise;
       } catch (_error) {
         error = _error;
-        throw new exports.FileError("while fetching " + file, null, "cannot fetch " + file + " (" + error + ")", this.start_mark);
+        throw new exports.FileError("while fetching " + file, null, "cannot fetch " + file + " (" + error + "), check that the server is up and that CORS is enabled", this.start_mark);
       }
     };
 
@@ -8152,7 +8152,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
       }
     };
 
-    Validator.prototype.validate_base_uri_parameters = function(node) {
+    Validator.prototype.validate_base_uri_parameters = function() {
       if (!this.baseUriParameters) {
         return;
       }
@@ -8209,9 +8209,8 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
     };
 
     Validator.prototype.validate_types = function(typeProperty) {
-      var type, type_entry, types, typesNamesTrack, _i, _len, _results;
+      var type, type_entry, types, _i, _len, _results;
       types = typeProperty.value;
-      typesNamesTrack = {};
       if (!util.isSequence(typeProperty)) {
         throw new exports.ValidationError('while validating resource types', null, 'invalid resourceTypes definition, it must be an array', typeProperty.start_mark);
       }
@@ -8242,9 +8241,8 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
     };
 
     Validator.prototype.validate_traits = function(traitProperty) {
-      var trait, traitNamesTrack, trait_entry, _i, _len, _results;
+      var trait, trait_entry, _i, _len, _results;
       traits = traitProperty.value;
-      traitNamesTrack = {};
       if (!Array.isArray(traits)) {
         throw new exports.ValidationError('while validating traits', null, 'invalid traits definition, it must be an array', traitProperty.start_mark);
       }
@@ -8323,7 +8321,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
     };
 
     Validator.prototype.validate_named_parameter = function(node, allowParameterKeys) {
-      var booleanValues, canonicalPropertyName, childNode, enumValues, parameterProperties, parameterType, propertyName, propertyValue, unusableProperty, validTypes, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3, _results;
+      var booleanValues, canonicalPropertyName, childNode, enumValues, parameterProperties, parameterType, propertyName, propertyValue, unusableProperty, valid, validTypes, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3, _results;
       parameterProperties = {};
       parameterType = "string";
       _ref1 = node.value;
@@ -8339,7 +8337,8 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
           }
         }
         canonicalPropertyName = this.canonicalizePropertyName(propertyName, allowParameterKeys);
-        switch (canonicalPropertyName) {
+        valid = true;
+        switch (propertyName) {
           case "displayName":
             if (!util.isScalar(childNode[1])) {
               throw new exports.ValidationError('while validating parameter properties', null, 'the value of displayName must be a scalar', childNode[1].start_mark);
@@ -8353,18 +8352,6 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
           case "default":
             if (!util.isScalar(childNode[1])) {
               throw new exports.ValidationError('while validating parameter properties', null, 'the value of default must be a scalar', childNode[1].start_mark);
-            }
-            break;
-          case "enum":
-            if (!util.isNullableSequence(childNode[1])) {
-              throw new exports.ValidationError('while validating parameter properties', null, 'the value of enum must be an array', childNode[1].start_mark);
-            }
-            if (!childNode[1].value.length) {
-              throw new exports.ValidationError('while validating parameter properties', null, 'enum is empty', childNode[1].start_mark);
-            }
-            enumValues = this.get_list_values(childNode[1].value);
-            if (this.hasDuplicates(enumValues)) {
-              throw new exports.ValidationError('while validating parameter properties', null, 'enum contains duplicated values', childNode[1].start_mark);
             }
             break;
           case "description":
@@ -8415,7 +8402,25 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
             }
             break;
           default:
-            throw new exports.ValidationError('while validating parameter properties', null, "unknown property " + propertyName, childNode[0].start_mark);
+            valid = false;
+        }
+        switch (canonicalPropertyName) {
+          case "enum":
+            if (!util.isNullableSequence(childNode[1])) {
+              throw new exports.ValidationError('while validating parameter properties', null, 'the value of enum must be an array', childNode[1].start_mark);
+            }
+            if (!childNode[1].value.length) {
+              throw new exports.ValidationError('while validating parameter properties', null, 'enum is empty', childNode[1].start_mark);
+            }
+            enumValues = this.get_list_values(childNode[1].value);
+            if (this.hasDuplicates(enumValues)) {
+              throw new exports.ValidationError('while validating parameter properties', null, 'enum contains duplicated values', childNode[1].start_mark);
+            }
+            break;
+          default:
+            if (!valid) {
+              throw new exports.ValidationError('while validating parameter properties', null, "unknown property " + propertyName, childNode[0].start_mark);
+            }
         }
       }
       if (parameterType !== "string") {
@@ -8548,7 +8553,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
     };
 
     Validator.prototype.validate_doc_section = function(docSection) {
-      var docProperties, hasContent, hasTitle, property, _i, _len, _ref1;
+      var docProperties, property, _i, _len, _ref1;
       if (!util.isMapping(docSection)) {
         throw new exports.ValidationError('while validating documentation section', null, 'each documentation section must be a map', docSection.start_mark);
       }
@@ -8562,13 +8567,11 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
             if (!(util.isScalar(property[1]) && !util.isNull(property[1]))) {
               throw new exports.ValidationError('while validating documentation section', null, 'title must be a string', property[0].start_mark);
             }
-            hasTitle = true;
             break;
           case "content":
             if (!(util.isScalar(property[1]) && !util.isNull(property[1]))) {
               throw new exports.ValidationError('while validating documentation section', null, 'content must be a string', property[0].start_mark);
             }
-            hasContent = true;
             break;
           default:
             throw new exports.ValidationError('while validating root properties', null, 'unknown property ' + property[0].value, property[0].start_mark);
@@ -8738,7 +8741,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
       return _results;
     };
 
-    Validator.prototype.validate_type_property = function(property, allowParameterKeys) {
+    Validator.prototype.validate_type_property = function(property) {
       var parameter, typeName, _i, _len, _ref1, _results;
       if (!(util.isMapping(property[1]) || util.isString(property[1]))) {
         throw new exports.ValidationError('while validating resource types', null, "property 'type' must be a string or a map", property[0].start_mark);
@@ -8806,13 +8809,6 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
           case 'responses':
             this.validate_responses(property, allowParameterKeys);
             break;
-          default:
-            valid = false;
-        }
-        switch (key) {
-          case 'securedBy':
-            _results.push(this.validate_secured_by(property));
-            break;
           case 'baseUriParameters':
             if (!this.baseUri) {
               throw new exports.ValidationError('while validating uri parameters', null, 'base uri parameters defined when there is no baseUri', property[0].start_mark);
@@ -8820,7 +8816,17 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
             if (!util.isNullableMapping(property[1])) {
               throw new exports.ValidationError('while validating uri parameters', null, 'base uri parameters must be a map', property[0].start_mark);
             }
-            _results.push(this.validate_uri_parameters(this.baseUri, property[1], allowParameterKeys));
+            this.validate_uri_parameters(this.baseUri, property[1], allowParameterKeys);
+            break;
+          case 'protocols':
+            this.validate_protocols_property(property);
+            break;
+          default:
+            valid = false;
+        }
+        switch (key) {
+          case 'securedBy':
+            _results.push(this.validate_secured_by(property));
             break;
           case 'usage':
             if (!(allowParameterKeys && context === 'trait')) {
@@ -8828,9 +8834,6 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
             } else {
               _results.push(void 0);
             }
-            break;
-          case 'protocols':
-            _results.push(this.validate_protocols_property(property));
             break;
           default:
             if (!valid) {
@@ -8932,7 +8935,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
     };
 
     Validator.prototype.validate_response = function(response, allowParameterKeys) {
-      var canonicalKey, property, responseCode, responseProperties, _i, _j, _len, _len1, _ref1, _ref2, _results;
+      var canonicalKey, property, responseCode, responseProperties, valid, _i, _j, _len, _len1, _ref1, _ref2, _results;
       if (util.isSequence(response[0])) {
         if (!response[0].value.length) {
           throw new exports.ValidationError('while validating responses', null, 'there must be at least one response code', response[0].start_mark);
@@ -8958,17 +8961,20 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
           property = _ref2[_j];
           canonicalKey = this.canonicalizePropertyName(property[0].value, allowParameterKeys);
           this.trackRepeatedProperties(responseProperties, canonicalKey, property[0], 'while validating responses', "property already used");
+          valid = true;
           if (!this.isParameterKey(property)) {
-            switch (canonicalKey) {
-              case "body":
-                _results.push(this.validate_body(property, allowParameterKeys, null, true));
-                break;
+            switch (property[0].value) {
               case "description":
                 if (!util.isScalar(property[1])) {
                   throw new exports.ValidationError('while validating responses', null, 'property description must be a string', response[0].start_mark);
-                } else {
-                  _results.push(void 0);
                 }
+                break;
+              default:
+                valid = false;
+            }
+            switch (canonicalKey) {
+              case "body":
+                _results.push(this.validate_body(property, allowParameterKeys, null, true));
                 break;
               case "headers":
                 if (!util.isNullableMapping(property[1])) {
@@ -8977,7 +8983,11 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
                 _results.push(this.validate_headers(property));
                 break;
               default:
-                throw new exports.ValidationError('while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark);
+                if (!valid) {
+                  throw new exports.ValidationError('while validating response', null, "property: '" + property[0].value + "' is invalid in a response", property[0].start_mark);
+                } else {
+                  _results.push(void 0);
+                }
             }
           } else {
             _results.push(void 0);
@@ -9028,7 +9038,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
     };
 
     Validator.prototype.validate_body = function(property, allowParameterKeys, bodyMode, isResponseBody) {
-      var bodyProperties, bodyProperty, canonicalProperty, implicitMode, key, start_mark, _i, _len, _ref1;
+      var bodyProperties, bodyProperty, canonicalProperty, implicitMode, key, start_mark, valid, _i, _len, _ref1;
       if (bodyMode == null) {
         bodyMode = null;
       }
@@ -9057,6 +9067,7 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
         } else {
           key = bodyProperty[0].value;
           canonicalProperty = this.canonicalizePropertyName(key, allowParameterKeys);
+          valid = true;
           switch (canonicalProperty) {
             case "formParameters":
               if (bodyMode && __indexOf.call(implicitMode, bodyMode) < 0) {
@@ -9067,6 +9078,10 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
               }
               this.validate_form_params(bodyProperty, allowParameterKeys);
               break;
+            default:
+              valid = false;
+          }
+          switch (key) {
             case "example":
               if (bodyMode && __indexOf.call(implicitMode, bodyMode) < 0) {
                 throw new exports.ValidationError('while validating body', null, "not compatible with explicit Media Type", bodyProperty[0].start_mark);
@@ -9091,7 +9106,9 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
               this.validateSchema(bodyProperty[1]);
               break;
             default:
-              throw new exports.ValidationError('while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark);
+              if (!valid) {
+                throw new exports.ValidationError('while validating body', null, "property: '" + bodyProperty[0].value + "' is invalid in a body", bodyProperty[0].start_mark);
+              }
           }
         }
       }
@@ -9142,16 +9159,14 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
     };
 
     Validator.prototype.validate_common_properties = function(property, allowParameterKeys, context) {
-      var canonicalProperty, key, use, _i, _len, _ref1;
+      var use, _i, _len, _ref1;
       if (this.isParameterKey(property)) {
         if (!allowParameterKeys) {
           throw new exports.ValidationError('while validating resources', null, "property '" + property[0].value + "' is invalid in a resource", property[0].start_mark);
         }
         return true;
       } else {
-        key = property[0].value;
-        canonicalProperty = this.canonicalizePropertyName(key, allowParameterKeys);
-        switch (canonicalProperty) {
+        switch (property[0].value) {
           case "displayName":
             if (context === 'method') {
               return false;
@@ -9165,8 +9180,6 @@ var Buffer=require("__browserify_Buffer").Buffer;(function() {
               throw new exports.ValidationError('while validating resources', null, "property 'description' must be a string", property[0].start_mark);
             }
             return true;
-        }
-        switch (key) {
           case "is":
             if (!util.isSequence(property[1])) {
               throw new exports.ValidationError('while validating resources', null, "property 'is' must be an array", property[0].start_mark);

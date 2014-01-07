@@ -67,7 +67,7 @@ class @FileReader
       xhr.send null
       return deferred.promise
     catch error
-      throw new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{error})", @start_mark
+      throw new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{error}), check that the server is up and that CORS is enabled", @start_mark
 
 ###
 OO version of the parser, static functions will be removed after consumers move on to use the OO version
