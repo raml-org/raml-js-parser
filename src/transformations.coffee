@@ -231,7 +231,7 @@ class @Transformations
       switch canonicalKey
         when "securedBy"        then @noop()
         when "usage"            then @noop()
-        when "headers"          then @transform_named_params property, allowParameterKeys
+        when "headers"          then @transform_named_params property, allowParameterKeys, false
         when "queryParameters"  then @transform_named_params property, allowParameterKeys, false
         when "baseUriParameters"then @transform_named_params property, allowParameterKeys
         when "body"             then @transform_body property, allowParameterKeys
@@ -249,7 +249,7 @@ class @Transformations
         switch canonicalKey
           when "description"  then @noop()
           when "body"         then @transform_body property, allowParameterKeys
-          when "headers"      then @transform_named_params property, allowParameterKeys
+          when "headers"      then @transform_named_params property, allowParameterKeys, false
           else @noop()
 
   isContentTypeString: (value) =>

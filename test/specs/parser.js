@@ -1552,14 +1552,12 @@ describe('Parser', function() {
                     {
                       displayName: 'A',
                       description: 'This is A',
-                      type: "string",
-                      required: true
+                      type: "string"
                     },
                     {
                       displayName: 'A',
                       description: 'This is A',
-                      type: "file",
-                      required: true
+                      type: "file"
                     },
                   ]
                 }
@@ -1567,6 +1565,22 @@ describe('Parser', function() {
             }
           ]
         }).and.notify(done);
+      });
+
+      it('should be required when explicitly marked', function (done) {
+        raml.load([
+          '#%RAML 0.8',
+          '---',
+          'title: My API',
+          '/:',
+          '  get:',
+          '    headers:',
+          '      header1:',
+          '        required: true'
+        ].join('\n'))
+          .should.eventually.have.deep.property('resources[0].methods[0].headers.header1.required', true)
+          .and.notify(done)
+        ;
       });
     });
 
@@ -1728,6 +1742,22 @@ describe('Parser', function() {
             }
           ]
         }).and.notify(done);
+      });
+
+      it('should be required when explicitly marked', function (done) {
+        raml.load([
+          '#%RAML 0.8',
+          '---',
+          'title: My API',
+          '/:',
+          '  get:',
+          '    queryParameters:',
+          '      queryParameter1:',
+          '        required: true'
+        ].join('\n'))
+          .should.eventually.have.deep.property('resources[0].methods[0].queryParameters.queryParameter1.required', true)
+          .and.notify(done)
+        ;
       });
     });
 
@@ -1933,6 +1963,24 @@ describe('Parser', function() {
           ]
         }).and.notify(done);
       });
+
+      it('should be required when explicitly marked', function (done) {
+        raml.load([
+          '#%RAML 0.8',
+          '---',
+          'title: My API',
+          '/:',
+          '  post:',
+          '    body:',
+          '      application/x-www-form-urlencoded:',
+          '        formParameters:',
+          '          formParameter1:',
+          '            required: true'
+        ].join('\n'))
+          .should.eventually.have.deep.property('resources[0].methods[0].body.application/x-www-form-urlencoded.formParameters.formParameter1.required', true)
+          .and.notify(done)
+        ;
+      });
     });
 
     describe('Named parameters in response headers', function(){
@@ -2054,14 +2102,12 @@ describe('Parser', function() {
                         {
                           displayName: 'A',
                           description: 'This is A',
-                          type: "string",
-                          required: true
+                          type: "string"
                         },
                         {
                           displayName: 'A',
                           description: 'This is A',
-                          type: "file",
-                          required: true
+                          type: "file"
                         },
                       ]
                     }
@@ -2071,6 +2117,24 @@ describe('Parser', function() {
             }
           ]
         }).and.notify(done);
+      });
+
+      it('should be required when explicitly marked', function (done) {
+        raml.load([
+          '#%RAML 0.8',
+          '---',
+          'title: My API',
+          '/:',
+          '  get:',
+          '    responses:',
+          '      200:',
+          '        headers:',
+          '          header1:',
+          '            required: true'
+        ].join('\n'))
+          .should.eventually.have.deep.property('resources[0].methods[0].responses.200.headers.header1.required', true)
+          .and.notify(done)
+        ;
       });
     });
   });
@@ -2732,8 +2796,7 @@ describe('Parser', function() {
             "headers?": {
               "x-header-extra": {
                 displayName: "API Limit Exceeded",
-                type: "string",
-                required: true
+                type: "string"
               }
             }
           }
@@ -2968,14 +3031,12 @@ describe('Parser', function() {
               'If-None-Match?': {
                 description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
                 type: 'string',
-                displayName: "If-None-Match",
-                required: true
+                displayName: "If-None-Match"
               },
               'On-Behalf-Of?' : {
                 description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
                 type: 'string',
-                displayName: "On-Behalf-Of",
-                required: true
+                displayName: "On-Behalf-Of"
               }
             }
           }
@@ -3040,13 +3101,11 @@ describe('Parser', function() {
               'If-None-Match?': {
                 description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
                 type: 'string',
-                required: true,
                 displayName: "If-None-Match"
               },
               'On-Behalf-Of?' : {
                 description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
                 type: 'string',
-                required: true,
                 displayName: "On-Behalf-Of"
               }
             }
@@ -3113,13 +3172,11 @@ describe('Parser', function() {
               'If-None-Match?': {
                 description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
                 type: 'string',
-                required: true,
                 displayName: "If-None-Match"
               },
               'On-Behalf-Of?' : {
                 description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
                 type: 'string',
-                required: true,
                 displayName: "On-Behalf-Of"
               }
             },
@@ -3298,7 +3355,6 @@ describe('Parser', function() {
               'Authorization': {
                 description: '<<param1>> <<param2>>',
                 displayName: "Authorization",
-                required: true,
                 type: "string"
               }
             }
@@ -3315,7 +3371,6 @@ describe('Parser', function() {
                   'Authorization': {
                     description: 'value1 value2',
                     displayName: "Authorization",
-                    required: true,
                     type: "string"
                   }
                 },
@@ -3366,19 +3421,16 @@ describe('Parser', function() {
               'Authorization': {
                 description: '<<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>><<param1>> <<param2>>',
                 displayName: "Authorization",
-                required: true,
                 type: "string"
               },
               'X-Random-Header': {
                 description: '<<param2>><<param2>><<param2>>',
                 displayName: "X-Random-Header",
-                required: true,
                 type: "string"
               },
               '<<param2>><<param2>>': {
                 description: '<<param1>>',
                 displayName: "<<param2>><<param2>>",
-                required: true,
                 type: "string"
               }
             }
@@ -3395,19 +3447,16 @@ describe('Parser', function() {
                   'Authorization': {
                     description: 'value1 value2value1 value2value1 value2value1 value2value1 value2value1 value2',
                     displayName: "Authorization",
-                    required: true,
                     type: "string"
                   },
                   'X-Random-Header': {
                     description: 'value2value2value2',
                     displayName: "X-Random-Header",
-                    required: true,
                     type: "string"
                   },
                   'value2value2': {
                     description: 'value1',
                     displayName: "value2value2",
-                    required: true,
                     type: "string"
                   }
                 },
@@ -3454,7 +3503,6 @@ describe('Parser', function() {
               '<<header>>': {
                 description: '<<param1>> <<param2>>',
                 displayName: "<<header>>",
-                required: true,
                 type: "string"
               }
             }
@@ -3471,7 +3519,6 @@ describe('Parser', function() {
                   'Authorization': {
                     description: 'value1 value2',
                     displayName: "Authorization",
-                    required: true,
                     type: "string"
                   }
                 },
@@ -3522,7 +3569,6 @@ describe('Parser', function() {
               '<<header>>': {
                 description: '<<param1>> <<param2>>',
                 displayName: "<<header>>",
-                required: true,
                 type: "string"
               }
             }
@@ -3539,7 +3585,6 @@ describe('Parser', function() {
                   'Authorization': {
                     description: 'value1 value2',
                     displayName: "Authorization",
-                    required: true,
                     type: "string"
                   }
                 },
@@ -3555,7 +3600,6 @@ describe('Parser', function() {
                   'Authorization': {
                     description: 'value1 value2',
                     displayName: "Authorization",
-                    required: true,
                     type: "string"
                   }
                 },
@@ -3741,7 +3785,6 @@ describe('Parser', function() {
             "headers?": {
               "x-header-extra": {
                 displayName: "API Limit Exceeded",
-                required: true,
                 type: "string"
               }
             }
@@ -3866,14 +3909,12 @@ describe('Parser', function() {
               'If-None-Match?': {
                 description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
                 type: 'string',
-                displayName: "If-None-Match",
-                required: true
+                displayName: "If-None-Match"
               },
               'On-Behalf-Of?' : {
                 description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
                 type: 'string',
-                displayName: "On-Behalf-Of",
-                required: true
+                displayName: "On-Behalf-Of"
               }
             }
           }
@@ -3938,13 +3979,11 @@ describe('Parser', function() {
               'If-None-Match?': {
                 description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
                 type: 'string',
-                required: true,
                 displayName: "If-None-Match"
               },
               'On-Behalf-Of?' : {
                 description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
                 type: 'string',
-                required: true,
                 displayName: "On-Behalf-Of"
               }
             }
@@ -4012,13 +4051,11 @@ describe('Parser', function() {
               'If-None-Match?': {
                 description: 'If-None-Match headers ensure that you don’t retrieve unnecessary data\nif you already have the most current version on-hand.\n',
                 type: 'string',
-                required: true,
                 displayName: "If-None-Match"
               },
               'On-Behalf-Of?' : {
                 description: 'Used for enterprise administrators to make API calls on behalf of their\nmanaged users. To enable this functionality, please contact us with your\nAPI key.\n',
                 type: 'string',
-                required: true,
                 displayName: "On-Behalf-Of"
               }
             },
@@ -4165,7 +4202,6 @@ describe('Parser', function() {
               'Authorization': {
                 description: '<<param1>> <<param2>>',
                 displayName: "Authorization",
-                required: true,
                 type: "string"
               }
             }
@@ -4182,7 +4218,6 @@ describe('Parser', function() {
                   'Authorization': {
                     description: 'value1 value2',
                     displayName: "Authorization",
-                    required: true,
                     type: "string"
                   }
                 },
@@ -4229,7 +4264,6 @@ describe('Parser', function() {
               '<<header>>': {
                 description: '<<param1>> <<param2>>',
                 displayName: "<<header>>",
-                required: true,
                 type: "string"
               }
             }
@@ -4246,7 +4280,6 @@ describe('Parser', function() {
                   'Authorization': {
                     description: 'value1 value2',
                     displayName: "Authorization",
-                    required: true,
                     type: "string"
                   }
                 },
