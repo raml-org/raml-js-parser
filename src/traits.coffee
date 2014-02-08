@@ -22,8 +22,8 @@ class @Traits
 
   # Loading is extra careful because it is done before validation (so it can be used for validation)
   load_traits: (node) ->
-    if @has_property node, /^traits$/
-      allTraits = @property_value node, /^traits$/
+    if @has_property node, 'traits'
+      allTraits = @property_value node, 'traits'
       if allTraits and typeof allTraits is "object"
         allTraits.forEach (trait_item) =>
           if trait_item and typeof trait_item is "object" and typeof trait_item.value is "object"
@@ -31,7 +31,7 @@ class @Traits
               @declaredTraits[trait[0].value] = trait
 
   has_traits: (node) ->
-    if @declaredTraits.length == 0 and @has_property node, /^traits$/
+    if @declaredTraits.length == 0 and @has_property node, 'traits'
       @load_traits node
     return Object.keys(@declaredTraits).length > 0
 
@@ -51,16 +51,16 @@ class @Traits
     return unless util.isMapping resource
     methods = @child_methods resource
     # apply traits at the resource level, which is basically the same as applying to each method in the resource
-    if @has_property resource, /^is$/
-      uses = @property_value resource, /^is$/
+    if @has_property resource, 'is'
+      uses = @property_value resource, 'is'
       uses.forEach (use) =>
         methods.forEach (method) =>
           @apply_trait resourceUri, method, use
 
     # iterate over all methods and apply all their traits
     methods.forEach (method) =>
-      if @has_property method[1], /^is$/
-        uses = @property_value method[1], /^is$/
+      if @has_property method[1], 'is'
+        uses = @property_value method[1], 'is'
         uses.forEach (use) =>
           @apply_trait resourceUri, method, use
 

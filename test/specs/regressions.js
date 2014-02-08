@@ -286,7 +286,7 @@ describe('Regressions', function () {
       '/resource:',
       '  post:',
       '    body:',
-      '      schema: someSchema',
+      '      schema: someSchema'
     ].join('\n');
 
     raml.load(definition).then(noop, function (error) {
@@ -529,6 +529,7 @@ describe('Regressions', function () {
     };
     raml.load(definition).should.become(expected).and.notify(done);
   });
+
   it('should clone references instead of using reference', function (done) {
     var definition = [
       '#%RAML 0.8',
@@ -578,6 +579,78 @@ describe('Regressions', function () {
     };
     raml.load(definition).should.become(expected).and.notify(done);
   });
+
+  it('should handle a resource and sub-resource named /protocols', function (done) {
+    var definition = [
+      '#%RAML 0.8',
+      'title: My api',
+      '/protocols:',
+      '  /protocols:'
+    ].join('\n');
+    var expected = {
+      title: "My api",
+      resources: [
+        {
+          relativeUri: "/protocols",
+          relativeUriPathSegments: [
+            "protocols"
+          ],
+          resources:[
+            {
+              relativeUri: "/protocols",
+              relativeUriPathSegments: [
+                "protocols"
+              ]
+            }
+          ]
+        }
+      ]
+    };
+    raml.load(definition).should.become(expected).and.notify(done);
+  });
+
+  it('should handle a resource and sub-resource named /type.*', function (done) {
+    var definition = [
+      '#%RAML 0.8',
+      'title: My api',
+      'resourceTypes:',
+      '    - ref: {}',
+      '/type_:',
+      '  /type_someword:',
+      '    get:'
+    ].join('\n');
+    var expected = {
+      title: "My api",
+      resourceTypes: [
+          {
+              ref: {}
+          }
+      ],
+      resources: [
+        {
+          relativeUri: "/type_",
+          resources:[
+            {
+              relativeUri: "/type_someword",
+              methods:[
+                {
+                  method: "get"
+                }
+              ],
+              relativeUriPathSegments: [
+                "type_someword"
+              ]
+            }
+          ],
+          relativeUriPathSegments: [
+            "type_"
+          ]
+        }
+      ]
+    };
+    raml.load(definition).should.become(expected).and.notify(done);
+  });
+
   it('should not download a null named file. RT-259', function (done) {
     var definition = [
       '#%RAML 0.8',
