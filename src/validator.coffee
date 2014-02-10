@@ -807,7 +807,7 @@ class @Validator
     # Does it match something of the form?
     # <?xml?>
     # <xs:schema
-    return string?.match(/^\s*(<\?xml[^>]+>)?[\s\n]*<xs:sxhema/)
+    return string?.match(/^\s*(<\?xml[^>]+>)?[\s\n]*<xs:schema/)
 
   validate_common_properties: (property, allowParameterKeys, context) ->
     if @isParameterKey(property)
@@ -870,19 +870,19 @@ class @Validator
 
   has_property: (node, property) ->
     if node and util.isMapping node
-      return node.value.some((childNode) -> return childNode[0].value and typeof childNode[0].value != "object" and childNode[0].value.match(property))
+      return node.value.some((childNode) -> return childNode[0].value and typeof childNode[0].value != "object" and childNode[0].value is property)
     return false
 
   property_value: (node, property) ->
     filteredNodes = node.value.filter (childNode) ->
-      return typeof childNode[0].value != "object" and childNode[0].value.match(property)
+      return typeof childNode[0].value != "object" and childNode[0].value is property
     if (filteredNodes.length)
       return filteredNodes[0][1].value
 
   get_property: (node, property) ->
     if node and util.isMapping node
       filteredNodes = node.value.filter (childNode) =>
-        return util.isString(childNode[0]) and childNode[0].value.match(property)
+        return util.isString(childNode[0]) and childNode[0].value is property
       if filteredNodes.length > 0
         if filteredNodes[0].length > 0
           return filteredNodes[0][1]
@@ -892,7 +892,7 @@ class @Validator
     properties = []
     if node and util.isMapping node
       for prop in node.value
-        if util.isString(prop[0]) and prop[0].value?.match(property)
+        if util.isString(prop[0]) and prop[0].value is property
           properties.push prop
         else
           properties = properties.concat @get_properties prop[1], property

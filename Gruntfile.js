@@ -1,14 +1,19 @@
+var path = require('path');
+var util = require('util');
+
 module.exports = function (grunt) {
+  require('load-grunt-tasks')(grunt);
+
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
 
     coffee: {
       files: {
-        expand: true,
+        expand:  true,
         flatten: true,
-        src: 'src/*.coffee',
-        dest: 'lib',
-        ext: '.js'
+        src:     'src/*.coffee',
+        dest:    'lib',
+        ext:     '.js'
       }
     },
 
@@ -17,14 +22,11 @@ module.exports = function (grunt) {
         files: ['src/*.coffee'],
         tasks: ['coffee']
       },
+
       javascript: {
         files: ['lib/*.js', 'src/browserify.js'],
         tasks: ['browserify']
       }
-    },
-
-    browserify: {
-      'dist/raml-parser.js': ['src/browserify.js', 'lib/*.js', 'node_modules/q/q.js']
     },
 
     uglify: {
@@ -63,36 +65,81 @@ module.exports = function (grunt) {
 
     mochacli: {
       options: {
-        require: ['chai', 'chai-as-promised'],
+        require:  ['chai', 'chai-as-promised'],
         reporter: 'dot',
-        bail: true
+        bail:     true,
+        grep:     grunt.option('grep') || ''
       },
       all: ['test/specs/*.js']
     },
 
     coffeelint: {
-      app: ['src/*.coffee'],
       options: {
         max_line_length: {
           level: 'ignore'
         }
+      },
+      app: ['src/*.coffee']
+    },
+
+    shell: {
+      options: {
+        failOnError: true
+      },
+
+      browserify: {
+        command: [
+          'mkdir -p dist',
+          '&&',
+          './node_modules/.bin/browserify',
+          '--standalone RAML.Parser',
+          util.format('--noparse %s', path.join(__dirname, 'node_modules/inflection/lib/inflection.js')),
+          util.format('--noparse %s', path.join(__dirname, 'node_modules/q/q.js')),
+          '--outfile dist/raml-parser.js',
+          'lib/raml.js'
+        ].join(' ')
       }
     }
   });
 
-  grunt.loadNpmTasks('grunt-browserify');
-  grunt.loadNpmTasks('grunt-coffeelint');
-  grunt.loadNpmTasks('grunt-contrib-coffee');
-  grunt.loadNpmTasks('grunt-contrib-connect');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-mocha-cli');
-  grunt.loadNpmTasks('grunt-mocha-phantomjs');
+  grunt.registerTask('compile', [
+    'coffeelint',
+    'coffee'
+  ]);
 
-  grunt.registerTask('compile', ['coffeelint', 'coffee']);
-  grunt.registerTask('test', ['default', 'connect', 'mochacli', 'mocha_phantomjs']);
-  grunt.registerTask('test-ui-only', ['coffee', 'browserify', 'uglify', 'connect', 'mocha_phantomjs']);
-  grunt.registerTask('server', ['default', 'connect', 'watch']);
+  grunt.registerTask('build', [
+    'compile',
+    'shell:browserify',
+    'uglify'
+  ]);
 
-  grunt.registerTask('default', ['coffeelint', 'coffee', 'browserify', 'uglify']);
+  grunt.registerTask('test', [
+    'compile',
+    'connect',
+    'mochacli',
+    'mocha_phantomjs'
+  ]);
+
+  grunt.registerTask('test:node', [
+    'compile',
+    'connect',
+    'mochacli'
+  ]);
+
+  grunt.registerTask('test:browser', [
+    'compile',
+    'shell:browserify',
+    'connect',
+    'mocha_phantomjs'
+  ]);
+
+  grunt.registerTask('server', [
+    'build',
+    'connect',
+    'watch'
+  ]);
+
+  grunt.registerTask('default', [
+    'build'
+  ]);
 };
