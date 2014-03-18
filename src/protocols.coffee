@@ -15,7 +15,7 @@ class @Protocols
     if @has_property node, 'protocols'
       return @get_property node, 'protocols'
 
-    unless baseUri = @property_value node, /^baseUri$/
+    unless baseUri = @property_value node, 'baseUri'
       return
 
     parsedBaseUri = url.parse(baseUri)

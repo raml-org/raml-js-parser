@@ -21,7 +21,7 @@ class @Transformations
 
   load_default_media_type: (node) =>
     return unless util.isMapping node or node?.value
-    @mediaType = @property_value node, "mediaType"
+    @mediaType = @property_value node, 'mediaType'
 
   get_media_type: () =>
     return @mediaType
@@ -95,16 +95,16 @@ class @Transformations
     return unless @mediaType
     return unless util.isMapping method
     # resource->methods->body
-    if @has_property(method, "body")
-      @apply_default_media_type_to_body @get_property(method, "body")
+    if @has_property(method, 'body')
+      @apply_default_media_type_to_body @get_property(method, 'body')
 
     # resource->methods->responses->items->body
-    if @has_property(method, "responses")
-      responses = @get_property method, "responses"
+    if @has_property(method, 'responses')
+      responses = @get_property method, 'responses'
       return unless responses and responses.value
       responses.value.forEach (response) =>
-        if @has_property(response[1], "body")
-          @apply_default_media_type_to_body @get_property(response[1], "body")
+        if @has_property(response[1], 'body')
+          @apply_default_media_type_to_body @get_property(response[1], 'body')
 
   apply_default_media_type_to_body: (body) ->
     return unless util.isMapping body

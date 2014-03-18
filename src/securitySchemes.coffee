@@ -16,17 +16,12 @@ class @SecuritySchemes
   # Loading is extra careful because it is done before validation (so it can be used for validation)
   load_security_schemes: (node) =>
     if @has_property node, "securitySchemes"
-      allschemes = @property_value node, "securitySchemes"
+      allschemes = @property_value node, 'securitySchemes'
       if allschemes and typeof allschemes is "object"
         allschemes.forEach (scheme_entry) =>
           if scheme_entry.tag is 'tag:yaml.org,2002:map'
             scheme_entry.value.forEach (scheme) =>
               @declaredSchemes[scheme[0].value] = scheme[1].value
-
-  has_schemes: (node) =>
-    if @declaredSchemes.length == 0 and @has_property node, "schemes"
-      @load_schemes node
-    return Object.keys(@declaredSchemes).length > 0
 
   get_all_schemes: =>
     return @declaredSchemes

@@ -1841,7 +1841,6 @@ describe('Parser', function() {
           '    body:',
           '      formParameters:'
         ].join('\n');
-
         raml.load(definition).should.become({
           title: 'Test',
           mediaType: 'multipart/form-data',
@@ -1851,7 +1850,6 @@ describe('Parser', function() {
           ],
           resources: [
             {
-              relativeUriPathSegments: [ "resource" ],
               relativeUri: "/resource",
               methods: [{
                 body: {
@@ -1859,11 +1857,12 @@ describe('Parser', function() {
                     formParameters: null
                   }
                 },
-                method: "post",
                 protocols: [
                   'HTTP'
-                ]
-              }]
+                ],
+                method: "post"
+              }],
+              relativeUriPathSegments: [ "resource" ]
             }
           ]
         }).and.notify(done);

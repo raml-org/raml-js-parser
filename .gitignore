@@ -1,9 +1,10 @@
-gen
-node_modules
-.DS_Store
 *.iml
+.DS_Store
 .classpath
+.idea
 .project
 .settings
-.idea
+gen
+node_modules
+src/*.js
 target
