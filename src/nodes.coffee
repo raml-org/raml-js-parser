@@ -146,7 +146,8 @@ class @MappingNode extends @CollectionNode
             unless (ownNodeProperty[0].value.slice(-1) == '?') and
                    (resourceProperty[0].value.slice(-1) == '?')
               # remove the '?' at the end of the property name
-              ownNodeProperty[0].value = ownNodeProperty[0].value.replace /\?$/, ''
+              if ownNodeProperty[0].value.slice(-1) == '?'
+                ownNodeProperty[0].value = ownNodeProperty[0].value.slice(0, -1)
       else
         @value.push [resourceProperty[0].clone(), resourceProperty[1].clone()]
 
