@@ -711,4 +711,137 @@ describe('Regressions', function () {
 
     raml.load(definition).should.be.fulfilled.and.notify(done);
   });
+
+  it('should handle optional parameters onto optional parameters merge correctly', function (done){
+    var definition = [
+      '#%RAML 0.8',
+      'title: Title',
+      'resourceTypes:',
+      '  - common:',
+      '      get?:',
+      '  - base:',
+      '      type: common',
+      '      get?:',
+      '/files:',
+      '  type: base',
+      '  post:'
+    ].join('\n');
+    var expected = {
+      "title":"Title",
+      "resourceTypes":[
+        {
+          "common": {
+            "get?":null
+          }
+        },
+        {
+          "base": {
+            "type":"common",
+            "get?":null
+          }
+        }
+      ],
+      "resources": [
+       {
+        "type":"base",
+        "relativeUri":"/files",
+        "methods": [
+          {
+            "method":"post"
+          }
+        ],
+        "relativeUriPathSegments": ["files"]
+      }
+      ]
+    };
+
+    raml.load(definition).should.become(expected).and.notify(done);
+  });
+
+  it('should handle optional parameters onto optional parameters merge correctly', function (done){
+    var definition = [
+      '#%RAML 0.8',
+      'title: Title',
+      'resourceTypes:',
+      '  - common: {}',
+      '  - base:',
+      '      type: common',
+      '      get?:',
+      '/files:',
+      '  type: base',
+      '  post:'
+    ].join('\n');
+    var expected = {
+      "title":"Title",
+      "resourceTypes":[
+        {
+          "common": {}
+        },
+        {
+          "base": {
+            "type":"common",
+            "get?":null
+          }
+        }
+      ],
+      "resources": [
+       {
+        "type":"base",
+        "relativeUri":"/files",
+        "methods": [
+          {
+            "method":"post"
+          }
+        ],
+        "relativeUriPathSegments": ["files"]
+      }
+      ]
+    };
+
+    raml.load(definition).should.become(expected).and.notify(done);
+  });
+
+  it('should handle optional parameters onto optional parameters merge correctly', function (done){
+    var definition = [
+      '#%RAML 0.8',
+      'title: Title',
+      'resourceTypes:',
+      '  - common:',
+      '      get?:',
+      '  - base:',
+      '      type: common',
+      '/files:',
+      '  type: base',
+      '  post:'
+    ].join('\n');
+    var expected = {
+      "title":"Title",
+      "resourceTypes":[
+        {
+          "common": {
+            "get?":null
+          }
+        },
+        {
+          "base": {
+            "type":"common"
+          }
+        }
+      ],
+      "resources": [
+       {
+        "type":"base",
+        "relativeUri":"/files",
+        "methods": [
+          {
+            "method":"post"
+          }
+        ],
+        "relativeUriPathSegments": ["files"]
+      }
+      ]
+    };
+
+    raml.load(definition).should.become(expected).and.notify(done);
+  });
 });

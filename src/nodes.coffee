@@ -142,8 +142,11 @@ class @MappingNode extends @CollectionNode
               ownNodeProperty[1] = nonNullNode
 
             ownNodeProperty[1].combine resourceProperty[1]
-            # remove the '?' at the end of the property name
-            ownNodeProperty[0].value = ownNodeProperty[0].value.replace /\?$/, ''
+            # check if the property should still end in '?', if the destination property was optional,
+            unless (ownNodeProperty[0].value.slice(-1) == '?') and
+                   (resourceProperty[0].value.slice(-1) == '?')
+              # remove the '?' at the end of the property name
+              ownNodeProperty[0].value = ownNodeProperty[0].value.replace /\?$/, ''
       else
         @value.push [resourceProperty[0].clone(), resourceProperty[1].clone()]
 
