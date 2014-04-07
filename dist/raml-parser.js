@@ -2489,7 +2489,7 @@
       }
     };
 
-    RamlParser.prototype.composeFile = function(file, settings) {
+    RamlParser.prototype.composeFile = function(file, settings, parent) {
       var error,
         _this = this;
       if (settings == null) {
@@ -2516,6 +2516,7 @@
           src: location
         };
       }
+      console.log(location);
       settings.compose = false;
       return this.parseStream(stream, location, settings, parent);
     };

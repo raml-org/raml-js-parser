@@ -701,4 +701,14 @@ describe('Regressions', function () {
 
     raml.load(definition).should.be.fulfilled.and.notify(done);
   });
+
+  it('add a regression test that composeFile does not fail', function (done) {
+    var definition = [
+      '#%RAML 0.8',
+      '---',
+      '!include http://localhost:9001/test/raml-files/large-raml.yml'
+    ].join('\n');
+
+    raml.load(definition).should.be.fulfilled.and.notify(done);
+  });
 });

@@ -95,7 +95,7 @@ class @RamlParser
       return @q.fcall =>
         throw new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{error})", null
 
-  composeFile: (file, settings = @settings) ->
+  composeFile: (file, settings = @settings, parent) ->
     try
       return settings.reader.readFileAsync(file)
       .then (stream) =>
