@@ -1605,7 +1605,15 @@
                   ownNodeProperty[1] = nonNullNode;
                 }
                 ownNodeProperty[1].combine(resourceProperty[1]);
-                _results1.push(ownNodeProperty[0].value = ownNodeProperty[0].value.replace(/\?$/, ''));
+                if (!((ownNodeProperty[0].value.slice(-1) === '?') && (resourceProperty[0].value.slice(-1) === '?'))) {
+                  if (ownNodeProperty[0].value.slice(-1) === '?') {
+                    _results1.push(ownNodeProperty[0].value = ownNodeProperty[0].value.slice(0, -1));
+                  } else {
+                    _results1.push(void 0);
+                  }
+                } else {
+                  _results1.push(void 0);
+                }
               } else {
                 _results1.push(void 0);
               }
@@ -2516,7 +2524,6 @@
           src: location
         };
       }
-      console.log(location);
       settings.compose = false;
       return this.parseStream(stream, location, settings, parent);
     };
