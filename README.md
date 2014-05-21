@@ -21,6 +21,11 @@ and *z* is the version of the parser.
 So *0.1.2* is the 2nd revision of the parser for the *0.1* version
 of the RAML specification.
 
+### Contributing
+If you are interested in contributing some code to this project, thanks! Please submit a [Contributors Agreement](https://api-notebook.anypoint.mulesoft.com/notebooks#bc1cf75a0284268407e4) acknowledging that you are transferring ownership.
+
+To discuss this project, please use its github issues or the [RAML forum](http://forums.raml.org/).
+
 ## Usage for NodeJS
   
 ### Load
