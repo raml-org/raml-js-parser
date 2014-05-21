@@ -48,11 +48,11 @@ you can also alternatively load from a string containing the api definition:
   var raml = require('raml-parser');
   
   var definition = [
+    '#%RAML 0.8',
     '---',
     'title: MyApi',
     'baseUri: http://myapi.com',
-    '/:',
-    '  name: Root'
+    '/Root:'
   ].join('\n');
   
   raml.load(definition).then( function(data) {
@@ -83,11 +83,11 @@ you can also alternatively generate an AST from a string containing the api defi
   var raml = require('raml-parser');
   
   var definition = [
+    '#%RAML 0.8',
     '---',
     'title: MyApi',
     'baseUri: http://myapi.com',
-    '/:',
-    '  name: Root'
+    '/Root:'
   ].join('\n');
   
   raml.compose(definition).then( function(rootNode) {
