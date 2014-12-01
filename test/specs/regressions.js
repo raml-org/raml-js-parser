@@ -844,4 +844,51 @@ describe('Regressions', function () {
 
     raml.load(definition).should.become(expected).and.notify(done);
   });
+
+  it('should parse multiple parameters in the same line', function (done){
+    var definition = [
+      '#%RAML 0.8',
+      'title: Example',
+      'resourceTypes:',
+      '  - readOnlyCollectionItem:',
+      '      description: Retrieve <<resourcePathName|!singularize>> where <<key>> equals **{<<key>>}**',
+      '/{widgetName}:',
+      '  type:',
+      '    readOnlyCollectionItem:',
+      '      key: widgetName'
+    ].join('\n');
+    var expected = {
+         "title": "Example",
+         "resourceTypes": [
+           {
+             "readOnlyCollectionItem": {
+               "description": "Retrieve <<resourcePathName|!singularize>> where <<key>> equals **{<<key>>}**"
+             }
+           }
+         ],
+         "resources": [
+           {
+             "description": "Retrieve  where widgetName equals **{widgetName}**",
+             "type": {
+               "readOnlyCollectionItem": {
+                 "key": "widgetName"
+               }
+             },
+             "relativeUri": "/{widgetName}",
+             "relativeUriPathSegments": [
+               "{widgetName}"
+             ],
+             "uriParameters": {
+               "widgetName": {
+                 "type": "string",
+                 "required": true,
+                 "displayName": "widgetName"
+               }
+             }
+           }
+         ]
+      };
+
+    raml.load(definition).should.become(expected).and.notify(done);
+  });
 });
