@@ -104,7 +104,7 @@ class @Traits
       return
 
     if util.isString(resource)
-      if parameterUse = resource.value.match(/<<\s*([^\|\s>]+)\s*(\|.*)?\s*>>/g)
+      if parameterUse = resource.value.match(/<<\s*([^\|\s>]+)\s*(\|[^>]*)?\s*>>/g)
         parameterUse.forEach (parameter) =>
           parameterName = parameter?.trim()?.replace(/[<>]+/g, '').trim()
           [parameterName, method] = parameterName.split(/\s*\|\s*/)
