@@ -1,4 +1,5 @@
 # RAML Parser
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/raml-org/raml-js-parser?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![Build Status](https://travis-ci.org/raml-org/raml-js-parser.png)](https://travis-ci.org/raml-org/raml-js-parser)
 [![Dependency Status](https://david-dm.org/raml-org/raml-js-parser.png)](https://david-dm.org/raml-org/raml-js-parser)
