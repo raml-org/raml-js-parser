@@ -7,6 +7,9 @@
     "url": "git@github.com:raml-org/raml-js-parser.git"
   },
   "main": "./lib/raml.js",
+  "browser": {
+    "xmlhttprequest": false
+  },
   "dependencies": {
     "json-lint": "~0.1.0",
     "q": "0.9.7",
