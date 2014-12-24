@@ -6702,19 +6702,6 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejectedWith(/method must be a map/).and.notify(done);
     });
 
-    it('should fail if displayName is defined within methods', function(done) {
-      var definition = [
-        '#%RAML 0.8',
-        '---',
-        'title: Test',
-        '/a:',
-        '  displayName: A',
-        '  get:',
-        '    displayName: {}'
-      ].join('\n');
-      raml.load(definition).should.be.rejectedWith('property: \'displayName\' is invalid in a method').and.notify(done);
-    });
-
     it('should fail if methods description is map', function(done) {
       var definition = [
         '#%RAML 0.8',
