@@ -4,8 +4,8 @@
 [![Build Status](https://travis-ci.org/raml-org/raml-js-parser.png)](https://travis-ci.org/raml-org/raml-js-parser)
 [![Dependency Status](https://david-dm.org/raml-org/raml-js-parser.png)](https://david-dm.org/raml-org/raml-js-parser)
 
-This project contains a RAML parser capable (at this moment) to parser v0.8 version
-of the RAML specification. The parser is written in CoffeeScript and its capable
+This project contains a RAML parser capable (at this moment) of parsing version 0.8
+of the [RAML specification](http://raml.org/spec.html). The parser is written in CoffeeScript and its capable
 of running inside NodeJS as well as in-browser.
 
 ## Versioning
@@ -16,16 +16,16 @@ The RAML parser is versioned in the following manner:
 x.y.z
 ```
 
-in which *x.y* denotes the version of the RAML specification
+in which *x.y* denotes the version of the [RAML specification](http://raml.org/spec.html)
 and *z* is the version of the parser.
 
 So *0.1.2* is the 2nd revision of the parser for the *0.1* version
-of the RAML specification.
+of the [RAML specification](http://raml.org/spec.html).
 
 ### Contributing
 If you are interested in contributing some code to this project, thanks! Please submit a [Contributors Agreement](https://api-notebook.anypoint.mulesoft.com/notebooks#bc1cf75a0284268407e4) acknowledging that you are transferring ownership.
 
-To discuss this project, please use its github issues or the [RAML forum](http://forums.raml.org/).
+To discuss this project, please use its [github issues](https://github.com/raml-org/raml-js-parser/issues) or the [RAML forum](http://forums.raml.org/).
 
 ## Usage for NodeJS
   
@@ -43,7 +43,7 @@ Loading a RAML file is as easy as follows:
   });
 ```
 
-you can also alternatively load from a string containing the api definition:
+You can alternatively load from a string containing the api definition:
 
 ```javascript
   var raml = require('raml-parser');
@@ -62,6 +62,8 @@ you can also alternatively load from a string containing the api definition:
     console.log('Error parsing: ' + error);
   });
 ```
+
+The shape of the returned object is (unofficially) documented in this [Typescript interface](https://github.com/aldonline/raml-typescript).
 
 ### Abstract Syntax Tree
 
