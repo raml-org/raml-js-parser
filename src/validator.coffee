@@ -817,8 +817,6 @@ class @Validator
     else
       switch property[0].value
         when "displayName"
-          if context is 'method'
-            return false
           unless util.isScalar(property[1])
             throw new exports.ValidationError 'while validating resources', null, "property 'displayName' must be a string", property[0].start_mark
           return true
