@@ -19,17 +19,10 @@ class @FileReader
     if @readFileAsyncOverride
       return @readFileAsyncOverride(file)
 
-    targerUrl = @url.parse(file)
-    if targerUrl.protocol?
-      unless targerUrl.protocol.match(/^https?/i)
-        throw new exports.FileError "while reading #{file}", null, "unknown protocol #{targerUrl.protocol}", @start_mark
-      else
-        return @fetchFileAsync file
-    else
-      if window?
-        return @fetchFileAsync file
-      else
-        return @fetchLocalFileAsync file
+    if (/^https?/i).test(file) or window?
+      return @fetchFileAsync file
+
+    return @fetchLocalFileAsync file
 
   ###
   Read file from the disk.
