@@ -6702,6 +6702,36 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejectedWith(/method must be a map/).and.notify(done);
     });
 
+    it('should show displayName in a method', function(done) {    
+      var definition = [   
+        '#%RAML 0.8',    
+        '---',   
+        'title: Test',   
+        '/a:',   
+        '  displayName: A',    
+        '  get:',    
+        '    displayName: SomeName'    
+      ].join('\n');
+
+      var expected = {
+        title: "Test",
+        resources: [
+          {
+            displayName: "A",
+            relativeUri: "/a",
+            methods: [
+              {
+                displayName: "SomeName",
+                method: "get"
+              }
+            ],
+            relativeUriPathSegments: [ "a" ]
+          }
+        ]
+      }
+      raml.load(definition).should.become(expected).and.notify(done);   
+    });
+
     it('should fail if methods description is map', function(done) {
       var definition = [
         '#%RAML 0.8',
