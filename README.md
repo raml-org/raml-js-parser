@@ -112,7 +112,7 @@ include the RAML javascript file in a script tag as follows:
 from there on the usage is pretty much the same as NodeJS, the script
 defines a *RAML.Parser* object globally which can be used as follows:
 
-```html
+```javascript
 RAML.Parser.loadFile('http://localhost:9001/myAPI.raml').then( function(data) {
   console.log(data)
 }, function(error) {
