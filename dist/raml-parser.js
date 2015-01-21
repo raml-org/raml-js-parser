@@ -2378,24 +2378,13 @@
 
 
     FileReader.prototype.readFileAsync = function(file) {
-      var targerUrl;
       if (this.readFileAsyncOverride) {
         return this.readFileAsyncOverride(file);
       }
-      targerUrl = this.url.parse(file);
-      if (targerUrl.protocol != null) {
-        if (!targerUrl.protocol.match(/^https?/i)) {
-          throw new exports.FileError("while reading " + file, null, "unknown protocol " + targerUrl.protocol, this.start_mark);
-        } else {
-          return this.fetchFileAsync(file);
-        }
-      } else {
-        if (typeof window !== "undefined" && window !== null) {
-          return this.fetchFileAsync(file);
-        } else {
-          return this.fetchLocalFileAsync(file);
-        }
+      if (/^https?/i.test(file) || (typeof window !== "undefined" && window !== null)) {
+        return this.fetchFileAsync(file);
       }
+      return this.fetchLocalFileAsync(file);
     };
 
     /*
@@ -8680,6 +8669,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
     ? Uint8Array
     : Array
 
+	var ZERO   = '0'.charCodeAt(0)
 	var PLUS   = '+'.charCodeAt(0)
 	var SLASH  = '/'.charCodeAt(0)
 	var NUMBER = '0'.charCodeAt(0)
@@ -8788,9 +8778,9 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 		return output
 	}
 
-	exports.toByteArray = b64ToByteArray
-	exports.fromByteArray = uint8ToBase64
-}(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
+	module.exports.toByteArray = b64ToByteArray
+	module.exports.fromByteArray = uint8ToBase64
+}())
 
 },{}],26:[function(require,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
@@ -10211,15 +10201,7 @@ function parseHost(host) {
  * A port of inflection-js to node.js module.
  */
 
-( function ( root, factory ){
-  if( typeof define === 'function' && define.amd ){
-    define([], factory );
-  }else if( typeof exports === 'object' ){
-    module.exports = factory();
-  }else{
-    root.inflection = factory();
-  }
-}( this, function (){
+( function ( root ){
 
   /**
    * @description This is a list of nouns that use the same form for both singular and plural.
@@ -10325,9 +10307,9 @@ function parseHost(host) {
     [ new RegExp( '(curve)s$', 'gi' ),                                                    '$1' ],
     [ new RegExp( '([lr])ves$', 'gi' ),                                                   '$1f' ],
     [ new RegExp( '([^fo])ves$', 'gi' ),                                                  '$1fe' ],
-    [ new RegExp( '(m)ovies$', 'gi' ),                                                    '$1ovie' ],
     [ new RegExp( '([^aeiouy]|qu)ies$', 'gi' ),                                           '$1y' ],
     [ new RegExp( '(s)eries$', 'gi' ),                                                    '$1eries' ],
+    [ new RegExp( '(m)ovies$', 'gi' ),                                                    '$1ovie' ],
     [ new RegExp( '(x|ch|ss|sh)es$', 'gi' ),                                              '$1' ],
     [ new RegExp( '([m|l])ice$', 'gi' ),                                                  '$1ouse' ],
     [ new RegExp( '(bus)es$', 'gi' ),                                                     '$1' ],
@@ -10378,7 +10360,7 @@ function parseHost(host) {
    *
    *     this._apply_rules( 'cows', singular_rules ); // === 'cow'
    */
-    _apply_rules : function ( str, rules, skip, override ){
+    _apply_rules : function( str, rules, skip, override ){
       if( override ){
         str = override;
       }else{
@@ -10410,8 +10392,8 @@ function parseHost(host) {
    * @function
    * @param {Array} arr The subject array.
    * @param {Object} item Object to locate in the Array.
-   * @param {Number} from_index Starts checking from this position in the Array.(optional)
-   * @param {Function} compare_func Function used to compare Array item vs passed item.(optional)
+   * @param {Number} fromIndex Starts checking from this position in the Array.(optional)
+   * @param {Function} compareFunc Function used to compare Array item vs passed item.(optional)
    * @returns {Number} Return index position in the Array of the passed item.
    * @example
    *
@@ -10420,17 +10402,17 @@ function parseHost(host) {
    *     inflection.indexOf([ 'hi','there' ], 'guys' ); // === -1
    *     inflection.indexOf([ 'hi','there' ], 'hi' ); // === 0
    */
-    indexOf : function ( arr, item, from_index, compare_func ){
-      if( !from_index ){
-        from_index = -1;
+    indexOf : function( arr, item, fromIndex, compareFunc ){
+      if( !fromIndex ){
+        fromIndex = -1;
       }
 
       var index = -1;
-      var i     = from_index;
+      var i     = fromIndex;
       var j     = arr.length;
 
       for( ; i < j; i++ ){
-        if( arr[ i ]  === item || compare_func && compare_func( arr[ i ], item )){
+        if( arr[ i ]  === item || compareFunc && compareFunc( arr[ i ], item )){
           index = i;
           break;
         }
@@ -10453,7 +10435,7 @@ function parseHost(host) {
    *     var inflection = require( 'inflection' );
    *
    *     inflection.pluralize( 'person' ); // === 'people'
-   *     inflection.pluralize( 'octopus' ); // === 'octopi'
+   *     inflection.pluralize( 'octopus' ); // === "octopi"
    *     inflection.pluralize( 'Hat' ); // === 'Hats'
    *     inflection.pluralize( 'person', 'guys' ); // === 'guys'
    */
@@ -10475,7 +10457,7 @@ function parseHost(host) {
    *     var inflection = require( 'inflection' );
    *
    *     inflection.singularize( 'people' ); // === 'person'
-   *     inflection.singularize( 'octopi' ); // === 'octopus'
+   *     inflection.singularize( 'octopi' ); // === "octopus"
    *     inflection.singularize( 'Hats' ); // === 'Hat'
    *     inflection.singularize( 'guys', 'person' ); // === 'person'
    */
@@ -10490,7 +10472,7 @@ function parseHost(host) {
    * @public
    * @function
    * @param {String} str The subject string.
-   * @param {Boolean} low_first_letter Default is to capitalize the first letter of the results.(optional)
+   * @param {Boolean} lowFirstLetter Default is to capitalize the first letter of the results.(optional)
    *                                 Passing true will lowercase it.
    * @returns {String} Lower case underscored words will be returned in camel case.
    *                  additionally '/' is translated to '::'
@@ -10501,26 +10483,19 @@ function parseHost(host) {
    *     inflection.camelize( 'message_properties' ); // === 'MessageProperties'
    *     inflection.camelize( 'message_properties', true ); // === 'messageProperties'
    */
-    camelize : function ( str, low_first_letter ){
-      var str_path = str.split( '/' );
+    camelize : function ( str, lowFirstLetter ){
+      var str_path = str.toLowerCase().split( '/' );
       var i        = 0;
       var j        = str_path.length;
-      var str_arr, init_x, k, l, first;
 
       for( ; i < j; i++ ){
-        str_arr = str_path[ i ].split( '_' );
-        k       = 0;
-        l       = str_arr.length;
+        var str_arr = str_path[ i ].split( '_' );
+        var initX   = (( lowFirstLetter && i + 1 === j ) ? ( 1 ) : ( 0 ));
+        var k       = initX;
+        var l       = str_arr.length;
 
         for( ; k < l; k++ ){
-          if( k !== 0 ){
-            str_arr[ k ] = str_arr[ k ].toLowerCase();
-          }
-
-          first = str_arr[ k ].charAt( 0 );
-          first = low_first_letter && i === 0 && k === 0
-            ? first.toLowerCase() : first.toUpperCase();
-          str_arr[ k ] = first + str_arr[ k ].substring( 1 );
+          str_arr[ k ] = str_arr[ k ].charAt( 0 ).toUpperCase() + str_arr[ k ].substring( 1 );
         }
 
         str_path[ i ] = str_arr.join( '' );
@@ -10536,7 +10511,7 @@ function parseHost(host) {
    * @public
    * @function
    * @param {String} str The subject string.
-   * @param {Boolean} all_upper_case Default is to lowercase and add underscore prefix.(optional)
+   * @param {Boolean} allUpperCase Default is to lowercase and add underscore prefix.(optional)
    *                  Passing true will return as entered.
    * @returns {String} Camel cased words are returned as lower cased and underscored.
    *                  additionally '::' is translated to '/'.
@@ -10548,8 +10523,8 @@ function parseHost(host) {
    *     inflection.underscore( 'messageProperties' ); // === 'message_properties'
    *     inflection.underscore( 'MP', true ); // === 'MP'
    */
-    underscore : function ( str, all_upper_case ){
-      if( all_upper_case && str === str.toUpperCase()) return str;
+    underscore : function ( str, allUpperCase ){
+      if( allUpperCase && str === str.toUpperCase()) return str;
 
       var str_path = str.split( '::' );
       var i        = 0;
@@ -10570,7 +10545,7 @@ function parseHost(host) {
    * @public
    * @function
    * @param {String} str The subject string.
-   * @param {Boolean} low_first_letter Default is to capitalize the first letter of the results.(optional)
+   * @param {Boolean} lowFirstLetter Default is to capitalize the first letter of the results.(optional)
    *                                 Passing true will lowercase it.
    * @returns {String} Lower case underscored words will be returned in humanized form.
    * @example
@@ -10580,12 +10555,12 @@ function parseHost(host) {
    *     inflection.humanize( 'message_properties' ); // === 'Message properties'
    *     inflection.humanize( 'message_properties', true ); // === 'message properties'
    */
-    humanize : function ( str, low_first_letter ){
+    humanize : function( str, lowFirstLetter ){
       str = str.toLowerCase();
       str = str.replace( id_suffix, '' );
       str = str.replace( underbar, ' ' );
 
-      if( !low_first_letter ){
+      if( !lowFirstLetter ){
         str = inflector.capitalize( str );
       }
 
@@ -10648,16 +10623,15 @@ function parseHost(host) {
    *     inflection.titleize( 'message properties to keep' ); // === 'Message Properties to Keep'
    */
     titleize : function ( str ){
-      str         = str.toLowerCase().replace( underbar, ' ' );
-      var str_arr = str.split( ' ' );
+      str         = str.toLowerCase().replace( underbar, ' ');
+      var str_arr = str.split(' ');
       var i       = 0;
       var j       = str_arr.length;
-      var d, k, l;
 
       for( ; i < j; i++ ){
-        d = str_arr[ i ].split( '-' );
-        k = 0;
-        l = d.length;
+        var d = str_arr[ i ].split( '-' );
+        var k = 0;
+        var l = d.length;
 
         for( ; k < l; k++){
           if( inflector.indexOf( non_titlecased_words, d[ k ].toLowerCase()) < 0 ){
@@ -10743,7 +10717,7 @@ function parseHost(host) {
    * @public
    * @function
    * @param {String} str The subject string.
-   * @param {Boolean} drop_id_ubar Default is to seperate id with an underbar at the end of the class name,
+   * @param {Boolean} dropIdUbar Default is to seperate id with an underbar at the end of the class name,
                                  you can pass true to skip it.(optional)
    * @returns {String} Underscored plural nouns become the camel cased singular form.
    * @example
@@ -10753,9 +10727,9 @@ function parseHost(host) {
    *     inflection.foreign_key( 'MessageBusProperty' ); // === 'message_bus_property_id'
    *     inflection.foreign_key( 'MessageBusProperty', true ); // === 'message_bus_propertyid'
    */
-    foreign_key : function ( str, drop_id_ubar ){
+    foreign_key : function( str, dropIdUbar ){
       str = inflector.demodulize( str );
-      str = inflector.underscore( str ) + (( drop_id_ubar ) ? ( '' ) : ( '_' )) + 'id';
+      str = inflector.underscore( str ) + (( dropIdUbar ) ? ( '' ) : ( '_' )) + 'id';
 
       return str;
     },
@@ -10767,7 +10741,7 @@ function parseHost(host) {
    * @public
    * @function
    * @param {String} str The subject string.
-   * @returns {String} Return all found numbers their sequence like '22nd'.
+   * @returns {String} Return all found numbers their sequence like "22nd".
    * @example
    *
    *     var inflection = require( 'inflection' );
@@ -10775,7 +10749,7 @@ function parseHost(host) {
    *     inflection.ordinalize( 'the 1 pitch' ); // === 'the 1st pitch'
    */
     ordinalize : function ( str ){
-      var str_arr = str.split( ' ' );
+      var str_arr = str.split(' ');
       var i       = 0;
       var j       = str_arr.length;
 
@@ -10802,44 +10776,20 @@ function parseHost(host) {
       }
 
       return str_arr.join( ' ' );
-    },
-
-  /**
-   * This function performs multiple inflection methods on a string
-   * @public
-   * @function
-   * @param {String} str The subject string.
-   * @param {Array} arr An array of inflection methods.
-   * @returns {String}
-   * @example
-   *
-   *     var inflection = require( 'inflection' );
-   *
-   *     inflection.transform( 'all job', [ 'pluralize', 'capitalize', 'dasherize' ]); // === 'All-jobs'
-   */
-    transform : function ( str, arr ){
-      var i = 0;
-      var j = arr.length;
-
-      for( ;i < j; i++ ){
-        var method = arr[ i ];
-
-        if( this.hasOwnProperty( method )){
-          str = this[ method ]( str );
-        }
-      }
-
-      return str;
     }
   };
+
+  if( typeof exports === 'undefined' ) return root.inflection = inflector;
 
 /**
  * @public
  */
-  inflector.version = '1.3.8';
-
-  return inflector;
-}));
+  inflector.version = "1.2.5";
+/**
+ * Exports module.
+ */
+  module.exports = inflector;
+})( this );
 
 },{}],33:[function(require,module,exports){
 (function( glob, undefined ) {
