@@ -35,8 +35,9 @@ class @YAMLError extends Error
   constructor: ->
     super()
 
-    # Hack to get the stack on the error somehow
-    #@stack = @toString() + '\n' + (new Error).stack.split('\n')[1..].join('\n')
+    Error.captureStackTrace(@, @constructor) if Error.captureStackTrace
+
+  name: 'YAMLError'
 
 class @MarkedYAMLError extends @YAMLError
   constructor: (@context, @context_mark, @message, @problem_mark, @note) ->
