@@ -93,7 +93,7 @@ module.exports = function (grunt) {
           '&&',
           './node_modules/.bin/browserify',
           '--standalone RAML.Parser',
-          util.format('--noparse %s', path.join(__dirname, 'node_modules/inflection/lib/inflection.js')),
+          util.format('--noparse %s', path.join(__dirname, 'node_modules/pluralize/pluralize.js')),
           util.format('--noparse %s', path.join(__dirname, 'node_modules/q/q.js')),
           '--outfile dist/raml-parser.js',
           'lib/raml.js'
