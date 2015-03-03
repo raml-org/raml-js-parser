@@ -1,19 +1,19 @@
-!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),(f.RAML||(f.RAML={})).Parser=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+!function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),(f.RAML||(f.RAML={})).Parser=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 (function() {
   var MarkedYAMLError, events, nodes, raml, util, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  events = require('./events');
+  events = _dereq_('./events');
 
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
+  MarkedYAMLError = _dereq_('./errors').MarkedYAMLError;
 
-  nodes = require('./nodes');
+  nodes = _dereq_('./nodes');
 
-  raml = require('./raml');
+  raml = _dereq_('./raml');
 
-  util = require('./util');
+  util = _dereq_('./util');
 
   this.ComposerError = (function(_super) {
     __extends(ComposerError, _super);
@@ -228,7 +228,7 @@
 
 }).call(this);
 
-},{"./errors":3,"./events":4,"./nodes":7,"./raml":10,"./util":20}],2:[function(require,module,exports){
+},{"./errors":3,"./events":4,"./nodes":7,"./raml":10,"./util":20}],2:[function(_dereq_,module,exports){
 (function (Buffer){
 (function() {
   var MarkedYAMLError, nodes, util, _ref, _ref1,
@@ -236,11 +236,11 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
+  MarkedYAMLError = _dereq_('./errors').MarkedYAMLError;
 
-  nodes = require('./nodes');
+  nodes = _dereq_('./nodes');
 
-  util = require('./util');
+  util = _dereq_('./util');
 
   this.ConstructorError = (function(_super) {
     __extends(ConstructorError, _super);
@@ -794,8 +794,8 @@
 
 }).call(this);
 
-}).call(this,require("buffer").Buffer)
-},{"./errors":3,"./nodes":7,"./util":20,"buffer":24}],3:[function(require,module,exports){
+}).call(this,_dereq_("buffer").Buffer)
+},{"./errors":3,"./nodes":7,"./util":20,"buffer":24}],3:[function(_dereq_,module,exports){
 (function() {
   var _ref,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
@@ -934,7 +934,7 @@
 
 }).call(this);
 
-},{}],4:[function(require,module,exports){
+},{}],4:[function(_dereq_,module,exports){
 (function() {
   var _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6,
     __hasProp = {}.hasOwnProperty,
@@ -1124,15 +1124,15 @@
 
 }).call(this);
 
-},{}],5:[function(require,module,exports){
+},{}],5:[function(_dereq_,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
+  MarkedYAMLError = _dereq_('./errors').MarkedYAMLError;
 
-  nodes = require('./nodes');
+  nodes = _dereq_('./nodes');
 
   /*
   The Traits throws these.
@@ -1234,39 +1234,39 @@
 
 }).call(this);
 
-},{"./errors":3,"./nodes":7}],6:[function(require,module,exports){
+},{"./errors":3,"./nodes":7}],6:[function(_dereq_,module,exports){
 (function() {
   var composer, construct, joiner, parser, protocols, reader, resolver, scanner, schemas, securitySchemes, traits, transformations, types, util, validator;
 
-  util = require('./util');
+  util = _dereq_('./util');
 
-  reader = require('./reader');
+  reader = _dereq_('./reader');
 
-  scanner = require('./scanner');
+  scanner = _dereq_('./scanner');
 
-  parser = require('./parser');
+  parser = _dereq_('./parser');
 
-  composer = require('./composer');
+  composer = _dereq_('./composer');
 
-  resolver = require('./resolver');
+  resolver = _dereq_('./resolver');
 
-  construct = require('./construct');
+  construct = _dereq_('./construct');
 
-  validator = require('./validator');
+  validator = _dereq_('./validator');
 
-  joiner = require('./joiner');
+  joiner = _dereq_('./joiner');
 
-  traits = require('./traits');
+  traits = _dereq_('./traits');
 
-  types = require('./resourceTypes');
+  types = _dereq_('./resourceTypes');
 
-  schemas = require('./schemas');
+  schemas = _dereq_('./schemas');
 
-  protocols = require('./protocols');
+  protocols = _dereq_('./protocols');
 
-  securitySchemes = require('./securitySchemes');
+  securitySchemes = _dereq_('./securitySchemes');
 
-  transformations = require('./transformations');
+  transformations = _dereq_('./transformations');
 
   this.make_loader = function(Reader, Scanner, Parser, Composer, Resolver, Validator, ResourceTypes, Traits, Schemas, Protocols, Joiner, SecuritySchemes, Constructor, Transformations) {
     if (Reader == null) {
@@ -1349,13 +1349,13 @@
 
 }).call(this);
 
-},{"./composer":1,"./construct":2,"./joiner":5,"./parser":8,"./protocols":9,"./reader":11,"./resolver":12,"./resourceTypes":13,"./scanner":14,"./schemas":15,"./securitySchemes":16,"./traits":18,"./transformations":19,"./util":20,"./validator":21}],7:[function(require,module,exports){
+},{"./composer":1,"./construct":2,"./joiner":5,"./parser":8,"./protocols":9,"./reader":11,"./resolver":12,"./resourceTypes":13,"./scanner":14,"./schemas":15,"./securitySchemes":16,"./traits":18,"./transformations":19,"./util":20,"./validator":21}],7:[function(_dereq_,module,exports){
 (function() {
   var MarkedYAMLError, unique_id, _ref, _ref1, _ref2,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
+  MarkedYAMLError = _dereq_('./errors').MarkedYAMLError;
 
   unique_id = 0;
 
@@ -1647,18 +1647,18 @@
 
 }).call(this);
 
-},{"./errors":3}],8:[function(require,module,exports){
+},{"./errors":3}],8:[function(_dereq_,module,exports){
 (function() {
   var MarkedYAMLError, events, tokens, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __slice = [].slice;
 
-  events = require('./events');
+  events = _dereq_('./events');
 
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
+  MarkedYAMLError = _dereq_('./errors').MarkedYAMLError;
 
-  tokens = require('./tokens');
+  tokens = _dereq_('./tokens');
 
   this.ParserError = (function(_super) {
     __extends(ParserError, _super);
@@ -2258,18 +2258,18 @@
 
 }).call(this);
 
-},{"./errors":3,"./events":4,"./tokens":17}],9:[function(require,module,exports){
+},{"./errors":3,"./events":4,"./tokens":17}],9:[function(_dereq_,module,exports){
 (function() {
   var MarkedYAMLError, nodes, url, util,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  url = require('url');
+  url = _dereq_('url');
 
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
+  MarkedYAMLError = _dereq_('./errors').MarkedYAMLError;
 
-  nodes = require('./nodes');
+  nodes = _dereq_('./nodes');
 
-  util = require('./util');
+  util = _dereq_('./util');
 
   /*
   The Protocols class deals with applying protocols to methods according to the spec
@@ -2339,17 +2339,17 @@
 
 }).call(this);
 
-},{"./errors":3,"./nodes":7,"./util":20,"url":31}],10:[function(require,module,exports){
+},{"./errors":3,"./nodes":7,"./util":20,"url":31}],10:[function(_dereq_,module,exports){
 (function() {
   var defaultSettings, util, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  this.errors = require('./errors');
+  this.errors = _dereq_('./errors');
 
-  this.loader = require('./loader');
+  this.loader = _dereq_('./loader');
 
-  util = require('./util');
+  util = _dereq_('./util');
 
   this.FileError = (function(_super) {
     __extends(FileError, _super);
@@ -2365,8 +2365,8 @@
 
   this.FileReader = (function() {
     function FileReader(readFileAsyncOverride) {
-      this.q = require('q');
-      this.url = require('url');
+      this.q = _dereq_('q');
+      this.url = _dereq_('url');
       if (readFileAsyncOverride) {
         this.readFileAsyncOverride = readFileAsyncOverride;
       }
@@ -2396,7 +2396,7 @@
       var deferred,
         _this = this;
       deferred = this.q.defer();
-      require('fs').readFile(file, function(err, data) {
+      _dereq_('fs').readFile(file, function(err, data) {
         if (err) {
           return deferred.reject(new exports.FileError("while reading " + file, null, "cannot read " + file + " (" + err + ")", _this.start_mark));
         } else {
@@ -2418,7 +2418,7 @@
       if (typeof window !== "undefined" && window !== null) {
         xhr = new XMLHttpRequest();
       } else {
-        xhr = new (require('xmlhttprequest').XMLHttpRequest)();
+        xhr = new (_dereq_('xmlhttprequest').XMLHttpRequest)();
       }
       try {
         xhr.open('GET', file, false);
@@ -2453,9 +2453,9 @@
   this.RamlParser = (function() {
     function RamlParser(settings) {
       this.settings = settings != null ? settings : defaultSettings;
-      this.q = require('q');
-      this.url = require('url');
-      this.nodes = require('./nodes');
+      this.q = _dereq_('q');
+      this.url = _dereq_('url');
+      this.nodes = _dereq_('./nodes');
       this.loadDefaultSettings(settings);
     }
 
@@ -2734,14 +2734,14 @@
 
 }).call(this);
 
-},{"./errors":3,"./loader":6,"./nodes":7,"./util":20,"fs":22,"q":34,"url":31,"xmlhttprequest":23}],11:[function(require,module,exports){
+},{"./errors":3,"./loader":6,"./nodes":7,"./util":20,"fs":22,"q":34,"url":31,"xmlhttprequest":23}],11:[function(_dereq_,module,exports){
 (function() {
   var Mark, MarkedYAMLError, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  _ref = require('./errors'), Mark = _ref.Mark, MarkedYAMLError = _ref.MarkedYAMLError;
+  _ref = _dereq_('./errors'), Mark = _ref.Mark, MarkedYAMLError = _ref.MarkedYAMLError;
 
   this.ReaderError = (function(_super) {
     __extends(ReaderError, _super);
@@ -2837,18 +2837,18 @@
 
 }).call(this);
 
-},{"./errors":3}],12:[function(require,module,exports){
+},{"./errors":3}],12:[function(_dereq_,module,exports){
 (function() {
   var YAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  nodes = require('./nodes');
+  nodes = _dereq_('./nodes');
 
-  util = require('./util');
+  util = _dereq_('./util');
 
-  YAMLError = require('./errors').YAMLError;
+  YAMLError = _dereq_('./errors').YAMLError;
 
   this.ResolverError = (function(_super) {
     __extends(ResolverError, _super);
@@ -3046,18 +3046,18 @@
 
 }).call(this);
 
-},{"./errors":3,"./nodes":7,"./util":20}],13:[function(require,module,exports){
+},{"./errors":3,"./nodes":7,"./util":20}],13:[function(_dereq_,module,exports){
 (function() {
   var MarkedYAMLError, nodes, util, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
+  MarkedYAMLError = _dereq_('./errors').MarkedYAMLError;
 
-  nodes = require('./nodes');
+  nodes = _dereq_('./nodes');
 
-  util = require('./util');
+  util = _dereq_('./util');
 
   /*
   The ResourceTypes throws these.
@@ -3235,7 +3235,7 @@
 
 }).call(this);
 
-},{"./errors":3,"./nodes":7,"./util":20}],14:[function(require,module,exports){
+},{"./errors":3,"./nodes":7,"./util":20}],14:[function(_dereq_,module,exports){
 (function() {
   var MarkedYAMLError, SimpleKey, tokens, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -3243,11 +3243,11 @@
     __slice = [].slice,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
+  MarkedYAMLError = _dereq_('./errors').MarkedYAMLError;
 
-  tokens = require('./tokens');
+  tokens = _dereq_('./tokens');
 
-  util = require('./util');
+  util = _dereq_('./util');
 
   /*
   The Scanner throws these.
@@ -4740,16 +4740,16 @@
 
 }).call(this);
 
-},{"./errors":3,"./tokens":17,"./util":20}],15:[function(require,module,exports){
+},{"./errors":3,"./tokens":17,"./util":20}],15:[function(_dereq_,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
+  MarkedYAMLError = _dereq_('./errors').MarkedYAMLError;
 
-  nodes = require('./nodes');
+  nodes = _dereq_('./nodes');
 
   /*
   The Schemas throws these.
@@ -4841,16 +4841,16 @@
 
 }).call(this);
 
-},{"./errors":3,"./nodes":7}],16:[function(require,module,exports){
+},{"./errors":3,"./nodes":7}],16:[function(_dereq_,module,exports){
 (function() {
   var MarkedYAMLError, nodes, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
+  MarkedYAMLError = _dereq_('./errors').MarkedYAMLError;
 
-  nodes = require('./nodes');
+  nodes = _dereq_('./nodes');
 
   /*
   The Schemas throws these.
@@ -4913,7 +4913,7 @@
 
 }).call(this);
 
-},{"./errors":3,"./nodes":7}],17:[function(require,module,exports){
+},{"./errors":3,"./nodes":7}],17:[function(_dereq_,module,exports){
 (function() {
   var _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9,
     __hasProp = {}.hasOwnProperty,
@@ -5220,19 +5220,19 @@
 
 }).call(this);
 
-},{}],18:[function(require,module,exports){
+},{}],18:[function(_dereq_,module,exports){
 (function() {
-  var MarkedYAMLError, inflection, nodes, util, _ref, _ref1,
+  var MarkedYAMLError, nodes, pluralize, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
+  pluralize = _dereq_('pluralize');
 
-  nodes = require('./nodes');
+  MarkedYAMLError = _dereq_('./errors').MarkedYAMLError;
 
-  inflection = require('inflection');
+  nodes = _dereq_('./nodes');
 
-  util = require('./util');
+  util = _dereq_('./util');
 
   /*
   The Traits throws these.
@@ -5411,9 +5411,9 @@
             usedParameters[parameterName] = true;
             if (method) {
               if (method.match(/!\s*singularize/)) {
-                value = inflection.singularize(value);
+                value = pluralize.singular(value);
               } else if (method.match(/!\s*pluralize/)) {
-                value = inflection.pluralize(value);
+                value = pluralize.plural(value);
               } else {
                 throw new exports.ParameterError('while validating parameter', null, 'unknown function applied to parameter', resource.start_mark);
               }
@@ -5478,16 +5478,16 @@
 
 }).call(this);
 
-},{"./errors":3,"./nodes":7,"./util":20,"inflection":32}],19:[function(require,module,exports){
+},{"./errors":3,"./nodes":7,"./util":20,"pluralize":33}],19:[function(_dereq_,module,exports){
 (function() {
   var nodes, uritemplate, util,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  uritemplate = require('uritemplate');
+  uritemplate = _dereq_('uritemplate');
 
-  nodes = require('./nodes');
+  nodes = _dereq_('./nodes');
 
-  util = require('./util');
+  util = _dereq_('./util');
 
   /*
      Applies transformations to the RAML
@@ -5995,7 +5995,7 @@
 
 }).call(this);
 
-},{"./nodes":7,"./util":20,"uritemplate":35}],20:[function(require,module,exports){
+},{"./nodes":7,"./util":20,"uritemplate":35}],20:[function(_dereq_,module,exports){
 (function() {
   var __slice = [].slice,
     __hasProp = {}.hasOwnProperty;
@@ -6075,7 +6075,7 @@
 
 }).call(this);
 
-},{}],21:[function(require,module,exports){
+},{}],21:[function(_dereq_,module,exports){
 (function() {
   var MarkedYAMLError, jsonlint, nodes, traits, uritemplate, url, util, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -6083,19 +6083,19 @@
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  url = require('url');
+  url = _dereq_('url');
 
-  uritemplate = require('uritemplate');
+  uritemplate = _dereq_('uritemplate');
 
-  MarkedYAMLError = require('./errors').MarkedYAMLError;
+  MarkedYAMLError = _dereq_('./errors').MarkedYAMLError;
 
-  nodes = require('./nodes');
+  nodes = _dereq_('./nodes');
 
-  traits = require('./traits');
+  traits = _dereq_('./traits');
 
-  util = require('./util');
+  util = _dereq_('./util');
 
-  jsonlint = require('json-lint');
+  jsonlint = _dereq_('json-lint');
 
   /*
   The Validator throws these.
@@ -7597,13 +7597,13 @@
 
 }).call(this);
 
-},{"./errors":3,"./nodes":7,"./traits":18,"./util":20,"json-lint":33,"uritemplate":35,"url":31}],22:[function(require,module,exports){
+},{"./errors":3,"./nodes":7,"./traits":18,"./util":20,"json-lint":32,"uritemplate":35,"url":31}],22:[function(_dereq_,module,exports){
 
-},{}],23:[function(require,module,exports){
-module.exports=require(22)
-},{}],24:[function(require,module,exports){
-var base64 = require('base64-js')
-var ieee754 = require('ieee754')
+},{}],23:[function(_dereq_,module,exports){
+module.exports=_dereq_(22)
+},{}],24:[function(_dereq_,module,exports){
+var base64 = _dereq_('base64-js')
+var ieee754 = _dereq_('ieee754')
 
 exports.Buffer = Buffer
 exports.SlowBuffer = Buffer
@@ -8659,7 +8659,7 @@ function assert (test, message) {
   if (!test) throw new Error(message || 'Failed assertion')
 }
 
-},{"base64-js":25,"ieee754":26}],25:[function(require,module,exports){
+},{"base64-js":25,"ieee754":26}],25:[function(_dereq_,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -8669,18 +8669,21 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
     ? Uint8Array
     : Array
 
-	var ZERO   = '0'.charCodeAt(0)
 	var PLUS   = '+'.charCodeAt(0)
 	var SLASH  = '/'.charCodeAt(0)
 	var NUMBER = '0'.charCodeAt(0)
 	var LOWER  = 'a'.charCodeAt(0)
 	var UPPER  = 'A'.charCodeAt(0)
+	var PLUS_URL_SAFE = '-'.charCodeAt(0)
+	var SLASH_URL_SAFE = '_'.charCodeAt(0)
 
 	function decode (elt) {
 		var code = elt.charCodeAt(0)
-		if (code === PLUS)
+		if (code === PLUS ||
+		    code === PLUS_URL_SAFE)
 			return 62 // '+'
-		if (code === SLASH)
+		if (code === SLASH ||
+		    code === SLASH_URL_SAFE)
 			return 63 // '/'
 		if (code < NUMBER)
 			return -1 //no match
@@ -8778,11 +8781,11 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 		return output
 	}
 
-	module.exports.toByteArray = b64ToByteArray
-	module.exports.fromByteArray = uint8ToBase64
-}())
+	exports.toByteArray = b64ToByteArray
+	exports.fromByteArray = uint8ToBase64
+}(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],26:[function(require,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -8868,7 +8871,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],27:[function(require,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -9379,7 +9382,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],28:[function(require,module,exports){
+},{}],28:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9465,7 +9468,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],29:[function(require,module,exports){
+},{}],29:[function(_dereq_,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9552,13 +9555,13 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],30:[function(require,module,exports){
+},{}],30:[function(_dereq_,module,exports){
 'use strict';
 
-exports.decode = exports.parse = require('./decode');
-exports.encode = exports.stringify = require('./encode');
+exports.decode = exports.parse = _dereq_('./decode');
+exports.encode = exports.stringify = _dereq_('./encode');
 
-},{"./decode":28,"./encode":29}],31:[function(require,module,exports){
+},{"./decode":28,"./encode":29}],31:[function(_dereq_,module,exports){
 /*jshint strict:true node:true es5:true onevar:true laxcomma:true laxbreak:true eqeqeq:true immed:true latedef:true*/
 (function () {
   "use strict";
@@ -9584,7 +9587,7 @@ exports.encode = exports.stringify = require('./encode');
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var punycode = require('punycode');
+var punycode = _dereq_('punycode');
 
 exports.parse = urlParse;
 exports.resolve = urlResolve;
@@ -9652,7 +9655,7 @@ var protocolPattern = /^([a-z0-9.+-]+:)/i,
       'gopher:': true,
       'file:': true
     },
-    querystring = require('querystring');
+    querystring = _dereq_('querystring');
 
 function urlParse(url, parseQueryString, slashesDenoteHost) {
   if (url && typeof(url) === 'object' && url.href) return url;
@@ -10191,607 +10194,7 @@ function parseHost(host) {
 
 }());
 
-},{"punycode":27,"querystring":30}],32:[function(require,module,exports){
-/*!
- * inflection
- * Copyright(c) 2011 Ben Lin <ben@dreamerslab.com>
- * MIT Licensed
- *
- * @fileoverview
- * A port of inflection-js to node.js module.
- */
-
-( function ( root ){
-
-  /**
-   * @description This is a list of nouns that use the same form for both singular and plural.
-   *              This list should remain entirely in lower case to correctly match Strings.
-   * @private
-   */
-  var uncountable_words = [
-    'equipment', 'information', 'rice', 'money', 'species',
-    'series', 'fish', 'sheep', 'moose', 'deer', 'news'
-  ];
-
-  /**
-   * @description These rules translate from the singular form of a noun to its plural form.
-   * @private
-   */
-  var plural_rules = [
-
-    // do not replace if its already a plural word
-    [ new RegExp( '(m)en$',      'gi' )],
-    [ new RegExp( '(pe)ople$',   'gi' )],
-    [ new RegExp( '(child)ren$', 'gi' )],
-    [ new RegExp( '([ti])a$',    'gi' )],
-    [ new RegExp( '((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$','gi' )],
-    [ new RegExp( '(hive)s$',           'gi' )],
-    [ new RegExp( '(tive)s$',           'gi' )],
-    [ new RegExp( '(curve)s$',          'gi' )],
-    [ new RegExp( '([lr])ves$',         'gi' )],
-    [ new RegExp( '([^fo])ves$',        'gi' )],
-    [ new RegExp( '([^aeiouy]|qu)ies$', 'gi' )],
-    [ new RegExp( '(s)eries$',          'gi' )],
-    [ new RegExp( '(m)ovies$',          'gi' )],
-    [ new RegExp( '(x|ch|ss|sh)es$',    'gi' )],
-    [ new RegExp( '([m|l])ice$',        'gi' )],
-    [ new RegExp( '(bus)es$',           'gi' )],
-    [ new RegExp( '(o)es$',             'gi' )],
-    [ new RegExp( '(shoe)s$',           'gi' )],
-    [ new RegExp( '(cris|ax|test)es$',  'gi' )],
-    [ new RegExp( '(octop|vir)i$',      'gi' )],
-    [ new RegExp( '(alias|status)es$',  'gi' )],
-    [ new RegExp( '^(ox)en',            'gi' )],
-    [ new RegExp( '(vert|ind)ices$',    'gi' )],
-    [ new RegExp( '(matr)ices$',        'gi' )],
-    [ new RegExp( '(quiz)zes$',         'gi' )],
-
-    // original rule
-    [ new RegExp( '(m)an$', 'gi' ),                 '$1en' ],
-    [ new RegExp( '(pe)rson$', 'gi' ),              '$1ople' ],
-    [ new RegExp( '(child)$', 'gi' ),               '$1ren' ],
-    [ new RegExp( '^(ox)$', 'gi' ),                 '$1en' ],
-    [ new RegExp( '(ax|test)is$', 'gi' ),           '$1es' ],
-    [ new RegExp( '(octop|vir)us$', 'gi' ),         '$1i' ],
-    [ new RegExp( '(alias|status)$', 'gi' ),        '$1es' ],
-    [ new RegExp( '(bu)s$', 'gi' ),                 '$1ses' ],
-    [ new RegExp( '(buffal|tomat|potat)o$', 'gi' ), '$1oes' ],
-    [ new RegExp( '([ti])um$', 'gi' ),              '$1a' ],
-    [ new RegExp( 'sis$', 'gi' ),                   'ses' ],
-    [ new RegExp( '(?:([^f])fe|([lr])f)$', 'gi' ),  '$1$2ves' ],
-    [ new RegExp( '(hive)$', 'gi' ),                '$1s' ],
-    [ new RegExp( '([^aeiouy]|qu)y$', 'gi' ),       '$1ies' ],
-    [ new RegExp( '(x|ch|ss|sh)$', 'gi' ),          '$1es' ],
-    [ new RegExp( '(matr|vert|ind)ix|ex$', 'gi' ),  '$1ices' ],
-    [ new RegExp( '([m|l])ouse$', 'gi' ),           '$1ice' ],
-    [ new RegExp( '(quiz)$', 'gi' ),                '$1zes' ],
-
-    [ new RegExp( 's$', 'gi' ), 's' ],
-    [ new RegExp( '$', 'gi' ),  's' ]
-  ];
-
-  /**
-   * @description These rules translate from the plural form of a noun to its singular form.
-   * @private
-   */
-  var singular_rules = [
-
-    // do not replace if its already a singular word
-    [ new RegExp( '(m)an$',                 'gi' )],
-    [ new RegExp( '(pe)rson$',              'gi' )],
-    [ new RegExp( '(child)$',               'gi' )],
-    [ new RegExp( '^(ox)$',                 'gi' )],
-    [ new RegExp( '(ax|test)is$',           'gi' )],
-    [ new RegExp( '(octop|vir)us$',         'gi' )],
-    [ new RegExp( '(alias|status)$',        'gi' )],
-    [ new RegExp( '(bu)s$',                 'gi' )],
-    [ new RegExp( '(buffal|tomat|potat)o$', 'gi' )],
-    [ new RegExp( '([ti])um$',              'gi' )],
-    [ new RegExp( 'sis$',                   'gi' )],
-    [ new RegExp( '(?:([^f])fe|([lr])f)$',  'gi' )],
-    [ new RegExp( '(hive)$',                'gi' )],
-    [ new RegExp( '([^aeiouy]|qu)y$',       'gi' )],
-    [ new RegExp( '(x|ch|ss|sh)$',          'gi' )],
-    [ new RegExp( '(matr|vert|ind)ix|ex$',  'gi' )],
-    [ new RegExp( '([m|l])ouse$',           'gi' )],
-    [ new RegExp( '(quiz)$',                'gi' )],
-
-    // original rule
-    [ new RegExp( '(m)en$', 'gi' ),                                                       '$1an' ],
-    [ new RegExp( '(pe)ople$', 'gi' ),                                                    '$1rson' ],
-    [ new RegExp( '(child)ren$', 'gi' ),                                                  '$1' ],
-    [ new RegExp( '([ti])a$', 'gi' ),                                                     '$1um' ],
-    [ new RegExp( '((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$','gi' ), '$1$2sis' ],
-    [ new RegExp( '(hive)s$', 'gi' ),                                                     '$1' ],
-    [ new RegExp( '(tive)s$', 'gi' ),                                                     '$1' ],
-    [ new RegExp( '(curve)s$', 'gi' ),                                                    '$1' ],
-    [ new RegExp( '([lr])ves$', 'gi' ),                                                   '$1f' ],
-    [ new RegExp( '([^fo])ves$', 'gi' ),                                                  '$1fe' ],
-    [ new RegExp( '([^aeiouy]|qu)ies$', 'gi' ),                                           '$1y' ],
-    [ new RegExp( '(s)eries$', 'gi' ),                                                    '$1eries' ],
-    [ new RegExp( '(m)ovies$', 'gi' ),                                                    '$1ovie' ],
-    [ new RegExp( '(x|ch|ss|sh)es$', 'gi' ),                                              '$1' ],
-    [ new RegExp( '([m|l])ice$', 'gi' ),                                                  '$1ouse' ],
-    [ new RegExp( '(bus)es$', 'gi' ),                                                     '$1' ],
-    [ new RegExp( '(o)es$', 'gi' ),                                                       '$1' ],
-    [ new RegExp( '(shoe)s$', 'gi' ),                                                     '$1' ],
-    [ new RegExp( '(cris|ax|test)es$', 'gi' ),                                            '$1is' ],
-    [ new RegExp( '(octop|vir)i$', 'gi' ),                                                '$1us' ],
-    [ new RegExp( '(alias|status)es$', 'gi' ),                                            '$1' ],
-    [ new RegExp( '^(ox)en', 'gi' ),                                                      '$1' ],
-    [ new RegExp( '(vert|ind)ices$', 'gi' ),                                              '$1ex' ],
-    [ new RegExp( '(matr)ices$', 'gi' ),                                                  '$1ix' ],
-    [ new RegExp( '(quiz)zes$', 'gi' ),                                                   '$1' ],
-    [ new RegExp( 'ss$', 'gi' ),                                                          'ss' ],
-    [ new RegExp( 's$', 'gi' ),                                                           '' ]
-  ];
-
-  /**
-   * @description This is a list of words that should not be capitalized for title case.
-   * @private
-   */
-  var non_titlecased_words = [
-    'and', 'or', 'nor', 'a', 'an', 'the', 'so', 'but', 'to', 'of', 'at','by',
-    'from', 'into', 'on', 'onto', 'off', 'out', 'in', 'over', 'with', 'for'
-  ];
-
-  /**
-   * @description These are regular expressions used for converting between String formats.
-   * @private
-   */
-  var id_suffix         = new RegExp( '(_ids|_id)$', 'g' );
-  var underbar          = new RegExp( '_', 'g' );
-  var space_or_underbar = new RegExp( '[\ _]', 'g' );
-  var uppercase         = new RegExp( '([A-Z])', 'g' );
-  var underbar_prefix   = new RegExp( '^_' );
-
-  var inflector = {
-
-  /**
-   * A helper method that applies rules based replacement to a String.
-   * @private
-   * @function
-   * @param {String} str String to modify and return based on the passed rules.
-   * @param {Array: [RegExp, String]} rules Regexp to match paired with String to use for replacement
-   * @param {Array: [String]} skip Strings to skip if they match
-   * @param {String} override String to return as though this method succeeded (used to conform to APIs)
-   * @returns {String} Return passed String modified by passed rules.
-   * @example
-   *
-   *     this._apply_rules( 'cows', singular_rules ); // === 'cow'
-   */
-    _apply_rules : function( str, rules, skip, override ){
-      if( override ){
-        str = override;
-      }else{
-        var ignore = ( inflector.indexOf( skip, str.toLowerCase()) > -1 );
-
-        if( !ignore ){
-          var i = 0;
-          var j = rules.length;
-
-          for( ; i < j; i++ ){
-            if( str.match( rules[ i ][ 0 ])){
-              if( rules[ i ][ 1 ] !== undefined ){
-                str = str.replace( rules[ i ][ 0 ], rules[ i ][ 1 ]);
-              }
-              break;
-            }
-          }
-        }
-      }
-
-      return str;
-    },
-
-
-
-  /**
-   * This lets us detect if an Array contains a given element.
-   * @public
-   * @function
-   * @param {Array} arr The subject array.
-   * @param {Object} item Object to locate in the Array.
-   * @param {Number} fromIndex Starts checking from this position in the Array.(optional)
-   * @param {Function} compareFunc Function used to compare Array item vs passed item.(optional)
-   * @returns {Number} Return index position in the Array of the passed item.
-   * @example
-   *
-   *     var inflection = require( 'inflection' );
-   *
-   *     inflection.indexOf([ 'hi','there' ], 'guys' ); // === -1
-   *     inflection.indexOf([ 'hi','there' ], 'hi' ); // === 0
-   */
-    indexOf : function( arr, item, fromIndex, compareFunc ){
-      if( !fromIndex ){
-        fromIndex = -1;
-      }
-
-      var index = -1;
-      var i     = fromIndex;
-      var j     = arr.length;
-
-      for( ; i < j; i++ ){
-        if( arr[ i ]  === item || compareFunc && compareFunc( arr[ i ], item )){
-          index = i;
-          break;
-        }
-      }
-
-      return index;
-    },
-
-
-
-  /**
-   * This function adds pluralization support to every String object.
-   * @public
-   * @function
-   * @param {String} str The subject string.
-   * @param {String} plural Overrides normal output with said String.(optional)
-   * @returns {String} Singular English language nouns are returned in plural form.
-   * @example
-   *
-   *     var inflection = require( 'inflection' );
-   *
-   *     inflection.pluralize( 'person' ); // === 'people'
-   *     inflection.pluralize( 'octopus' ); // === "octopi"
-   *     inflection.pluralize( 'Hat' ); // === 'Hats'
-   *     inflection.pluralize( 'person', 'guys' ); // === 'guys'
-   */
-    pluralize : function ( str, plural ){
-      return inflector._apply_rules( str, plural_rules, uncountable_words, plural );
-    },
-
-
-
-  /**
-   * This function adds singularization support to every String object.
-   * @public
-   * @function
-   * @param {String} str The subject string.
-   * @param {String} singular Overrides normal output with said String.(optional)
-   * @returns {String} Plural English language nouns are returned in singular form.
-   * @example
-   *
-   *     var inflection = require( 'inflection' );
-   *
-   *     inflection.singularize( 'people' ); // === 'person'
-   *     inflection.singularize( 'octopi' ); // === "octopus"
-   *     inflection.singularize( 'Hats' ); // === 'Hat'
-   *     inflection.singularize( 'guys', 'person' ); // === 'person'
-   */
-    singularize : function ( str, singular ){
-      return inflector._apply_rules( str, singular_rules, uncountable_words, singular );
-    },
-
-
-
-  /**
-   * This function adds camelization support to every String object.
-   * @public
-   * @function
-   * @param {String} str The subject string.
-   * @param {Boolean} lowFirstLetter Default is to capitalize the first letter of the results.(optional)
-   *                                 Passing true will lowercase it.
-   * @returns {String} Lower case underscored words will be returned in camel case.
-   *                  additionally '/' is translated to '::'
-   * @example
-   *
-   *     var inflection = require( 'inflection' );
-   *
-   *     inflection.camelize( 'message_properties' ); // === 'MessageProperties'
-   *     inflection.camelize( 'message_properties', true ); // === 'messageProperties'
-   */
-    camelize : function ( str, lowFirstLetter ){
-      var str_path = str.toLowerCase().split( '/' );
-      var i        = 0;
-      var j        = str_path.length;
-
-      for( ; i < j; i++ ){
-        var str_arr = str_path[ i ].split( '_' );
-        var initX   = (( lowFirstLetter && i + 1 === j ) ? ( 1 ) : ( 0 ));
-        var k       = initX;
-        var l       = str_arr.length;
-
-        for( ; k < l; k++ ){
-          str_arr[ k ] = str_arr[ k ].charAt( 0 ).toUpperCase() + str_arr[ k ].substring( 1 );
-        }
-
-        str_path[ i ] = str_arr.join( '' );
-      }
-
-      return str_path.join( '::' );
-    },
-
-
-
-  /**
-   * This function adds underscore support to every String object.
-   * @public
-   * @function
-   * @param {String} str The subject string.
-   * @param {Boolean} allUpperCase Default is to lowercase and add underscore prefix.(optional)
-   *                  Passing true will return as entered.
-   * @returns {String} Camel cased words are returned as lower cased and underscored.
-   *                  additionally '::' is translated to '/'.
-   * @example
-   *
-   *     var inflection = require( 'inflection' );
-   *
-   *     inflection.underscore( 'MessageProperties' ); // === 'message_properties'
-   *     inflection.underscore( 'messageProperties' ); // === 'message_properties'
-   *     inflection.underscore( 'MP', true ); // === 'MP'
-   */
-    underscore : function ( str, allUpperCase ){
-      if( allUpperCase && str === str.toUpperCase()) return str;
-
-      var str_path = str.split( '::' );
-      var i        = 0;
-      var j        = str_path.length;
-
-      for( ; i < j; i++ ){
-        str_path[ i ] = str_path[ i ].replace( uppercase, '_$1' );
-        str_path[ i ] = str_path[ i ].replace( underbar_prefix, '' );
-      }
-
-      return str_path.join( '/' ).toLowerCase();
-    },
-
-
-
-  /**
-   * This function adds humanize support to every String object.
-   * @public
-   * @function
-   * @param {String} str The subject string.
-   * @param {Boolean} lowFirstLetter Default is to capitalize the first letter of the results.(optional)
-   *                                 Passing true will lowercase it.
-   * @returns {String} Lower case underscored words will be returned in humanized form.
-   * @example
-   *
-   *     var inflection = require( 'inflection' );
-   *
-   *     inflection.humanize( 'message_properties' ); // === 'Message properties'
-   *     inflection.humanize( 'message_properties', true ); // === 'message properties'
-   */
-    humanize : function( str, lowFirstLetter ){
-      str = str.toLowerCase();
-      str = str.replace( id_suffix, '' );
-      str = str.replace( underbar, ' ' );
-
-      if( !lowFirstLetter ){
-        str = inflector.capitalize( str );
-      }
-
-      return str;
-    },
-
-
-
-  /**
-   * This function adds capitalization support to every String object.
-   * @public
-   * @function
-   * @param {String} str The subject string.
-   * @returns {String} All characters will be lower case and the first will be upper.
-   * @example
-   *
-   *     var inflection = require( 'inflection' );
-   *
-   *     inflection.capitalize( 'message_properties' ); // === 'Message_properties'
-   *     inflection.capitalize( 'message properties', true ); // === 'Message properties'
-   */
-    capitalize : function ( str ){
-      str = str.toLowerCase();
-
-      return str.substring( 0, 1 ).toUpperCase() + str.substring( 1 );
-    },
-
-
-
-  /**
-   * This function adds dasherization support to every String object.
-   * @public
-   * @function
-   * @param {String} str The subject string.
-   * @returns {String} Replaces all spaces or underbars with dashes.
-   * @example
-   *
-   *     var inflection = require( 'inflection' );
-   *
-   *     inflection.dasherize( 'message_properties' ); // === 'message-properties'
-   *     inflection.dasherize( 'Message Properties' ); // === 'Message-Properties'
-   */
-    dasherize : function ( str ){
-      return str.replace( space_or_underbar, '-' );
-    },
-
-
-
-  /**
-   * This function adds titleize support to every String object.
-   * @public
-   * @function
-   * @param {String} str The subject string.
-   * @returns {String} Capitalizes words as you would for a book title.
-   * @example
-   *
-   *     var inflection = require( 'inflection' );
-   *
-   *     inflection.titleize( 'message_properties' ); // === 'Message Properties'
-   *     inflection.titleize( 'message properties to keep' ); // === 'Message Properties to Keep'
-   */
-    titleize : function ( str ){
-      str         = str.toLowerCase().replace( underbar, ' ');
-      var str_arr = str.split(' ');
-      var i       = 0;
-      var j       = str_arr.length;
-
-      for( ; i < j; i++ ){
-        var d = str_arr[ i ].split( '-' );
-        var k = 0;
-        var l = d.length;
-
-        for( ; k < l; k++){
-          if( inflector.indexOf( non_titlecased_words, d[ k ].toLowerCase()) < 0 ){
-            d[ k ] = inflector.capitalize( d[ k ]);
-          }
-        }
-
-        str_arr[ i ] = d.join( '-' );
-      }
-
-      str = str_arr.join( ' ' );
-      str = str.substring( 0, 1 ).toUpperCase() + str.substring( 1 );
-
-      return str;
-    },
-
-
-
-  /**
-   * This function adds demodulize support to every String object.
-   * @public
-   * @function
-   * @param {String} str The subject string.
-   * @returns {String} Removes module names leaving only class names.(Ruby style)
-   * @example
-   *
-   *     var inflection = require( 'inflection' );
-   *
-   *     inflection.demodulize( 'Message::Bus::Properties' ); // === 'Properties'
-   */
-    demodulize : function ( str ){
-      var str_arr = str.split( '::' );
-
-      return str_arr[ str_arr.length - 1 ];
-    },
-
-
-
-  /**
-   * This function adds tableize support to every String object.
-   * @public
-   * @function
-   * @param {String} str The subject string.
-   * @returns {String} Return camel cased words into their underscored plural form.
-   * @example
-   *
-   *     var inflection = require( 'inflection' );
-   *
-   *     inflection.tableize( 'MessageBusProperty' ); // === 'message_bus_properties'
-   */
-    tableize : function ( str ){
-      str = inflector.underscore( str );
-      str = inflector.pluralize( str );
-
-      return str;
-    },
-
-
-
-  /**
-   * This function adds classification support to every String object.
-   * @public
-   * @function
-   * @param {String} str The subject string.
-   * @returns {String} Underscored plural nouns become the camel cased singular form.
-   * @example
-   *
-   *     var inflection = require( 'inflection' );
-   *
-   *     inflection.classify( 'message_bus_properties' ); // === 'MessageBusProperty'
-   */
-    classify : function ( str ){
-      str = inflector.camelize( str );
-      str = inflector.singularize( str );
-
-      return str;
-    },
-
-
-
-  /**
-   * This function adds foreign key support to every String object.
-   * @public
-   * @function
-   * @param {String} str The subject string.
-   * @param {Boolean} dropIdUbar Default is to seperate id with an underbar at the end of the class name,
-                                 you can pass true to skip it.(optional)
-   * @returns {String} Underscored plural nouns become the camel cased singular form.
-   * @example
-   *
-   *     var inflection = require( 'inflection' );
-   *
-   *     inflection.foreign_key( 'MessageBusProperty' ); // === 'message_bus_property_id'
-   *     inflection.foreign_key( 'MessageBusProperty', true ); // === 'message_bus_propertyid'
-   */
-    foreign_key : function( str, dropIdUbar ){
-      str = inflector.demodulize( str );
-      str = inflector.underscore( str ) + (( dropIdUbar ) ? ( '' ) : ( '_' )) + 'id';
-
-      return str;
-    },
-
-
-
-  /**
-   * This function adds ordinalize support to every String object.
-   * @public
-   * @function
-   * @param {String} str The subject string.
-   * @returns {String} Return all found numbers their sequence like "22nd".
-   * @example
-   *
-   *     var inflection = require( 'inflection' );
-   *
-   *     inflection.ordinalize( 'the 1 pitch' ); // === 'the 1st pitch'
-   */
-    ordinalize : function ( str ){
-      var str_arr = str.split(' ');
-      var i       = 0;
-      var j       = str_arr.length;
-
-      for( ; i < j; i++ ){
-        var k = parseInt( str_arr[ i ], 10 );
-
-        if( !isNaN( k )){
-          var ltd = str_arr[ i ].substring( str_arr[ i ].length - 2 );
-          var ld  = str_arr[ i ].substring( str_arr[ i ].length - 1 );
-          var suf = 'th';
-
-          if( ltd != '11' && ltd != '12' && ltd != '13' ){
-            if( ld === '1' ){
-              suf = 'st';
-            }else if( ld === '2' ){
-              suf = 'nd';
-            }else if( ld === '3' ){
-              suf = 'rd';
-            }
-          }
-
-          str_arr[ i ] += suf;
-        }
-      }
-
-      return str_arr.join( ' ' );
-    }
-  };
-
-  if( typeof exports === 'undefined' ) return root.inflection = inflector;
-
-/**
- * @public
- */
-  inflector.version = "1.2.5";
-/**
- * Exports module.
- */
-  module.exports = inflector;
-})( this );
-
-},{}],33:[function(require,module,exports){
+},{"punycode":27,"querystring":30}],32:[function(_dereq_,module,exports){
 (function( glob, undefined ) {
 
 var rnumber = /[0-9]/,
@@ -11298,7 +10701,433 @@ else {
 
 })( this );
 
-},{}],34:[function(require,module,exports){
+},{}],33:[function(_dereq_,module,exports){
+(function (root, pluralize) {
+  /* istanbul ignore else */
+  if (typeof _dereq_ === 'function' && typeof exports === 'object' && typeof module === 'object') {
+    // Node.
+    module.exports = pluralize();
+  } else if (typeof define === 'function' && define.amd) {
+    // AMD, registers as an anonymous module.
+    define(function () {
+      return pluralize();
+    });
+  } else {
+    // Browser global.
+    root.pluralize = pluralize();
+  }
+})(this, function () {
+  // Rule storage - pluralize and singularize need to be run sequentially,
+  // while other rules can be optimized using an object for instant lookups.
+  var pluralRules      = [];
+  var singularRules    = [];
+  var uncountables     = {};
+  var irregularPlurals = {};
+  var irregularSingles = {};
+
+  /**
+   * Title case a string.
+   *
+   * @param  {string} str
+   * @return {string}
+   */
+  function toTitleCase (str) {
+    return str.charAt(0).toUpperCase() + str.substr(1).toLowerCase();
+  }
+
+  /**
+   * Sanitize a pluralization rule to a usable regular expression.
+   *
+   * @param  {(RegExp|string)} rule
+   * @return {RegExp}
+   */
+  function sanitizeRule (rule) {
+    if (typeof rule === 'string') {
+      return new RegExp('^' + rule + '$', 'i');
+    }
+
+    return rule;
+  }
+
+  /**
+   * Pass in a word token to produce a function that can replicate the case on
+   * another word.
+   *
+   * @param  {string}   word
+   * @param  {string}   token
+   * @return {Function}
+   */
+  function restoreCase (word, token) {
+    // Upper cased words. E.g. "HELLO".
+    if (word === word.toUpperCase()) {
+      return token.toUpperCase();
+    }
+
+    // Title cased words. E.g. "Title".
+    if (word[0] === word[0].toUpperCase()) {
+      return toTitleCase(token);
+    }
+
+    // Lower cased words. E.g. "test".
+    return token.toLowerCase();
+  }
+
+  /**
+   * Interpolate a regexp string.
+   *
+   * @param  {[type]} str  [description]
+   * @param  {[type]} args [description]
+   * @return {[type]}      [description]
+   */
+  function interpolate (str, args) {
+    return str.replace(/\$(\d{1,2})/g, function (match, index) {
+      return args[index] || '';
+    });
+  }
+
+  /**
+   * Sanitize a word by passing in the word and sanitization rules.
+   *
+   * @param  {String}   word
+   * @param  {Array}    collection
+   * @return {String}
+   */
+  function sanitizeWord (word, collection) {
+    // Empty string or doesn't need fixing.
+    if (!word.length || uncountables.hasOwnProperty(word)) {
+      return word;
+    }
+
+    var len = collection.length;
+
+    // Iterate over the sanitization rules and use the first one to match.
+    while (len--) {
+      var rule = collection[len];
+
+      // If the rule passes, return the replacement.
+      if (rule[0].test(word)) {
+        return word.replace(rule[0], function (match, index, word) {
+          var result = interpolate(rule[1], arguments);
+
+          if (match === '') {
+            return restoreCase(word[index - 1], result);
+          }
+
+          return restoreCase(match, result);
+        });
+      }
+    }
+
+    return word;
+  }
+
+  /**
+   * Replace a word with the updated word.
+   *
+   * @param  {Object}   replaceMap
+   * @param  {Object}   keepMap
+   * @param  {Array}    rules
+   * @return {Function}
+   */
+  function replaceWord (replaceMap, keepMap, rules) {
+    return function (word) {
+      // Get the correct token and case restoration functions.
+      var token = word.toLowerCase();
+
+      // Check against the keep object map.
+      if (keepMap.hasOwnProperty(token)) {
+        return restoreCase(word, token);
+      }
+
+      // Check against the replacement map for a direct word replacement.
+      if (replaceMap.hasOwnProperty(token)) {
+        return restoreCase(word, replaceMap[token]);
+      }
+
+      // Run all the rules against the word.
+      return sanitizeWord(word, rules);
+    };
+  }
+
+  /**
+   * Pluralize or singularize a word based on the passed in count.
+   *
+   * @param  {String}  word
+   * @param  {Number}  count
+   * @param  {Boolean} inclusive
+   * @return {String}
+   */
+  function pluralize (word, count, inclusive) {
+    var pluralized = count === 1 ?
+      pluralize.singular(word) : pluralize.plural(word);
+
+    return (inclusive ? count + ' ' : '') + pluralized;
+  }
+
+  /**
+   * Pluralize a word.
+   *
+   * @type {Function}
+   */
+  pluralize.plural = replaceWord(
+    irregularSingles, irregularPlurals, pluralRules
+  );
+
+  /**
+   * Singularize a word.
+   *
+   * @type {Function}
+   */
+  pluralize.singular = replaceWord(
+    irregularPlurals, irregularSingles, singularRules
+  );
+
+  /**
+   * Add a pluralization rule to the collection.
+   *
+   * @param {(string|RegExp)} rule
+   * @param {string}          replacement
+   */
+  pluralize.addPluralRule = function (rule, replacement) {
+    pluralRules.push([sanitizeRule(rule), replacement]);
+  };
+
+  /**
+   * Add a singularization rule to the collection.
+   *
+   * @param {(string|RegExp)} rule
+   * @param {string}          replacement
+   */
+  pluralize.addSingularRule = function (rule, replacement) {
+    singularRules.push([sanitizeRule(rule), replacement]);
+  };
+
+  /**
+   * Add an uncountable word rule.
+   *
+   * @param {(string|RegExp)} word
+   */
+  pluralize.addUncountableRule = function (word) {
+    if (typeof word === 'string') {
+      return uncountables[word.toLowerCase()] = true;
+    }
+
+    // Set singular and plural references for the word.
+    pluralize.addPluralRule(word, '$0');
+    pluralize.addSingularRule(word, '$0');
+  };
+
+  /**
+   * Add an irregular word definition.
+   *
+   * @param {String} single
+   * @param {String} plural
+   */
+  pluralize.addIrregularRule = function (single, plural) {
+    plural = plural.toLowerCase();
+    single = single.toLowerCase();
+
+    irregularSingles[single] = plural;
+    irregularPlurals[plural] = single;
+  };
+
+  /**
+   * Irregular rules.
+   */
+  [
+    // Pronouns.
+    ['I',        'we'],
+    ['me',       'us'],
+    ['he',       'they'],
+    ['she',      'they'],
+    ['them',     'them'],
+    ['myself',   'ourselves'],
+    ['yourself', 'yourselves'],
+    ['itself',   'themselves'],
+    ['herself',  'themselves'],
+    ['himself',  'themselves'],
+    ['themself', 'themselves'],
+    ['this',     'these'],
+    ['that',     'those'],
+    // Words ending in with a consonant and `o`.
+    ['volcano', 'volcanoes'],
+    ['tornado', 'tornadoes'],
+    ['torpedo', 'torpedoes'],
+    // Ends with `us`.
+    ['genus',  'genera'],
+    ['viscus', 'viscera'],
+    // Ends with `ma`.
+    ['stigma',   'stigmata'],
+    ['stoma',    'stomata'],
+    ['dogma',    'dogmata'],
+    ['lemma',    'lemmata'],
+    ['schema',   'schemata'],
+    ['anathema', 'anathemata'],
+    // Other irregular rules.
+    ['ox',      'oxen'],
+    ['axe',     'axes'],
+    ['die',     'dice'],
+    ['yes',     'yeses'],
+    ['foot',    'feet'],
+    ['eave',    'eaves'],
+    ['goose',   'geese'],
+    ['tooth',   'teeth'],
+    ['quiz',    'quizzes'],
+    ['human',   'humans'],
+    ['proof',   'proofs'],
+    ['carve',   'carves'],
+    ['valve',   'valves'],
+    ['thief',   'thieves'],
+    ['genie',   'genies'],
+    ['groove',  'grooves'],
+    ['pickaxe', 'pickaxes'],
+    ['whiskey', 'whiskies']
+  ].forEach(function (rule) {
+    return pluralize.addIrregularRule(rule[0], rule[1]);
+  });
+
+  /**
+   * Pluralization rules.
+   */
+  [
+    [/s?$/i, 's'],
+    [/([^aeiou]ese)$/i, '$1'],
+    [/(ax|test)is$/i, '$1es'],
+    [/(alias|[^aou]us|tlas|gas|ris)$/i, '$1es'],
+    [/(e[mn]u)s?$/i, '$1s'],
+    [/([^l]ias|[aeiou]las|[emjzr]as|[iu]am)$/i, '$1'],
+    [/(alumn|syllab|octop|vir|radi|nucle|fung|cact|stimul|termin|bacill|foc|uter|loc|strat)(?:us|i)$/i, '$1i'],
+    [/(alumn|alg|vertebr)(?:a|ae)$/i, '$1ae'],
+    [/(seraph|cherub)(?:im)?$/i, '$1im'],
+    [/(her|at|gr)o$/i, '$1oes'],
+    [/(agend|addend|millenni|dat|extrem|bacteri|desiderat|strat|candelabr|errat|ov|symposi|curricul|automat|quor)(?:a|um)$/i, '$1a'],
+    [/(apheli|hyperbat|periheli|asyndet|noumen|phenomen|criteri|organ|prolegomen|\w+hedr)(?:a|on)$/i, '$1a'],
+    [/sis$/i, 'ses'],
+    [/(?:(i)fe|(ar|l|ea|eo|oa|hoo)f)$/i, '$1$2ves'],
+    [/([^aeiouy]|qu)y$/i, '$1ies'],
+    [/([^ch][ieo][ln])ey$/i, '$1ies'],
+    [/(x|ch|ss|sh|zz)$/i, '$1es'],
+    [/(matr|cod|mur|sil|vert|ind|append)(?:ix|ex)$/i, '$1ices'],
+    [/(m|l)(?:ice|ouse)$/i, '$1ice'],
+    [/(pe)(?:rson|ople)$/i, '$1ople'],
+    [/(child)(?:ren)?$/i, '$1ren'],
+    [/eaux$/i, '$0'],
+    [/m[ae]n$/i, 'men']
+  ].forEach(function (rule) {
+    return pluralize.addPluralRule(rule[0], rule[1]);
+  });
+
+  /**
+   * Singularization rules.
+   */
+  [
+    [/s$/i, ''],
+    [/(ss)$/i, '$1'],
+    [/((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)(?:sis|ses)$/i, '$1sis'],
+    [/(^analy)(?:sis|ses)$/i, '$1sis'],
+    [/([^aeflor])ves$/i, '$1fe'],
+    [/(hive|tive|dr?ive)s$/i, '$1'],
+    [/(ar|(?:wo|[ae])l|[eo][ao])ves$/i, '$1f'],
+    [/([^aeiouy]|qu)ies$/i, '$1y'],
+    [/(^[pl]|zomb|^(?:neck)?t|[aeo][lt]|cut)ies$/i, '$1ie'],
+    [/([^c][eor]n|smil)ies$/i, '$1ey'],
+    [/(m|l)ice$/i, '$1ouse'],
+    [/(seraph|cherub)im$/i, '$1'],
+    [/(x|ch|ss|sh|zz|tto|go|cho|alias|[^aou]us|tlas|gas|(?:her|at|gr)o|ris)(?:es)?$/i, '$1'],
+    [/(e[mn]u)s?$/i, '$1'],
+    [/(movie|twelve)s$/i, '$1'],
+    [/(cris|test|diagnos)(?:is|es)$/i, '$1is'],
+    [/(alumn|syllab|octop|vir|radi|nucle|fung|cact|stimul|termin|bacill|foc|uter|loc|strat)(?:us|i)$/i, '$1us'],
+    [/(agend|addend|millenni|dat|extrem|bacteri|desiderat|strat|candelabr|errat|ov|symposi|curricul|automat|quor)a$/i, '$1um'],
+    [/(apheli|hyperbat|periheli|asyndet|noumen|phenomen|criteri|organ|prolegomen|\w+hedr)a$/i, '$1on'],
+    [/(alumn|alg|vertebr)ae$/i, '$1a'],
+    [/(cod|mur|sil|vert|ind)ices$/i, '$1ex'],
+    [/(matr|append)ices$/i, '$1ix'],
+    [/(pe)(rson|ople)$/i, '$1rson'],
+    [/(child)ren$/i, '$1'],
+    [/(eau)x?$/i, '$1'],
+    [/men$/i, 'man']
+  ].forEach(function (rule) {
+    return pluralize.addSingularRule(rule[0], rule[1]);
+  });
+
+  /**
+   * Uncountable rules.
+   */
+  [
+    // Singular words with no plurals.
+    'advice',
+    'agenda',
+    'bison',
+    'bream',
+    'buffalo',
+    'carp',
+    'chassis',
+    'cod',
+    'cooperation',
+    'corps',
+    'digestion',
+    'debris',
+    'diabetes',
+    'energy',
+    'equipment',
+    'elk',
+    'excretion',
+    'expertise',
+    'flounder',
+    'gallows',
+    'graffiti',
+    'headquarters',
+    'health',
+    'herpes',
+    'highjinks',
+    'homework',
+    'information',
+    'jeans',
+    'justice',
+    'kudos',
+    'labour',
+    'machinery',
+    'mackerel',
+    'media',
+    'mews',
+    'moose',
+    'news',
+    'pike',
+    'plankton',
+    'pliers',
+    'pollution',
+    'premises',
+    'rain',
+    'rice',
+    'salmon',
+    'scissors',
+    'series',
+    'sewage',
+    'shambles',
+    'shrimp',
+    'species',
+    'staff',
+    'swine',
+    'trout',
+    'tuna',
+    'whiting',
+    'wildebeest',
+    'wildlife',
+    // Regexes.
+    /pox$/i, // "chickpox", "smallpox"
+    /ois$/i,
+    /deer$/i, // "deer", "reindeer"
+    /fish$/i, // "fish", "blowfish", "angelfish"
+    /sheep$/i,
+    /measles$/i,
+    /[^aeiou]ese$/i // "chinese", "japanese"
+  ].forEach(pluralize.addUncountableRule);
+
+  return pluralize;
+});
+
+},{}],34:[function(_dereq_,module,exports){
 // vim:ts=4:sts=4:sw=4:
 /*!
  *
@@ -13237,7 +13066,7 @@ return Q;
 
 });
 
-},{}],35:[function(require,module,exports){
+},{}],35:[function(_dereq_,module,exports){
 (function (global){
 /*global unescape, module, define, window, global*/
 

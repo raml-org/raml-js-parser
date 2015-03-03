@@ -891,4 +891,67 @@ describe('Regressions', function () {
 
     raml.load(definition).should.become(expected).and.notify(done);
   });
+
+  it('should singularize words properly', function(done) {
+    var definition = [
+      '#%RAML 0.8',
+      '---',
+      'title: Example',
+      'mediaType: application/json',
+      'resourceTypes:',
+      '  - collection:',
+      '      get:',
+      '        responses:',
+      '          200:',
+      '            body:',
+      '              schema: <<resourcePathName | !singularize>>',
+      '/waves:',
+      '  type: collection'
+    ].join('\n');
+
+    var expected = {
+      title: 'Example',
+      mediaType: 'application/json',
+      resourceTypes: [
+        {
+          collection: {
+            get: {
+              responses: {
+                200: {
+                  body: {
+                    schema: '<<resourcePathName | !singularize>>'
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      resources: [
+        {
+          type: 'collection',
+          relativeUri: '/waves',
+          methods: [
+            {
+              responses: {
+                200: {
+                  body: {
+                    'application/json': {
+                      schema: 'wave'
+                    }
+                  }
+                }
+              },
+              method: 'get'
+            }
+          ],
+          relativeUriPathSegments: [
+            'waves'
+          ]
+        }
+      ]
+    };
+
+    raml.load(definition).should.eventually.deep.equal(expected).and.notify(done);
+  });
 });

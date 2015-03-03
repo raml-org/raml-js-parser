@@ -1,6 +1,6 @@
+pluralize         = require 'pluralize'
 {MarkedYAMLError} = require './errors'
 nodes             = require './nodes'
-inflection        = require 'inflection'
 util              = require './util'
 
 ###
@@ -117,9 +117,9 @@ class @Traits
 
           if method
             if method.match(/!\s*singularize/)
-              value = inflection.singularize(value)
+              value = pluralize.singular(value)
             else if method.match(/!\s*pluralize/)
-              value = inflection.pluralize(value)
+              value = pluralize.plural(value)
             else
               throw new exports.ParameterError 'while validating parameter', null, 'unknown function applied to parameter', resource.start_mark
 
