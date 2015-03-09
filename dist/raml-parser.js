@@ -10950,6 +10950,8 @@ else {
     ['this',     'these'],
     ['that',     'those'],
     // Words ending in with a consonant and `o`.
+    ['echo', 'echoes'],
+    ['dingo', 'dingoes'],
     ['volcano', 'volcanoes'],
     ['tornado', 'tornadoes'],
     ['torpedo', 'torpedoes'],
