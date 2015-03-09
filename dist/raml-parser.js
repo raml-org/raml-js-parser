@@ -2417,32 +2417,54 @@
 
 
     FileReader.prototype.fetchFileAsync = function(file) {
+      if (typeof window !== "undefined" && window !== null) {
+        return this.fetchFileAsyncBrowser(file);
+      }
+      return this.fetchFileAsyncNode(file);
+    };
+
+    FileReader.prototype.fetchFileAsyncNode = function(file) {
+      var deferred;
+      deferred = this.q.defer();
+      _dereq_('got').get(file, {
+        headers: {
+          'Accept': 'application/raml+yaml, */*'
+        }
+      }, function(err, data, res) {
+        if (err) {
+          return deferred.reject(new exports.FileError("while fetching " + file, null, "cannot fetch " + file + " (" + err.message + ")", this.start_mark));
+        }
+        if (res.statusCode === 200 || res.statusCode === 304) {
+          return deferred.resolve(data);
+        }
+        return deferred.reject(new exports.FileError("while fetching " + file, null, "cannot fetch " + file + " (" + res.statusCode + ")", this.start_mark));
+      });
+      return deferred.promise;
+    };
+
+    FileReader.prototype.fetchFileAsyncBrowser = function(file) {
       var deferred, error, xhr,
         _this = this;
       deferred = this.q.defer();
-      if (typeof window !== "undefined" && window !== null) {
-        xhr = new XMLHttpRequest();
-      } else {
-        xhr = new (_dereq_('xmlhttprequest').XMLHttpRequest)();
-      }
+      xhr = new XMLHttpRequest();
       try {
-        xhr.open('GET', file, false);
-        xhr.setRequestHeader('Accept', 'application/raml+yaml, */*');
-        xhr.onreadystatechange = function() {
-          if (xhr.readyState === 4) {
-            if ((typeof xhr.status === 'number' && xhr.status === 200) || (typeof xhr.status === 'string' && xhr.status.match(/^200/i))) {
-              return deferred.resolve(xhr.responseText);
-            } else {
-              return deferred.reject(new exports.FileError("while fetching " + file, null, "cannot fetch " + file + " (" + xhr.statusText + ")", _this.start_mark));
-            }
-          }
-        };
-        xhr.send(null);
-        return deferred.promise;
+        xhr.open('GET', file);
       } catch (_error) {
         error = _error;
         throw new exports.FileError("while fetching " + file, null, "cannot fetch " + file + " (" + error + "), check that the server is up and that CORS is enabled", this.start_mark);
       }
+      xhr.setRequestHeader('Accept', 'application/raml+yaml, */*');
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200 || xhr.status === 304) {
+            return deferred.resolve(xhr.responseText);
+          } else {
+            return deferred.reject(new exports.FileError("while fetching " + file, null, "cannot fetch " + file + " (" + xhr.status + ")", _this.start_mark));
+          }
+        }
+      };
+      xhr.send();
+      return deferred.promise;
     };
 
     return FileReader;
@@ -2739,7 +2761,7 @@
 
 }).call(this);
 
-},{"./errors":3,"./loader":6,"./nodes":7,"./util":20,"fs":22,"q":34,"url":31,"xmlhttprequest":23}],11:[function(_dereq_,module,exports){
+},{"./errors":3,"./loader":6,"./nodes":7,"./util":20,"fs":22,"got":23,"q":34,"url":31}],11:[function(_dereq_,module,exports){
 (function() {
   var Mark, MarkedYAMLError, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
