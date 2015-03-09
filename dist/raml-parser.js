@@ -2456,7 +2456,7 @@
       this.q = _dereq_('q');
       this.url = _dereq_('url');
       this.nodes = _dereq_('./nodes');
-      this.loadDefaultSettings(settings);
+      this.loadDefaultSettings(this.settings);
     }
 
     RamlParser.prototype.loadDefaultSettings = function(settings) {
@@ -10950,6 +10950,8 @@ else {
     ['this',     'these'],
     ['that',     'those'],
     // Words ending in with a consonant and `o`.
+    ['echo', 'echoes'],
+    ['dingo', 'dingoes'],
     ['volcano', 'volcanoes'],
     ['tornado', 'tornadoes'],
     ['torpedo', 'torpedoes'],
