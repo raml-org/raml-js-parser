@@ -71,7 +71,7 @@ class @RamlParser
     @q    = require 'q'
     @url  = require 'url'
     @nodes= require './nodes'
-    @loadDefaultSettings(settings)
+    @loadDefaultSettings(@settings)
 
   loadDefaultSettings: (settings) ->
     Object.keys(defaultSettings).forEach (settingName) =>
