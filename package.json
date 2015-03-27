@@ -42,11 +42,11 @@
   "scripts": {
     "test": "grunt test",
     "build": "grunt build",
-    "stage-build": "git add dist"
+    "stage-build": "git add lib && git add dist"
   },
   "pre-commit": [
+    "test",
     "build",
-    "stage-build",
-    "test"
+    "stage-build"
   ]
 }

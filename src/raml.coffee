@@ -150,49 +150,50 @@ class @RamlParser
         return fullyAssembledTree
 
   getPendingFiles: (loader, node, files) ->
-    loc = []
-    lastVisitedNode = undefined
-    for file in files
-      loc.push @getPendingFile(loader, file)
-        .then (overwritingnode) =>
+    return node if !files.length
+
+    loadFiles = files.map((fileInfo) =>
+      @getPendingFile(loader, fileInfo)
+    )
+
+    return @q.all(loadFiles)
+      .then((results) =>
+        lastVisitedNode = undefined
+
+        results.forEach((result, index) =>
+          overwritingnode = @mergePendingFile(files[index], result)
+
           # we should be able to handle parentless children, but only the last one
           if overwritingnode and !lastVisitedNode
             lastVisitedNode = overwritingnode
-    return @q.all(loc).then => return if lastVisitedNode then lastVisitedNode else node
+        )
+
+        return if lastVisitedNode then lastVisitedNode else node
+      )
 
   getPendingFile: (loader, fileInfo) ->
-    node    = fileInfo.parentNode
     event   = fileInfo.event
-    key     = fileInfo.parentKey
     fileUri = fileInfo.targetFileUri
 
-    if fileInfo.includingContext
-      fileUri = @url.resolve(fileInfo.includingContext, fileInfo.targetFileUri)
-
     if loader.parent and @isInIncludeTagsStack(fileUri, loader)
-      throw new exports.FileError 'while composing scalar out of !include', null, "detected circular !include of #{event.value}", event.start_mark
+      return @q.reject(new exports.FileError 'while composing scalar out of !include', null, "detected circular !include of #{event.value}", event.start_mark)
 
-    try
-      # This handles included files that are expected to be a YAML structure
-      if fileInfo.type is 'fragment'
-        return @settings.reader.readFileAsync(fileUri)
-        .then (result) =>
-          return @compose(result, fileUri, { validate: false, transform: false, compose: true }, loader)
-        .then (value) =>
-          return @appendNewNodeToParent(node, key, value)
-        .catch (error) =>
-          @addContextToError(error, event)
-      # This handles included files that are expected to be scalars
-      else
-        return @settings.reader.readFileAsync(fileUri)
-        .then (result) =>
-          value = new @nodes.ScalarNode('tag:yaml.org,2002:str', result, event.start_mark, event.end_mark, event.style)
-          return @appendNewNodeToParent(node, key, value)
-        .catch (error) =>
-          @addContextToError(error, event)
-    catch error
-      # Why you ask? in-browser q.catch() will not be called
-      @addContextToError(error, event)
+    return @settings.reader.readFileAsync(fileUri)
+      .then((fileData) =>
+        if fileInfo.type is 'fragment'
+          @compose(fileData, fileInfo.targetFileUri, { validate: false, transform: false, compose: true }, loader)
+        else
+          new @nodes.ScalarNode('tag:yaml.org,2002:str', fileData, event.start_mark, event.end_mark, event.style)
+      )
+      .catch((error) =>
+        @addContextToError(error, event)
+      )
+
+  mergePendingFile: (fileInfo, value) ->
+    node = fileInfo.parentNode
+    key  = fileInfo.parentKey
+
+    return @appendNewNodeToParent(node, key, value)
 
   addContextToError: (error, event) ->
     if error.constructor.name == "FileError"

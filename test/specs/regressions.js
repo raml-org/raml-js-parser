@@ -5,6 +5,7 @@
 if (typeof window === 'undefined') {
   var raml           = require('../../lib/raml.js');
   var chai           = require('chai');
+  var q              = require('q');
   var chaiAsPromised = require('chai-as-promised');
 
   chai.should();
@@ -52,6 +53,7 @@ describe('Regressions', function () {
 
     raml.load(definition).should.be.rejectedWith(/found unexpected document separator/).and.notify(done);
   });
+
   it('should fail if baseUriParameter is not a map', function (done) {
     var definition = [
       '#%RAML 0.8',
@@ -953,5 +955,115 @@ describe('Regressions', function () {
     };
 
     raml.load(definition).should.eventually.deep.equal(expected).and.notify(done);
+  });
+
+  it('should resolve keys in the correct order', function (done) {
+    var definition = [
+      '#%RAML 0.8',
+      '---',
+      'title: Example',
+      '/foo: !include foo.raml',
+      '/bar: !include bar.raml',
+      '/qux: !include qux.raml'
+    ].join('\n');
+
+    var ROOT_FILE = 'root.raml';
+
+    var reader = new raml.FileReader(function (path) {
+      if (path === ROOT_FILE) {
+        return q(definition);
+      }
+
+      var deferred = q.defer();
+
+      // Resolve randomly.
+      setTimeout(function () {
+        deferred.resolve('get:\n');
+      }, Math.random() * 100);
+
+      return deferred.promise;
+    });
+
+    return raml.loadFile(ROOT_FILE, { reader: reader })
+      .then(function (result) {
+        result.resources.map(function (resource) {
+          return resource.relativeUri;
+        }).should.deep.equal(['/foo', '/bar', '/qux']);
+      })
+      .should.notify(done);
+  });
+
+  it('should resolve nested includes in the correct order', function (done) {
+    var files = {
+      'root.raml': [
+        '#%RAML 0.8',
+        '---',
+        'title: Example',
+        '/users: !include users.raml',
+        '/articles: !include articles.raml'
+      ].join('\n'),
+      'users.raml': [
+        'get: !include users-get.raml',
+        'post: !include users-post.raml',
+        '/{userId}: !include user.raml'
+      ].join('\n'),
+      'users-get.raml': [
+        'responses:',
+        '  200:'
+      ].join('\n'),
+      'users-post.raml': [
+        'responses:',
+        '  200:'
+      ].join('\n'),
+      'user.raml': [
+        '/articles: !include user-articles.raml',
+        '/comments: !include user-comments.raml'
+      ].join('\n'),
+      'user-articles.raml': [
+        'get:'
+      ].join('\n'),
+      'user-comments.raml': [
+        'get:'
+      ].join('\n'),
+      'articles.raml': [
+        'get:'
+      ].join('\n')
+    };
+
+    var reader = new raml.FileReader(function (path) {
+      var deferred = q.defer();
+
+      // Resolve randomly.
+      setTimeout(function () {
+        deferred.resolve(files[path]);
+      }, Math.random() * 100);
+
+      return deferred.promise;
+    });
+
+    function getResouces (resource) {
+      return resource.resources.map(function (resource) {
+        return resource.relativeUri;
+      });
+    }
+
+    function getMethods (resource) {
+      return resource.methods ? resource.methods.map(function (method) {
+        return method.method;
+      }) : [];
+    }
+
+    return raml.loadFile('root.raml', { reader: reader })
+      .then(function (result) {
+        getResouces(result).should.deep.equal(['/users', '/articles'])
+        getResouces(result.resources[0]).should.deep.equal(['/{userId}'])
+        getResouces(result.resources[0].resources[0]).should.deep.equal(['/articles', '/comments'])
+
+        getMethods(result).should.deep.equal([])
+        getMethods(result.resources[0]).should.deep.equal(['get', 'post'])
+        getMethods(result.resources[0].resources[0]).should.deep.equal([])
+
+      })
+      .should.notify(done);
   });
 });

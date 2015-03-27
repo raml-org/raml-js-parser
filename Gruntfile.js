@@ -117,6 +117,7 @@ module.exports = function (grunt) {
     'compile',
     'connect',
     'mochacli',
+    'shell:browserify',
     'mocha_phantomjs'
   ]);
 

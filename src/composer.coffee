@@ -3,6 +3,7 @@ events            = require './events'
 nodes             = require './nodes'
 raml              = require './raml'
 util              = require './util'
+url               = require 'url'
 
 class @ComposerError extends MarkedYAMLError
 
@@ -131,13 +132,12 @@ class @Composer
         fileType = 'scalar'
 
       @filesToRead.push({
-        targetUri: event.value,
         type: fileType,
         parentNode: parent,
         parentKey: key,
         event: event,
         includingContext: @src,
-        targetFileUri: event.value
+        targetFileUri: if @src then url.resolve(@src, event.value) else event.value
       })
 
       node = undefined
