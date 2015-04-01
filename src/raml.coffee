@@ -178,7 +178,7 @@ class @RamlParser
         error.problem_mark = event.start_mark
       throw error
     else
-      throw new exports.FileError 'while reading file', null, "error: #{error}", event.start_mark
+      throw new exports.FileError 'while reading file', null, error, event.start_mark
 
   # detect
   isInIncludeTagsStack:  (include, parent) ->

@@ -866,7 +866,12 @@
 
     function YAMLError() {
       YAMLError.__super__.constructor.call(this);
+      if (Error.captureStackTrace) {
+        Error.captureStackTrace(this, this.constructor);
+      }
     }
+
+    YAMLError.prototype.name = 'YAMLError';
 
     return YAMLError;
 
@@ -2624,7 +2629,7 @@
         }
         throw error;
       } else {
-        throw new exports.FileError('while reading file', null, "error: " + error, event.start_mark);
+        throw new exports.FileError('while reading file', null, error, event.start_mark);
       }
     };
 

@@ -25,6 +25,7 @@ describe('Errors', function () {
       'title: API 2'
     ].join('\n')).then(function () {}, function (error) {
       setTimeout(function () {
+        error.stack.should.exist;
         error.problem_mark.should.exist;
         error.problem_mark.line.should.be.equal(4);
         error.problem_mark.column.should.be.equal(0);
@@ -38,6 +39,7 @@ describe('Errors', function () {
             '*Note:* You may provide an optional *scope* parameter to request additional permissions outside of the â€œbasicâ€ permissions scope. [Learn more about scope](http://instagram.com/developer/authentication/#scop'
     ].join('\n')).then(function () {}, function (error) {
       setTimeout(function () {
+        error.stack.should.exist;
         error.problem_mark.should.exist;
         error.problem_mark.line.should.be.equal(1);
         error.problem_mark.column.should.be.equal(113);
