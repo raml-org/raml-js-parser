@@ -40,27 +40,49 @@ class @FileReader
   Read file from the network.
   ###
   fetchFileAsync: (file) ->
+    if window?
+      return @fetchFileAsyncBrowser file
+
+    @fetchFileAsyncNode file
+
+  fetchFileAsyncNode: (file) ->
     deferred = @q.defer()
 
-    if window?
-      xhr = new XMLHttpRequest()
-    else
-      xhr = new (require('xmlhttprequest').XMLHttpRequest)()
+    require('got').get(file, {
+      headers: {
+        'Accept': 'application/raml+yaml, */*'
+      }
+    }, (err, data, res) ->
+      if err
+        return deferred.reject(new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{err.message})", @start_mark)
+
+      if res.statusCode == 200 or res.statusCode == 304
+        return deferred.resolve(data)
+
+      return deferred.reject(new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{res.statusCode})", @start_mark)
+    )
+
+    deferred.promise
+
+  fetchFileAsyncBrowser: (file) ->
+    deferred = @q.defer()
+    xhr = new XMLHttpRequest()
 
     try
-      xhr.open 'GET', file, false
-      xhr.setRequestHeader 'Accept', 'application/raml+yaml, */*'
-      xhr.onreadystatechange = () =>
-        if(xhr.readyState == 4)
-          if (typeof xhr.status is 'number' and xhr.status == 200) or
-          (typeof xhr.status is 'string' and xhr.status.match /^200/i)
-            deferred.resolve(xhr.responseText)
-          else
-            deferred.reject(new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{xhr.statusText})", @start_mark)
-      xhr.send null
-      return deferred.promise
+      xhr.open 'GET', file
     catch error
       throw new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{error}), check that the server is up and that CORS is enabled", @start_mark
+
+    xhr.setRequestHeader 'Accept', 'application/raml+yaml, */*'
+    xhr.onreadystatechange = () =>
+      if (xhr.readyState == 4)
+        if (xhr.status == 200 or xhr.status == 304)
+          deferred.resolve(xhr.responseText)
+        else
+          deferred.reject(new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{xhr.status})", @start_mark)
+    xhr.send()
+
+    deferred.promise
 
 ###
 OO version of the parser, static functions will be removed after consumers move on to use the OO version

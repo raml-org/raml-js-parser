@@ -11,14 +11,14 @@
     "raml-parser": "bin/raml-parser"
   },
   "browser": {
-    "xmlhttprequest": false
+    "got": false
   },
   "dependencies": {
+    "got": "~2.4.0",
     "json-lint": "~0.1.0",
     "pluralize": "~1.1.1",
     "q": "0.9.7",
-    "uritemplate": "0.3.4",
-    "xmlhttprequest": "1.6.0"
+    "uritemplate": "0.3.4"
   },
   "devDependencies": {
     "browserify": "~3.24.13",
