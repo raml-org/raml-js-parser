@@ -37,7 +37,7 @@
     "grunt-shell": "~0.6.4",
     "load-grunt-tasks": "~0.3.0",
     "mocha": "1.14.0",
-    "pre-commit": "0.0.9"
+    "pre-commit": "~1.0.6"
   },
   "scripts": {
     "test": "grunt test",
