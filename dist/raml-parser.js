@@ -1,6 +1,6 @@
 !function(e){if("object"==typeof exports)module.exports=e();else if("function"==typeof define&&define.amd)define(e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),(f.RAML||(f.RAML={})).Parser=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 (function() {
-  var MarkedYAMLError, events, nodes, raml, util, _ref,
+  var MarkedYAMLError, events, nodes, raml, url, util, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -14,6 +14,8 @@
   raml = _dereq_('./raml');
 
   util = _dereq_('./util');
+
+  url = _dereq_('url');
 
   this.ComposerError = (function(_super) {
     __extends(ComposerError, _super);
@@ -156,13 +158,12 @@
           fileType = 'scalar';
         }
         this.filesToRead.push({
-          targetUri: event.value,
           type: fileType,
           parentNode: parent,
           parentKey: key,
           event: event,
           includingContext: this.src,
-          targetFileUri: event.value
+          targetFileUri: this.src ? url.resolve(this.src, event.value) : event.value
         });
         node = void 0;
       } else {
@@ -228,7 +229,7 @@
 
 }).call(this);
 
-},{"./errors":3,"./events":4,"./nodes":7,"./raml":10,"./util":20}],2:[function(_dereq_,module,exports){
+},{"./errors":3,"./events":4,"./nodes":7,"./raml":10,"./util":20,"url":31}],2:[function(_dereq_,module,exports){
 (function (Buffer){
 (function() {
   var MarkedYAMLError, nodes, util, _ref, _ref1,
@@ -2582,19 +2583,24 @@
     };
 
     RamlParser.prototype.getPendingFiles = function(loader, node, files) {
-      var file, lastVisitedNode, loc, _i, _len,
+      var loadFiles,
         _this = this;
-      loc = [];
-      lastVisitedNode = void 0;
-      for (_i = 0, _len = files.length; _i < _len; _i++) {
-        file = files[_i];
-        loc.push(this.getPendingFile(loader, file).then(function(overwritingnode) {
+      if (!files.length) {
+        return node;
+      }
+      loadFiles = files.map(function(fileInfo) {
+        return _this.getPendingFile(loader, fileInfo);
+      });
+      return this.q.all(loadFiles).then(function(results) {
+        var lastVisitedNode;
+        lastVisitedNode = void 0;
+        results.forEach(function(result, index) {
+          var overwritingnode;
+          overwritingnode = _this.mergePendingFile(files[index], result);
           if (overwritingnode && !lastVisitedNode) {
             return lastVisitedNode = overwritingnode;
           }
-        }));
-      }
-      return this.q.all(loc).then(function() {
+        });
         if (lastVisitedNode) {
           return lastVisitedNode;
         } else {
@@ -2604,44 +2610,33 @@
     };
 
     RamlParser.prototype.getPendingFile = function(loader, fileInfo) {
-      var error, event, fileUri, key, node,
+      var event, fileUri,
         _this = this;
-      node = fileInfo.parentNode;
       event = fileInfo.event;
-      key = fileInfo.parentKey;
       fileUri = fileInfo.targetFileUri;
-      if (fileInfo.includingContext) {
-        fileUri = this.url.resolve(fileInfo.includingContext, fileInfo.targetFileUri);
-      }
       if (loader.parent && this.isInIncludeTagsStack(fileUri, loader)) {
-        throw new exports.FileError('while composing scalar out of !include', null, "detected circular !include of " + event.value, event.start_mark);
+        return this.q.reject(new exports.FileError('while composing scalar out of !include', null, "detected circular !include of " + event.value, event.start_mark));
       }
-      try {
+      return this.settings.reader.readFileAsync(fileUri).then(function(fileData) {
         if (fileInfo.type === 'fragment') {
-          return this.settings.reader.readFileAsync(fileUri).then(function(result) {
-            return _this.compose(result, fileUri, {
-              validate: false,
-              transform: false,
-              compose: true
-            }, loader);
-          }).then(function(value) {
-            return _this.appendNewNodeToParent(node, key, value);
-          })["catch"](function(error) {
-            return _this.addContextToError(error, event);
-          });
+          return _this.compose(fileData, fileInfo.targetFileUri, {
+            validate: false,
+            transform: false,
+            compose: true
+          }, loader);
         } else {
-          return this.settings.reader.readFileAsync(fileUri).then(function(result) {
-            var value;
-            value = new _this.nodes.ScalarNode('tag:yaml.org,2002:str', result, event.start_mark, event.end_mark, event.style);
-            return _this.appendNewNodeToParent(node, key, value);
-          })["catch"](function(error) {
-            return _this.addContextToError(error, event);
-          });
+          return new _this.nodes.ScalarNode('tag:yaml.org,2002:str', fileData, event.start_mark, event.end_mark, event.style);
         }
-      } catch (_error) {
-        error = _error;
-        return this.addContextToError(error, event);
-      }
+      })["catch"](function(error) {
+        return _this.addContextToError(error, event);
+      });
+    };
+
+    RamlParser.prototype.mergePendingFile = function(fileInfo, value) {
+      var key, node;
+      node = fileInfo.parentNode;
+      key = fileInfo.parentKey;
+      return this.appendNewNodeToParent(node, key, value);
     };
 
     RamlParser.prototype.addContextToError = function(error, event) {

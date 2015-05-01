@@ -40,13 +40,13 @@ describe('CLI', function () {
       PARSER_BIN,
       join(__dirname, '../raml-files/local.yml')
     ].join(' '), function (err, stdout, stderr) {
+      should.not.exist(err);
+      stderr.should.equal('');
+
       var output = JSON.parse(stdout);
 
       output.title.should.equal('MyApi');
       output.documentation.should.be.an('array');
-
-      should.not.exist(err);
-      stderr.should.equal('');
 
       return done(err);
     });
