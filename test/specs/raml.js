@@ -12,6 +12,8 @@ if (typeof window === 'undefined') {
 }
 
 describe('RAML', function () {
+  this.timeout(20000);
+
   it('should report error via promises when remote resource is unavalable', function (done) {
     raml.loadFile('/404.ERROR').should.be.rejected.and.notify(done);
   });

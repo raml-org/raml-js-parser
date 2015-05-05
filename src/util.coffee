@@ -30,3 +30,5 @@
                                       node?.tag is 'tag:yaml.org,2002:set' or
                                       node?.tag is 'tag:yaml.org,2002:seq' or
                                       node?.tag is 'tag:yaml.org,2002:map'
+
+@NON_PRINTABLE = /[^\x09\x0A\x0D\x20-\x7E\x85\xA0-\uD7FF\uE000-\uFFFD]/
