@@ -798,10 +798,12 @@
 }).call(this,_dereq_("buffer").Buffer)
 },{"./errors":3,"./nodes":7,"./util":20,"buffer":24}],3:[function(_dereq_,module,exports){
 (function() {
-  var _ref,
+  var NON_PRINTABLE, _ref,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  NON_PRINTABLE = _dereq_('./util').NON_PRINTABLE;
 
   this.Mark = (function() {
     function Mark(name, line, column, buffer, pointer) {
@@ -813,7 +815,7 @@
     }
 
     Mark.prototype.get_snippet = function(indent, max_length) {
-      var break_chars, end, head, start, tail, _ref, _ref1;
+      var break_chars, end, head, offset, start, tail, _ref, _ref1;
       if (indent == null) {
         indent = 4;
       }
@@ -824,34 +826,39 @@
         return null;
       }
       break_chars = '\x00\r\n\x85\u2028\u2029';
+      offset = 0;
       head = '';
+      tail = '';
       start = this.pointer;
+      end = this.pointer;
       while (start > 0 && (_ref = this.buffer[start - 1], __indexOf.call(break_chars, _ref) < 0)) {
         start--;
-        if (this.pointer - start > max_length / 2 - 1) {
-          head = ' ... ';
-          start += 5;
+        if (NON_PRINTABLE.test(this.buffer[start])) {
+          offset--;
+        }
+        if (this.pointer - start > Math.ceil(max_length / 2 - 1)) {
+          head = '... ';
+          start += 4;
+          offset += 4;
           break;
         }
       }
-      tail = '';
-      end = this.pointer;
       while (end < this.buffer.length && (_ref1 = this.buffer[end], __indexOf.call(break_chars, _ref1) < 0)) {
         end++;
-        if (end - this.pointer > max_length / 2 - 1) {
-          tail = ' ... ';
-          end -= 5;
+        if (end - this.pointer > Math.floor(max_length / 2 - 1)) {
+          tail = ' ...';
+          end -= 4;
           break;
         }
       }
-      return "" + ((new Array(indent)).join(' ')) + head + this.buffer.slice(start, end) + tail + "\n" + ((new Array(indent + this.pointer - start + head.length)).join(' ')) + "^";
+      return "" + ((new Array(indent + 1)).join(' ')) + head + this.buffer.slice(start, end) + tail + "\n" + ((new Array(indent + 1 + this.pointer - start + offset)).join(' ')) + "^";
     };
 
     Mark.prototype.toString = function() {
       var snippet, where;
       snippet = this.get_snippet();
       where = "  in \"" + this.name + "\", line " + (this.line + 1) + ", column " + (this.column + 1);
-      if (snippet) {
+      if (!snippet) {
         return where;
       } else {
         return "" + where + ":\n" + snippet;
@@ -905,7 +912,7 @@
       if ((this.context_mark != null) && ((this.message == null) || (this.problem_mark == null) || this.context_mark.name !== this.problem_mark.name || this.context_mark.line !== this.problem_mark.line || this.context_mark.column !== this.problem_mark.column)) {
         lines.push(this.context_mark.toString());
       }
-      if (this.message != null) {
+      if (this.message !== this.context) {
         lines.push(this.message);
       }
       if (this.problem_mark != null) {
@@ -940,7 +947,7 @@
 
 }).call(this);
 
-},{}],4:[function(_dereq_,module,exports){
+},{"./util":20}],4:[function(_dereq_,module,exports){
 (function() {
   var _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6,
     __hasProp = {}.hasOwnProperty,
@@ -2758,12 +2765,14 @@
 
 },{"./errors":3,"./loader":6,"./nodes":7,"./util":20,"fs":22,"got":23,"q":34,"url":31}],11:[function(_dereq_,module,exports){
 (function() {
-  var Mark, MarkedYAMLError, _ref, _ref1,
+  var Mark, MarkedYAMLError, NON_PRINTABLE, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   _ref = _dereq_('./errors'), Mark = _ref.Mark, MarkedYAMLError = _ref.MarkedYAMLError;
+
+  NON_PRINTABLE = _dereq_('./util').NON_PRINTABLE;
 
   this.ReaderError = (function(_super) {
     __extends(ReaderError, _super);
@@ -2785,10 +2794,6 @@
 
 
   this.Reader = (function() {
-    var NON_PRINTABLE;
-
-    NON_PRINTABLE = /[^\x09\x0A\x0D\x20-\x7E\x85\xA0-\uD7FF\uE000-\uFFFD]/;
-
     function Reader(string, src) {
       this.string = string;
       this.src = src;
@@ -2849,7 +2854,7 @@
 
     Reader.prototype.check_printable = function(char) {
       if (NON_PRINTABLE.exec(char)) {
-        throw new exports.ReaderError('while reading file', null, "non printable characters are not allowed column: " + (this.get_mark().column), this.get_mark());
+        throw new exports.ReaderError('while reading file', null, "non printable characters are not allowed column: " + (this.get_mark().column + 1), this.get_mark());
       }
     };
 
@@ -2859,7 +2864,7 @@
 
 }).call(this);
 
-},{"./errors":3}],12:[function(_dereq_,module,exports){
+},{"./errors":3,"./util":20}],12:[function(_dereq_,module,exports){
 (function() {
   var YAMLError, nodes, util, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
@@ -6095,6 +6100,8 @@
     return (node != null ? node.tag : void 0) === 'tag:yaml.org,2002:omap' || (node != null ? node.tag : void 0) === 'tag:yaml.org,2002:pairs' || (node != null ? node.tag : void 0) === 'tag:yaml.org,2002:set' || (node != null ? node.tag : void 0) === 'tag:yaml.org,2002:seq' || (node != null ? node.tag : void 0) === 'tag:yaml.org,2002:map';
   };
 
+  this.NON_PRINTABLE = /[^\x09\x0A\x0D\x20-\x7E\x85\xA0-\uD7FF\uE000-\uFFFD]/;
+
 }).call(this);
 
 },{}],21:[function(_dereq_,module,exports){
@@ -8696,12 +8703,16 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	var NUMBER = '0'.charCodeAt(0)
 	var LOWER  = 'a'.charCodeAt(0)
 	var UPPER  = 'A'.charCodeAt(0)
+	var PLUS_URL_SAFE = '-'.charCodeAt(0)
+	var SLASH_URL_SAFE = '_'.charCodeAt(0)
 
 	function decode (elt) {
 		var code = elt.charCodeAt(0)
-		if (code === PLUS)
+		if (code === PLUS ||
+		    code === PLUS_URL_SAFE)
 			return 62 // '+'
-		if (code === SLASH)
+		if (code === SLASH ||
+		    code === SLASH_URL_SAFE)
 			return 63 // '/'
 		if (code < NUMBER)
 			return -1 //no match
