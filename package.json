@@ -10,6 +10,7 @@
   "bin": {
     "raml-parser": "bin/raml-parser"
   },
+  "license": "Apache-2.0",
   "browser": {
     "got": false
   },
