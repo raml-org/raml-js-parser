@@ -750,6 +750,9 @@ class @Validator
             valid = false
 
         switch key
+          when "description"
+            unless util.isScalar(bodyProperty[1])
+              throw new exports.ValidationError 'while validating body', null, "body description must be a string", bodyProperty[0].start_mark
           when "example"
             if bodyMode and bodyMode not in implicitMode
               throw new exports.ValidationError 'while validating body', null, "not compatible with explicit Media Type", bodyProperty[0].start_mark
