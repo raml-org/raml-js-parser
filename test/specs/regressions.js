@@ -1066,4 +1066,45 @@ describe('Regressions', function () {
       })
       .should.notify(done);
   });
+
+  it('should accept description in responses', function (done) {
+    var definition = [
+      '#%RAML 0.8',
+      'title: Title',
+      '/example:',
+      '  get:',
+      '    responses:',
+      '      200:',
+      '        body:',
+      '          "*/*":',
+      '            description: |',
+      '              This is an example.'
+    ].join('\n');
+
+    var expected = {
+      title: 'Title',
+      resources: [
+        {
+          relativeUri: '/example',
+          methods: [
+            {
+              method: 'get',
+              responses: {
+                '200': {
+                  body: {
+                    '*/*': {
+                      description: 'This is an example.'
+                    }
+                  }
+                }
+              }
+            }
+          ],
+          relativeUriPathSegments: ['example']
+        }
+      ]
+    };
+
+    raml.load(definition).should.become(expected).and.notify(done);
+  });
 });
