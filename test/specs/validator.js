@@ -576,7 +576,7 @@ describe('Validator', function () {
           '      }'
       ].join('\n')).then(function () {}, function (error) {
         setTimeout(function () {
-          error.message.should.contain('schema is not valid JSON error: \'Unknown Character \'"\', expecting a semicolon.\'');
+          error.message.should.contain('schema is not valid JSON error: \'Unexpected token \'"\' at 2:7\'');
           error.problem_mark.line.should.be.equal(6);
           error.problem_mark.column.should.be.equal(0);
           done();
@@ -609,7 +609,7 @@ describe('Validator', function () {
           'baseUri: http://pepe.com'
       ].join('\n')).then(function () {}, function (error) {
         setTimeout(function () {
-          error.message.should.contain('schema is not valid JSON error: \'EOF Error, expecting closing \'}\'.\'');
+          error.message.should.contain('schema is not valid JSON error: \'Unexpected end of input at 3:2\'');
           error.problem_mark.line.should.be.equal(6);
           error.problem_mark.column.should.be.equal(0);
           done();
