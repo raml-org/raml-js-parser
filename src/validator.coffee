@@ -4,7 +4,7 @@ uritemplate       = require 'uritemplate'
 nodes             = require './nodes'
 traits            = require './traits'
 util              = require './util'
-jsonlint          = require 'json-lint'
+jju               = require 'jju/lib/parse'
 
 ###
 The Validator throws these.
@@ -789,18 +789,19 @@ class @Validator
     if @isXmlSchema property.value
       undefined #noop
     else if @isJsonSchema property.value
-      lint = jsonlint(property.value)
-      if lint.error
-        mark = @create_mark(property.start_mark.line + lint.line, 0)
-        if property.end_mark.line is mark.line and property.end_mark.column is 0
-          # The error is beyond the scope of the current property
-          # rewind the error, make sure that it does
-          mark.line--
-        throw new exports.ValidationError 'while validating body', null, "schema is not valid JSON error: '#{lint.error}'", mark
-
       try
         schema = JSON.parse(property.value)
       catch error
+        try
+          schema = jju.parse(property.value)
+        catch error
+          mark = @create_mark(property.start_mark.line + error.row, 0)
+          if property.end_mark.line is mark.line and property.end_mark.column is 0
+            # The error is beyond the scope of the current property
+            # rewind the error, make sure that it does
+            mark.line--
+          throw new exports.ValidationError 'while validating body', null, "schema is not valid JSON error: '#{error.message.split('\n')[0]}'", mark
+
         throw new exports.ValidationError 'while validating body', null, "schema is not valid JSON error: '#{error}'", property.start_mark
 
   isJsonSchema: (string) ->

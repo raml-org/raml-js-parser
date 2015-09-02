@@ -1107,4 +1107,43 @@ describe('Regressions', function () {
 
     raml.load(definition).should.become(expected).and.notify(done);
   });
+
+  it('should json parse unicode encoding', function (done) {
+    var definition = [
+      '#%RAML 0.8',
+      'title: Title',
+      '/:',
+      '  post:',
+      '    body:',
+      '      application/json:',
+      '        schema: |',
+      '          {',
+      '            "type": "string",',
+      '            "pattern": "^[A-Z\u017D\\u017E]*$"',
+      '          }'
+    ].join('\n');
+
+    var expected = {
+      title: 'Title',
+      resources: [
+        {
+          relativeUri: '/',
+          methods: [
+            {
+              body: {
+                'application/json': {
+                  schema: '{\n  \"type\": \"string\",\n  \"pattern\": \"^[A-ZŽ\\u017E]*$\"\n}'
+                }
+              },
+              method: 'post'
+            }
+          ],
+          relativeUriPathSegments: []
+        }
+      ]
+    };
+
+
+    raml.load(definition).should.become(expected).and.notify(done);
+  })
 });
