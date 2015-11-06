@@ -4,38 +4,24 @@
 [![Build Status](https://travis-ci.org/raml-org/raml-js-parser.png)](https://travis-ci.org/raml-org/raml-js-parser)
 [![Dependency Status](https://david-dm.org/raml-org/raml-js-parser.png)](https://david-dm.org/raml-org/raml-js-parser)
 
-This project contains a RAML parser capable (at this moment) of parsing version 0.8
-of the [RAML specification](http://raml.org/spec.html). The parser is written in CoffeeScript and its capable
-of running inside NodeJS as well as in-browser.
+This is a JavaScript parser for [RAML](http://raml.org) version 0.8 as defined in the [0.8 RAML specification](https://github.com/raml-org/raml-spec/blob/master/raml-0.8.md)
 
-## Versioning
-
-The RAML parser is versioned in the following manner:
-
-```
-x.y.z
-```
-
-in which *x.y* denotes the version of the [RAML specification](http://raml.org/spec.html)
-and *z* is the version of the parser.
-
-So *0.1.2* is the 2nd revision of the parser for the *0.1* version
-of the [RAML specification](http://raml.org/spec.html).
+A newer [version](https://github.com/raml-org/raml-js-parser-2) is now available as a beta. It supports RAML 1.0 as well as RAML 0.8.
 
 ### Contributing
-If you are interested in contributing some code to this project, thanks! Please submit a [Contributors Agreement](https://api-notebook.anypoint.mulesoft.com/notebooks#bc1cf75a0284268407e4) acknowledging that you are transferring ownership.
+If you are interested in contributing some code to this project, thanks! Please first [read and accept the Contributors Agreement](https://api-notebook.anypoint.mulesoft.com/notebooks#bc1cf75a0284268407e4).
 
 To discuss this project, please use its [github issues](https://github.com/raml-org/raml-js-parser/issues) or the [RAML forum](http://forums.raml.org/).
 
 ## Usage for NodeJS
-  
+
 ### Load
 
 Loading a RAML file is as easy as follows:
 
 ```javascript
   var raml = require('raml-parser');
-  
+
   raml.loadFile('myAPI.raml').then( function(data) {
     console.log(data);
   }, function(error) {
@@ -47,7 +33,7 @@ You can alternatively load from a string containing the api definition:
 
 ```javascript
   var raml = require('raml-parser');
-  
+
   var definition = [
     '#%RAML 0.8',
     '---',
@@ -55,7 +41,7 @@ You can alternatively load from a string containing the api definition:
     'baseUri: http://myapi.com',
     '/Root:'
   ].join('\n');
-  
+
   raml.load(definition).then( function(data) {
     console.log(data);
   }, function(error) {
@@ -71,7 +57,7 @@ Generating an AST from a RAML file is as easy as follows:
 
 ```javascript
   var raml = require('raml-parser');
-  
+
   var myAPI;
   raml.composeFile('myAPI.raml').then( function(rootNode) {
     console.log('Root Node: ' + rootNode)
@@ -84,7 +70,7 @@ you can also alternatively generate an AST from a string containing the api defi
 
 ```javascript
   var raml = require('raml-parser');
-  
+
   var definition = [
     '#%RAML 0.8',
     '---',
@@ -92,7 +78,7 @@ you can also alternatively generate an AST from a string containing the api defi
     'baseUri: http://myapi.com',
     '/Root:'
   ].join('\n');
-  
+
   raml.compose(definition).then( function(rootNode) {
     console.log('Root Node: ' + rootNode)
   }, function(error) {
