@@ -1,6 +1,6 @@
 {
   "name": "raml-parser",
-  "version": "0.8.12",
+  "version": "0.8.13",
   "description": "A RAML parser based on PyYAML written in CoffeScript and available for use as NodeJs module or in-browser.",
   "repository": {
     "type": "git",
