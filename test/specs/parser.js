@@ -6702,15 +6702,15 @@ describe('Parser', function() {
       raml.load(definition).should.be.rejectedWith(/method must be a map/).and.notify(done);
     });
 
-    it('should show displayName in a method', function(done) {    
-      var definition = [   
-        '#%RAML 0.8',    
-        '---',   
-        'title: Test',   
-        '/a:',   
-        '  displayName: A',    
-        '  get:',    
-        '    displayName: SomeName'    
+    it('should show displayName in a method', function(done) {
+      var definition = [
+        '#%RAML 0.8',
+        '---',
+        'title: Test',
+        '/a:',
+        '  displayName: A',
+        '  get:',
+        '    displayName: SomeName'
       ].join('\n');
 
       var expected = {
@@ -6729,7 +6729,7 @@ describe('Parser', function() {
           }
         ]
       }
-      raml.load(definition).should.become(expected).and.notify(done);   
+      raml.load(definition).should.become(expected).and.notify(done);
     });
 
     it('should fail if methods description is map', function(done) {
@@ -7665,6 +7665,38 @@ describe('Parser', function() {
     });
 
     describe('Default Media Type in request body', function(){
+      it('should apply mediaType property in a resource with nullable body', function(done) {
+        var definition = [
+          '#%RAML 0.8',
+          '---',
+          'title: MyApi',
+          'mediaType: application/json',
+          '/resource:',
+          '  post:',
+          '    body:',
+          ''
+        ].join('\n');
+        var expected = {
+          title: "MyApi",
+          mediaType: "application/json",
+          resources:[
+            {
+              relativeUri: "/resource",
+              relativeUriPathSegments: [ "resource" ],
+              methods: [
+                {
+                  body: {
+                    "application/json": null
+                  },
+                  method: "post"
+                }
+              ]
+            }
+          ]
+        };
+        raml.load(definition).should.become(expected).and.notify(done);
+      });
+
       it('should apply mediaType property in a resource', function(done) {
         var definition = [
           '#%RAML 0.8',

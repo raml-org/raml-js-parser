@@ -881,13 +881,19 @@ class @Validator
     if (filteredNodes.length)
       return filteredNodes[0][1].value
 
-  get_property: (node, property) ->
+  get_property_pair: (node, property) ->
     if node and util.isMapping node
       filteredNodes = node.value.filter (childNode) =>
         return util.isString(childNode[0]) and childNode[0].value is property
       if filteredNodes.length > 0
         if filteredNodes[0].length > 0
-          return filteredNodes[0][1]
+          return filteredNodes[0]
+    return []
+
+  get_property: (node, property) ->
+    pair = @get_property_pair(node, property)
+    if pair?
+      return pair[1]
     return []
 
   get_properties: (node, property) =>
