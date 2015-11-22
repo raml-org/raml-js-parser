@@ -96,7 +96,7 @@ class @Transformations
     return unless util.isMapping method
     # resource->methods->body
     if @has_property(method, 'body')
-      @apply_default_media_type_to_body @get_property(method, 'body')
+      @apply_default_media_type_to_body @get_property_pair(method, 'body')
 
     # resource->methods->responses->items->body
     if @has_property(method, 'responses')
@@ -104,17 +104,29 @@ class @Transformations
       return unless responses and responses.value
       responses.value.forEach (response) =>
         if @has_property(response[1], 'body')
-          @apply_default_media_type_to_body @get_property(response[1], 'body')
+          @apply_default_media_type_to_body @get_property_pair(response[1], 'body')
 
   apply_default_media_type_to_body: (body) ->
-    return unless util.isMapping body
-    if body?.value?[0]?[0]?.value
-      key = body.value[0][0].value
+    if util.isNull body[1]
+      body[1] = new nodes.MappingNode 'tag:yaml.org,2002:map', []
+
+    # Does body mapping have at least one key?
+    if body[1]?.value?[0]?[0]?.value
+      key = body[1].value[0][0].value
+
+      # Unless key look like content type (contains "/")
       unless key.match(/\//)
-        responseType = new nodes.MappingNode 'tag:yaml.org,2002:map', [], body.start_mark, body.end_mark
-        responseTypeKey = new nodes.ScalarNode 'tag:yaml.org,2002:str', @mediaType, body.start_mark, body.end_mark
-        responseType.value.push [responseTypeKey, body.clone()]
-        body.value =  responseType.value
+        # Move body mapping keys under new default media type mapping
+        responseType = new nodes.MappingNode 'tag:yaml.org,2002:map', [], body[1].start_mark, body[1].end_mark
+        responseTypeKey = new nodes.ScalarNode 'tag:yaml.org,2002:str', @mediaType, body[1].start_mark, body[1].end_mark
+        responseType.value.push [responseTypeKey, body[1].clone()]
+        body[1].value = responseType.value
+    else
+      # Add default media type mapping as only key of body mapping
+      body[1].value.push [
+        new nodes.ScalarNode('tag:yaml.org,2002:str', @mediaType),
+        new nodes.ScalarNode('tag:yaml.org,2002:null')
+      ]
 
   noop: ->
 
