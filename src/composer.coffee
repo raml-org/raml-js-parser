@@ -58,7 +58,8 @@ class @Composer
     if settings.transform
       @apply_types node
       @apply_traits node
-      @apply_schemas node
+      if settings.applySchemas
+        @apply_schemas node
       @apply_protocols node
       @join_resources node
 
