@@ -223,7 +223,7 @@ class @RamlParser
 ###
   validate controls whether the stream must be processed as a
 ###
-defaultSettings = { validate: true, transform: true, compose: true, reader: new exports.FileReader(null) }
+defaultSettings = { validate: true, transform: true, compose: true, reader: new exports.FileReader(null), applySchemas: true }
 
 ###
 Parse the first RAML document in a stream and produce the corresponding
