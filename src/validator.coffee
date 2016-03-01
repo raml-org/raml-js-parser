@@ -162,11 +162,16 @@ class @Validator
       template = uritemplate.parse uri
     catch err
       throw new exports.ValidationError 'while validating uri parameters', null, err?.options?.message, uriProperty.start_mark
-    expressions = template.expressions.filter((expr) -> return "templateText" of expr ).map (expression) -> expression.templateText
+    expressions = []
+    template.expressions?.forEach (expression) ->
+      expression.varspecs?.forEach (spec) ->
+        expressions.push spec.varname
+
     uriParameters = {}
+
     if typeof uriProperty.value is "object"
       for uriParameter in uriProperty.value
-        parameterName = @canonicalizePropertyName(uriParameter[0].value, allowParameterKeys)
+        parameterName = @canonicalizeParameterName(uriParameter[0].value, allowParameterKeys)
         @trackRepeatedProperties(uriParameters, parameterName, uriProperty, 'while validating URI parameters', "URI parameter with the same name already exists")
 
         if parameterName in reservedNames
@@ -224,6 +229,12 @@ class @Validator
       throw new exports.ValidationError 'while validating trait properties', null, "property: '" + invalid[0][0].value + "' is invalid in a trait", invalid[0][0].start_mark
 
     @validate_method node, true, 'trait'
+
+  canonicalizeParameterName: (propertyName, mustRemoveQuestionMark)   ->
+    canonicalParameterName = @canonicalizePropertyName propertyName, mustRemoveQuestionMark
+    if canonicalParameterName[0] == '+'
+      return canonicalParameterName.slice(1)
+    return canonicalParameterName
 
   canonicalizePropertyName: (propertyName, mustRemoveQuestionMark)   ->
     if mustRemoveQuestionMark and propertyName.slice(-1) is '?'

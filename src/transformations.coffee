@@ -28,9 +28,11 @@ class @Transformations
 
   applyTransformationsToRoot: (rootObject) ->
     if rootObject.baseUri
-
       template = uritemplate.parse rootObject.baseUri
-      expressions = template.expressions.filter((expr) -> return 'templateText' of expr).map (expression) -> expression.templateText
+      expressions = []
+      template.expressions?.forEach (expression) ->
+        expression.varspecs?.forEach (spec) ->
+          expressions.push spec.varname
 
       if expressions.length
         rootObject.baseUriParameters = {} unless rootObject.baseUriParameters
@@ -62,7 +64,10 @@ class @Transformations
         resource.relativeUriPathSegments = pathParts
 
         template = uritemplate.parse resource.relativeUri
-        expressions = template.expressions.filter((expr) -> return 'templateText' of expr).map (expression) -> expression.templateText
+        expressions = []
+        template.expressions?.forEach (expression) ->
+          expression.varspecs?.forEach (spec) ->
+            expressions.push spec.varname
 
         if expressions.length
           resource.uriParameters = {} unless resource.uriParameters

@@ -5564,14 +5564,18 @@
     };
 
     Transformations.prototype.applyTransformationsToRoot = function(rootObject) {
-      var expressions, template;
+      var expressions, template, _ref;
       if (rootObject.baseUri) {
         template = uritemplate.parse(rootObject.baseUri);
-        expressions = template.expressions.filter(function(expr) {
-          return 'templateText' in expr;
-        }).map(function(expression) {
-          return expression.templateText;
-        });
+        expressions = [];
+        if ((_ref = template.expressions) != null) {
+          _ref.forEach(function(expression) {
+            var _ref1;
+            return (_ref1 = expression.varspecs) != null ? _ref1.forEach(function(spec) {
+              return expressions.push(spec.varname);
+            }) : void 0;
+          });
+        }
         if (expressions.length) {
           if (!rootObject.baseUriParameters) {
             rootObject.baseUriParameters = {};
@@ -5593,7 +5597,7 @@
     };
 
     Transformations.prototype.applyTransformationsToResources = function(rootObject, resources) {
-      var expressions, inheritedSecScheme, method, parameterName, pathParts, resource, template, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _results;
+      var expressions, inheritedSecScheme, method, parameterName, pathParts, resource, template, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
       if (resources != null ? resources.length : void 0) {
         _results = [];
         for (_i = 0, _len = resources.length; _i < _len; _i++) {
@@ -5616,11 +5620,15 @@
           }
           resource.relativeUriPathSegments = pathParts;
           template = uritemplate.parse(resource.relativeUri);
-          expressions = template.expressions.filter(function(expr) {
-            return 'templateText' in expr;
-          }).map(function(expression) {
-            return expression.templateText;
-          });
+          expressions = [];
+          if ((_ref2 = template.expressions) != null) {
+            _ref2.forEach(function(expression) {
+              var _ref3;
+              return (_ref3 = expression.varspecs) != null ? _ref3.forEach(function(spec) {
+                return expressions.push(spec.varname);
+              }) : void 0;
+            });
+          }
           if (expressions.length) {
             if (!resource.uriParameters) {
               resource.uriParameters = {};
@@ -6390,7 +6398,7 @@
     };
 
     Validator.prototype.validate_uri_parameters = function(uri, uriProperty, allowParameterKeys, skipParameterUseCheck, reservedNames) {
-      var err, expressions, parameterName, template, uriParameter, uriParameters, _i, _len, _ref1, _ref2, _results;
+      var err, expressions, parameterName, template, uriParameter, uriParameters, _i, _len, _ref1, _ref2, _ref3, _results;
       if (reservedNames == null) {
         reservedNames = [];
       }
@@ -6400,18 +6408,22 @@
         err = _error;
         throw new exports.ValidationError('while validating uri parameters', null, err != null ? (_ref1 = err.options) != null ? _ref1.message : void 0 : void 0, uriProperty.start_mark);
       }
-      expressions = template.expressions.filter(function(expr) {
-        return "templateText" in expr;
-      }).map(function(expression) {
-        return expression.templateText;
-      });
+      expressions = [];
+      if ((_ref2 = template.expressions) != null) {
+        _ref2.forEach(function(expression) {
+          var _ref3;
+          return (_ref3 = expression.varspecs) != null ? _ref3.forEach(function(spec) {
+            return expressions.push(spec.varname);
+          }) : void 0;
+        });
+      }
       uriParameters = {};
       if (typeof uriProperty.value === "object") {
-        _ref2 = uriProperty.value;
+        _ref3 = uriProperty.value;
         _results = [];
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          uriParameter = _ref2[_i];
-          parameterName = this.canonicalizePropertyName(uriParameter[0].value, allowParameterKeys);
+        for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+          uriParameter = _ref3[_i];
+          parameterName = this.canonicalizeParameterName(uriParameter[0].value, allowParameterKeys);
           this.trackRepeatedProperties(uriParameters, parameterName, uriProperty, 'while validating URI parameters', "URI parameter with the same name already exists");
           if (__indexOf.call(reservedNames, parameterName) >= 0) {
             throw new exports.ValidationError('while validating baseUri', null, uriParameter[0].value + ' parameter not allowed here', uriParameter[0].start_mark);
@@ -6511,6 +6523,15 @@
         throw new exports.ValidationError('while validating trait properties', null, "property: '" + invalid[0][0].value + "' is invalid in a trait", invalid[0][0].start_mark);
       }
       return this.validate_method(node, true, 'trait');
+    };
+
+    Validator.prototype.canonicalizeParameterName = function(propertyName, mustRemoveQuestionMark) {
+      var canonicalParameterName;
+      canonicalParameterName = this.canonicalizePropertyName(propertyName, mustRemoveQuestionMark);
+      if (canonicalParameterName[0] === '+') {
+        return canonicalParameterName.slice(1);
+      }
+      return canonicalParameterName;
     };
 
     Validator.prototype.canonicalizePropertyName = function(propertyName, mustRemoveQuestionMark) {
