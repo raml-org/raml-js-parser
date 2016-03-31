@@ -12,7 +12,6 @@ class @TraitError extends MarkedYAMLError
 ###
 class @ParameterError extends MarkedYAMLError
 
-
 ###
 The Traits class deals with applying traits to resources according to the spec
 ###
@@ -49,7 +48,7 @@ class @Traits
 
   apply_traits_to_resource: (resourceUri, resource, removeQs) ->
     return unless util.isMapping resource
-    methods = @child_methods resource
+    methods = @child_methods resource, true
     # apply traits at the resource level, which is basically the same as applying to each method in the resource
     if @has_property resource, 'is'
       uses = @property_value resource, 'is'

@@ -865,10 +865,10 @@ class @Validator
       unless util.isScalar parameter[1]
         throw new exports.ValidationError 'while validating trait consumption', null, 'parameter value must be a scalar', parameter[1].start_mark
 
-  child_methods: (node) ->
+  child_methods: (node, allowParameterKeys = false) ->
     unless node and util.isMapping node
       return []
-    return node.value.filter (childNode) => return @isHttpMethod childNode[0].value
+    return node.value.filter (childNode) => return @isHttpMethod childNode[0].value, allowParameterKeys
 
   has_property: (node, property) ->
     if node and util.isMapping node
