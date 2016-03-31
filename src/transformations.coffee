@@ -193,7 +193,7 @@ class @Transformations
     unless hasType
       @add_key_value_to_node(node, 'type', 'tag:yaml.org,2002:str', 'string')
 
-  add_key_value_to_node: (node, keyName, valueTag, value) =>
+  add_key_value_to_node: (node, keyName, valueTag, value) ->
     propertyName = new nodes.ScalarNode 'tag:yaml.org,2002:str', keyName, node.start_mark, node.end_mark
     propertyValue = new nodes.ScalarNode valueTag, value, node.start_mark, node.end_mark
     node.value.push([propertyName, propertyValue])
@@ -264,7 +264,7 @@ class @Transformations
           when "headers"      then @transform_named_params property, allowParameterKeys, false
           else @noop()
 
-  isContentTypeString: (value) =>
+  isContentTypeString: (value) ->
     return value?.match(/^[^\/]+\/[^\/]+$/)
 
   transform_body: (property, allowParameterKeys) ->

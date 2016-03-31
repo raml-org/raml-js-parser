@@ -2497,7 +2497,6 @@
     }
 
     RamlParser.prototype.loadDefaultSettings = function(settings) {
-      var _this = this;
       return Object.keys(defaultSettings).forEach(function(settingName) {
         if (!(settingName in settings)) {
           return settings[settingName] = defaultSettings[settingName];
@@ -5527,8 +5526,6 @@
   this.Transformations = (function() {
     function Transformations(settings) {
       this.settings = settings;
-      this.isContentTypeString = __bind(this.isContentTypeString, this);
-      this.add_key_value_to_node = __bind(this.add_key_value_to_node, this);
       this.apply_default_media_type_to_resource = __bind(this.apply_default_media_type_to_resource, this);
       this.get_media_type = __bind(this.get_media_type, this);
       this.load_default_media_type = __bind(this.load_default_media_type, this);
@@ -6176,7 +6173,6 @@
   this.Validator = (function() {
     function Validator() {
       this.get_properties = __bind(this.get_properties, this);
-      this.get_list_values = __bind(this.get_list_values, this);
       this.validations = [this.validate_root, this.validate_root_properties, this.validate_base_uri_parameters, this.valid_absolute_uris];
     }
 
@@ -6672,7 +6668,6 @@
     };
 
     Validator.prototype.get_list_values = function(node) {
-      var _this = this;
       return node.map(function(item) {
         return item.value;
       });
@@ -7491,8 +7486,7 @@
     };
 
     Validator.prototype.get_property_pair = function(node, property) {
-      var filteredNodes,
-        _this = this;
+      var filteredNodes;
       if (node && util.isMapping(node)) {
         filteredNodes = node.value.filter(function(childNode) {
           return util.isString(childNode[0]) && childNode[0].value === property;

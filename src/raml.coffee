@@ -96,7 +96,7 @@ class @RamlParser
     @loadDefaultSettings(@settings)
 
   loadDefaultSettings: (settings) ->
-    Object.keys(defaultSettings).forEach (settingName) =>
+    Object.keys(defaultSettings).forEach (settingName) ->
       unless settingName of settings
         settings[settingName] = defaultSettings[settingName]
 
@@ -107,7 +107,7 @@ class @RamlParser
         @load stream, file, settings
     catch error
       # return a promise that throws the error
-      return @q.fcall =>
+      return @q.fcall ->
         throw new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{error})", null
 
   composeFile: (file, settings = @settings, parent) ->
@@ -117,7 +117,7 @@ class @RamlParser
         @compose stream, file, settings, parent
     catch error
       # return a promise that throws the error
-      return @q.fcall =>
+      return @q.fcall ->
         throw new exports.FileError "while fetching #{file}", null, "cannot fetch #{file} (#{error})", null
 
   compose: (stream, location, settings = @settings, parent = { src: location}) ->
@@ -131,14 +131,14 @@ class @RamlParser
   parseStream: (stream, location, settings = @settings, parent) ->
     loader = new exports.loader.Loader stream, location, settings, parent
 
-    return @q.fcall =>
+    return @q.fcall ->
       return loader.getYamlRoot()
 
     .then (partialTree) =>
       files = loader.getPendingFilesList()
       @getPendingFiles(loader, partialTree, files)
 
-    .then (fullyAssembledTree) =>
+    .then (fullyAssembledTree) ->
       loader.composeRamlTree(fullyAssembledTree, settings)
 
       if settings.compose

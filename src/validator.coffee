@@ -324,8 +324,8 @@ class @Validator
         if unusableProperty of parameterProperties
           throw new exports.ValidationError 'while validating parameter properties', null, "property #{unusableProperty} can only be used if type is 'number' or 'integer'", parameterProperties[unusableProperty].start_mark
 
-  get_list_values: (node) =>
-    return node.map (item) => item.value
+  get_list_values: (node) ->
+    return node.map (item) -> item.value
 
   validate_root_properties: (node) ->
     checkVersion   = false
@@ -883,7 +883,7 @@ class @Validator
 
   get_property_pair: (node, property) ->
     if node and util.isMapping node
-      filteredNodes = node.value.filter (childNode) =>
+      filteredNodes = node.value.filter (childNode) ->
         return util.isString(childNode[0]) and childNode[0].value is property
       if filteredNodes.length > 0
         if filteredNodes[0].length > 0
