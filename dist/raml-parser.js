@@ -5364,7 +5364,7 @@
       if (!util.isMapping(resource)) {
         return;
       }
-      methods = this.child_methods(resource);
+      methods = this.child_methods(resource, true);
       if (this.has_property(resource, 'is')) {
         uses = this.property_value(resource, 'is');
         uses.forEach(function(use) {
@@ -7458,13 +7458,16 @@
       return _results;
     };
 
-    Validator.prototype.child_methods = function(node) {
+    Validator.prototype.child_methods = function(node, allowParameterKeys) {
       var _this = this;
+      if (allowParameterKeys == null) {
+        allowParameterKeys = false;
+      }
       if (!(node && util.isMapping(node))) {
         return [];
       }
       return node.value.filter(function(childNode) {
-        return _this.isHttpMethod(childNode[0].value);
+        return _this.isHttpMethod(childNode[0].value, allowParameterKeys);
       });
     };
 

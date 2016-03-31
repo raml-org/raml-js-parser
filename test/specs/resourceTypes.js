@@ -230,4 +230,69 @@ describe('Resource Types', function () {
       '      resourceTypeName:'
     ].join('\n')).should.be.rejectedWith('resource type name must be provided').and.notify(done);
   });
+
+  it('should mixin traits into optional methods', function (done) {
+    var doc = [
+      '#%RAML 0.8',
+      'title: test1',
+      'traits:',
+      '  - foo:',
+      '      headers:',
+      '        foo:',
+      'resourceTypes:',
+      '  - collection:',
+      '      is: [foo]',
+      '      get?:',
+      '/resource1:',
+      '  type: collection',
+      '  get:'].join('\n');
+
+    var expected = {
+       'title': 'test1',
+       'traits': [
+        {
+         'foo': {
+          'headers': {
+           'foo': {
+            'displayName': 'foo',
+            'type': 'string'
+           }
+          }
+         }
+        }
+       ],
+       'resourceTypes': [
+        {
+         'collection': {
+          'is': [
+           'foo'
+          ],
+          'get?': null
+         }
+        }
+       ],
+       'resources': [
+        {
+         'type': 'collection',
+         'relativeUri': '/resource1',
+         'methods': [
+          {
+           'method': 'get',
+           'headers': {
+            'foo': {
+              'displayName': 'foo',
+              'type': 'string'
+            }
+           }
+          }
+         ],
+         'relativeUriPathSegments': [
+          'resource1'
+         ]
+        }
+       ]
+      };
+
+    raml.load(doc).should.become(expected).and.notify(done);
+  });
 });
