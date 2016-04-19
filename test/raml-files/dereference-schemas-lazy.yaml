@@ -1,0 +1,2 @@
+lazyLoaded: !include schemas/collections/items.json
+
