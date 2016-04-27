@@ -1,6 +1,9 @@
-@errors = require './errors'
-@loader = require './loader'
-util    = require './util'
+@errors   = require './errors'
+@loader   = require './loader'
+nodes     = require './nodes'
+path      = require 'path'
+refParser = require 'json-schema-ref-parser'
+util      = require './util'
 
 class @FileError extends @errors.MarkedYAMLError
 
@@ -138,6 +141,12 @@ class @RamlParser
       files = loader.getPendingFilesList()
       @getPendingFiles(loader, partialTree, files)
 
+    .then (fullyAssembledTree) =>
+      if settings.compose && settings.dereferenceSchemas
+        @dereferenceSchemas(loader, fullyAssembledTree)
+      else
+        return fullyAssembledTree
+
     .then (fullyAssembledTree) ->
       loader.composeRamlTree(fullyAssembledTree, settings)
 
@@ -148,6 +157,76 @@ class @RamlParser
           return null
       else
         return fullyAssembledTree
+
+  dereferenceSchemas: (loader, node) =>
+    schemaNodes = []
+    definedSchemaNames = []
+
+    # Collect defined schemas
+    node.value.forEach(([childName, childBody]) ->
+      if childName.value == 'schemas' && childBody instanceof nodes.SequenceNode
+        childBody.value.forEach((mappingNode) ->
+          mappingNode.value.forEach(([schemaName, schemaBody]) ->
+            definedSchemaNames.push(schemaName.value)
+            schemaNodes.push(schemaBody)
+          )
+        )
+    )
+
+    # Collect inline-defined schemas in tree
+    collectNodes = ((node) ->
+
+      items = []
+      if node instanceof nodes.MappingNode
+        node.value.forEach(([kind, item]) ->
+          if item instanceof nodes.FileNode
+            # schema inline inclusions
+            schemaNodes.push(item)
+          else if item instanceof nodes.ScalarNode
+            if kind.value == 'schema' && definedSchemaNames.indexOf(item.value) == -1
+              # schema inline definitions
+              schemaNodes.push(item)
+
+          else
+            collectNodes(item)
+        )
+      else if (node instanceof nodes.SequenceNode)
+        node.value.map collectNodes
+    )
+    collectNodes(node)
+
+    # Dereference schema
+    resolveSchemas = schemaNodes.map((schemaNode) =>
+      if schemaNode instanceof nodes.FileNode
+        # Included schemas
+        uri = schemaNode.inclusionPath
+        schema = undefined
+      else
+        # Inline-defined schemas
+        uri = loader.src
+        schema = JSON.parse(schemaNode.value)
+      @dereferenceSchema(uri, schema)
+    )
+
+    return @q.all(resolveSchemas)
+    .then((dereferedSchemas) ->
+      dereferedSchemas.forEach((dereferedSchema, index) ->
+        schemaNodes[index].value = dereferedSchema
+      )
+      return node
+    )
+
+  dereferenceSchema: (uri, schema) =>
+    deferred = @q.defer()
+
+    refParser.dereference(uri, schema, {})
+      .then((dereferencedSchema) ->
+        deferred.resolve(JSON.stringify(dereferencedSchema))
+      )
+      .catch((err) ->
+        deferred.reject(err)
+      )
+    return deferred.promise
 
   getPendingFiles: (loader, node, files) ->
     return node if !files.length
@@ -183,7 +262,7 @@ class @RamlParser
         if fileInfo.type is 'fragment'
           @compose(fileData, fileInfo.targetFileUri, { validate: false, transform: false, compose: true }, loader)
         else
-          new @nodes.ScalarNode('tag:yaml.org,2002:str', fileData, event.start_mark, event.end_mark, event.style)
+          new @nodes.FileNode('tag:yaml.org,2002:str', fileData, event.start_mark, event.end_mark, event.style, fileInfo.targetFileUri)
       )
       .catch((error) =>
         @addContextToError(error, event)
@@ -223,7 +302,14 @@ class @RamlParser
 ###
   validate controls whether the stream must be processed as a
 ###
-defaultSettings = { validate: true, transform: true, compose: true, reader: new exports.FileReader(null), applySchemas: true }
+defaultSettings = {
+  validate: true,
+  transform: true,
+  compose: true,
+  reader: new exports.FileReader(null),
+  applySchemas: true,
+  dereferenceSchemas: false
+}
 
 ###
 Parse the first RAML document in a stream and produce the corresponding

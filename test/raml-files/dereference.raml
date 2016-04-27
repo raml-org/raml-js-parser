@@ -1,0 +1,58 @@
+#%RAML 0.8
+---
+title: Dereference test
+schemas:
+  - !include dereference-schemas-lazy.yaml
+  - includedByVar: !include schemas/collections/items.json
+  - inlineByVar: |
+      {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "type": "object",
+        "properties": {
+          "items": {
+            "$ref": "schemas/item.json"
+          }
+        }
+      }
+
+/items:
+  /included-lazy:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              schema: lazyLoaded
+
+  /included-by-var:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              schema: includedByVar
+
+  /inline-by-var:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              schema: inlineByVar
+
+  /inline:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              schema: |
+                {
+                  "$schema": "http://json-schema.org/draft-04/schema#",
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "$ref": "schemas/item.json"
+                    }
+                  }
+                }

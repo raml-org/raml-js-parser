@@ -74,7 +74,7 @@ class @BaseConstructor
     return object
 
   construct_scalar: (node) ->
-    if not ( node instanceof nodes.ScalarNode )
+    if not ( node instanceof nodes.ScalarNode || node instanceof nodes.FileNode)
       throw new exports.ConstructorError null, null, \
         "expected a scalar node but found #{node.id}", node.start_mark
     node.value

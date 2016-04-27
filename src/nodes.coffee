@@ -34,6 +34,11 @@ class @ScalarNode extends @Node
 
   remove_question_mark_properties: ->
 
+class @FileNode extends @ScalarNode
+  id: 'file'
+  constructor: (@tag, @value, @start_mark, @end_mark, @style, @inclusionPath) ->
+    super
+
 class @CollectionNode extends @Node
   constructor: (@tag, @value, @start_mark, @end_mark, @flow_style) ->
     super
