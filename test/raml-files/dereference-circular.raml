@@ -1,0 +1,41 @@
+#%RAML 0.8
+---
+title: Dereference Circular Test
+schemas:
+  - circularSchema: |
+      {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "definitions": {
+          "node": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "id"
+              },
+              "label": {
+                "type": "string"
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/node"
+                }
+              }
+            },
+            "required": ["id", "label", "children"]
+          }
+        },
+        "items": {
+          "$ref": "#/definitions/node"
+        },
+        "type": "array"
+      }
+
+/inline-circular:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            schema: circularSchema
