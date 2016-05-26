@@ -143,7 +143,7 @@ class @RamlParser
 
     .then (fullyAssembledTree) =>
       if settings.compose && settings.dereferenceSchemas
-        @dereferenceSchemas(loader, fullyAssembledTree)
+        @dereferenceSchemas(loader, fullyAssembledTree, settings.dereferenceSchemas.maxDepth)
       else
         return fullyAssembledTree
 
@@ -158,7 +158,7 @@ class @RamlParser
       else
         return fullyAssembledTree
 
-  dereferenceSchemas: (loader, node) =>
+  dereferenceSchemas: (loader, node, maxDepth=500) =>
     schemaNodes = []
     definedSchemaNames = []
 
@@ -205,7 +205,7 @@ class @RamlParser
         # Inline-defined schemas
         uri = loader.src
         schema = JSON.parse(schemaNode.value)
-      @dereferenceSchema(uri, schema)
+      @dereferenceSchema(uri, schema, maxDepth)
     )
 
     return @q.all(resolveSchemas)
@@ -216,12 +216,12 @@ class @RamlParser
       return node
     )
 
-  dereferenceSchema: (uri, schema) =>
+  dereferenceSchema: (uri, schema, maxDepth) =>
     deferred = @q.defer()
 
     refParser.dereference(uri, schema, {})
       .then((dereferencedSchema) ->
-        deferred.resolve(JSON.stringify(dereferencedSchema))
+        deferred.resolve(util.stringifyJSONCircularDepth(dereferencedSchema, maxDepth))
       )
       .catch((err) ->
         deferred.reject(err)

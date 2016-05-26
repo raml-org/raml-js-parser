@@ -1,3 +1,4 @@
+objectAssign     = require 'object-assign'
 @extend = (destination, sources...) ->
   destination[k] = (v) for k, v of source for source in sources
   return destination
@@ -32,3 +33,25 @@
                                       node?.tag is 'tag:yaml.org,2002:map'
 
 @NON_PRINTABLE = /[^\x09\x0A\x0D\x20-\x7E\x85\xA0-\uD7FF\uE000-\uFFFD]/
+
+@stringifyJSONCircularDepth = (json, depth = 1000) ->
+  cache = {}
+  JSON.stringify json, (key, value) ->
+    if typeof value == 'object' and value != null
+      # Store value in our collection
+      if cache[key] and cache[key].value == value and cache[key].repetitions > depth
+        # Circular reference found, discard key
+        delete cache[key]
+        return
+      # Increments the depth
+      if !cache[key]
+        cache[key] =
+          value: value
+          repetitions: 0
+      cache[key].repetitions++
+
+      if Array.isArray(value)
+        return value.slice()
+      else
+        return objectAssign({}, value)
+    value
