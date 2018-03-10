@@ -1,4 +1,6 @@
 # RAML Parser
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/raml-org/raml-js-parser.svg)](https://greenkeeper.io/)
 [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/raml-org/raml-js-parser?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![Build Status](https://travis-ci.org/raml-org/raml-js-parser.png)](https://travis-ci.org/raml-org/raml-js-parser)
